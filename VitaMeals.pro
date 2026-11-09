@@ -1,0 +1,33 @@
+# ---------------------------------------------------------------------------
+#  VitaMeals – Rezeptverwaltung mit Nährwertanalyse und Gewichtskontrolle
+#  Copyright (c) 2026 Michael Bergmann – MIT License (siehe LICENSE)
+#
+#  KEIN Medizinprodukt – VitaMeals ist eine persönliche Rezept- und Ernährungsverwaltung.
+#
+#  Build:   qmake6 VitaMeals.pro && make        (Linux/macOS)
+#           qmake6 VitaMeals.pro && nmake/jom   (Windows, MSVC) bzw. mingw32-make (MinGW)
+#  Benötigt Qt 6.4 oder neuer bzw. Qt 5.15 mit den Modulen: widgets printsupport svg
+#  Technisch und optisch an VitaParms und VitaBreathe angelehnt.
+# ---------------------------------------------------------------------------
+
+lessThan(QT_MAJOR_VERSION, 5) | equals(QT_MAJOR_VERSION, 5):lessThan(QT_MINOR_VERSION, 15) {
+    error("VitaMeals braucht Qt 5.15 oder Qt 6.4 und neuer (gefunden: $$[QT_VERSION])")
+}
+
+QT       += core gui widgets printsupport svg
+CONFIG   += c++17
+TEMPLATE  = app
+TARGET    = VitaMeals
+
+include(version.pri)
+DEFINES  += VITAMEALS_VERSION=\\\"$$VERSION\\\"
+
+# Gemeinsamer Kern (Rezeptmodell, Datenbank, Importe, Exporte, Nährwerte, Planung)
+include(core.pri)
+# Desktop-Oberfläche (Qt Widgets)
+include(desktop.pri)
+
+RESOURCES += resources/vitameals.qrc resources/data.qrc
+
+win32: RC_ICONS = resources/icons/app/vitameals.ico
+macx:  ICON     = resources/icons/app/vitameals.icns

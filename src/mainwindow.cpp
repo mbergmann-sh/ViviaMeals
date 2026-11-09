@@ -1,0 +1,768 @@
+// SPDX-License-Identifier: MIT
+#include "mainwindow.h"
+#include "assistantdialog.h"
+#include "editordialog.h"
+#include "exportdialogs.h"
+#include "fooddialog.h"
+#include "fridgedialog.h"
+#include "icons.h"
+#include "importdialogs.h"
+#include "mealplandialog.h"
+#include "nutrition.h"
+#include "recipedb.h"
+#include "recipehtml.h"
+#include "recipeview.h"
+#include "searchdialog.h"
+#include "settingsdialog.h"
+#include "themes.h"
+
+#include <QAction>
+#include <QActionGroup>
+#include <QRandomGenerator>
+#include <QRegularExpression>
+#include <QApplication>
+#include <QCloseEvent>
+#include <QComboBox>
+#include <QDir>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QFrame>
+#include <QHBoxLayout>
+#include <QInputDialog>
+#include <QLabel>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QMenu>
+#include <QMenuBar>
+#include <QMessageBox>
+#include <QPrintPreviewDialog>
+#include <QPrinter>
+#include <QProgressDialog>
+#include <QPushButton>
+#include <QSettings>
+#include <QSplitter>
+#include <QStandardPaths>
+#include <QStatusBar>
+#include <QTextDocument>
+#include <QTimer>
+#include <QToolBar>
+#include <QVBoxLayout>
+
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
+{
+    setWindowTitle(QStringLiteral("VitaMeals"));
+    setWindowIcon(Icons::app());
+
+    auto *central = new QWidget;
+    auto *lay = new QVBoxLayout(central);
+    lay->setContentsMargins(6, 6, 6, 2);
+
+    // Kopfbereich (wie das Stammblatt in VitaParms bzw. der Kopf in VitaBreathe)
+    auto *head = new QFrame;
+    head->setFrameShape(QFrame::StyledPanel);
+    head->setFrameShadow(QFrame::Sunken);
+    auto *hl = new QHBoxLayout(head);
+    hl->setContentsMargins(8, 4, 8, 4);
+    auto *logo = new QLabel;
+    logo->setPixmap(Icons::app().pixmap(44, 44));
+    hl->addWidget(logo, 0, Qt::AlignTop);
+    auto *ht = new QVBoxLayout;
+    ht->setSpacing(0);
+    m_headName = new QLabel;
+    QFont nf = m_headName->font();
+    nf.setPointSizeF(nf.pointSizeF() * 1.45);
+    nf.setBold(true);
+    m_headName->setFont(nf);
+    ht->addWidget(m_headName);
+    m_headInfo = new QLabel;
+    m_headInfo->setTextFormat(Qt::RichText);
+    m_headInfo->setWordWrap(true);
+    ht->addWidget(m_headInfo);
+    hl->addLayout(ht, 1);
+    lay->addWidget(head);
+
+    m_split = new QSplitter(Qt::Horizontal);
+    auto *left = new QWidget;
+    auto *ll = new QVBoxLayout(left);
+    ll->setContentsMargins(0, 0, 0, 0);
+    m_filter = new QLineEdit;
+    m_filter->setPlaceholderText(tr("Rezepte filtern (Name, Zutat, Tag) …"));
+    m_filter->setClearButtonEnabled(true);
+    m_filter->addAction(Icons::get(QStringLiteral("search")), QLineEdit::LeadingPosition);
+    ll->addWidget(m_filter);
+    m_tagFilter = new QComboBox;
+    ll->addWidget(m_tagFilter);
+    m_list = new QListWidget;
+    m_list->setUniformItemSizes(true);
+    m_list->setContextMenuPolicy(Qt::CustomContextMenu);
+    ll->addWidget(m_list, 1);
+    m_split->addWidget(left);
+    m_view = new RecipeView;
+    m_split->addWidget(m_view);
+    m_split->setStretchFactor(0, 1);
+    m_split->setStretchFactor(1, 3);
+    m_split->setSizes({ 280, 820 });
+    lay->addWidget(m_split, 1);
+    setCentralWidget(central);
+
+    m_statusDb = new QLabel;
+    statusBar()->addPermanentWidget(m_statusDb);
+
+    buildMenus();
+    buildToolBar();
+
+    auto *filterTimer = new QTimer(this);
+    filterTimer->setSingleShot(true);
+    filterTimer->setInterval(150);
+    connect(filterTimer, &QTimer::timeout, this, &MainWindow::refreshList);
+    connect(m_filter, &QLineEdit::textChanged, filterTimer, qOverload<>(&QTimer::start));
+    connect(m_tagFilter, qOverload<int>(&QComboBox::currentIndexChanged), this, &MainWindow::refreshList);
+    connect(m_list, &QListWidget::currentRowChanged, this, &MainWindow::showCurrent);
+    connect(m_list, &QListWidget::itemDoubleClicked, this, &MainWindow::editRecipe);
+    connect(m_list, &QListWidget::customContextMenuRequested, this, [this](const QPoint &pos) {
+        if (!m_list->itemAt(pos)) return;
+        QMenu menu(this);
+        menu.addAction(Icons::get(QStringLiteral("edit")), tr("Bearbeiten …"), this, &MainWindow::editRecipe);
+        menu.addAction(Icons::get(QStringLiteral("tex")), tr("Als LaTeX-Datei exportieren …"), this, &MainWindow::exportLatex);
+        menu.addAction(Icons::get(QStringLiteral("save")), tr("Als .vmr-Datei speichern …"), this, &MainWindow::exportVmr);
+        menu.addAction(Icons::get(QStringLiteral("print")), tr("Drucken …"), this, &MainWindow::printRecipe);
+        menu.addSeparator();
+        menu.addAction(Icons::get(QStringLiteral("delete")), tr("Löschen …"), this, &MainWindow::deleteRecipe);
+        menu.exec(m_list->viewport()->mapToGlobal(pos));
+    });
+    connect(m_view, &RecipeView::editRequested, this, &MainWindow::editRecipe);
+    connect(m_view, &RecipeView::favoriteToggled, this, [this](bool on) {
+        Recipe r;
+        if (!RecipeDb::instance().load(currentId(), &r)) return;
+        r.favorite = on;
+        m_pendingSelect = r.id;
+        RecipeDb::instance().save(r);
+    });
+    connect(&RecipeDb::instance(), &RecipeDb::changed, this, [this] {
+        refreshTags();
+        refreshList();
+        refreshHeader();
+        updateActions();
+    });
+
+    QSettings s;
+    if (!restoreGeometry(s.value(QStringLiteral("ui/geometry")).toByteArray())) resize(1180, 780);
+    restoreState(s.value(QStringLiteral("ui/state")).toByteArray());
+    m_split->restoreState(s.value(QStringLiteral("ui/split")).toByteArray());
+    refreshHeader();
+    updateActions();
+    m_view->showMessage(tr("Willkommen bei VitaMeals"), tr("Keine Rezeptdatenbank geöffnet."));
+}
+
+// ---------------------------------------------------------------- Menüs und Werkzeugleiste
+
+void MainWindow::buildMenus()
+{
+    QMenu *file = menuBar()->addMenu(tr("&Datei"));
+    QAction *a = file->addAction(Icons::get(QStringLiteral("database-add")), tr("&Neue Rezeptdatenbank …"), this, &MainWindow::newDatabase);
+    a->setObjectName(QStringLiteral("actNewDb"));
+    a = file->addAction(Icons::get(QStringLiteral("open")), tr("Rezeptdatenbank ö&ffnen …"), this, &MainWindow::openDatabaseDialog);
+    a->setShortcut(QKeySequence::Open);
+    a->setObjectName(QStringLiteral("actOpenDb"));
+    m_recent = file->addMenu(Icons::get(QStringLiteral("database")), tr("&Zuletzt geöffnet"));
+    file->addSeparator();
+    a = file->addAction(Icons::get(QStringLiteral("recipe-add")), tr("Neues &Rezept …"), this, &MainWindow::newRecipe);
+    a->setShortcut(QKeySequence::New);
+    a->setObjectName(QStringLiteral("actNewRecipe"));
+    m_needDb << a;
+    a = file->addAction(Icons::get(QStringLiteral("edit")), tr("Rezept &bearbeiten …"), this, &MainWindow::editRecipe);
+    a->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_E));
+    a->setObjectName(QStringLiteral("actEdit"));
+    m_needRecipe << a;
+    a = file->addAction(Icons::get(QStringLiteral("delete")), tr("Rezept &löschen …"), this, &MainWindow::deleteRecipe);
+    a->setShortcut(QKeySequence::Delete);
+    a->setShortcutContext(Qt::WidgetShortcut);
+    m_list->addAction(a);
+    m_needRecipe << a;
+    a = file->addAction(Icons::get(QStringLiteral("search")), tr("&Suchen …"), this, &MainWindow::search);
+    a->setShortcut(QKeySequence::Find);
+    a->setObjectName(QStringLiteral("actSearch"));
+    m_needDb << a;
+    file->addSeparator();
+    QMenu *imp = file->addMenu(Icons::get(QStringLiteral("import")), tr("&Import"));
+    a = imp->addAction(Icons::get(QStringLiteral("import-rk")), tr("&RezKonv-Rezepte importieren …"), this,
+                       [this] { importFormat(Importers::Format::RezKonv); });
+    a->setObjectName(QStringLiteral("actImportRk"));
+    m_needDb << a;
+    a = imp->addAction(Icons::get(QStringLiteral("import-mm")), tr("&MealMaster-Rezepte importieren …"), this,
+                       [this] { importFormat(Importers::Format::MealMaster); });
+    a->setObjectName(QStringLiteral("actImportMm"));
+    m_needDb << a;
+    a = imp->addAction(Icons::get(QStringLiteral("import")), tr("Alte VitaMeals-&Liste (.vtm) importieren …"), this,
+                       [this] { importFormat(Importers::Format::Vtm); });
+    m_needDb << a;
+    a = imp->addAction(Icons::get(QStringLiteral("recipe")), tr("VitaMeals-Rezept (.vmr) importieren …"), this, [this] {
+        const QStringList files = QFileDialog::getOpenFileNames(this, tr("VitaMeals-Rezepte importieren"), QString(), tr("VitaMeals-Rezepte (*.vmr)"));
+        QString first;
+        for (const QString &f : files) {
+            Recipe r;
+            QString err;
+            if (!Recipe::load(f, &r, &err)) {
+                QMessageBox::warning(this, tr("Import"), QStringLiteral("%1: %2").arg(QFileInfo(f).fileName(), err));
+                continue;
+            }
+            if (RecipeDb::instance().summary(r.id)) r.id = Recipe::newId();
+            RecipeDb::instance().save(r);
+            if (first.isEmpty()) first = r.id;
+        }
+        if (!first.isEmpty()) selectRecipe(first);
+    });
+    m_needDb << a;
+    QMenu *exp = file->addMenu(Icons::get(QStringLiteral("web")), tr("&Export"));
+    a = exp->addAction(Icons::get(QStringLiteral("web")), tr("Als &Website exportieren …"), this, &MainWindow::exportWebsite);
+    a->setObjectName(QStringLiteral("actWeb"));
+    m_needDb << a;
+    a = exp->addAction(Icons::get(QStringLiteral("tex")), tr("Als &LaTeX-Datei exportieren …"), this, &MainWindow::exportLatex);
+    a->setObjectName(QStringLiteral("actTex"));
+    m_needRecipe << a;
+    a = exp->addAction(Icons::get(QStringLiteral("save")), tr("Als VitaMeals-Rezept (.&vmr) speichern …"), this, &MainWindow::exportVmr);
+    m_needRecipe << a;
+    file->addSeparator();
+    a = file->addAction(Icons::get(QStringLiteral("print")), tr("&Drucken …"), this, &MainWindow::printRecipe);
+    a->setShortcut(QKeySequence::Print);
+    a->setObjectName(QStringLiteral("actPrint"));
+    m_needRecipe << a;
+    file->addSeparator();
+    a = file->addAction(Icons::get(QStringLiteral("quit")), tr("Programm &beenden"), this, &QWidget::close);
+    a->setShortcut(QKeySequence::Quit);
+
+    QMenu *plan = menuBar()->addMenu(tr("&Planen"));
+    a = plan->addAction(Icons::get(QStringLiteral("fridge")), tr("&Kühlschrank – was koche ich heute? …"), this, &MainWindow::openFridge);
+    a->setShortcut(QKeySequence(Qt::Key_F5));
+    a->setObjectName(QStringLiteral("actFridge"));
+    m_needDb << a;
+    a = plan->addAction(Icons::get(QStringLiteral("scale")), tr("&Assistent Gewichtskontrolle …"), this, &MainWindow::openAssistant);
+    a->setShortcut(QKeySequence(Qt::Key_F6));
+    a->setObjectName(QStringLiteral("actAssistant"));
+    a = plan->addAction(Icons::get(QStringLiteral("plan")), tr("&Wochenmenü-Plan …"), this, [this] { openMealPlan(); });
+    a->setShortcut(QKeySequence(Qt::Key_F7));
+    a->setObjectName(QStringLiteral("actPlan"));
+    m_needDb << a;
+    plan->addSeparator();
+    a = plan->addAction(Icons::get(QStringLiteral("dice")), tr("&Zufälliges Rezept"), this, &MainWindow::showRandom);
+    a->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_R));
+    a->setObjectName(QStringLiteral("actRandom"));
+    m_needDb << a;
+
+    QMenu *extras = menuBar()->addMenu(tr("E&xtras"));
+    a = extras->addAction(Icons::get(QStringLiteral("nutrition")), tr("&Nährwerttabelle …"), this, &MainWindow::openFoodTable);
+    a = extras->addAction(Icons::get(QStringLiteral("refresh")), tr("Nährwerte aller Rezepte neu &berechnen"), this, &MainWindow::recalcAll);
+    m_needDb << a;
+    extras->addSeparator();
+    QMenu *themes = extras->addMenu(Icons::get(QStringLiteral("theme")), tr("&Darstellung"));
+    auto *group = new QActionGroup(this);
+    for (const QString &id : Themes::available()) {
+        QAction *t = themes->addAction(Themes::displayName(id));
+        t->setCheckable(true);
+        t->setChecked(id == Themes::current());
+        group->addAction(t);
+        connect(t, &QAction::triggered, this, [this, id] {
+            Themes::apply(id);
+            appearanceChanged();
+        });
+    }
+    a = extras->addAction(Icons::get(QStringLiteral("settings")), tr("&Einstellungen …"), this, &MainWindow::openSettings);
+    a->setShortcut(QKeySequence::Preferences);
+
+    QMenu *help = menuBar()->addMenu(tr("&Hilfe"));
+    help->addAction(Icons::get(QStringLiteral("info")), tr("&Über VitaMeals …"), this, &MainWindow::about);
+    help->addAction(tr("Über &Qt …"), qApp, &QApplication::aboutQt);
+    updateRecentMenu();
+}
+
+void MainWindow::buildToolBar()
+{
+    QToolBar *tb = addToolBar(tr("Werkzeugleiste"));
+    tb->setObjectName(QStringLiteral("mainToolBar"));
+    tb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    tb->setIconSize(QSize(24, 24));
+    auto add = [&](const char *name, const QString &text, bool important) {
+        QAction *a = findChild<QAction *>(QLatin1String(name));
+        if (!a) return;
+        a->setIconText(text);
+        a->setPriority(important ? QAction::NormalPriority : QAction::LowPriority);   // LowPriority: nur Symbol
+        tb->addAction(a);
+    };
+    add("actOpenDb", tr("Öffnen"), false);
+    add("actNewRecipe", tr("Neues Rezept"), true);
+    add("actEdit", tr("Bearbeiten"), true);
+    add("actSearch", tr("Suchen"), true);
+    tb->addSeparator();
+    add("actImportRk", tr("RezKonv"), false);
+    add("actImportMm", tr("MealMaster"), false);
+    add("actWeb", tr("Website"), false);
+    add("actTex", tr("LaTeX"), false);
+    tb->addSeparator();
+    add("actFridge", tr("Kühlschrank"), true);
+    add("actAssistant", tr("Assistent"), true);
+    add("actPlan", tr("Wochenplan"), true);
+    tb->addSeparator();
+    add("actRandom", tr("Zufall"), false);
+    add("actPrint", tr("Drucken"), false);
+}
+
+void MainWindow::updateActions()
+{
+    const bool db = RecipeDb::instance().isOpen();
+    const bool rec = db && m_view->hasRecipe();
+    for (QAction *a : m_needDb) a->setEnabled(db);
+    for (QAction *a : m_needRecipe) a->setEnabled(rec);
+}
+
+// ---------------------------------------------------------------- Datenbank
+
+void MainWindow::rememberDatabase(const QString &folder)
+{
+    QSettings s;
+    s.setValue(QStringLiteral("db/last"), folder);
+    QStringList recent = s.value(QStringLiteral("db/recent")).toStringList();
+    recent.removeAll(folder);
+    recent.prepend(folder);
+    while (recent.size() > 8) recent.removeLast();
+    s.setValue(QStringLiteral("db/recent"), recent);
+    updateRecentMenu();
+}
+
+void MainWindow::updateRecentMenu()
+{
+    m_recent->clear();
+    const QStringList recent = QSettings().value(QStringLiteral("db/recent")).toStringList();
+    for (const QString &f : recent) {
+        if (!RecipeDb::isDatabaseFolder(f)) continue;
+        m_recent->addAction(QDir::toNativeSeparators(f), this, [this, f] { openDatabase(f); });
+    }
+    m_recent->setEnabled(!m_recent->isEmpty());
+}
+
+bool MainWindow::openDatabase(const QString &path, bool quiet)
+{
+    QString err;
+    if (!RecipeDb::instance().open(path, &err)) {
+        if (!quiet) QMessageBox::warning(this, tr("Rezeptdatenbank öffnen"), err);
+        return false;
+    }
+    rememberDatabase(RecipeDb::instance().folder());
+    m_filter->clear();
+    if (QSettings().value(QStringLiteral("ui/randomStart"), true).toBool() || RecipeDb::instance().count() > 0) showRandom();
+    if (RecipeDb::instance().count() == 0)
+        m_view->showMessage(tr("Die Datenbank „%1“ ist leer").arg(RecipeDb::instance().name()),
+                            tr("Legen Sie mit <b>Datei → Neues Rezept</b> ein Rezept an oder importieren Sie Rezepte im "
+                               "RezKonv- oder MealMaster-Format (<b>Datei → Import</b>)."));
+    updateActions();
+    return true;
+}
+
+bool MainWindow::ensureDatabase()
+{
+    QSettings s;
+    const QString last = s.value(QStringLiteral("db/last")).toString();
+    if (!last.isEmpty() && RecipeDb::isDatabaseFolder(last) && openDatabase(last, true)) return true;
+    // keine Datenbank: zum Anlegen auffordern
+    QMessageBox box(this);
+    box.setWindowTitle(tr("Willkommen bei VitaMeals"));
+    box.setIconPixmap(Icons::app().pixmap(64, 64));
+    box.setText(tr("<b>Es ist noch keine Rezeptdatenbank vorhanden.</b>"));
+    box.setInformativeText(tr("Eine VitaMeals-Rezeptdatenbank ist ein Ordner, in dem jedes Rezept als eigene .vmr-Datei liegt. "
+                              "Bitte legen Sie eine neue Datenbank an oder öffnen Sie eine vorhandene."));
+    QPushButton *create = box.addButton(tr("Neue Datenbank anlegen …"), QMessageBox::AcceptRole);
+    QPushButton *samples = box.addButton(tr("Mit Beispielrezepten anlegen …"), QMessageBox::AcceptRole);
+    QPushButton *open = box.addButton(tr("Vorhandene öffnen …"), QMessageBox::AcceptRole);
+    box.addButton(tr("Später"), QMessageBox::RejectRole);
+    box.setDefaultButton(samples);
+    box.exec();
+    if (box.clickedButton() == create || box.clickedButton() == samples) {
+        newDatabase();
+        if (RecipeDb::instance().isOpen() && box.clickedButton() == samples) {
+            // Beispielrezepte aus den Ressourcen importieren (ohne Rückfragen)
+            RecipeDb::instance().beginBatch();
+            for (const QString &f : { QStringLiteral(":/samples/beispiele.rk"), QStringLiteral(":/samples/beispiele.mmf") }) {
+                const Importers::Result res = Importers::importFile(f, Importers::Format::Unknown);
+                for (Recipe r : res.recipes) RecipeDb::instance().save(r);
+            }
+            RecipeDb::instance().endBatch();
+            showRandom();
+        }
+    } else if (box.clickedButton() == open) {
+        openDatabaseDialog();
+    }
+    return RecipeDb::instance().isOpen();
+}
+
+void MainWindow::newDatabase()
+{
+    const QString base = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    bool ok = false;
+    const QString name = QInputDialog::getText(this, tr("Neue Rezeptdatenbank"), tr("Name der Datenbank:"), QLineEdit::Normal,
+                                               tr("Meine Rezepte"), &ok);
+    if (!ok || name.trimmed().isEmpty()) return;
+    const QString parentDir = QFileDialog::getExistingDirectory(this, tr("Ordner wählen, in dem die Datenbank angelegt wird"), base);
+    if (parentDir.isEmpty()) return;
+    QString folderName = name.trimmed();
+    folderName.replace(QRegularExpression(QStringLiteral("[\\\\/:*?\"<>|]")), QStringLiteral("_"));
+    const QString folder = QDir(parentDir).filePath(folderName);
+    if (QDir(folder).exists() && !QDir(folder).isEmpty() && !RecipeDb::isDatabaseFolder(folder)) {
+        QMessageBox::warning(this, tr("Neue Rezeptdatenbank"), tr("Der Ordner %1 existiert bereits und ist nicht leer.").arg(QDir::toNativeSeparators(folder)));
+        return;
+    }
+    QString err;
+    if (!RecipeDb::instance().create(folder, name.trimmed(), &err)) {
+        QMessageBox::warning(this, tr("Neue Rezeptdatenbank"), err);
+        return;
+    }
+    openDatabase(folder);
+}
+
+void MainWindow::openDatabaseDialog()
+{
+    const QString start = RecipeDb::instance().isOpen() ? QFileInfo(RecipeDb::instance().folder()).absolutePath()
+                                                         : QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    const QString file = QFileDialog::getOpenFileName(this, tr("Rezeptdatenbank öffnen"), start,
+                                                      tr("VitaMeals-Datenbank (%1);;Alle Dateien (*)").arg(RecipeDb::markerName()));
+    if (!file.isEmpty()) openDatabase(file);
+}
+
+// ---------------------------------------------------------------- Liste und Anzeige
+
+void MainWindow::refreshHeader()
+{
+    const RecipeDb &db = RecipeDb::instance();
+    if (!db.isOpen()) {
+        m_headName->setText(QStringLiteral("VitaMeals"));
+        m_headInfo->setText(tr("Rezeptverwaltung mit Nährwertanalyse und Gewichtskontrolle – keine Datenbank geöffnet"));
+        m_statusDb->clear();
+        setWindowTitle(QStringLiteral("VitaMeals"));
+        return;
+    }
+    int withNut = 0, fav = 0, veg = 0;
+    for (const RecipeSummary &s : db.summaries()) {
+        if (s.hasNutrition) ++withNut;
+        if (s.favorite) ++fav;
+        if (s.tags.contains(QStringLiteral("vegetarisch")) || s.tags.contains(QStringLiteral("vegan"))) ++veg;
+    }
+    m_headName->setText(db.name());
+    m_headInfo->setText(tr("<b>%1</b> Rezepte · %2 mit Nährwerten · %3 vegetarisch/vegan · %4 Favoriten")
+                            .arg(db.count())
+                            .arg(withNut)
+                            .arg(veg)
+                            .arg(fav));
+    m_statusDb->setText(tr("Datenbank: %1").arg(QDir::toNativeSeparators(db.folder())));
+    setWindowTitle(QStringLiteral("%1 – VitaMeals").arg(db.name()));
+}
+
+void MainWindow::refreshTags()
+{
+    const QString cur = m_tagFilter->currentData().toString();
+    m_tagFilter->blockSignals(true);
+    m_tagFilter->clear();
+    m_tagFilter->addItem(Icons::get(QStringLiteral("tag")), tr("Alle Themen"), QString());
+    m_tagFilter->addItem(Icons::get(QStringLiteral("star-filled")), tr("Favoriten"), QStringLiteral(":fav"));
+    QStringList tags = RecipeDb::instance().allTags();
+    std::sort(tags.begin(), tags.end(), [](const QString &a, const QString &b) { return QString::localeAwareCompare(a, b) < 0; });
+    for (const QString &t : tags) m_tagFilter->addItem(RecipeHtml::tagLabel(t), t);
+    const int i = m_tagFilter->findData(cur);
+    m_tagFilter->setCurrentIndex(i >= 0 ? i : 0);
+    m_tagFilter->blockSignals(false);
+}
+
+void MainWindow::refreshList()
+{
+    const QString keep = m_pendingSelect.isEmpty() ? currentId() : m_pendingSelect;
+    m_pendingSelect.clear();
+    const QString text = m_filter->text().trimmed();
+    const QString tag = m_tagFilter->currentData().toString();
+    m_list->blockSignals(true);
+    m_list->clear();
+    const QIcon star = Icons::get(QStringLiteral("star-filled"));
+    const QIcon plain = Icons::get(QStringLiteral("recipe"));
+    int select = -1;
+    for (const RecipeSummary &s : RecipeDb::instance().summaries()) {
+        if (!text.isEmpty() && !SearchDialog::matches(s, text, true)) continue;
+        if (tag == QLatin1String(":fav") && !s.favorite) continue;
+        if (!tag.isEmpty() && !tag.startsWith(QLatin1Char(':')) && !s.tags.contains(tag, Qt::CaseInsensitive)) continue;
+        auto *it = new QListWidgetItem(s.favorite ? star : plain, s.title);
+        it->setData(Qt::UserRole, s.id);
+        it->setToolTip(s.hasNutrition ? tr("%1 kcal je Portion · %2").arg(qRound(s.perServing.kcal)).arg(s.tags.join(QStringLiteral(", ")))
+                                      : s.tags.join(QStringLiteral(", ")));
+        m_list->addItem(it);
+        if (s.id == keep) select = m_list->count() - 1;
+    }
+    m_list->blockSignals(false);
+    statusBar()->showMessage(tr("%1 von %2 Rezepten angezeigt").arg(m_list->count()).arg(RecipeDb::instance().count()), 4000);
+    if (select >= 0) {
+        m_list->setCurrentRow(select);
+        m_list->scrollToItem(m_list->item(select));
+        if (m_view->hasRecipe() && m_view->recipe().id == keep) {
+            // gleiches Rezept – Ansicht nur bei Änderung neu laden
+            const RecipeSummary *s = RecipeDb::instance().summary(keep);
+            if (s && s->modified != m_view->recipe().modified) showCurrent();
+        } else {
+            showCurrent();
+        }
+    }
+}
+
+QString MainWindow::currentId() const
+{
+    const QListWidgetItem *it = m_list->currentItem();
+    return it ? it->data(Qt::UserRole).toString() : QString();
+}
+
+QStringList MainWindow::visibleIds() const
+{
+    QStringList l;
+    for (int i = 0; i < m_list->count(); ++i) l << m_list->item(i)->data(Qt::UserRole).toString();
+    return l;
+}
+
+void MainWindow::showCurrent()
+{
+    const QString id = currentId();
+    if (id.isEmpty()) return;
+    Recipe r;
+    QString err;
+    if (!RecipeDb::instance().load(id, &r, &err)) {
+        m_view->showMessage(tr("Rezept kann nicht geladen werden"), err.toHtmlEscaped());
+        return;
+    }
+    m_view->setRecipe(r);
+    updateActions();
+}
+
+void MainWindow::selectRecipe(const QString &id)
+{
+    for (int pass = 0; pass < 2; ++pass) {
+        for (int i = 0; i < m_list->count(); ++i)
+            if (m_list->item(i)->data(Qt::UserRole).toString() == id) {
+                m_list->setCurrentRow(i);
+                m_list->scrollToItem(m_list->item(i), QAbstractItemView::PositionAtCenter);
+                showCurrent();
+                return;
+            }
+        // durch Filter verborgen: Filter zurücksetzen
+        m_filter->blockSignals(true);
+        m_filter->clear();
+        m_filter->blockSignals(false);
+        m_tagFilter->setCurrentIndex(0);
+        refreshList();
+    }
+}
+
+void MainWindow::showRandom()
+{
+    const QStringList ids = visibleIds();
+    if (ids.isEmpty()) {
+        const QString id = RecipeDb::instance().randomId();
+        if (!id.isEmpty()) selectRecipe(id);
+        return;
+    }
+    QString id = ids.at(QRandomGenerator::global()->bounded(int(ids.size())));
+    if (ids.size() > 1 && id == currentId()) id = ids.at((ids.indexOf(id) + 1) % ids.size());
+    selectRecipe(id);
+}
+
+// ---------------------------------------------------------------- Rezepte
+
+void MainWindow::newRecipe()
+{
+    Recipe r;
+    r.servings = 4;
+    EditorDialog d(r, this);
+    if (d.exec() != QDialog::Accepted) return;
+    Recipe nr = d.recipe();
+    QString err;
+    if (!RecipeDb::instance().duplicatesOf(nr).isEmpty()
+        && QMessageBox::question(this, tr("Neues Rezept"), tr("Ein Rezept „%1“ gibt es bereits. Trotzdem speichern?").arg(nr.title)) != QMessageBox::Yes)
+        return;
+    m_pendingSelect = nr.id.isEmpty() ? QString() : nr.id;
+    if (!RecipeDb::instance().save(nr, &err)) QMessageBox::warning(this, tr("Speichern"), err);
+    else selectRecipe(nr.id);
+}
+
+void MainWindow::editRecipe()
+{
+    const QString id = currentId();
+    Recipe r;
+    if (id.isEmpty() || !RecipeDb::instance().load(id, &r)) return;
+    EditorDialog d(r, this);
+    if (d.exec() != QDialog::Accepted) return;
+    Recipe nr = d.recipe();
+    QString err;
+    m_pendingSelect = nr.id;
+    if (!RecipeDb::instance().save(nr, &err)) QMessageBox::warning(this, tr("Speichern"), err);
+    showCurrent();
+}
+
+void MainWindow::deleteRecipe()
+{
+    const QString id = currentId();
+    const RecipeSummary *s = RecipeDb::instance().summary(id);
+    if (!s) return;
+    if (QMessageBox::question(this, tr("Rezept löschen"), tr("Das Rezept „%1“ endgültig löschen?").arg(s->title)) != QMessageBox::Yes) return;
+    const int row = m_list->currentRow();
+    RecipeDb::instance().remove(id);
+    if (m_list->count() > 0) {
+        m_list->setCurrentRow(qMin(row, m_list->count() - 1));
+        showCurrent();
+    } else {
+        m_view->showMessage(tr("Keine Rezepte"), QString());
+        updateActions();
+    }
+}
+
+void MainWindow::search()
+{
+    SearchDialog d(this);
+    if (d.exec() == QDialog::Accepted && !d.selectedId().isEmpty()) selectRecipe(d.selectedId());
+}
+
+void MainWindow::importFormat(Importers::Format f)
+{
+    const QString first = ImportFlow::run(this, f);
+    if (!first.isEmpty()) selectRecipe(first);
+}
+
+void MainWindow::exportWebsite()
+{
+    WebsiteExportDialog d(visibleIds(), this);
+    d.exec();
+}
+
+void MainWindow::exportLatex()
+{
+    if (!m_view->hasRecipe()) return;
+    LatexExportDialog d(m_view->recipe(), this);
+    d.exec();
+}
+
+void MainWindow::exportVmr()
+{
+    if (!m_view->hasRecipe()) return;
+    const Recipe &r = m_view->recipe();
+    QString base = r.title;
+    base.replace(QRegularExpression(QStringLiteral("[^\\p{L}\\p{N}]+")), QStringLiteral("_"));
+    const QString f = QFileDialog::getSaveFileName(this, tr("Rezept speichern"),
+                                                   QDir(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)).filePath(base + QStringLiteral(".vmr")),
+                                                   tr("VitaMeals-Rezept (*.vmr)"));
+    if (f.isEmpty()) return;
+    QString err;
+    if (!r.save(f, &err)) QMessageBox::warning(this, tr("Speichern"), err);
+}
+
+void MainWindow::printRecipe()
+{
+    if (!m_view->hasRecipe()) return;
+    QPrinter printer(QPrinter::HighResolution);
+    QPrintPreviewDialog pd(&printer, this);
+    connect(&pd, &QPrintPreviewDialog::paintRequested, this, [this](QPrinter *p) {
+        QTextDocument doc;
+        m_view->fillDocument(&doc);
+        doc.print(p);
+    });
+    pd.exec();
+}
+
+void MainWindow::recalcAll()
+{
+    RecipeDb &db = RecipeDb::instance();
+    QStringList ids;
+    for (const RecipeSummary &s : db.summaries()) ids << s.id;
+    QProgressDialog prog(tr("Nährwerte werden neu berechnet …"), tr("Abbrechen"), 0, int(ids.size()), this);
+    prog.setWindowModality(Qt::WindowModal);
+    prog.setMinimumDuration(300);
+    db.beginBatch();
+    int n = 0;
+    for (const QString &id : ids) {
+        prog.setValue(n++);
+        if (prog.wasCanceled()) break;
+        Recipe r;
+        if (!db.load(id, &r)) continue;
+        Nutrition::analyze(r);
+        db.save(r);
+    }
+    db.endBatch();
+    prog.setValue(int(ids.size()));
+    statusBar()->showMessage(tr("Nährwerte von %1 Rezepten neu berechnet.").arg(n), 5000);
+    showCurrent();
+}
+
+// ---------------------------------------------------------------- Planung und Extras
+
+void MainWindow::openFridge()
+{
+    FridgeDialog d(this);
+    connect(&d, &FridgeDialog::showRecipe, this, &MainWindow::selectRecipe);
+    d.exec();
+}
+
+void MainWindow::openAssistant()
+{
+    AssistantDialog d(this);
+    connect(&d, &AssistantDialog::planRequested, this, [this](const QString &id) { openMealPlan(id); });
+    d.exec();
+}
+
+void MainWindow::openMealPlan(const QString &profileId)
+{
+    if (!RecipeDb::instance().isOpen()) return;
+    MealPlanDialog d(profileId, this);
+    connect(&d, &MealPlanDialog::showRecipe, this, &MainWindow::selectRecipe);
+    d.exec();
+}
+
+void MainWindow::openFoodTable()
+{
+    FoodTableDialog d(this);
+    d.exec();
+    if (d.changed() && RecipeDb::instance().isOpen()
+        && QMessageBox::question(this, tr("Nährwerttabelle"), tr("Die Nährwerttabelle wurde geändert. Nährwerte aller Rezepte jetzt neu berechnen?"))
+               == QMessageBox::Yes)
+        recalcAll();
+}
+
+void MainWindow::openSettings()
+{
+    SettingsDialog d(this);
+    connect(&d, &SettingsDialog::appearanceChanged, this, &MainWindow::appearanceChanged);
+    d.exec();
+}
+
+void MainWindow::about()
+{
+    QMessageBox box(this);
+    box.setWindowTitle(tr("Über VitaMeals"));
+    box.setIconPixmap(Icons::app().pixmap(72, 72));
+    box.setText(tr("<h2>VitaMeals %1</h2><p>Rezeptverwaltung mit Nährwertanalyse, Kühlschrank-Vorschlägen, Wochenplänen "
+                   "und Assistenten für die Gewichtskontrolle.</p>")
+                    .arg(QApplication::applicationVersion()));
+    box.setInformativeText(tr("<p><b>VitaMeals ist kein Medizinprodukt.</b> Nährwerte und Energiebedarf sind Schätzwerte "
+                              "und ersetzen keine ärztliche oder Ernährungsberatung.</p>"
+                              "<p>Importiert RezKonv und MealMaster, exportiert Websites (HTML5/PHP) und LaTeX (book, scrbook).<br/>"
+                              "Optik und Bausteine aus VitaParms und VitaBreathe.</p>"
+                              "<p>© 2026 Michael Bergmann – MIT-Lizenz</p>"));
+    box.exec();
+}
+
+void MainWindow::appearanceChanged()
+{
+    Icons::refreshWidgets();
+    refreshTags();
+    refreshList();
+    m_view->refresh();
+    // Häkchen im Menü Darstellung nachführen
+    for (QAction *a : findChildren<QAction *>())
+        if (a->isCheckable() && a->actionGroup()) a->setChecked(a->text() == Themes::displayName(Themes::current()));
+}
+
+void MainWindow::closeEvent(QCloseEvent *e)
+{
+    QSettings s;
+    if (!isFullScreen() && !isMinimized()) s.setValue(QStringLiteral("ui/geometry"), saveGeometry());
+    s.setValue(QStringLiteral("ui/state"), saveState());
+    s.setValue(QStringLiteral("ui/split"), m_split->saveState());
+    e->accept();
+}

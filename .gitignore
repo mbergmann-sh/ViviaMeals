@@ -1,0 +1,16 @@
+# Build-Ergebnisse
+build/
+build-*/
+*.o
+moc_*
+qrc_*
+Makefile*
+.qmake.stash
+*.pro.user
+.qtcreator/
+VitaMeals
+VitaMeals.exe
+tests/coretest/coretest
+tests/coretest/*.o
+*.aux
+*.log

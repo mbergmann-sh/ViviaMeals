@@ -1,0 +1,10 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/data">
+        <file alias="lebensmittel.json">data/lebensmittel.json</file>
+    </qresource>
+    <qresource prefix="/samples">
+        <file alias="beispiele.rk">samples/beispiele.rk</file>
+        <file alias="beispiele.mmf">samples/beispiele.mmf</file>
+    </qresource>
+</RCC>
