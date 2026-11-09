@@ -4,7 +4,7 @@
 // Zutaten (deutsche Mengenangaben), Zubereitung und die Nährwerttabelle (je Portion, gesamt,
 // Anteil an der Referenzmenge). Das HTML ist auf den Teil von HTML/CSS beschränkt, den
 // QTextBrowser darstellt, und wird im Website-Export zusätzlich per CSS gestaltet.
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 #pragma once
 
 #include "recipe.h"

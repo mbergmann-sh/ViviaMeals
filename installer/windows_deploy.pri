@@ -5,85 +5,90 @@
 #  Nach jedem erfolgreichen Windows-Build (Qt Creator oder Konsole, MinGW oder MSVC):
 #    1. windeployqt kopiert die nötigen Qt-DLLs, Plugins und die deutschen Qt-Übersetzungen
 #       neben VitaMeals.exe – das Programm startet direkt aus dem Build-Ordner.
-#  Zusätzlich beim Release-Build:
-#    2. installer/qtifw/data wird neu befüllt: VitaMeals.exe, alle DLLs und windeployqt-
-#       Unterordner, LICENSE.txt, README.md
-#    3. Paketbaum installer/qtifw/packages/de.mbergmann.vitameals (meta + data)
-#    4. Ist das Qt Installer Framework installiert:
-#         installer/Output/VitaMeals-<Version>-Setup.exe     (Zielordner-Vorgabe C:\VitaMeals)
+#  Zusätzlich beim Release-Build (installer/make_installer.cmd; von Hand: mingw32-make installer):
+#    2. Bereitstellungsordner <Build>/installer-staging: NUR VitaMeals.exe, die von windeployqt
+#       ermittelten DLLs/Plugins, translations\qt_de.qm, LICENSE.txt, README.md –
+#       keine Quelltexte, Objekt- oder Debugdateien (werden zur Sicherheit zusätzlich gelöscht)
+#    3. Paketbaum <Build>/installer-packages/de.mbergmann.vitameals (meta + data)
+#    4. installer/Output/VitaMeals-<Version>-Setup.exe     (Zielordner-Vorgabe C:\VitaMeals),
+#       installer/Output/VitaMeals-<Version>-Inhalt.txt (Liste aller eingepackten Dateien) und
+#       installer/Output/VitaMeals-<Version>-Protokoll.txt (Ablauf, Fehlermeldungen)
 #
-#  binarycreator wird beim qmake-Lauf gesucht; abweichender Ort über die Umgebungsvariable
-#    VM_BINARYCREATOR   Pfad zu binarycreator.exe   (Vorgabe: <Qt>/Tools/QtInstallerFramework/<neueste>/bin
-#                                                     bzw. %QTIFWDIR%/bin)
-#  Installer nicht automatisch bauen:   qmake CONFIG+=vm_no_installer
+#  binarycreator.exe wird gesucht über
+#    VM_BINARYCREATOR (Umgebungsvariable, Pfad zu binarycreator.exe), QTIFWDIR,
+#    <Qt>/Tools/QtInstallerFramework/<Version>/bin (Qt Maintenance Tool),
+#    <Qt>/QtIFW-<Version>/bin bzw. C:/Qt/QtIFW-<Version>/bin (einzelner IFW-Installer)
+#    und beim Build erneut (dieselben Orte, C:\Qt\Tools\QtInstallerFramework\*, Suchpfad).
+#  Installer nicht automatisch bauen:                    qmake CONFIG+=vm_no_installer
 #  Alles wie von windeployqt vorgesehen bereitstellen:   qmake CONFIG+=vm_full_deploy
-#
-#  Alle Pfade mit Schrägstrich und in Anführungszeichen – das funktioniert unverändert in
-#  cmd.exe und in einer sh.exe. Dateien kopiert qmake selbst (qmake -install qinstall).
 # ---------------------------------------------------------------------------
 
 defineReplace(vmQuote) {
-    return("\"$$clean_path($$1)\"")
+    return("\"$$shell_path($$clean_path($$1))\"")
 }
 
-VM_INST     = $$clean_path($$PWD)
-VM_IFW      = $$VM_INST/qtifw
-VM_DATA     = $$VM_IFW/data
-VM_PKG      = de.mbergmann.vitameals
-VM_PKGDIR   = $$VM_IFW/packages/$$VM_PKG
-VM_OUTPUT   = $$VM_INST/Output
+VM_INST = $$clean_path($$PWD)
+VM_NL   = $$escape_expand(\\n\\t)
+VM_EXE  = \"$(DESTDIR_TARGET)\"
 
-VM_WINDEPLOYQT = $$vmQuote($$[QT_INSTALL_BINS]/windeployqt.exe) --verbose 0
-
-# Schlank ausliefern: reine Widgets-Anwendung (kein OpenGL/Direct3D/Qt Quick, kein Multimedia).
-# Druck (printsupport) und SVG-Symbole (svg + imageformats) bringt windeployqt selbst mit.
-# Qt-Übersetzungen: Deutsch (Standarddialoge „Speichern“, „Abbrechen“ …).
+# 1. Qt-DLLs neben das Programm im Build-Ordner (zum Starten aus Qt Creator)
+VM_WINDEPLOYQT = $$vmQuote($$[QT_INSTALL_BINS]/windeployqt.exe) --verbose 0 --translations de
 !vm_full_deploy {
-    VM_WINDEPLOYQT += --no-opengl-sw --no-system-d3d-compiler --translations de
+    VM_WINDEPLOYQT += --no-opengl-sw --no-system-d3d-compiler
     versionAtLeast(QT_VERSION, 6.8.0): VM_WINDEPLOYQT += --no-system-dxc-compiler
 }
-VM_QINSTALL    = $$vmQuote($$QMAKE_QMAKE) -install qinstall
-VM_EXE         = \"$(DESTDIR_TARGET)\"
-VM_NL          = $$escape_expand(\\n\\t)
-
-# 1. Qt-DLLs neben das Programm im Build-Ordner
 QMAKE_POST_LINK += $$VM_WINDEPLOYQT $$VM_EXE
 
+# 2.–4. Installer (nur Release)
+VM_QT68 = qt5
+versionAtLeast(QT_VERSION, 6.8.0): VM_QT68 = qt68
+VM_FULL = slim
+vm_full_deploy: VM_FULL = full
+
+# binarycreator.exe schon beim qmake-Lauf suchen (make_installer.cmd sucht beim Build noch einmal –
+# falls das Qt Installer Framework erst nach dem qmake-Lauf installiert wurde)
+VM_BINARYCREATOR = $$(VM_BINARYCREATOR)
+isEmpty(VM_BINARYCREATOR) {
+    VM_IFW_ROOT = $$(QTIFWDIR)
+    !isEmpty(VM_IFW_ROOT):exists($$VM_IFW_ROOT/bin/binarycreator.exe): VM_BINARYCREATOR = $$VM_IFW_ROOT/bin/binarycreator.exe
+}
+isEmpty(VM_BINARYCREATOR) {
+    # Qt-Installation <Qt>/<Version>/<Kit> → <Qt>/Tools/QtInstallerFramework/<Version>/bin,
+    # einzelner IFW-Installer → <Qt>/QtIFW-<Version>/bin (Vorgabe C:\Qt\QtIFW-4.x.x)
+    VM_QT_ROOT = $$clean_path($$[QT_INSTALL_PREFIX]/../..)
+    VM_IFW_CANDIDATES = $$files($$VM_QT_ROOT/Tools/QtInstallerFramework/*) \
+                        $$files($$VM_QT_ROOT/QtIFW*) $$files(C:/Qt/QtIFW*) \
+                        $$files(C:/Qt/Tools/QtInstallerFramework/*)
+    for(d, VM_IFW_CANDIDATES): exists($$d/bin/binarycreator.exe): VM_BINARYCREATOR = $$d/bin/binarycreator.exe
+}
+isEmpty(VM_BINARYCREATOR) {
+    VM_BC_ARG = \"-\"
+} else {
+    VM_BC_ARG = $$vmQuote($$VM_BINARYCREATOR)
+}
+VM_MAKE_INSTALLER = cmd /c call $$vmQuote($$VM_INST/make_installer.cmd) $$VM_EXE \
+    $$vmQuote($$[QT_INSTALL_BINS]) $$vmQuote($$[QT_INSTALL_TRANSLATIONS]) $$VM_BC_ARG \
+    $$vmQuote($$OUT_PWD) $$VERSION $$VM_QT68 $$VM_FULL
+
+# von Hand: mingw32-make installer  bzw.  nmake installer  (im Build-Ordner, baut immer die Release-Fassung)
+debug_and_release:!build_pass {
+    installer.commands = $(MAKE) -f $(MAKEFILE).Release installer
+} else: CONFIG(release, debug|release) {
+    installer.commands = $$VM_MAKE_INSTALLER
+    installer.depends = $(DESTDIR_TARGET)
+} else {
+    installer.commands = @echo VitaMeals: Der Installer wird aus dem Release-Build erstellt - bitte Release waehlen.
+}
+QMAKE_EXTRA_TARGETS += installer
+
 CONFIG(release, debug|release) {
-    # 2. Programmdateien für den Installer frisch aufbauen (führendes "-": Fehler ignorieren)
-    QMAKE_POST_LINK += $$VM_NL-$$QMAKE_DEL_TREE $$shell_quote($$shell_path($$VM_DATA))
-    QMAKE_POST_LINK += $$VM_NL$$VM_WINDEPLOYQT --dir $$vmQuote($$VM_DATA) $$VM_EXE
-    QMAKE_POST_LINK += $$VM_NL$$VM_QINSTALL -exe $$VM_EXE $$vmQuote($$VM_DATA/VitaMeals.exe)
-    QMAKE_POST_LINK += $$VM_NL$$VM_QINSTALL $$vmQuote($$PWD/../LICENSE) $$vmQuote($$VM_DATA/LICENSE.txt)
-    QMAKE_POST_LINK += $$VM_NL$$VM_QINSTALL $$vmQuote($$PWD/../README.md) $$vmQuote($$VM_DATA/README.md)
-
-    # 3. Paketbaum
-    QMAKE_POST_LINK += $$VM_NL-$$QMAKE_DEL_TREE $$shell_quote($$shell_path($$VM_IFW/packages))
-    QMAKE_POST_LINK += $$VM_NL$$VM_QINSTALL $$vmQuote($$VM_IFW/meta/package.xml) $$vmQuote($$VM_PKGDIR/meta/package.xml)
-    QMAKE_POST_LINK += $$VM_NL$$VM_QINSTALL $$vmQuote($$VM_IFW/meta/license.txt) $$vmQuote($$VM_PKGDIR/meta/license.txt)
-    QMAKE_POST_LINK += $$VM_NL$$VM_QINSTALL $$vmQuote($$VM_IFW/meta/installscript.qs) $$vmQuote($$VM_PKGDIR/meta/installscript.qs)
-    QMAKE_POST_LINK += $$VM_NL$$VM_QINSTALL $$vmQuote($$VM_DATA) $$vmQuote($$VM_PKGDIR/data)
-
-    # 4. Installer bauen, sofern das Qt Installer Framework vorhanden ist
-    !vm_no_installer {
-        VM_BINARYCREATOR = $$(VM_BINARYCREATOR)
-        isEmpty(VM_BINARYCREATOR) {
-            VM_IFW_ROOT = $$(QTIFWDIR)
-            !isEmpty(VM_IFW_ROOT): exists($$VM_IFW_ROOT/bin/binarycreator.exe): VM_BINARYCREATOR = $$VM_IFW_ROOT/bin/binarycreator.exe
-        }
-        isEmpty(VM_BINARYCREATOR) {
-            # Qt-Online-Installer: <Qt>/<Version>/<Kit> → <Qt>/Tools/QtInstallerFramework/<Version>/bin
-            VM_IFW_VERSIONS = $$files($$clean_path($$[QT_INSTALL_PREFIX]/../../Tools/QtInstallerFramework/*))
-            for(d, VM_IFW_VERSIONS): exists($$d/bin/binarycreator.exe): VM_BINARYCREATOR = $$d/bin/binarycreator.exe
-        }
-        !isEmpty(VM_BINARYCREATOR) {
-            message("VitaMeals: Qt Installer Framework gefunden – $$VM_BINARYCREATOR")
-            QMAKE_POST_LINK += $$VM_NL-$$QMAKE_MKDIR $$shell_quote($$shell_path($$VM_OUTPUT))
-            QMAKE_POST_LINK += $$VM_NL-$$vmQuote($$VM_BINARYCREATOR) --offline-only --compression 9 \
-                -c $$vmQuote($$VM_IFW/config/config.xml) -p $$vmQuote($$VM_IFW/packages) \
-                $$vmQuote($$VM_OUTPUT/VitaMeals-$${VERSION}-Setup.exe)
-        } else {
-            message("VitaMeals: Qt Installer Framework nicht gefunden – kein Installer (siehe installer/README.md)")
-        }
+    vm_no_installer {
+        QMAKE_POST_LINK += $${VM_NL}@echo VitaMeals: Installer abgeschaltet (CONFIG+=vm_no_installer) - von Hand: mingw32-make installer
+    } else {
+        isEmpty(VM_BINARYCREATOR): message("VitaMeals: binarycreator.exe beim qmake-Lauf nicht gefunden – make_installer.cmd sucht beim Build erneut (siehe installer/README.md)")
+        else: message("VitaMeals: Qt Installer Framework gefunden – $$VM_BINARYCREATOR")
+        QMAKE_POST_LINK += $${VM_NL}$$VM_MAKE_INSTALLER
     }
+} else {
+    QMAKE_POST_LINK += $${VM_NL}@echo VitaMeals: Debug-Build - der Installer wird nur beim Release-Build erstellt.
 }

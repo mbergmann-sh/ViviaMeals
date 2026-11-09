@@ -4,7 +4,7 @@
 // zum Einbinden mit \input{} in ein eigenes Kochbuch. Das Foto wird als JPEG neben die .tex-Datei
 // geschrieben. Benötigte Pakete: inputenc, fontenc, babel (ngerman), graphicx, booktabs, tabularx,
 // xcolor, textcomp – in jeder TeX-Distribution enthalten.
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 #pragma once
 
 #include "recipe.h"

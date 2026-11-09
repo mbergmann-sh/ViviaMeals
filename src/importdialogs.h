@@ -1,5 +1,5 @@
 // VitaMeals – Import-Ablauf: Dateien wählen (einzeln oder mehrere), Vorschau, Doubletten-Abfrage
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 #pragma once
 
 #include "importers.h"

@@ -5,7 +5,7 @@
 // Ziel nahekommt. Berücksichtigt werden Ernährungsform (vegan/vegetarisch), ausgeschlossene
 // Zutaten, bevorzugte Themen und Abwechslung (kein Rezept zweimal am selben Tag, möglichst
 // selten in der Woche). Nur Rezepte mit berechneten Nährwerten werden verplant.
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 #pragma once
 
 #include "fridge.h"

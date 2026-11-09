@@ -3,7 +3,7 @@
 // Personen wählen/anlegen, Kennzahlen (BMI, Grund- und Gesamtumsatz, Zielzufuhr, voraussichtliche
 // Dauer bis zum Zielgewicht), Gewichtsverlauf mit Grafik und Start des Wochenplans.
 // KEIN Medizinprodukt – die Werte sind allgemeine Richtwerte.
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 #pragma once
 
 #include <QDialog>

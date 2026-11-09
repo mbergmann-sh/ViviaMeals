@@ -6,7 +6,7 @@
 //
 // Im Speicher stehen nur die Kurzfassungen (Titel, Tags, Nährwerte, Zutatennamen); vollständige
 // Rezepte (mit Bild) werden bei Bedarf geladen. So bleiben auch große Sammlungen schnell.
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 #pragma once
 
 #include "recipe.h"

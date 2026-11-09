@@ -1,5 +1,5 @@
 // VitaMeals – Gewichtsverlauf als Grafik (eigene QPainter-Zeichnung wie in VitaBreathe, kein Qt Charts)
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 #pragma once
 
 #include "profiles.h"

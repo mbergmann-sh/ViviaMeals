@@ -9,7 +9,7 @@
 //  * Zwischenüberschriften in Großbuchstaben werden in normale Schreibweise gebracht.
 // Angewendet nur auf deutschsprachige Rezepte, die noch keine Umlaute enthalten (automatisch)
 // oder auf Wunsch (Editor, Extras).
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 #pragma once
 
 #include "recipe.h"

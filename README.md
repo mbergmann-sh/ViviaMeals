@@ -1,7 +1,7 @@
 # VitaMeals
 
 Rezeptverwaltung mit **Nährwertanalyse**, **Kühlschrank-Vorschlägen**, **Wochenmenü-Plänen** und
-**Assistenten für Gewichtsverlust und Gewichtszunahme** – Deutsch, Qt 6 (bzw. Qt 5.15) / C++17 / qmake – MIT-Lizenz.
+**Assistenten für Gewichtsverlust und Gewichtszunahme** – Deutsch, Qt 6 (bzw. Qt 5.15) / C++17 / qmake – MIT-Lizenz mit „Commons Clause“ (kein Verkauf).
 Technisch und optisch an [VitaParms](https://github.com/mbergmann-sh/VitaParms) und
 [VitaBreathe](https://github.com/mbergmann-sh/VitaBreathe) angelehnt (Themes, Symbole, `screenfit`, `windowstate`).
 
@@ -124,3 +124,18 @@ tests/coretest/ Test des Kerns
   "nutrition": { "total": {…}, "perServing": {"kcal": 450, "kJ": 1883, "protein": 12.5, "fat": 18, "saturatedFat": 9,
   "carbohydrates": 55, "sugar": 20, "fiber": 4, "salt": 0.8}, "matched": 9, "countable": 10, "unmatched": ["…"] } }
 ```
+
+## Lizenz
+
+© 2026 Michael Bergmann. VitaMeals steht unter der **MIT-Lizenz mit „Commons Clause“ v1.0**
+(Wortlaut in [LICENSE](LICENSE)):
+
+* **erlaubt** – kostenlos: das Programm nutzen (privat, im Verein, im Büro), den Quelltext lesen,
+  verändern und Veränderungen weitergeben; Weitergabe nur mit diesem Lizenztext.
+* **nicht erlaubt:** VitaMeals zu **verkaufen** – also das Programm oder ein Produkt bzw. eine
+  Dienstleistung, deren Wert ganz oder im Wesentlichen auf VitaMeals beruht, gegen Entgelt anzubieten
+  (auch als kostenpflichtiges Hosting oder kostenpflichtigen Support).
+
+Durch die Commons Clause ist VitaMeals *quelloffen*, aber keine „Open Source“-Software im Sinne der
+Open Source Initiative. Die mit dem Windows-Installer ausgelieferten Qt-Bibliotheken stehen weiterhin
+unter der LGPL-3.0 und fallen nicht unter die Commons Clause.

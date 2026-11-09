@@ -1,5 +1,5 @@
 // VitaMeals – Wochenmenü-Plan anzeigen, anpassen, drucken und Einkaufsliste erstellen
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 #pragma once
 
 #include "mealplanner.h"

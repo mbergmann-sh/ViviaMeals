@@ -1,5 +1,5 @@
 // VitaMeals – Export-Dialoge: Website (ganze Sammlung) und LaTeX (einzelnes Rezept)
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 #pragma once
 
 #include "recipe.h"

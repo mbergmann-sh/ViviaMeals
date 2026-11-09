@@ -4,7 +4,7 @@
 // Zutaten werden zerlegt (Menge, Einheit, Name, Zusatz), englische Maße in deutsche umgerechnet,
 // englische Zutatennamen über das Glossar übersetzt, Temperaturen/Zoll in der Anleitung
 // umgerechnet und die Nährwerte berechnet.
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 #pragma once
 
 #include "recipe.h"

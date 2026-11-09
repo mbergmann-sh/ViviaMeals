@@ -10,7 +10,7 @@
 //   * Qt::SingleShotConnection (Qt 6)           → vpConnectOnce()
 // Überladene Signale (QComboBox::currentIndexChanged, QSpinBox::valueChanged …) werden im Code
 // mit qOverload<…>() eindeutig gemacht – das gilt in beiden Versionen.
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 #pragma once
 
 #include <QtGlobal>

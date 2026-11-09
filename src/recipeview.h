@@ -3,7 +3,7 @@
 // Zeigt das gewählte Rezept als HTML: rechts oben das Foto, daneben Titel, Portionen, kcal/kJ,
 // Zutatenliste, Zubereitung und Nährwerttabelle. Über der Ansicht kann die Portionenzahl
 // geändert werden (Mengen werden umgerechnet). Das Foto passt sich der Fensterbreite an.
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 #pragma once
 
 #include "recipe.h"

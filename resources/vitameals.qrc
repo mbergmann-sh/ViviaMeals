@@ -38,9 +38,6 @@
         <file alias="ui/star.svg">icons/ui/star.svg</file>
         <file alias="ui/star-filled.svg">icons/ui/star-filled.svg</file>
         <file alias="ui/tag.svg">icons/ui/tag.svg</file>
-        <file alias="ui/translate.svg">icons/ui/translate.svg</file>
-        <file alias="ui/umlaut.svg">icons/ui/umlaut.svg</file>
-        <file alias="ui/eye.svg">icons/ui/eye.svg</file>
         <file alias="ui/tex.svg">icons/ui/tex.svg</file>
         <file alias="ui/theme.svg">icons/ui/theme.svg</file>
         <file alias="ui/translate.svg">icons/ui/translate.svg</file>

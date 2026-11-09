@@ -3,7 +3,7 @@
 // Ein Rezept wird als JSON-Datei mit der Endung .vmr gespeichert (UTF-8, Bild als Base64-JPEG
 // eingebettet). Aufbau siehe Recipe::toJson(). Die berechneten Nährwerte werden mitgespeichert,
 // damit Liste, Suche, Wochenplan und Website ohne Neuberechnung auskommen.
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 #pragma once
 
 #include <QDateTime>

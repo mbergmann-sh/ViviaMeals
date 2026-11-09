@@ -4,7 +4,7 @@
 // rechts die HTML-Ansicht des gewählten Rezepts. Beim Start wird die zuletzt geöffnete Datenbank
 // wieder geöffnet und ein zufälliges Rezept gezeigt; gibt es keine Datenbank, wird der Benutzer
 // aufgefordert, eine anzulegen.
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 #pragma once
 
 #include "importers.h"

@@ -4,7 +4,7 @@
 // Eigene:     <AppData>/lebensmittel_eigene.json – eigene Lebensmittel und abweichende Werte
 //             (gleicher Schlüssel überschreibt den eingebauten Eintrag) sowie gelernte Zuordnungen
 //             „Zutatenname → Lebensmittel“, die der Benutzer im Editor festgelegt hat.
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 #pragma once
 
 #include "recipe.h"

@@ -8,7 +8,7 @@
 //
 // Die Aufrufe blockieren (eigene Ereignisschleife mit Zeitlimit) und sind für den Import gedacht.
 // Zum Testen kann die Umgebungsvariable VITAMEALS_DEEPL_URL einen anderen Server angeben.
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 #pragma once
 
 #include "recipe.h"

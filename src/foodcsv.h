@@ -9,7 +9,7 @@
 //    food_category.csv), z. B. „Foundation Foods“ oder „SR Legacy“ – gemeinfrei (CC0).
 // Importierte Einträge sind „eigene Lebensmittel“ mit einer Herkunftsangabe und lassen sich je
 // Herkunft wieder entfernen.
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 #pragma once
 
 #include "foodtable.h"

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 //
 // Die Paletten und Stylesheets der Themes "Dark" und "Visual Studio Code Dark"
 // entsprechen AmigaED 4.0 (mainwindow.cpp: darkApplicationPalette(),

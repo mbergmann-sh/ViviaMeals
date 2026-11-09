@@ -3,7 +3,7 @@
 // Alle Einheiten werden auf eine deutsche Küchenmaßeinheit abgebildet. Englische Maße werden beim
 // Import umgerechnet: Cups → ml bzw. g (über die Dichte der Zutat), Unzen/Pfund → g, Flüssigunzen,
 // Pints, Quarts → ml, tablespoon → EL, teaspoon → TL, pinch → Prise …
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 #pragma once
 
 #include <QString>

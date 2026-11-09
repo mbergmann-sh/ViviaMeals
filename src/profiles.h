@@ -5,7 +5,7 @@
 //   Grundumsatz nach Mifflin-St Jeor, Gesamtbedarf = Grundumsatz × PAL (körperliche Aktivität),
 //   Energiedefizit bzw. -überschuss aus dem Wochenziel (≈ 7 000 kcal je kg Körpergewicht).
 // VitaMeals ist KEIN Medizinprodukt – die Werte ersetzen keine ärztliche oder Ernährungsberatung.
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 #pragma once
 
 #include <QDate>

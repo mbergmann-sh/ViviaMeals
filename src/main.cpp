@@ -5,7 +5,7 @@
 //   VitaMeals --demo                Demo mit Beispielrezepten, Bildern und einem Profil in einem temporären
 //                                   Ordner, mit eigenen Einstellungen – berührt die eigenen Daten nicht
 //   VitaMeals --demo --screenshots <ordner>   Bildschirmfotos für Handbuch/README erzeugen
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 #include "assistantdialog.h"
 #include "editordialog.h"
 #include "foodcsv.h"

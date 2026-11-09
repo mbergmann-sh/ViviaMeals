@@ -13,7 +13,34 @@ Ihre Rezeptdatenbanken liegen in den Ordnern, die Sie selbst wählen; Profile,
 Gewichtsverlauf, eigene Nährwerte und Einstellungen liegen im Benutzerprofil.
 Bei der Deinstallation bleiben alle diese Daten erhalten.
 
-VitaMeals ist freie Software unter der MIT-Lizenz (englischer Originaltext):
+VitaMeals ist quelloffen. Erlaubt sind – kostenlos – Nutzung, Weitergabe und
+Veränderung des Programms und seines Quelltexts, privat wie gewerblich (etwa
+im Büro oder Verein). NICHT erlaubt ist der Verkauf: Niemand darf VitaMeals
+oder ein Produkt bzw. eine Dienstleistung, deren Wert im Wesentlichen auf
+VitaMeals beruht, gegen Bezahlung anbieten – auch nicht als Hosting oder
+kostenpflichtigen Support. Maßgeblich ist der folgende englische Lizenztext
+(MIT-Lizenz mit „Commons Clause“):
+
+"Commons Clause" License Condition v1.0
+
+The Software is provided to you by the Licensor under the License, as defined
+below, subject to the following condition.
+
+Without limiting other conditions in the License, the grant of rights under the
+License will not include, and the License does not grant to you, the right to
+Sell the Software.
+
+For purposes of the foregoing, "Sell" means practicing any or all of the rights
+granted to you under the License to provide to third parties, for a fee or
+other consideration (including without limitation fees for hosting or
+consulting/ support services related to the Software), a product or service
+whose value derives, entirely or substantially, from the functionality of the
+Software. Any license notice or attribution required by the License must also
+include this Commons Clause License Condition notice.
+
+Software: VitaMeals
+License: MIT
+Licensor: Michael Bergmann
 
 MIT License
 
@@ -36,3 +63,12 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+-------------------------------------------------------------------------------
+Third-party components
+
+VitaMeals uses the Qt framework (https://www.qt.io), which is licensed under the
+GNU Lesser General Public License v3 (LGPL-3.0). Qt is linked dynamically; the
+Qt libraries shipped with the Windows installer (Qt*.dll, plugins) remain under
+the LGPL and are not covered by the Commons Clause above. The Qt source code is
+available at https://download.qt.io/official_releases/qt/ .

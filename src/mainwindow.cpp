@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 #include "mainwindow.h"
 #include "assistantdialog.h"
 #include "editordialog.h"
@@ -26,6 +26,7 @@
 #include <QCloseEvent>
 #include <QComboBox>
 #include <QDir>
+#include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QFrame>
@@ -924,7 +925,13 @@ void MainWindow::about()
                               "und ersetzen keine ärztliche oder Ernährungsberatung.</p>"
                               "<p>Importiert RezKonv und MealMaster, exportiert Websites (HTML5/PHP) und LaTeX (book, scrbook).<br/>"
                               "Optik und Bausteine aus VitaParms und VitaBreathe.</p>"
-                              "<p>© 2026 Michael Bergmann – MIT-Lizenz</p>"));
+                              "<p>© 2026 Michael Bergmann<br/>"
+                              "Quelloffen unter der <b>MIT-Lizenz mit „Commons Clause“</b>: Nutzung, Weitergabe und Veränderung "
+                              "sind kostenlos erlaubt, der <b>Verkauf</b> von VitaMeals oder darauf beruhender Produkte und "
+                              "Dienstleistungen nicht.<br/>Verwendet Qt (LGPL-3.0).</p>"));
+    QFile lic(QStringLiteral(":/doc/LICENSE"));
+    if (lic.open(QIODevice::ReadOnly)) box.setDetailedText(QString::fromUtf8(lic.readAll()));   // „Details einblenden …“ zeigt den Lizenztext
+    box.setStandardButtons(QMessageBox::Ok);
     box.exec();
 }
 

@@ -8,7 +8,7 @@
 // werden schlichte QDialogs nicht gemerkt). Dialoge von Qt selbst (Datei-, Meldungs- …) bleiben
 // unberührt, ausgenommen die Druckvorschau. Das Hauptfenster speichert sich selbst (MainWindow).
 // Danach passt ScreenFit das Fenster an den aktuellen Bildschirm an (z. B. anderer Monitor).
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
 #pragma once
 
 class QApplication;
