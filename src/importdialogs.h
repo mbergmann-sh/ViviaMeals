@@ -9,9 +9,17 @@
 class QCheckBox;
 class QTableWidget;
 
+class QProgressDialog;
+
 namespace ImportFlow {
 // Gibt die ID des ersten importierten Rezepts zurück (leer = nichts importiert)
 QString run(QWidget *parent, Importers::Format format, const QStringList &files = {});
+// Übersetzer für Importers::Options auf Grundlage der DeepL-Einstellungen (leer, wenn DeepL aus ist).
+// Zeigt den Fortschritt im Dialog und bricht nach einem Schlüssel-/Kontingentfehler weitere Versuche ab.
+std::function<bool(Recipe &, QString *)> deeplTranslator(QProgressDialog *progress = nullptr);
+// Sprache für Listen: „deutsch“, „englisch → DeepL“, „englisch (Glossar)“ …
+QString languageLabel(const Recipe &r);
+QString umlautNote(int recipes);   // Hinweis „In 3 Rezepten wurden fehlende Umlaute ergänzt …“
 }
 
 // Vorschau der gefundenen Rezepte mit Auswahl

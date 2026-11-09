@@ -15,6 +15,8 @@
 #include "searchdialog.h"
 #include "settingsdialog.h"
 #include "themes.h"
+#include "umlauts.h"
+#include "deepl.h"
 
 #include <QAction>
 #include <QActionGroup>
@@ -32,6 +34,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
+#include <QLocale>
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
@@ -252,6 +255,11 @@ void MainWindow::buildMenus()
     QMenu *extras = menuBar()->addMenu(tr("E&xtras"));
     a = extras->addAction(Icons::get(QStringLiteral("nutrition")), tr("&Nährwerttabelle …"), this, &MainWindow::openFoodTable);
     a = extras->addAction(Icons::get(QStringLiteral("refresh")), tr("Nährwerte aller Rezepte neu &berechnen"), this, &MainWindow::recalcAll);
+    m_needDb << a;
+    a = extras->addAction(Icons::get(QStringLiteral("umlaut")), tr("&Umlaute in allen Rezepten korrigieren …"), this, &MainWindow::fixUmlautsAll);
+    a->setStatusTip(tr("Rezepte ohne ä, ö, ü und ß (z. B. „Kaese“, „heiss“) in der ganzen Datenbank korrigieren"));
+    m_needDb << a;
+    a = extras->addAction(Icons::get(QStringLiteral("translate")), tr("Fremdsprachige Rezepte mit DeepL ü&bersetzen …"), this, &MainWindow::translateAll);
     m_needDb << a;
     extras->addSeparator();
     QMenu *themes = extras->addMenu(Icons::get(QStringLiteral("theme")), tr("&Darstellung"));
@@ -758,6 +766,108 @@ void MainWindow::recalcAll()
     db.endBatch();
     prog.setValue(int(ids.size()));
     statusBar()->showMessage(tr("Nährwerte von %1 Rezepten neu berechnet.").arg(n), 5000);
+    showCurrent();
+}
+
+void MainWindow::fixUmlautsAll()
+{
+    RecipeDb &db = RecipeDb::instance();
+    // erst zählen und eine Vorschau zeigen
+    QList<Recipe> todo;
+    QStringList examples;
+    for (const RecipeSummary &s : db.summaries()) {
+        Recipe r;
+        if (!db.load(s.id, &r) || r.language != QLatin1String("de")) continue;
+        if (!Umlauts::looksTranscribed(Umlauts::allRecipeText(r))) continue;
+        Recipe fixed = r;
+        if (Umlauts::fixRecipe(fixed) == 0) continue;
+        if (examples.size() < 6) examples << QStringLiteral("„%1“ → „%2“").arg(r.title, fixed.title);
+        todo << fixed;
+    }
+    if (todo.isEmpty()) {
+        QMessageBox::information(this, tr("Umlaute korrigieren"), tr("Es wurden keine Rezepte ohne Umlaute gefunden."));
+        return;
+    }
+    if (QMessageBox::question(this, tr("Umlaute korrigieren"),
+                              tr("%1 Rezepte schreiben ae, oe, ue und ss statt ä, ö, ü und ß, zum Beispiel:\n\n%2\n\nJetzt korrigieren?")
+                                  .arg(todo.size())
+                                  .arg(examples.join(QLatin1Char('\n'))))
+        != QMessageBox::Yes)
+        return;
+    db.beginBatch();
+    for (Recipe &r : todo) {
+        Nutrition::analyze(r);   // „Kaese“ → „Käse“ findet jetzt den Eintrag in der Nährwerttabelle
+        Nutrition::applyTagSuggestions(r);
+        db.save(r);
+    }
+    db.endBatch();
+    statusBar()->showMessage(tr("Umlaute in %1 Rezepten korrigiert.").arg(todo.size()), 5000);
+    showCurrent();
+}
+
+void MainWindow::translateAll()
+{
+    const DeepL::Settings ds = DeepL::Settings::load();
+    if (!ds.usable()) {
+        if (QMessageBox::question(this, tr("Mit DeepL übersetzen"),
+                                  tr("Dafür wird ein eigener DeepL-API-Schlüssel benötigt (kostenlos: „DeepL API Free“). "
+                                     "Jetzt die Einstellungen öffnen?"))
+            == QMessageBox::Yes)
+            openSettings();
+        return;
+    }
+    RecipeDb &db = RecipeDb::instance();
+    QStringList ids;
+    int chars = 0;
+    for (const RecipeSummary &s : db.summaries()) {
+        if (s.language == QLatin1String("de")) continue;
+        Recipe r;
+        if (!db.load(s.id, &r)) continue;
+        ids << s.id;
+        chars += DeepL::characterCount(r);
+    }
+    if (ids.isEmpty()) {
+        QMessageBox::information(this, tr("Mit DeepL übersetzen"), tr("In der Datenbank gibt es keine fremdsprachigen Rezepte."));
+        return;
+    }
+    if (QMessageBox::question(this, tr("Mit DeepL übersetzen"),
+                              tr("%1 fremdsprachige Rezepte gefunden. Titel, Zutaten und Zubereitung (etwa %2 Zeichen) werden an DeepL "
+                                 "gesendet und durch die deutsche Übersetzung ersetzt. Fortfahren?")
+                                  .arg(ids.size())
+                                  .arg(QLocale(QLocale::German).toString(chars)))
+        != QMessageBox::Yes)
+        return;
+    QProgressDialog prog(tr("Rezepte werden übersetzt …"), tr("Abbrechen"), 0, int(ids.size()), this);
+    prog.setWindowModality(Qt::WindowModal);
+    prog.setMinimumDuration(0);
+    const auto translator = ImportFlow::deeplTranslator(&prog);
+    int done = 0, failed = 0;
+    QString lastError;
+    db.beginBatch();
+    for (int i = 0; i < ids.size(); ++i) {
+        prog.setValue(i);
+        if (prog.wasCanceled()) break;
+        Recipe r;
+        if (!db.load(ids[i], &r)) continue;
+        if (r.originalLanguage.isEmpty()) r.originalLanguage = r.language;
+        QString err;
+        if (!translator(r, &err)) {
+            ++failed;
+            lastError = err;
+            continue;
+        }
+        Nutrition::analyze(r);
+        Nutrition::applyTagSuggestions(r);
+        db.save(r);
+        ++done;
+    }
+    db.endBatch();
+    prog.setValue(int(ids.size()));
+    if (failed > 0)
+        QMessageBox::warning(this, tr("Mit DeepL übersetzen"),
+                             tr("%1 Rezepte übersetzt, %2 nicht übersetzt.\nLetzter Fehler: %3").arg(done).arg(failed).arg(lastError));
+    else
+        statusBar()->showMessage(tr("%1 Rezepte mit DeepL übersetzt.").arg(done), 5000);
     showCurrent();
 }
 

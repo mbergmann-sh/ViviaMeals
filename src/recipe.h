@@ -74,7 +74,9 @@ struct Recipe {
     QString image;              // Base64-JPEG
     QString source;             // Quelle / Autor
     QString sourceFormat;       // "VitaMeals", "RezKonv", "MealMaster", "VTM"
-    QString language = QStringLiteral("de");   // Sprache der Anleitung ("de", "en")
+    QString language = QStringLiteral("de");   // Sprache der Anleitung ("de", "en", "fr" …)
+    QString originalLanguage;   // bei übersetzten Rezepten: Sprache des Originals ("en", "fr" …)
+    QString translatedBy;       // "DeepL" oder "Glossar" (nur Zutaten)
     int prepMinutes = 0;
     QDateTime created;
     QDateTime modified;

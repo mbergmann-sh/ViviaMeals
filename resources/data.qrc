@@ -6,5 +6,6 @@
     <qresource prefix="/samples">
         <file alias="beispiele.rk">samples/beispiele.rk</file>
         <file alias="beispiele.mmf">samples/beispiele.mmf</file>
+        <file alias="umlaute.rk">samples/umlaute.rk</file>
     </qresource>
 </RCC>

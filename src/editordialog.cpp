@@ -8,7 +8,11 @@
 #include "nutrition.h"
 #include "recipedb.h"
 #include "units.h"
+#include "umlauts.h"
+#include "deepl.h"
+#include "recipehtml.h"
 
+#include <QApplication>
 #include <QBuffer>
 #include <QCheckBox>
 #include <QComboBox>
@@ -96,7 +100,21 @@ EditorDialog::EditorDialog(const Recipe &r, QWidget *parent) : QDialog(parent), 
     form->addRow(tr("&Quelle:"), m_source);
     m_fav = new QCheckBox(tr("Favorit"));
     m_fav->setChecked(r.favorite);
-    form->addRow(QString(), m_fav);
+    auto *fl = new QHBoxLayout;
+    fl->addWidget(m_fav);
+    fl->addStretch(1);
+    auto *umlautBtn = new QPushButton(Icons::get(QStringLiteral("umlaut")), tr("Umlaute korrigieren"));
+    umlautBtn->setToolTip(tr("ae, oe, ue und ss in Titel, Zutaten und Zubereitung zu ä, ö, ü und ß machen, wo es passt"));
+    fl->addWidget(umlautBtn);
+    auto *deeplBtn = new QPushButton(Icons::get(QStringLiteral("translate")), tr("Mit DeepL übersetzen"));
+    deeplBtn->setToolTip(tr("Fremdsprachiges Rezept mit DeepL ins Deutsche übersetzen (API-Schlüssel in den Einstellungen)"));
+    deeplBtn->setEnabled(DeepL::Settings::load().usable());
+    if (!deeplBtn->isEnabled())
+        deeplBtn->setToolTip(tr("Dazu unter Extras → Einstellungen die DeepL-Übersetzung einschalten und einen eigenen API-Schlüssel eintragen."));
+    fl->addWidget(deeplBtn);
+    form->addRow(QString(), fl);
+    connect(umlautBtn, &QPushButton::clicked, this, &EditorDialog::fixUmlauts);
+    connect(deeplBtn, &QPushButton::clicked, this, &EditorDialog::translateDeepL);
     head->addLayout(form, 1);
 
     auto *imgBox = new QVBoxLayout;
@@ -225,6 +243,62 @@ void EditorDialog::chooseImage()
     img.convertToFormat(QImage::Format_RGB32).save(&buf, "JPG", 85);
     m_recipe.image = QString::fromLatin1(ba.toBase64());
     updateImage();
+}
+
+void EditorDialog::showRecipe()
+{
+    m_title->setText(m_recipe.title);
+    m_ingredients->setPlainText(m_recipe.ingredientsText());
+    m_instructions->setPlainText(m_recipe.instructions);
+    m_source->setText(m_recipe.source);
+    m_tags->setText(m_recipe.tags.join(QStringLiteral(", ")));
+    if (!m_recipe.yieldUnit.isEmpty()) m_yield->setCurrentText(m_recipe.yieldUnit);
+    analyze();
+}
+
+void EditorDialog::fixUmlauts()
+{
+    collect();
+    const int n = Umlauts::fixRecipe(m_recipe);
+    if (n == 0) {
+        QMessageBox::information(this, tr("Umlaute"), tr("Es wurde nichts gefunden, das korrigiert werden müsste."));
+        return;
+    }
+    showRecipe();
+    QMessageBox::information(this, tr("Umlaute"), (n == 1 ? tr("Ein Wort korrigiert.") : tr("%1 Wörter korrigiert.").arg(n)) + QLatin1Char(' ')
+                                 + tr("Bitte kurz durchsehen – „Speichern“ übernimmt die Änderung."));
+}
+
+void EditorDialog::translateDeepL()
+{
+    collect();
+    const DeepL::Settings ds = DeepL::Settings::load();
+    if (m_recipe.language == QLatin1String("de") && Glossary::detectLanguage(Umlauts::allRecipeText(m_recipe)) == QLatin1String("de")) {
+        if (QMessageBox::question(this, tr("Mit DeepL übersetzen"),
+                                  tr("Das Rezept scheint bereits deutschsprachig zu sein. Trotzdem an DeepL senden?"))
+            != QMessageBox::Yes)
+            return;
+    }
+    if (QMessageBox::question(this, tr("Mit DeepL übersetzen"),
+                              tr("Titel, Zutaten und Zubereitung (etwa %1 Zeichen) werden an DeepL gesendet und durch die deutsche "
+                                 "Übersetzung ersetzt. Fortfahren?")
+                                  .arg(DeepL::characterCount(m_recipe)))
+        != QMessageBox::Yes)
+        return;
+    // Englische Rezepte wurden beim Import ggf. schon über das Glossar übersetzt – DeepL erkennt die Sprache selbst
+    if (m_recipe.originalLanguage.isEmpty() && m_recipe.language != QLatin1String("de")) m_recipe.originalLanguage = m_recipe.language;
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    QString err;
+    Recipe r = m_recipe;
+    const bool ok = DeepL::translateRecipe(r, ds.key, &err);
+    QApplication::restoreOverrideCursor();
+    if (!ok) {
+        QMessageBox::warning(this, tr("Mit DeepL übersetzen"), tr("Die Übersetzung ist fehlgeschlagen:\n%1").arg(err));
+        return;
+    }
+    m_manual.clear();   // Zutatennamen sind jetzt deutsch
+    m_recipe = r;
+    showRecipe();
 }
 
 void EditorDialog::collect()

@@ -56,6 +56,7 @@ public:
     void learn(const QString &ingredientName, const QString &foodKey);
     QString learnedFor(const QString &ingredientName) const;
 
+    static QString foldUmlauts(const QString &s);
     static QString normalize(const QString &name);   // Zutatennamen für den Abgleich vereinfachen
     QString userFile() const;
     void reload();

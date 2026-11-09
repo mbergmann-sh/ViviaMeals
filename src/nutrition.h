@@ -16,6 +16,8 @@ namespace Nutrition {
 // Gewicht einer Zutat in g (0 = nicht bestimmbar)
 double gramsOf(const Ingredient &ing, const Food *food);
 
+// Menüfolge statt Rezept (Kategorie „Menü“, nur Gerichtnamen ohne Mengen)
+bool isMenu(const Recipe &r);
 // Zuordnen, Gramm berechnen, Nährwerte gesamt/je Portion bestimmen und im Rezept speichern
 void analyze(Recipe &r);
 

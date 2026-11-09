@@ -19,7 +19,9 @@ SOURCES += \
     $$PWD/src/latexexport.cpp \
     $$PWD/src/fridge.cpp \
     $$PWD/src/profiles.cpp \
-    $$PWD/src/mealplanner.cpp
+    $$PWD/src/mealplanner.cpp \
+    $$PWD/src/umlauts.cpp \
+    $$PWD/src/deepl.cpp
 
 HEADERS += \
     $$PWD/src/qtcompat.h \
@@ -38,4 +40,6 @@ HEADERS += \
     $$PWD/src/latexexport.h \
     $$PWD/src/fridge.h \
     $$PWD/src/profiles.h \
-    $$PWD/src/mealplanner.h
+    $$PWD/src/mealplanner.h \
+    $$PWD/src/umlauts.h \
+    $$PWD/src/deepl.h

@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 #include "importdialogs.h"
+#include "deepl.h"
 #include "icons.h"
 #include "recipedb.h"
+#include "recipehtml.h"
 
 #include <QApplication>
 #include <QCheckBox>
@@ -12,6 +14,7 @@
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
+#include <QLocale>
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QPushButton>
@@ -54,7 +57,7 @@ ImportPreviewDialog::ImportPreviewDialog(const QList<Recipe> &recipes, const QSt
         auto *st = new QTableWidgetItem(dup ? tr("Doublette") : tr("neu"));
         if (dup) st->setForeground(QColor(0xd0, 0x70, 0x10));
         m_table->setItem(i, 1, st);
-        m_table->setItem(i, 2, new QTableWidgetItem(r.language == QLatin1String("en") ? tr("englisch → umgerechnet") : tr("deutsch")));
+        m_table->setItem(i, 2, new QTableWidgetItem(ImportFlow::languageLabel(r)));
         m_table->setItem(i, 3, new QTableWidgetItem(r.servingsText()));
         auto *k = new QTableWidgetItem(r.nutrition.matched > 0 ? Fmt::kcal(r.nutrition.perServing.kcal) : QStringLiteral("–"));
         k->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
@@ -177,24 +180,68 @@ QString run(QWidget *parent, Importers::Format format, const QStringList &givenF
     Importers::Options opt;
     opt.translate = s.value(QStringLiteral("import/translate"), true).toBool();
     opt.autoTags = s.value(QStringLiteral("import/autoTags"), true).toBool();
+    opt.fixUmlauts = s.value(QStringLiteral("import/fixUmlauts"), true).toBool();
 
     QList<Recipe> recipes;
     QStringList origins, warnings;
-    {
-        QProgressDialog prog(QObject::tr("Rezepte werden gelesen …"), QObject::tr("Abbrechen"), 0, int(files.size()), parent);
-        prog.setWindowModality(Qt::WindowModal);
-        prog.setMinimumDuration(400);
+    int umlauts = 0;
+    // 1. Durchgang ohne DeepL: Sprache feststellen, nichts verlässt den Rechner
+    auto readAll = [&](const Importers::Options &o, QProgressDialog &prog) {
+        recipes.clear();
+        origins.clear();
+        warnings.clear();
+        umlauts = 0;
         for (int i = 0; i < files.size(); ++i) {
             prog.setValue(i);
-            if (prog.wasCanceled()) return {};
-            const Importers::Result res = Importers::importFile(files[i], format, opt);
+            if (prog.wasCanceled()) return false;
+            const Importers::Result res = Importers::importFile(files[i], format, o);
             for (const Recipe &r : res.recipes) {
                 recipes << r;
                 origins << files[i];
             }
+            umlauts += res.umlautsFixed;
             for (const QString &w : res.warnings) warnings << QFileInfo(files[i]).fileName() + QStringLiteral(": ") + w;
         }
+        prog.setValue(int(files.size()));
+        return true;
+    };
+    {
+        QProgressDialog prog(QObject::tr("Rezepte werden gelesen …"), QObject::tr("Abbrechen"), 0, int(files.size()), parent);
+        prog.setWindowModality(Qt::WindowModal);
+        prog.setMinimumDuration(400);
+        if (!readAll(opt, prog)) return {};
     }
+    // 2. fremdsprachige Rezepte mit DeepL übersetzen (nach Rückfrage)
+    const DeepL::Settings ds = DeepL::Settings::load();
+    if (ds.usable() && format != Importers::Format::Vtm) {
+        int foreign = 0, chars = 0;
+        for (const Recipe &r : recipes)
+            if (r.language != QLatin1String("de")) {
+                ++foreign;
+                chars += DeepL::characterCount(r);
+            }
+        if (foreign > 0) {
+            const auto answer = QMessageBox::question(
+                parent, QObject::tr("Mit DeepL übersetzen?"),
+                QObject::tr("%1 der %2 Rezepte sind nicht deutschsprachig.\n\nSollen sie mit DeepL ins Deutsche übersetzt werden? "
+                            "Dazu werden Titel, Zutaten und Zubereitung (etwa %3 Zeichen) an DeepL gesendet.\n\n"
+                            "„Nein“: Zutaten über das eingebaute Glossar übersetzen, Anleitung im Original lassen.")
+                    .arg(foreign)
+                    .arg(recipes.size())
+                    .arg(QLocale(QLocale::German).toString(chars)),
+                QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+            if (answer == QMessageBox::Yes) {
+                QProgressDialog prog(QObject::tr("Rezepte werden übersetzt …"), QObject::tr("Abbrechen"), 0, int(files.size()), parent);
+                prog.setWindowModality(Qt::WindowModal);
+                prog.setMinimumDuration(0);
+                Importers::Options o2 = opt;
+                o2.translator = deeplTranslator(&prog);
+                if (!readAll(o2, prog)) return {};
+            }
+        }
+    }
+    if (umlauts > 0)
+        warnings.prepend(umlautNote(umlauts));
     if (recipes.isEmpty()) {
         QMessageBox::warning(parent, QObject::tr("Import"),
                              QObject::tr("In den gewählten Dateien wurden keine %1-Rezepte gefunden.").arg(Importers::formatName(format))
@@ -256,6 +303,51 @@ QString run(QWidget *parent, Importers::Format format, const QStringList &givenF
     QString msg = QObject::tr("%1 Rezepte neu aufgenommen, %2 ersetzt, %3 übersprungen.").arg(added).arg(replaced).arg(skipped);
     QMessageBox::information(parent, QObject::tr("Import abgeschlossen"), msg);
     return firstId;
+}
+
+std::function<bool(Recipe &, QString *)> deeplTranslator(QProgressDialog *progress)
+{
+    const DeepL::Settings ds = DeepL::Settings::load();
+    if (!ds.usable()) return {};
+    auto stop = std::make_shared<QString>();   // nach einem schweren Fehler nicht weiter versuchen
+    const QString key = ds.key;
+    return [key, stop, progress](Recipe &r, QString *err) {
+        if (!stop->isEmpty()) {
+            if (err) *err = *stop;
+            return false;
+        }
+        if (progress) {
+            if (progress->wasCanceled()) {
+                if (err) *err = QObject::tr("abgebrochen");
+                return false;
+            }
+            progress->setLabelText(QObject::tr("Übersetze „%1“ …").arg(r.title));
+        }
+        QString e;
+        const bool ok = DeepL::translateRecipe(r, key, &e);
+        if (!ok) {
+            // Schlüssel, Kontingent, keine Verbindung: gilt auch für alle weiteren Rezepte
+            if (e.contains(QObject::tr("Schlüssel")) || e.contains(QObject::tr("Kontingent")) || e.contains(QObject::tr("Verbindung")))
+                *stop = e;
+            if (err) *err = e;
+        }
+        return ok;
+    };
+}
+
+QString umlautNote(int recipes)
+{
+    return (recipes == 1 ? QObject::tr("In einem Rezept") : QObject::tr("In %1 Rezepten").arg(recipes))
+           + QObject::tr(" wurden fehlende Umlaute ergänzt (ae → ä, oe → ö, ue → ü, ss → ß).");
+}
+
+QString languageLabel(const Recipe &r)
+{
+    if (r.translatedBy == QLatin1String("DeepL"))
+        return QObject::tr("%1 → DeepL").arg(RecipeHtml::languageName(r.originalLanguage).toLower());
+    if (r.language == QLatin1String("de")) return QObject::tr("deutsch");
+    if (r.language == QLatin1String("en")) return QObject::tr("englisch (Glossar)");
+    return QObject::tr("%1 (nicht übersetzt)").arg(RecipeHtml::languageName(r.language).toLower());
 }
 
 } // namespace ImportFlow

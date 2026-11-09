@@ -12,6 +12,7 @@
         <file alias="ui/delete.svg">icons/ui/delete.svg</file>
         <file alias="ui/dice.svg">icons/ui/dice.svg</file>
         <file alias="ui/edit.svg">icons/ui/edit.svg</file>
+        <file alias="ui/eye.svg">icons/ui/eye.svg</file>
         <file alias="ui/fridge.svg">icons/ui/fridge.svg</file>
         <file alias="ui/help.svg">icons/ui/help.svg</file>
         <file alias="ui/image.svg">icons/ui/image.svg</file>
@@ -37,8 +38,13 @@
         <file alias="ui/star.svg">icons/ui/star.svg</file>
         <file alias="ui/star-filled.svg">icons/ui/star-filled.svg</file>
         <file alias="ui/tag.svg">icons/ui/tag.svg</file>
+        <file alias="ui/translate.svg">icons/ui/translate.svg</file>
+        <file alias="ui/umlaut.svg">icons/ui/umlaut.svg</file>
+        <file alias="ui/eye.svg">icons/ui/eye.svg</file>
         <file alias="ui/tex.svg">icons/ui/tex.svg</file>
         <file alias="ui/theme.svg">icons/ui/theme.svg</file>
+        <file alias="ui/translate.svg">icons/ui/translate.svg</file>
+        <file alias="ui/umlaut.svg">icons/ui/umlaut.svg</file>
         <file alias="ui/user.svg">icons/ui/user.svg</file>
         <file alias="ui/user-add.svg">icons/ui/user-add.svg</file>
         <file alias="ui/users.svg">icons/ui/users.svg</file>

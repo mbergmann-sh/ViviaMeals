@@ -221,6 +221,8 @@ QJsonObject Recipe::toJson() const
     if (!source.isEmpty()) o[QStringLiteral("source")] = source;
     if (!sourceFormat.isEmpty()) o[QStringLiteral("sourceFormat")] = sourceFormat;
     if (prepMinutes > 0) o[QStringLiteral("prepMinutes")] = prepMinutes;
+    if (!originalLanguage.isEmpty()) o[QStringLiteral("originalLanguage")] = originalLanguage;
+    if (!translatedBy.isEmpty()) o[QStringLiteral("translatedBy")] = translatedBy;
     if (favorite) o[QStringLiteral("favorite")] = true;
     if (nutrition.valid()) o[QStringLiteral("nutrition")] = nutrition.toJson();
     return o;
@@ -242,6 +244,8 @@ Recipe Recipe::fromJson(const QJsonObject &o)
     r.source = o.value(QStringLiteral("source")).toString();
     r.sourceFormat = o.value(QStringLiteral("sourceFormat")).toString();
     r.prepMinutes = o.value(QStringLiteral("prepMinutes")).toInt();
+    r.originalLanguage = o.value(QStringLiteral("originalLanguage")).toString();
+    r.translatedBy = o.value(QStringLiteral("translatedBy")).toString();
     r.favorite = o.value(QStringLiteral("favorite")).toBool();
     r.created = QDateTime::fromString(o.value(QStringLiteral("created")).toString(), Qt::ISODate);
     r.modified = QDateTime::fromString(o.value(QStringLiteral("modified")).toString(), Qt::ISODate);

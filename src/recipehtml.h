@@ -33,6 +33,9 @@ QString nutritionTable(const Recipe &r, const Style &style, double servings = 0)
 QString ingredientsTable(const Recipe &r, const Style &style, double factor = 1.0);
 QString instructionsHtml(const Recipe &r);
 QString escape(const QString &s);
+// Hinweis zur Sprache der Anleitung („Aus dem Englischen übersetzt (DeepL)“), leer bei deutschen Originalen
+QString languageNote(const Recipe &r);
+QString languageName(const QString &code);   // "en" → „Englisch“
 QString tagLabel(const QString &tag);     // „fleischgerichte“ → „Fleischgerichte“
 QString emptyPage(const Style &style, const QString &title, const QString &text);
 

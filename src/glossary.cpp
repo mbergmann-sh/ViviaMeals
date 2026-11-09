@@ -299,6 +299,47 @@ bool looksEnglish(const QString &text)
     return e > d && e >= 2;
 }
 
+QString detectLanguage(const QString &text)
+{
+    struct L { const char *code; QSet<QString> words; };
+    auto set = [](std::initializer_list<const char *> l) {
+        QSet<QString> s;
+        for (const char *w : l) s.insert(QString::fromUtf8(w));
+        return s;
+    };
+    static const QList<L> langs{
+        { "de", set({ "und", "die", "der", "mit", "den", "das", "minuten", "dazu", "geben", "bis", "im", "ein", "eine", "zugeben",
+                      "backen", "auf", "zu", "nicht", "etwas", "dann", "darin", "abschmecken", "kochen", "unter", "wenig", "mehl" }) },
+        { "en", set({ "the", "and", "with", "until", "minutes", "add", "into", "bake", "stir", "mix", "to", "of", "cup", "place",
+                      "serve", "combine", "heat", "cook", "remove", "pour", "about" }) },
+        { "fr", set({ "le", "la", "les", "et", "avec", "dans", "pour", "des", "du", "une", "un", "faire", "cuire", "ajouter",
+                      "minutes", "puis", "sur", "au", "jusqu", "sel", "poivre" }) },
+        { "it", set({ "il", "la", "le", "e", "con", "di", "del", "della", "per", "un", "una", "aggiungere", "cuocere", "minuti",
+                      "sale", "pepe", "fino", "nel", "poi", "qb" }) },
+        { "es", set({ "el", "la", "los", "las", "y", "con", "de", "del", "para", "un", "una", "añadir", "cocinar", "minutos",
+                      "sal", "pimienta", "hasta", "en", "luego" }) },
+        { "nl", set({ "de", "het", "en", "met", "een", "van", "in", "tot", "minuten", "toevoegen", "bakken", "zout", "peper",
+                      "daarna", "op", "voor" }) },
+    };
+    QHash<QString, int> score;
+    const auto words = text.toLower().split(QRegularExpression(QStringLiteral("[^\\p{L}]+")), Qt::SkipEmptyParts);
+    for (const QString &w : words)
+        for (const L &l : langs)
+            if (l.words.contains(w)) ++score[QString::fromLatin1(l.code)];
+    QString best = QStringLiteral("de");
+    int bestScore = score.value(best);
+    for (const L &l : langs) {
+        const QString c = QString::fromLatin1(l.code);
+        if (score.value(c) > bestScore) {
+            best = c;
+            bestScore = score.value(c);
+        }
+    }
+    // knapp oder kaum Text: lieber deutsch annehmen (keine unnötige Übersetzung)
+    if (best != QLatin1String("de") && (bestScore < 3 || bestScore < score.value(QStringLiteral("de")) * 1.3)) return QStringLiteral("de");
+    return best;
+}
+
 QString ingredient(const QString &englishName, QString *leadNote)
 {
     QString name = englishName.trimmed();

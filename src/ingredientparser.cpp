@@ -54,7 +54,8 @@ void splitNote(const QString &text, QString *name, QString *note)
         notes << m.captured(1).trimmed();
         s = s.left(m.capturedStart()).trimmed();
     }
-    const int c = s.indexOf(QRegularExpression(QStringLiteral("[,;]")));
+    // „Zitrone: Saft“, „Petersilie; gehackt“, „Zwiebel, fein gewürfelt“
+    const int c = s.indexOf(QRegularExpression(QStringLiteral("[,;]|:\\s")));
     if (c > 0) {
         notes.prepend(s.mid(c + 1).trimmed());
         s = s.left(c).trimmed();
@@ -69,11 +70,11 @@ bool sizeWord(const QString &t, QString *note)
 {
     const QString l = t.toLower();
     if (l == QLatin1String("gr.") || l == QStringLiteral("groß") || l == QStringLiteral("große") || l == QStringLiteral("großer")
-        || l == QLatin1String("gross") || l == QLatin1String("grosse")) {
+        || l == QLatin1String("gross") || l == QLatin1String("grosse") || l == QLatin1String("gross.") || l == QStringLiteral("groß.")) {
         *note = QStringLiteral("groß");
         return true;
     }
-    if (l == QLatin1String("kl.") || l == QLatin1String("klein") || l == QLatin1String("kleine") || l == QLatin1String("kleiner")) {
+    if (l == QLatin1String("kl.") || l == QLatin1String("klein") || l == QLatin1String("klein.") || l == QLatin1String("kleine") || l == QLatin1String("kleiner")) {
         *note = QStringLiteral("klein");
         return true;
     }
@@ -230,6 +231,15 @@ Ingredient fromParts(const QString &amountText, const QString &unitText, const Q
     }
     QString name, note;
     splitNote(cleanName(nameText), &name, &note);
+    // Stückgewicht im Namen: „Zanderfilets a 125 g“, „Entenbrüste à ca. 300 g“ → Zusatz
+    static const QRegularExpression each(QStringLiteral("\\s+(?:à|a|á|je|zu je)\\s+((?:ca\\.\\s*)?\\d+(?:[.,]\\d+)?\\s*(?:g|kg|ml))\\b\\s*(.*)$"));
+    if (const auto e = each.match(name); e.hasMatch() && e.capturedStart() > 0) {
+        QStringList extra{ QStringLiteral("à ") + e.captured(1) };
+        if (!e.captured(2).trimmed().isEmpty()) extra << e.captured(2).trimmed();
+        if (!note.isEmpty()) extra << note;
+        note = extra.join(QStringLiteral(", "));
+        name = name.left(e.capturedStart()).trimmed();
+    }
     ing.name = name;
     ing.note = note;
     Units::Unit u;

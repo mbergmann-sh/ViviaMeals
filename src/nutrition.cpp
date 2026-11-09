@@ -44,10 +44,27 @@ double gramsOf(const Ingredient &ing, const Food *food)
     return 0;
 }
 
+bool isMenu(const Recipe &r)
+{
+    if (!r.hasTag(QStringLiteral("menüs")) && r.yieldUnit != QStringLiteral("Menü")) return false;
+    for (const Ingredient &i : r.ingredients)
+        if (!i.heading && i.amount > 0) return false;
+    return true;
+}
+
 void analyze(Recipe &r)
 {
     FoodTable &table = FoodTable::instance();
     NutritionInfo info;
+    // Menüfolge („Vorspeise: Lauch-Käse-Suppe …“): Gerichte statt Zutaten – keine Nährwerte
+    if (isMenu(r)) {
+        for (Ingredient &ing : r.ingredients) {
+            ing.food.clear();
+            ing.grams = 0;
+        }
+        r.nutrition = NutritionInfo();
+        return;
+    }
     for (Ingredient &ing : r.ingredients) {
         if (ing.heading) continue;
         const Food *food = nullptr;
@@ -93,6 +110,7 @@ void analyze(Recipe &r)
 
 QStringList suggestTags(const Recipe &r)
 {
+    if (isMenu(r)) return {};
     FoodTable &table = FoodTable::instance();
     bool meat = false, fish = false, gelatine = false, nonVegan = false;
     int known = 0, all = 0;

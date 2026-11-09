@@ -17,8 +17,8 @@ Technisch und optisch an [VitaParms](https://github.com/mbergmann-sh/VitaParms) 
 | ![Kühlschrank](docs/images/kuehlschrank.png) | ![Assistent](docs/images/assistent.png) | ![Wochenplan](docs/images/wochenplan.png) |
 | **Suche** | **Import-Vorschau mit Doubletten** | **Kleiner Bildschirm (1024 × 640)** |
 | ![Suche](docs/images/suche.png) | ![Import](docs/images/import-vorschau.png) | ![Klein](docs/images/hauptfenster-klein.png) |
-| **Nährwerte aus CSV importieren** | | |
-| ![Nährwert-Import](docs/images/naehrwerte-import.png) | | |
+| **Nährwerte aus CSV importieren** | **Import mit Umlaut-Korrektur** | **Einstellungen (DeepL)** |
+| ![Nährwert-Import](docs/images/naehrwerte-import.png) | ![Umlaute](docs/images/import-umlaute.png) | ![Einstellungen](docs/images/einstellungen.png) |
 
 ## Funktionen
 
@@ -28,10 +28,12 @@ Technisch und optisch an [VitaParms](https://github.com/mbergmann-sh/VitaParms) 
 | **Rezeptdatenbank** | ein Ordner mit `vitameals.vmdb` (Kennung) und je Rezept einer Datei `rezepte/<id>.vmr` (Eigenformat, JSON, Foto eingebettet) – sicherbar, synchronisierbar (Nextcloud/Dropbox), einzelne Rezepte weitergebbar; `index.json` hält Kurzfassungen für schnelle Listen und Suche |
 | **Editor** | Titel, Rezeptbild (Dateiauswahl, auf 800 px verkleinert), Portionen/Einheit, Zubereitungszeit, Tags (mit Vorschlägen), Quelle, Favorit, Zutatenliste (eine je Zeile, `== Abschnitt ==`), Zubereitung. **Live-Nährwertanalyse** während der Eingabe; Zuordnung einer Zutat zur Nährwerttabelle per Doppelklick änderbar und für alle Rezepte lernbar; Tags vegan/vegetarisch/fleischgerichte/fisch aus den Zutaten ergänzen |
 | **Nährwertanalyse** | Energie (kcal **und** kJ), Fett, gesättigte Fettsäuren, Kohlenhydrate, Zucker, Ballaststoffe, Eiweiß, Salz – gesamt, je Portion und in % der Referenzmenge (LMIV). Mengen werden in Gramm umgerechnet (Gewicht direkt, Volumen über die Dichte, Stück/Zehe/Dose/Pck. über Stückgewichte, „1 Süßkartoffel (ca. 400 g)“ über die Angabe). Ergebnis wird **im Rezept gespeichert**; nicht zuordenbare Zutaten werden genannt |
-| **Nährwerttabelle** | eingebaut: rund 200 Lebensmittelgruppen mit Richtwerten je 100 g, Dichte, Stückgewichten und deutschen/englischen Namen (`tools/make_foods.py`). Unter *Extras → Nährwerttabelle* eigene Lebensmittel anlegen und Werte überschreiben (`lebensmittel_eigene.json`) |
+| **Nährwerttabelle** | eingebaut: rund 210 Lebensmittelgruppen mit Richtwerten je 100 g, Dichte, Stückgewichten und deutschen/englischen Namen (`tools/make_foods.py`). Unter *Extras → Nährwerttabelle* eigene Lebensmittel anlegen und Werte überschreiben (`lebensmittel_eigene.json`) |
 | **Nährwerte importieren (CSV)** | *Extras → Nährwerttabelle → Importieren / Exportieren*: eigene Tabellen aus Excel/LibreOffice, die mitgelieferte **CSV-Vorlage** oder **Open-Food-Facts**-Exporte – Trennzeichen, Zeichensatz (UTF-8, Windows-1252, CP850), Dezimalkomma, „<0,1“ und kJ/Natrium werden erkannt bzw. umgerechnet, Spalten anhand der Überschriften zugeordnet (änderbar), mit Vorschau. Außerdem der entpackte CSV-Ordner von **USDA FoodData Central** (Foundation Foods, SR Legacy – gemeinfrei, CC0). Jeder Import erhält eine Herkunft und lässt sich wieder entfernen; wahlweise ersetzen eigene Werte die eingebauten gleichen Namens. Eigene Lebensmittel lassen sich als CSV exportieren |
-| **Import** | **RezKonv** und **MealMaster** – einzelne Dateien und Sammlungen, mehrere Dateien auf einmal; Zeichensatz-Erkennung (UTF-8, Windows-1252, DOS-CP850); Abschnitte, Fortsetzungszeilen, zweispaltige MealMaster-Zutaten, Quelle. **Vorschau** mit Auswahl und **Doubletten-Abfrage** (Überspringen / Ersetzen / Beide behalten, „für alle übernehmen“). Außerdem `.vmr` und alte Listen `.vtm` des Prototyps |
-| **Englische Rezepte** | Einheiten werden automatisch umgerechnet (cups → ml bzw. g über die Dichte, oz/lb → g, fl oz/pt/qt → ml, tbsp/tsp → EL/TL, stick butter → g, „1 (16 oz) can“ → g), Zutaten und Zusätze über ein **Offline-Glossar** übersetzt („chopped walnuts“ → „Walnüsse, gehackt“), Temperaturen (°F → °C) und Zoll in der Anleitung umgerechnet. Die Anleitung selbst bleibt englisch (Hinweis in der Ansicht) |
+| **Import** | **RezKonv** und **MealMaster** – einzelne Dateien und Sammlungen, mehrere Dateien auf einmal; Zeichensatz-Erkennung (UTF-8, Windows-1252, DOS-CP850); Abschnitte, Fortsetzungszeilen, zweispaltige MealMaster-Zutaten, Quelle; winREZKONV-Besonderheiten (gekürzte Titel über „O-Titel“, „180GradC“, „Prise/n“, „Kugel(n)“, „Zitrone: Saft“, „à 125 g“). Menüfolgen werden als Menü angezeigt (ohne Nährwerte). **Vorschau** mit Auswahl und **Doubletten-Abfrage** (Überspringen / Ersetzen / Beide behalten, „für alle übernehmen“). Außerdem `.vmr` und alte Listen `.vtm` des Prototyps |
+| **Umlaut-Korrektur** | ältere RezKonv-/MealMaster-Sammlungen in ASCII-Umschrift („Kaese“, „Gemuesebruehe“, „heiss“) werden beim Import korrigiert: ae/oe/ue → ä/ö/ü mit Ausnahmen (Feuer, Sauerbraten, Quelle, zuerst, aktuell, Baguette, Fondue, Oetker, Balsamicoessig …), ss → ß nur in bekannten Wortstämmen (heiß, weiß, gießen, süß, Grieß, gleichmäßig …), sodass Wasser, Schüssel, Masse und Essig bleiben. Großgeschriebene Abschnitte werden normal geschrieben. Abschaltbar; außerdem im Editor („Umlaute korrigieren“) und für die ganze Datenbank (*Extras*) |
+| **Übersetzung mit DeepL (optional)** | fremdsprachige Rezepte (Englisch, Französisch, Italienisch, Spanisch, Niederländisch …) werden beim Import nach Rückfrage mit **DeepL** vollständig ins Deutsche übersetzt – Titel, Zutaten und Zubereitung; deutsche Rezepte werden nie gesendet. Jeder trägt seinen **eigenen API-Schlüssel** ein (kostenloser Tarif *DeepL API Free*, 500.000 Zeichen im Monat), Verbindungstest zeigt den Verbrauch. Ohne Schlüssel oder bei Fehlern übernimmt das Glossar. Auch im Editor und für alle vorhandenen Rezepte (*Extras*) |
+| **Englische Rezepte** | Einheiten werden automatisch umgerechnet (cups → ml bzw. g über die Dichte, oz/lb → g, fl oz/pt/qt → ml, tbsp/tsp → EL/TL, stick butter → g, „1 (16 oz) can“ → g), Zutaten und Zusätze über ein **Offline-Glossar** übersetzt („chopped walnuts“ → „Walnüsse, gehackt“), Temperaturen (°F → °C) und Zoll in der Anleitung umgerechnet. Ohne DeepL bleibt die Anleitung selbst englisch (Hinweis in der Ansicht) |
 | **Suche** | Rezeptnamen (auch Teilnamen), Zutaten, Tags (UND/ODER), höchstens kcal je Portion, Favoriten, mit Foto |
 | **Kühlschrank** | Bestandsliste und Grundvorrat pflegen → passende Rezepte mit „vorhanden x/y“ und fehlenden Zutaten, **Einkaufsliste** (nach Warengruppen, kopieren/drucken/speichern) |
 | **Assistent Gewichtskontrolle** | beliebig viele Personen mit Größe, Alter, Aktivität (PAL), Ziel (verlieren/halten/zunehmen), Zielgewicht, Tempo, Ernährungsform, ausgeschlossenen Zutaten und bevorzugten Themen; BMI, Grund- und Gesamtumsatz (Mifflin-St Jeor), Zielzufuhr mit Schutzgrenzen, Dauer bis zum Zielgewicht; **Gewichtsverlauf** mit Grafik |
@@ -46,7 +48,9 @@ Technisch und optisch an [VitaParms](https://github.com/mbergmann-sh/VitaParms) 
 
 ## Bauen
 
-Benötigt Qt 6.4+ (oder Qt 5.15) mit den Modulen **widgets, printsupport, svg**.
+Benötigt Qt 6.4+ (oder Qt 5.15) mit den Modulen **widgets, printsupport, svg, network** (network nur für DeepL).
+Für die HTTPS-Verbindung zu DeepL nutzt Qt 6 unter Windows das systemeigene Schannel (Plugin `tls/qschannelbackend.dll`,
+kopiert `windeployqt` automatisch); unter Qt 5.15 müssen zusätzlich die OpenSSL-1.1-DLLs neben `VitaMeals.exe` liegen.
 
 ```sh
 qmake6 VitaMeals.pro      # bzw. qmake (Qt 5.15)
@@ -61,7 +65,8 @@ Weitergabe: `windeployqt VitaMeals.exe` (kopiert auch die deutschen Qt-Übersetz
 „Speichern/Abbrechen“ zeigen), macOS `macdeployqt`. Das Programmsymbol liegt als `.ico`, `.icns`, `.png` und `.svg`
 in `resources/icons/app/`.
 
-Test des Kerns (Zutatenparser, Einheiten, Glossar, Nährwerte, Rezept- und CSV-Importe, USDA, Datenbank; optional LaTeX-Ausgabe):
+Test des Kerns (Zutatenparser, Einheiten, Glossar, Umlaute, Spracherkennung, Nährwerte, Rezept- und CSV-Importe, USDA, Datenbank,
+DeepL gegen einen lokalen Testserver; optional LaTeX-Ausgabe). `./coretest --dump <datei>` zeigt, wie eine Rezeptdatei importiert wird:
 
 ```sh
 cd tests/coretest && qmake6 && make && ./coretest [ordner-für-tex-dateien]
@@ -80,6 +85,8 @@ src/
   units.*             Küchenmaßeinheiten deutsch/englisch/MealMaster/RezKonv, °F→°C, Zoll→cm
   ingredientparser.*  Zutatenzeilen zerlegen (Brüche, Bereiche, Packungsgrößen, Abschnitte)
   glossary.*          Offline-Glossar Englisch → Deutsch, Spracherkennung, Kategorien → Tags
+  umlauts.*           Umlaut-Korrektur für ASCII-Umschrift (ae/oe/ue/ss)
+  deepl.*             optionale Übersetzung mit der DeepL-API (eigener Schlüssel)
   foodtable.*         Nährwerttabelle (eingebaut + eigene + gelernte Zuordnungen), Namensabgleich
   foodcsv.*           CSV-Import/-Export eigener Nährwerte, USDA FoodData Central
   nutrition.*         Nährwertanalyse, Referenzmengen, automatische Tags

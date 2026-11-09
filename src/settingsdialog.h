@@ -1,4 +1,4 @@
-// VitaMeals – Einstellungen: Darstellung (Theme, Schriftgröße), Import, Start
+// VitaMeals – Einstellungen: Darstellung (Theme, Schriftgröße), Import, Übersetzung (DeepL), Start
 // SPDX-License-Identifier: MIT
 #pragma once
 
@@ -6,6 +6,8 @@
 
 class QCheckBox;
 class QComboBox;
+class QLabel;
+class QLineEdit;
 
 class SettingsDialog : public QDialog
 {
@@ -16,6 +18,9 @@ public:
 signals:
     void appearanceChanged();
 
+private slots:
+    void testDeepL();
+
 protected:
     void accept() override;
     void reject() override;
@@ -25,6 +30,10 @@ private:
     QComboBox *m_font;
     QCheckBox *m_translate;
     QCheckBox *m_autoTags;
+    QCheckBox *m_umlauts;
+    QCheckBox *m_deepl;
+    QLineEdit *m_deeplKey;
+    QLabel *m_deeplStatus;
     QCheckBox *m_notice;
     QCheckBox *m_random;
     QString m_origTheme;

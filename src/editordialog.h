@@ -37,6 +37,9 @@ private:
     void chooseImage();
     void assignFood(int row);
     void collect();
+    void showRecipe();     // m_recipe in die Eingabefelder übernehmen
+    void fixUmlauts();
+    void translateDeepL();
     QLineEdit *m_title;
     QLabel *m_image;
     QDoubleSpinBox *m_servings;

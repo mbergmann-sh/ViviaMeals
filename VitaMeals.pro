@@ -14,7 +14,7 @@ lessThan(QT_MAJOR_VERSION, 5) | equals(QT_MAJOR_VERSION, 5):lessThan(QT_MINOR_VE
     error("VitaMeals braucht Qt 5.15 oder Qt 6.4 und neuer (gefunden: $$[QT_VERSION])")
 }
 
-QT       += core gui widgets printsupport svg
+QT       += core gui widgets printsupport svg network
 CONFIG   += c++17
 TEMPLATE  = app
 TARGET    = VitaMeals

@@ -286,8 +286,8 @@ bool exportSite(const QString &folder, const Options &opt, QString *error, const
         body += QStringLiteral("</div>");
         body += QStringLiteral("<h2>%1</h2>").arg(tr("Zutaten")) + RecipeHtml::ingredientsTable(r, st);
         body += QStringLiteral("<h2>%1</h2>").arg(tr("Zubereitung"));
-        if (r.language == QLatin1String("en"))
-            body += QStringLiteral("<p class=\"muted\"><i>%1</i></p>").arg(tr("Anleitung im englischen Original."));
+        if (!RecipeHtml::languageNote(r).isEmpty())
+            body += QStringLiteral("<p class=\"muted\"><i>%1</i></p>").arg(esc(RecipeHtml::languageNote(r)));
         body += RecipeHtml::instructionsHtml(r);
         if (opt.nutrition) body += QStringLiteral("<h2>%1</h2>").arg(tr("Nährwerte")) + RecipeHtml::nutritionTable(r, st);
         if (!r.source.isEmpty()) body += QStringLiteral("<p class=\"small\">%1 %2</p>").arg(tr("Quelle:"), esc(r.source));

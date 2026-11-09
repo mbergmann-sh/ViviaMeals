@@ -51,7 +51,10 @@ const QHash<QString, Def> &germanDefs()
         { QStringLiteral("Beutel"), { "Beutel", Kind::Piece, 0 } },
         { QStringLiteral("Schale"), { "Schale", Kind::Piece, 0 } },
         { QStringLiteral("Packung"), { "Packung", Kind::Piece, 0 } },
+        { QStringLiteral("Kugel"), { "Kugel", Kind::Piece, 0 } },
         { QStringLiteral("etwas"), { "etwas", Kind::Vague, 0 } },
+        { QStringLiteral("wenig"), { "wenig", Kind::Vague, 0 } },
+        { QStringLiteral("einige"), { "einige", Kind::Vague, 0 } },
         { QStringLiteral("n. B."), { "n. B.", Kind::Vague, 0 } },
         { QStringLiteral("cm"), { "cm", Kind::Piece, 0 } },
     };
@@ -108,6 +111,15 @@ const QHash<QString, QString> &germanAliases()
         { QStringLiteral("spritzer"), QStringLiteral("Spritzer") }, { QStringLiteral("schuss"), QStringLiteral("Schuss") },
         { QStringLiteral("schuß"), QStringLiteral("Schuss") }, { QStringLiteral("tropfen"), QStringLiteral("Tropfen") },
         { QStringLiteral("etwas"), QStringLiteral("etwas") }, { QStringLiteral("evtl."), QStringLiteral("etwas") },
+        { QStringLiteral("wenig"), QStringLiteral("wenig") }, { QStringLiteral("einige"), QStringLiteral("einige") },
+        { QStringLiteral("kugel"), QStringLiteral("Kugel") }, { QStringLiteral("kugeln"), QStringLiteral("Kugel") },
+        { QStringLiteral("stueck"), QStringLiteral("Stück") }, { QStringLiteral("stck."), QStringLiteral("Stück") },
+        { QStringLiteral("loeffel"), QStringLiteral("EL") }, { QStringLiteral("löffel"), QStringLiteral("EL") },
+        { QStringLiteral("essloeffel"), QStringLiteral("EL") }, { QStringLiteral("teeloeffel"), QStringLiteral("TL") },
+        { QStringLiteral("paeckchen"), QStringLiteral("Pck.") }, { QStringLiteral("messersp."), QStringLiteral("Msp.") },
+        { QStringLiteral("zweiglein"), QStringLiteral("Zweig") }, { QStringLiteral("stiel"), QStringLiteral("Zweig") },
+        { QStringLiteral("stiele"), QStringLiteral("Zweig") }, { QStringLiteral("tl."), QStringLiteral("TL") },
+        { QStringLiteral("el."), QStringLiteral("EL") }, { QStringLiteral("glaeser"), QStringLiteral("Glas") },
         { QStringLiteral("n.b."), QStringLiteral("n. B.") }, { QStringLiteral("n. b."), QStringLiteral("n. B.") },
         { QStringLiteral("nb"), QStringLiteral("n. B.") }, { QStringLiteral("cm"), QStringLiteral("cm") },
     };
@@ -235,7 +247,10 @@ bool lookup(const QString &token, Unit *out)
         *out = Unit{ QString::fromUtf8(d.de), d.kind, d.factor, true, {} };
         return true;
     }
-    const QString l = t.toLower();
+    QString l = t.toLower();
+    // RezKonv-Schreibweisen „Prise/n“, „Dose/n“, „Kugel(n)“, „Scheibe/n“
+    static const QRegularExpression plural(QStringLiteral("(?:/n|/en|/e|\\(n\\)|\\(en\\)|\\(e\\))$"));
+    if (l.size() > 4) l.remove(plural);
     auto g = germanAliases().constFind(l);
     if (g != germanAliases().constEnd()) {
         const Def &d = germanDefs().value(*g);
@@ -282,7 +297,7 @@ double defaultPieceGrams(const QString &u)
         { QStringLiteral("Blatt"), 1 }, { QStringLiteral("Zweig"), 1 }, { QStringLiteral("Stange"), 100 },
         { QStringLiteral("Handvoll"), 30 }, { QStringLiteral("Kopf"), 500 }, { QStringLiteral("Knolle"), 50 },
         { QStringLiteral("Tafel"), 100 }, { QStringLiteral("Flasche"), 700 }, { QStringLiteral("Beutel"), 125 },
-        { QStringLiteral("Schale"), 250 },
+        { QStringLiteral("Schale"), 250 }, { QStringLiteral("Kugel"), 50 },
     };
     return d.value(u, 0.0);
 }
@@ -296,7 +311,7 @@ QStringList germanUnits()
              QStringLiteral("Würfel"), QStringLiteral("Blatt"), QStringLiteral("Zweig"), QStringLiteral("Stange"),
              QStringLiteral("Spritzer"), QStringLiteral("Schuss"), QStringLiteral("Handvoll"), QStringLiteral("Kopf"),
              QStringLiteral("Knolle"), QStringLiteral("Tafel"), QStringLiteral("Flasche"), QStringLiteral("Beutel"),
-             QStringLiteral("etwas"), QStringLiteral("n. B.") };
+             QStringLiteral("Kugel"), QStringLiteral("etwas"), QStringLiteral("wenig"), QStringLiteral("einige"), QStringLiteral("n. B.") };
 }
 
 QString convertTextMeasures(const QString &text)

@@ -54,6 +54,8 @@ public slots:
     void openMealPlan(const QString &profileId = QString());
     void openFoodTable();
     void recalcAll();
+    void fixUmlautsAll();
+    void translateAll();
     void openSettings();
     void about();
     void appearanceChanged();   // nach Theme- oder Schriftwechsel

@@ -9,14 +9,24 @@
 #include "recipedb.h"
 #include "textcodec.h"
 #include "units.h"
+#include "recipehtml.h"
+#include "umlauts.h"
+#include "deepl.h"
+#include "glossary.h"
 
 #include <QCoreApplication>
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>
 #include <QTemporaryDir>
+#include <QTcpServer>
+#include <QTcpSocket>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QTextStream>
 #include <cmath>
+#include <memory>
 
 static int g_fail = 0;
 static QTextStream out(stdout);
@@ -43,6 +53,18 @@ int main(int argc, char **argv)
 {
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName(QStringLiteral("VitaMealsTest"));
+    // coretest --dump <datei>: Import anzeigen (Titel, Zutaten mit Zuordnung, Anleitung)
+    if (argc >= 3 && QString::fromLocal8Bit(argv[1]) == QLatin1String("--dump")) {
+        const auto res = Importers::importFile(QString::fromLocal8Bit(argv[2]), Importers::Format::Unknown);
+        for (const Recipe &r : res.recipes) {
+            out << "### " << r.title << "  [" << r.language << "] " << r.servingsText() << " " << r.tags.join(QLatin1Char(',')) << "\n";
+            for (const Ingredient &i : r.ingredients)
+                out << "  " << (i.heading ? QStringLiteral("== ") : QString()) << i.displayLine() << "   -> " << (i.food.isEmpty() ? QStringLiteral("??") : i.food) << "\n";
+            out << r.instructions << "\n\n";
+        }
+        for (const QString &w : res.warnings) out << "WARN " << w << "\n";
+        return 0;
+    }
     out << "Lebensmittel: " << FoodTable::instance().all().size() << "\n";
 
     IngredientParser::Options de, en;
@@ -147,7 +169,7 @@ int main(int argc, char **argv)
         CHECK(foods.size() == 3 && foods[1].name == QStringLiteral("Grünkern; geschrotet") && std::fabs(foods[1].per100.salt - 0.05) < 1e-9,
               "Anführungszeichen, Umlaute, <-Wert");
         CHECK(foods.size() == 3 && std::fabs(foods[2].per100.kcal - 259 / 4.184) < 0.1 && foods[2].category == QLatin1String("milch"), "kJ→kcal, Kategorie");
-        CHECK(foods.size() == 3 && foods[1].category == QLatin1String("sonstiges"), "ohne Kategorie und Ähnlichkeit: Standardkategorie");
+        CHECK(foods.size() == 3 && foods[1].category == QLatin1String("getreide"), "ohne Kategorie: vom ähnlichen eingebauten Eintrag (Grünkern)");
         // 2. Open-Food-Facts-Export: Tabulator, energy_100g in kJ, Natrium in g
         QByteArray off = "code\tproduct_name\tgeneric_name\tcategories\tenergy_100g\tenergy-kcal_100g\tfat_100g\tsaturated-fat_100g\t"
                          "carbohydrates_100g\tsugars_100g\tfiber_100g\tproteins_100g\tsodium_100g\n"
@@ -229,9 +251,185 @@ int main(int argc, char **argv)
     Recipe b;
     CHECK(db.load(a.id, &b) && b.title == a.title && b.ingredients.size() == a.ingredients.size(), "laden");
     CHECK(std::fabs(b.nutrition.perServing.kcal - a.nutrition.perServing.kcal) < 1, "Nährwerte gespeichert");
-    CHECK(db.duplicatesOf(Recipe{ QString(), QStringLiteral("  test ") }).size() == 1, "Doublette");
+    Recipe probe;
+    probe.title = QStringLiteral("  test ");
+    CHECK(db.duplicatesOf(probe).size() == 1, "Doublette");
     db.close();
     CHECK(db.open(tmp.filePath(QStringLiteral("db"))) && db.count() == 1, "wieder öffnen");
+
+
+    // ---------------------------------------------------------------- Umlaute
+    out << "\nUmlaute:\n";
+    {
+        struct U { const char *in, *want; };
+        const U cases[] = {
+            { "Gemuesebruehe", "Gemüsebrühe" }, { "Kaese", "Käse" }, { "Weisswein", "Weißwein" }, { "heiss", "heiß" },
+            { "Suessspeise", "Süßspeise" }, { "Schuessel", "Schüssel" }, { "Sauerbraten", "Sauerbraten" }, { "Feuer", "Feuer" },
+            { "neue", "neue" }, { "Quelle", "Quelle" }, { "zuerst", "zuerst" }, { "eventuell", "eventuell" },
+            { "Baguette", "Baguette" }, { "Masse", "Masse" }, { "Wasser", "Wasser" }, { "giessen", "gießen" },
+            { "gleichmaessig", "gleichmäßig" }, { "Griess", "Grieß" }, { "Reissalat", "Reissalat" }, { "UEBERBACKEN", "ÜBERBACKEN" },
+            { "Balsamicoessig", "Balsamicoessig" }, { "eingeoelt", "eingeölt" }, { "Chilioel", "Chiliöl" }, { "Kakaoeis", "Kakaoeis" },
+            { "Menue", "Menü" }, { "Fondue", "Fondue" }, { "Oetker", "Oetker" }, { "Paella", "Paella" }, { "aussen", "außen" },
+            { "fuellen", "füllen" }, { "Kloesse", "Klöße" }, { "Muskatnuss", "Muskatnuss" }, { "Essig", "Essig" },
+        };
+        for (const U &c : cases) {
+            const QString got = Umlauts::fixWord(QString::fromUtf8(c.in));
+            CHECK(got == QString::fromUtf8(c.want), QStringLiteral("%1 → %2 (erhalten: %3)").arg(QString::fromUtf8(c.in), QString::fromUtf8(c.want), got));
+        }
+        CHECK(Umlauts::headingCase(QStringLiteral("FÜR DEN TEIG")) == QStringLiteral("Für den Teig"), "Überschrift Groß → normal");
+        CHECK(!Umlauts::looksTranscribed(QStringLiteral("Käse und Gemuese")), "Text mit Umlauten bleibt");
+        CHECK(Umlauts::looksTranscribed(QStringLiteral("Den Kaese reiben")), "Umschrift erkannt");
+        CHECK(Glossary::detectLanguage(QStringLiteral("Den Lauch in Ringe schneiden und mit der Butter dünsten, dann die Brühe zugeben.")) == QLatin1String("de"), "Sprache de");
+        CHECK(Glossary::detectLanguage(QStringLiteral("Add the flour and stir until smooth, then bake for 20 minutes.")) == QLatin1String("en"), "Sprache en");
+        CHECK(Glossary::detectLanguage(QStringLiteral("Faire cuire les pommes de terre dans l'eau avec du sel pendant 20 minutes, puis ajouter le beurre.")) == QLatin1String("fr"), "Sprache fr");
+        CHECK(Glossary::detectLanguage(QStringLiteral("Cuocere la pasta in acqua con sale per 10 minuti, poi aggiungere il sugo e il pepe.")) == QLatin1String("it"), "Sprache it");
+    }
+
+    // ---------------------------------------------------------------- winREZKONV (ASCII-Umschrift)
+    out << "\nwinREZKONV:\n";
+    {
+        const QString rk = QStringLiteral(
+            "========== REZKONV-Rezept - winREZKONV v1.6.100\n\n"
+            "     Titel: Gruenkernbratlinge mit Kaesesosse und gedünstetem Lauchgemue ...\n"
+            "Kategorien: Getreide, Kaese\n"
+            "     Menge: 4 Personen\n\n"
+            "====================BRATLINGE====================\n"
+            "    250     Gramm  Gruenkern, geschrotet\n"
+            "    0,5     Liter  Gemuesebruehe\n"
+            "      1      Prise/n Muskat\n"
+            "      2      Essl. Greyerzer; fein\n"
+            "                   -gerieben\n"
+            "      1            Zitrone: Saft\n"
+            "      4      Kugel(n) Vanilleeis\n"
+            "      4            Zanderfilets a 125 g\n\n"
+            "Den Gruenkern in der heissen Bruehe quellen lassen, in eine Schuessel geben. Bei 180GradC\n"
+            "backen und mit Weisswein abloeschen.\n\n"
+            ": O-Titel   : Gruenkernbratlinge mit Kaesesosse und gedünstetem\n"
+            ": >           Lauchgemuese\n\n"
+            "=====\n");
+        const auto res = Importers::parseRezKonv(rk);
+        CHECK(res.recipes.size() == 1, "ein Rezept");
+        if (!res.recipes.isEmpty()) {
+            const Recipe &r = res.recipes.first();
+            out << "  " << r.title << "\n";
+            for (const Ingredient &i : r.ingredients) out << "    " << i.displayLine() << " -> " << i.food << " (" << i.grams << " g)\n";
+            out << "  " << r.instructions << "\n";
+            // „gedünstetem“ enthält ein echtes ü → Datei nicht reine Umschrift? Titel kommt aus O-Titel
+            CHECK(r.title.startsWith(QStringLiteral("Grünkernbratlinge mit Käsesoße")), "voller Titel aus O-Titel");
+            CHECK(r.ingredients.size() == 8 && r.ingredients[1].heading == false, "Zutaten ohne Fortsetzungszeilen");
+            auto ing = [&](int k) { return k < r.ingredients.size() ? r.ingredients[k] : Ingredient(); };
+            CHECK(ing(1).name == QStringLiteral("Grünkern") && ing(1).food == QLatin1String("gruenkern"), "Grünkern erkannt");
+            CHECK(ing(2).food == QLatin1String("bruehe"), "Gemüsebrühe erkannt");
+            CHECK(ing(3).unit == QLatin1String("Prise"), "Prise/n");
+            CHECK(ing(4).food == QLatin1String("hartkaese") && ing(4).note == QStringLiteral("fein gerieben"), "Greyerzer + Fortsetzung");
+            CHECK(ing(5).name == QStringLiteral("Zitrone") && ing(5).food == QLatin1String("zitronensaft"), "Zitrone: Saft");
+            CHECK(ing(6).unit == QLatin1String("Kugel") && ing(6).food == QLatin1String("speiseeis") && std::fabs(ing(6).grams - 200) < 1, "Kugel(n) Vanilleeis");
+            CHECK(ing(7).food == QLatin1String("fisch_mager") && std::fabs(ing(7).grams - 500) < 1, "Zanderfilets à 125 g");
+            CHECK(r.instructions.contains(QStringLiteral("180 °C")) && r.instructions.contains(QStringLiteral("heißen Brühe"))
+                      && r.instructions.contains(QStringLiteral("Schüssel")) && r.instructions.contains(QStringLiteral("ablöschen"))
+                      && !r.instructions.contains(QStringLiteral("O-Titel")),
+                  "Anleitung korrigiert");
+        }
+        CHECK(FoodTable::instance().match(QStringLiteral("Gruyère"))->key == QLatin1String("hartkaese"), "Gruyère");
+        CHECK(FoodTable::instance().match(QStringLiteral("Gemuesebruehe"))->key == QLatin1String("bruehe"), "Gemuesebruehe ohne Umlaute");
+        CHECK(FoodTable::instance().match(QStringLiteral("Nelkenpulver"))->key == QLatin1String("gewuerze"), "Nelkenpulver (Wortteil)");
+    }
+
+    // ---------------------------------------------------------------- DeepL (Testserver)
+    out << "\nDeepL (Testserver):\n";
+    {
+        QTcpServer server;
+        server.listen(QHostAddress::LocalHost);
+        QByteArray lastAuth;
+        QObject::connect(&server, &QTcpServer::newConnection, [&] {
+            QTcpSocket *sock = server.nextPendingConnection();
+            auto buf = std::make_shared<QByteArray>();
+            QObject::connect(sock, &QTcpSocket::readyRead, sock, [sock, buf, &lastAuth] {
+                *buf += sock->readAll();
+                const int he = int(buf->indexOf("\r\n\r\n"));
+                if (he < 0) return;
+                const QByteArray head = buf->left(he);
+                int len = 0;
+                for (const QByteArray &l : head.split('\n')) {
+                    if (l.toLower().startsWith("content-length:")) len = l.mid(15).trimmed().toInt();
+                    if (l.toLower().startsWith("authorization:")) lastAuth = l.mid(14).trimmed();
+                }
+                if (buf->size() < he + 4 + len) return;
+                const QByteArray body = buf->mid(he + 4, len);
+                QByteArray answer;
+                int status = 200;
+                if (lastAuth != "DeepL-Auth-Key test:fx") {
+                    status = 403;
+                } else if (head.startsWith("GET /v2/usage")) {
+                    answer = R"({"character_count":1234,"character_limit":500000})";
+                } else {
+                    const QJsonArray in = QJsonDocument::fromJson(body).object().value(QStringLiteral("text")).toArray();
+                    QJsonArray tr;
+                    for (const auto &v : in) {
+                        static const QHash<QString, QString> dict{ { QStringLiteral("flour"), QStringLiteral("Mehl") },
+                                                                   { QStringLiteral("butter"), QStringLiteral("Butter") },
+                                                                   { QStringLiteral("melted"), QStringLiteral("geschmolzen") } };
+                        const QString t = v.toString();
+                        tr.append(QJsonObject{ { QStringLiteral("detected_source_language"), QStringLiteral("EN") },
+                                               { QStringLiteral("text"), dict.value(t, QStringLiteral("DE:") + t) } });
+                    }
+                    answer = QJsonDocument(QJsonObject{ { QStringLiteral("translations"), tr } }).toJson(QJsonDocument::Compact);
+                }
+                sock->write(QByteArray("HTTP/1.1 ") + QByteArray::number(status) + (status == 200 ? " OK" : " Forbidden")
+                            + "\r\nContent-Type: application/json\r\nConnection: close\r\nContent-Length: "
+                            + QByteArray::number(answer.size()) + "\r\n\r\n" + answer);
+                sock->disconnectFromHost();
+            });
+        });
+        qputenv("VITAMEALS_DEEPL_URL", QStringLiteral("http://127.0.0.1:%1").arg(server.serverPort()).toUtf8());
+        DeepL::Usage u;
+        QString err;
+        CHECK(DeepL::usage(QStringLiteral("test:fx"), &u, &err) && u.characterCount == 1234 && u.characterLimit == 500000, "Kontingent: " + err);
+        CHECK(!DeepL::usage(QStringLiteral("falsch"), &u, &err) && err.contains(QStringLiteral("abgelehnt")), "falscher Schlüssel abgelehnt");
+        const QString mm = QStringLiteral(
+            "MMMMM----- Recipe via Meal-Master (tm) v8.05\n\n"
+            "      Title: Simple Cake\n"
+            " Categories: Cakes\n"
+            "      Yield: 8 servings\n\n"
+            "      2 c  flour\n"
+            "    1/2 c  butter; melted\n\n"
+            "  Mix the flour and the butter until smooth, then bake at 350 F for 30 minutes.\n\n"
+            "MMMMM\n");
+        Importers::Options opt;
+        int calls = 0;
+        opt.translator = [&](Recipe &r, QString *e) {
+            ++calls;
+            return DeepL::translateRecipe(r, QStringLiteral("test:fx"), e);
+        };
+        auto res = Importers::parseMealMaster(mm, opt);
+        CHECK(res.recipes.size() == 1 && calls == 1, "englisches Rezept an DeepL übergeben");
+        if (!res.recipes.isEmpty()) {
+            const Recipe &r = res.recipes.first();
+            out << "  " << r.title << " | " << r.instructions << "\n";
+            for (const Ingredient &i : r.ingredients) out << "    " << i.displayLine() << " -> " << i.food << "\n";
+            CHECK(r.language == QLatin1String("de") && r.originalLanguage == QLatin1String("en") && r.translatedBy == QLatin1String("DeepL"),
+                  "Sprache nach Übersetzung");
+            CHECK(r.ingredients.size() == 2 && r.ingredients[0].name == QStringLiteral("Mehl") && r.ingredients[0].unit == QLatin1String("g")
+                      && r.ingredients[0].food == QLatin1String("weizenmehl") && r.ingredients[1].note == QStringLiteral("geschmolzen"),
+                  "Zutaten übersetzt und zugeordnet");
+            CHECK(r.instructions.contains(QStringLiteral("175 °C")) || r.instructions.contains(QStringLiteral("180 °C")), "°F vor der Übersetzung umgerechnet");
+            CHECK(RecipeHtml::languageNote(r).contains(QStringLiteral("Englischen")), "Hinweis „aus dem Englischen übersetzt“");
+        }
+        // deutsches Rezept geht nie an DeepL
+        calls = 0;
+        res = Importers::parseRezKonv(QStringLiteral("========== REZKONV-Rezept - winREZKONV v1.6.100\n\n     Titel: Test\n     Menge: 2 Personen\n\n"
+                                                     "    200     Gramm  Mehl\n\nDas Mehl mit der Butter und dem Zucker verrühren und backen.\n\n=====\n"),
+                                      opt);
+        CHECK(res.recipes.size() == 1 && calls == 0 && res.recipes.first().translatedBy.isEmpty(), "deutsches Rezept nicht übersetzt");
+        // Fehler → Glossar
+        opt.translator = [&](Recipe &r, QString *e) { return DeepL::translateRecipe(r, QStringLiteral("falsch"), e); };
+        res = Importers::parseMealMaster(mm, opt);
+        if (!res.recipes.isEmpty()) out << "  Glossar: " << res.recipes.first().ingredients.value(0).displayLine() << " | " << res.warnings.join(QStringLiteral("; ")) << "\n";
+        CHECK(res.recipes.size() == 1 && res.recipes.first().ingredients.value(0).food == QLatin1String("weizenmehl")
+                  && !res.recipes.first().ingredients.value(0).name.startsWith(QLatin1String("DE:")) && res.warnings.size() == 1,
+              "bei Fehler Glossar + Warnung");
+        qunsetenv("VITAMEALS_DEEPL_URL");
+    }
 
     out << "\n" << (g_fail ? QStringLiteral("%1 Fehler").arg(g_fail) : QStringLiteral("Alle Prüfungen bestanden")) << "\n";
     return g_fail ? 1 : 0;

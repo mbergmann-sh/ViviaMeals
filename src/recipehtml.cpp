@@ -3,6 +3,7 @@
 #include "nutrition.h"
 
 #include <QCoreApplication>
+#include <QHash>
 #include <QStringList>
 
 namespace RecipeHtml {
@@ -173,13 +174,20 @@ QString render(const Recipe &r, const Style &st, double servings)
     if (!img.isEmpty()) h += QStringLiteral("<td valign=\"top\" align=\"right\" width=\"%1\">%2</td>").arg(st.imageWidth + 12).arg(img);
     h += QStringLiteral("</tr></table>");
 
-    h += QStringLiteral("<h2 style=\"color:%1;\">%2</h2>").arg(col(st.primary), tr("Zutaten"));
+    const bool menu = Nutrition::isMenu(r);
+    h += QStringLiteral("<h2 style=\"color:%1;\">%2</h2>").arg(col(st.primary), menu ? tr("Menüfolge") : tr("Zutaten"));
     h += ingredientsTable(r, st, factor);
+    if (menu) {
+        if (!r.instructions.trimmed().isEmpty()) h += instructionsHtml(r);
+        if (!r.source.isEmpty())
+            h += QStringLiteral("<p style=\"color:%1;\">%2 %3</p>").arg(col(st.muted), tr("Quelle:"), escape(r.source));
+        h += QStringLiteral("</body></html>");
+        return h;
+    }
 
     h += QStringLiteral("<h2 style=\"color:%1;\">%2</h2>").arg(col(st.primary), tr("Zubereitung"));
-    if (r.language == QLatin1String("en"))
-        h += QStringLiteral("<p style=\"color:%1;\"><i>%2</i></p>")
-                 .arg(col(st.muted), tr("Anleitung im englischen Original – Temperaturen und Maße wurden in °C und cm umgerechnet."));
+    const QString note = languageNote(r);
+    if (!note.isEmpty()) h += QStringLiteral("<p style=\"color:%1;\"><i>%2</i></p>").arg(col(st.muted), escape(note));
     h += r.instructions.trimmed().isEmpty() ? QStringLiteral("<p><i>%1</i></p>").arg(tr("Keine Zubereitung angegeben.")) : instructionsHtml(r);
 
     h += QStringLiteral("<h2 style=\"color:%1;\">%2</h2>").arg(col(st.primary), tr("Nährwerte"));
@@ -190,6 +198,35 @@ QString render(const Recipe &r, const Style &st, double servings)
         h += QStringLiteral("<p style=\"color:%1;\">%2 %3</p>").arg(col(st.muted), tr("Quelle:"), escape(r.source));
     h += QStringLiteral("</body></html>");
     return h;
+}
+
+QString languageName(const QString &code)
+{
+    static const QHash<QString, QString> n{
+        { QStringLiteral("de"), tr("Deutsch") },     { QStringLiteral("en"), tr("Englisch") },
+        { QStringLiteral("fr"), tr("Französisch") }, { QStringLiteral("it"), tr("Italienisch") },
+        { QStringLiteral("es"), tr("Spanisch") },    { QStringLiteral("nl"), tr("Niederländisch") },
+        { QStringLiteral("pt"), tr("Portugiesisch") }, { QStringLiteral("pl"), tr("Polnisch") },
+        { QStringLiteral("da"), tr("Dänisch") },     { QStringLiteral("sv"), tr("Schwedisch") },
+    };
+    const QString c = code.left(2).toLower();
+    return n.value(c, c.toUpper());
+}
+
+QString languageNote(const Recipe &r)
+{
+    if (r.language == QLatin1String("de") && !r.originalLanguage.isEmpty() && r.originalLanguage != QLatin1String("de")) {
+        // Adjektiv: „Englisch“ → „dem Englischen“
+        QString from = languageName(r.originalLanguage);
+        if (from.size() > 2 && from.at(0).isUpper()) from = tr("dem %1en").arg(from);
+        return r.translatedBy.isEmpty() ? tr("Aus %1 übersetzt.").arg(from)
+                                        : tr("Aus %1 übersetzt (%2) – Temperaturen und Maße in °C und cm.").arg(from, r.translatedBy);
+    }
+    if (r.language == QLatin1String("en"))
+        return tr("Anleitung im englischen Original – Temperaturen und Maße wurden in °C und cm umgerechnet.");
+    if (!r.language.isEmpty() && r.language != QLatin1String("de"))
+        return tr("Anleitung im Original (%1).").arg(languageName(r.language));
+    return {};
 }
 
 QString emptyPage(const Style &st, const QString &title, const QString &text)

@@ -4,6 +4,7 @@
 #include "ingredientparser.h"
 #include "nutrition.h"
 #include "textcodec.h"
+#include "umlauts.h"
 #include "units.h"
 
 #include <QFile>
@@ -23,7 +24,12 @@ struct RawRecipe {
     QStringList categories;
     QString yield;
     QStringList ingredientLines;   // bereits als „Menge|Einheit|Name“ (MealMaster-Spalten) oder Freitext
-    QList<Ingredient> ingredients; // fertig zerlegt (aus Spalten)
+    struct ColumnIngredient {        // MealMaster-Spalten (Zerlegung erst, wenn die Sprache feststeht)
+        bool heading = false;
+        QString amount, unit, name, original;
+        QStringList more;            // Fortsetzungszeilen „-sifted“
+    };
+    QList<ColumnIngredient> columns;
     QStringList directionLines;
     QStringList sourceLines;
     QString format;
@@ -51,7 +57,9 @@ void parseYield(const QString &y, Recipe &r)
     const QString unit = m.captured(2).trimmed().toLower();
     static const QStringList portions{ QStringLiteral("portion"), QStringLiteral("portionen"), QStringLiteral("person"),
                                        QStringLiteral("personen"), QStringLiteral("serving"), QStringLiteral("servings"),
-                                       QStringLiteral("pers."), QStringLiteral("port."), QStringLiteral("") };
+                                       QStringLiteral("pers."), QStringLiteral("port."), QStringLiteral("persone"),
+                                       QStringLiteral("pers"), QStringLiteral("portion(en)"), QStringLiteral("person(en)"),
+                                       QStringLiteral("portionen à"), QStringLiteral("people"), QStringLiteral("") };
     if (portions.contains(unit)) return;
     static const QHash<QString, QString> en{
         { QStringLiteral("cookies"), QStringLiteral("Stück") }, { QStringLiteral("pieces"), QStringLiteral("Stück") },
@@ -97,30 +105,87 @@ QString joinDirections(const QStringList &lines)
     return paragraphs.join(QStringLiteral("\n\n"));
 }
 
-Recipe finish(RawRecipe &raw, const Options &opt, const QString &format)
+// winREZKONV kürzt lange Titel („… Maispla ...“) und legt den vollen Titel als
+// „: O-Titel : …“ mit Fortsetzungen „: > …“ in die Anleitung
+void extractOriginalTitle(RawRecipe &raw)
 {
+    static const QRegularExpression head(QStringLiteral("^\\s*:\\s*O-Titel\\s*:\\s*(.*)$"), QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression cont(QStringLiteral("^\\s*:\\s*>\\s*(.*)$"));
+    for (int i = 0; i < raw.directionLines.size(); ++i) {
+        const auto m = head.match(raw.directionLines[i]);
+        if (!m.hasMatch()) continue;
+        QString full = m.captured(1).trimmed();
+        int j = i + 1;
+        for (; j < raw.directionLines.size(); ++j) {
+            const auto c = cont.match(raw.directionLines[j]);
+            if (!c.hasMatch()) break;
+            const QString add = c.captured(1).trimmed();
+            full = full.endsWith(QLatin1Char('-')) ? full + add : full + QLatin1Char(' ') + add;
+        }
+        raw.directionLines.erase(raw.directionLines.begin() + i, raw.directionLines.begin() + j);
+        full = full.simplified();
+        // Zeilenumbruch nach Bindestrich: „Blumenkohl-Broccoli- Gemüse“ → „Blumenkohl-Broccoli-Gemüse“
+        static const QRegularExpression brokenHyphen(QStringLiteral("(\\p{L})- (\\p{Lu})"));
+        full.replace(brokenHyphen, QStringLiteral("\\1-\\2"));
+        if (full.isEmpty()) return;
+        QString shortTitle = raw.title.trimmed();
+        const bool cut = shortTitle.endsWith(QLatin1String("...")) || shortTitle.endsWith(QChar(0x2026));
+        while (shortTitle.endsWith(QLatin1Char('.')) || shortTitle.endsWith(QChar(0x2026))) shortTitle.chop(1);
+        shortTitle = shortTitle.trimmed();
+        if (cut || shortTitle.isEmpty() || full.startsWith(shortTitle, Qt::CaseInsensitive)) raw.title = full;
+        else raw.sourceLines << QObject::tr("Originaltitel: %1").arg(full);
+        // Leerzeile am Ende entfernen
+        while (!raw.directionLines.isEmpty() && raw.directionLines.last().trimmed().isEmpty()) raw.directionLines.removeLast();
+        return;
+    }
+}
+
+QString rawText(const RawRecipe &raw)
+{
+    QStringList parts{ raw.title, raw.yield, raw.categories.join(QLatin1Char(' ')), raw.directionLines.join(QLatin1Char(' ')),
+                       raw.ingredientLines.join(QLatin1Char(' ')) };
+    for (const auto &c : raw.columns) parts << c.name << c.more.join(QLatin1Char(' '));
+    return parts.join(QLatin1Char(' '));
+}
+
+Recipe build(const RawRecipe &raw, const QString &format, const QString &lang, bool glossary)
+{
+    const bool german = lang == QLatin1String("de");
     Recipe r;
     r.id = Recipe::newId();
     r.title = raw.title.simplified();
     if (r.title.isEmpty()) r.title = QObject::tr("Unbenanntes Rezept");
     r.sourceFormat = format;
     parseYield(raw.yield, r);
-    // Sprache aus Anleitung und Zutaten schätzen
-    QString probe = raw.directionLines.join(QLatin1Char(' '));
-    for (const Ingredient &i : raw.ingredients) probe += QLatin1Char(' ') + i.name;
-    for (const QString &l : raw.ingredientLines) probe += QLatin1Char(' ') + l;
-    const bool english = Glossary::looksEnglish(probe);
-    r.language = english ? QStringLiteral("en") : QStringLiteral("de");
+    r.language = lang;
     IngredientParser::Options po;
-    po.translate = english && opt.translate;
+    po.translate = !german && glossary;   // Glossar kennt nur Englisch, schadet bei anderen Sprachen aber nicht
     po.mealMasterUnits = format == QLatin1String("MealMaster");
-    // Zutaten: Freitextzeilen zerlegen; Spaltenzutaten liegen schon vor (englisch → übersetzen)
-    QList<Ingredient> list;
-    if (!raw.ingredientLines.isEmpty()) list = IngredientParser::parseText(raw.ingredientLines.join(QLatin1Char('\n')), po);
-    else list = raw.ingredients;
-    r.ingredients = list;
+    // Zutaten: Freitextzeilen zerlegen; Spaltenzutaten liegen schon vor
+    if (!raw.ingredientLines.isEmpty()) {
+        r.ingredients = IngredientParser::parseText(raw.ingredientLines.join(QLatin1Char('\n')), po);
+    } else {
+        for (const auto &c : raw.columns) {
+            Ingredient i;
+            if (c.heading) {
+                i.heading = true;
+                i.name = po.translate ? Glossary::ingredient(c.name.toLower()) : c.name;
+            } else {
+                i = IngredientParser::fromParts(c.amount, c.unit, c.name, po);
+                for (QString add : c.more) {
+                    if (po.translate) add = Glossary::note(add);
+                    i.note = i.note.isEmpty() ? add : i.note + QStringLiteral(", ") + add;
+                }
+            }
+            i.original = c.original;
+            r.ingredients << i;
+        }
+    }
     QString dir = joinDirections(raw.directionLines);
-    if (english) dir = Units::convertTextMeasures(dir);
+    if (!german) dir = Units::convertTextMeasures(dir);
+    // RezKonv-Schreibweise „bei 180GradC“ → „bei 180 °C“
+    static const QRegularExpression gradC(QStringLiteral("(\\d)\\s*Grad\\s*C\\b"));
+    dir.replace(gradC, QStringLiteral("\\1 °C"));
     r.instructions = dir;
     QStringList src;
     for (QString s : raw.sourceLines) {
@@ -131,9 +196,53 @@ Recipe finish(RawRecipe &raw, const Options &opt, const QString &format)
     r.source = src.join(QLatin1Char(' ')).simplified();
     for (const QString &c : raw.categories) {
         if (c.trimmed().isEmpty() || c.trimmed().compare(QLatin1String("None"), Qt::CaseInsensitive) == 0) continue;
-        r.addTag(english ? Glossary::category(c) : Glossary::germanCategory(c));
+        r.addTag(german ? Glossary::germanCategory(c) : Glossary::category(c));
     }
-    if (english) r.addTag(QStringLiteral("englisch"));
+    if (!german && glossary) {
+        r.originalLanguage = lang;
+        if (lang == QLatin1String("en")) r.addTag(QStringLiteral("englisch"));
+    }
+    return r;
+}
+
+Recipe finish(RawRecipe &raw, const Options &opt, const QString &format, Result *res)
+{
+    extractOriginalTitle(raw);
+    // Sprache aus Titel, Anleitung und Zutaten schätzen
+    const QString probe = rawText(raw);
+    QString lang = Glossary::detectLanguage(probe);
+    if (lang == QLatin1String("de") && Glossary::looksEnglish(probe)) lang = QStringLiteral("en");
+    const bool german = lang == QLatin1String("de");
+    bool umlauts = false;
+    if (german && opt.fixUmlauts && Umlauts::looksTranscribed(probe)) {
+        // vor dem Zerlegen, damit „Stueck“, „Essloeffel“ als Einheit erkannt werden
+        umlauts = true;
+        raw.title = Umlauts::fixText(raw.title);
+        raw.yield = Umlauts::fixText(raw.yield);
+        for (QString &c : raw.categories) c = Umlauts::fixText(c);
+        for (QString &l : raw.ingredientLines) l = Umlauts::fixText(l);
+        for (auto &c : raw.columns) c.name = Umlauts::fixText(c.name);
+    }
+    Recipe r;
+    if (!german && opt.translator) {
+        r = build(raw, format, lang, false);
+        QString err;
+        if (opt.translator(r, &err)) {
+            ++res->translated;
+            r.language = QStringLiteral("de");
+            if (r.originalLanguage.isEmpty()) r.originalLanguage = lang;
+        } else {
+            res->warnings << QObject::tr("„%1“: Übersetzung nicht möglich (%2) – Zutaten über das Glossar übersetzt.").arg(r.title, err);
+            r = build(raw, format, lang, true);
+        }
+    } else {
+        r = build(raw, format, lang, opt.translate);
+        if (!german && !opt.translate) r.originalLanguage.clear();
+    }
+    if (umlauts) {
+        Umlauts::fixRecipe(r);
+        ++res->umlautsFixed;
+    }
     Nutrition::analyze(r);
     if (opt.autoTags) Nutrition::applyTagSuggestions(r);
     return r;
@@ -156,14 +265,14 @@ bool mmLayout(const QString &line)
     return !line[11].isSpace();
 }
 
-Ingredient mmIngredient(const QString &part, const IngredientParser::Options &po)
+RawRecipe::ColumnIngredient mmIngredient(const QString &part)
 {
-    const QString amount = part.left(7).trimmed();
-    const QString unit = part.mid(8, 2).trimmed();
-    const QString name = part.mid(11).trimmed();
-    Ingredient i = IngredientParser::fromParts(amount, unit, name, po);
-    i.original = part.trimmed();
-    return i;
+    RawRecipe::ColumnIngredient c;
+    c.amount = part.left(7).trimmed();
+    c.unit = part.mid(8, 2).trimmed();
+    c.name = part.mid(11).trimmed();
+    c.original = part.trimmed();
+    return c;
 }
 
 } // namespace
@@ -202,17 +311,15 @@ Result parseMealMaster(const QString &text, const Options &opt)
     enum State { Outside, Header, Ingredients, Directions };
     State st = Outside;
     RawRecipe raw;
-    QList<Ingredient> right;      // rechte Spalte eines zweispaltigen Blocks (wird am Blockende angehängt)
-    IngredientParser::Options po;   // translate wird je Rezeptblock gesetzt
-    po.mealMasterUnits = true;
+    QList<RawRecipe::ColumnIngredient> right;   // rechte Spalte eines zweispaltigen Blocks (wird am Blockende angehängt)
     auto flushRight = [&] {
-        raw.ingredients << right;
+        raw.columns << right;
         right.clear();
     };
     auto finishRecipe = [&] {
         flushRight();
-        if (!raw.title.isEmpty() || !raw.ingredients.isEmpty()) {
-            res.recipes << finish(raw, opt, QStringLiteral("MealMaster"));
+        if (!raw.title.isEmpty() || !raw.columns.isEmpty()) {
+            res.recipes << finish(raw, opt, QStringLiteral("MealMaster"), &res);
         }
         raw = RawRecipe();
     };
@@ -222,14 +329,6 @@ Result parseMealMaster(const QString &text, const Options &opt)
         if (start.match(t).hasMatch()) {
             if (st != Outside) finishRecipe();
             st = Header;
-            // Sprache des ganzen Rezeptblocks vorab bestimmen (für Übersetzung der Spaltenzutaten)
-            QString block;
-            for (int k = n + 1; k < lines.size(); ++k) {
-                const QString bt = lines[k].trimmed();
-                if (bt == QLatin1String("MMMMM") || bt == QLatin1String("-----") || start.match(bt).hasMatch()) break;
-                block += lines[k] + QLatin1Char(' ');
-            }
-            po.translate = opt.translate && Glossary::looksEnglish(block);
             continue;
         }
         if (st == Outside) continue;
@@ -256,12 +355,11 @@ Result parseMealMaster(const QString &text, const Options &opt)
             const auto d = divider.match(t);
             flushRight();
             if (d.hasMatch() && !d.captured(1).trimmed().isEmpty()) {
-                Ingredient h;
+                RawRecipe::ColumnIngredient h;
                 h.heading = true;
                 h.name = d.captured(1).trimmed();
                 h.original = h.name;
-                if (po.translate) h.name = Glossary::ingredient(h.name.toLower());
-                raw.ingredients << h;
+                raw.columns << h;
             }
             st = Ingredients;
             continue;
@@ -273,21 +371,19 @@ Result parseMealMaster(const QString &text, const Options &opt)
             }
             if (mmLayout(line)) {
                 if (line.size() > 52 && mmLayout(line.mid(41))) {
-                    raw.ingredients << mmIngredient(line.left(40), po);
-                    right << mmIngredient(line.mid(41), po);
+                    raw.columns << mmIngredient(line.left(40));
+                    right << mmIngredient(line.mid(41));
                 } else {
-                    Ingredient i = mmIngredient(line, po);
+                    RawRecipe::ColumnIngredient i = mmIngredient(line);
                     // Fortsetzungszeile „          -sifted“
-                    if (i.amount <= 0 && i.unit.isEmpty() && line.mid(11).trimmed().startsWith(QLatin1Char('-'))
-                        && !raw.ingredients.isEmpty() && !raw.ingredients.last().heading) {
-                        Ingredient &prev = raw.ingredients.last();
-                        QString add = line.mid(11).trimmed().mid(1).trimmed();
-                        if (po.translate) add = Glossary::note(add);
-                        prev.note = prev.note.isEmpty() ? add : prev.note + QStringLiteral(", ") + add;
-                        prev.original += QLatin1Char(' ') + line.mid(11).trimmed();
+                    if (i.amount.isEmpty() && i.unit.isEmpty() && i.name.startsWith(QLatin1Char('-'))
+                        && !raw.columns.isEmpty() && !raw.columns.last().heading) {
+                        auto &prev = raw.columns.last();
+                        prev.more << i.name.mid(1).trimmed();
+                        prev.original += QLatin1Char(' ') + i.name;
                         continue;
                     }
-                    raw.ingredients << i;
+                    raw.columns << i;
                 }
                 continue;
             }
@@ -315,7 +411,7 @@ Result parseRezKonv(const QString &text, const Options &opt)
     RawRecipe raw;
     bool sawIngredient = false;
     auto finishRecipe = [&] {
-        if (!raw.title.isEmpty() || !raw.ingredientLines.isEmpty()) res.recipes << finish(raw, opt, QStringLiteral("RezKonv"));
+        if (!raw.title.isEmpty() || !raw.ingredientLines.isEmpty()) res.recipes << finish(raw, opt, QStringLiteral("RezKonv"), &res);
         raw = RawRecipe();
         sawIngredient = false;
     };
@@ -377,6 +473,15 @@ Result parseRezKonv(const QString &text, const Options &opt)
                 continue;
             }
             const int lead = leadingSpaces(line);
+            // winREZKONV: Fortsetzungszeile „                   -Würfeln“ gehört zur vorigen Zutat
+            if (sawIngredient && t.startsWith(QLatin1Char('-')) && !t.startsWith(QLatin1String("--")) && lead >= 6
+                && !raw.ingredientLines.isEmpty() && !raw.ingredientLines.last().startsWith(QLatin1String("=="))) {
+                QString &prev = raw.ingredientLines.last();
+                const QString add = t.mid(1).trimmed();
+                if (prev.endsWith(QLatin1Char('-'))) prev += add;   // „Tomaten-“ + „Portwein-Sauce“
+                else prev += QLatin1Char(' ') + add;
+                continue;
+            }
             double dummy = 0;
             const QString firstTok = t.section(QLatin1Char(' '), 0, 0);
             const bool startsWithAmount = IngredientParser::parseNumber(firstTok, &dummy)

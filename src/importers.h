@@ -12,6 +12,8 @@
 #include <QList>
 #include <QString>
 
+#include <functional>
+
 namespace Importers {
 
 enum class Format { Unknown, RezKonv, MealMaster, Vtm };
@@ -19,12 +21,19 @@ enum class Format { Unknown, RezKonv, MealMaster, Vtm };
 struct Options {
     bool translate = true;    // englische Rezepte: Zutaten übersetzen, Maße umrechnen
     bool autoTags = true;     // vegan/vegetarisch/fleischgerichte/fisch aus den Zutaten ergänzen
+    bool fixUmlauts = true;   // deutsche Rezepte in ASCII-Umschrift: ae/oe/ue/ss → ä/ö/ü/ß
+    // Übersetzer für fremdsprachige Rezepte (z. B. DeepL). Gesetzt → Zutaten werden nicht über das Glossar
+    // übersetzt, sondern das fertige Rezept wird übergeben. Liefert false (mit Fehlertext), greift das Glossar.
+    // Deutschsprachige Rezepte werden nie übergeben.
+    std::function<bool(Recipe &, QString *)> translator;
 };
 
 struct Result {
     QList<Recipe> recipes;
     QStringList warnings;
     QString encoding;
+    int umlautsFixed = 0;     // Rezepte, deren ASCII-Umschrift korrigiert wurde
+    int translated = 0;       // Rezepte, die der Übersetzer übersetzt hat
 };
 
 Format detect(const QString &text);

@@ -16,6 +16,7 @@
 #include "importdialogs.h"
 #include "importers.h"
 #include "mainwindow.h"
+#include "settingsdialog.h"
 #include "mealplandialog.h"
 #include "profiles.h"
 #include "qtcompat.h"
@@ -116,7 +117,7 @@ void createDemo(const QString &folder)
     RecipeDb &db = RecipeDb::instance();
     db.create(folder, QObject::tr("Demo-Rezepte"));
     db.beginBatch();
-    for (const QString &f : { QStringLiteral(":/samples/beispiele.rk"), QStringLiteral(":/samples/beispiele.mmf") }) {
+    for (const QString &f : { QStringLiteral(":/samples/beispiele.rk"), QStringLiteral(":/samples/beispiele.mmf"), QStringLiteral(":/samples/umlaute.rk") }) {
         const Importers::Result res = Importers::importFile(f, Importers::Format::Unknown);
         for (Recipe r : res.recipes) {
             r.image = demoImage(r);
@@ -214,6 +215,22 @@ void takeScreenshots(MainWindow *w, const QString &dir)
         d.show();
         shot(&d, dir, QStringLiteral("import-vorschau"));
         d.reject();
+    }
+    {
+        // ASCII-Umschrift (Kaese, heiss) wird beim Import korrigiert
+        const auto res = Importers::importFile(QStringLiteral(":/samples/umlaute.rk"), Importers::Format::Unknown);
+        ImportPreviewDialog d(res.recipes, { QStringLiteral("umlaute.rk"), QStringLiteral("umlaute.rk") },
+                              { ImportFlow::umlautNote(res.umlautsFixed) },
+                              w);
+        d.show();
+        shot(&d, dir, QStringLiteral("import-umlaute"));
+        d.reject();
+    }
+    {
+        SettingsDialog d(w);
+        d.show();
+        shot(&d, dir, QStringLiteral("einstellungen"));
+        static_cast<QDialog &>(d).reject();
     }
     {
         // Nährwert-Import mit einer Tabelle im Stil einer Excel-Datei

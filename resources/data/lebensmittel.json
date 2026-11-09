@@ -390,6 +390,35 @@
    ]
   },
   {
+   "key": "fruchtsirup",
+   "name": "Fruchtsirup (Grenadine, Himbeersirup)",
+   "category": "zucker",
+   "kcal": 270.0,
+   "protein": 0.0,
+   "fat": 0.0,
+   "saturatedFat": 0.0,
+   "carbohydrates": 67.0,
+   "sugar": 65.0,
+   "fiber": 0.0,
+   "salt": 0.0,
+   "density": 1.3,
+   "piece": 0.0,
+   "units": {},
+   "aliases": [
+    "grenadine",
+    "grenadinesirup",
+    "himbeersirup",
+    "holundersirup",
+    "holunderblütensirup",
+    "fruchtsirup",
+    "erdbeersirup",
+    "kirschsirup",
+    "raspberry syrup",
+    "elderflower syrup",
+    "fruit syrup"
+   ]
+  },
+  {
    "key": "zuckerruebensirup",
    "name": "Zuckerrübensirup",
    "category": "zucker",
@@ -672,6 +701,7 @@
    "piece": 0.0,
    "units": {
     "Blatt": 1.7,
+    "Scheibe": 1.7,
     "Pck.": 9.0
    },
    "aliases": [
@@ -828,6 +858,11 @@
     "bratöl",
     "frittieröl",
     "distelöl",
+    "chiliöl",
+    "knoblauchöl",
+    "kräuteröl",
+    "walnussöl",
+    "traubenkernöl",
     "oil",
     "vegetable oil",
     "canola oil",
@@ -835,7 +870,10 @@
     "cooking oil",
     "sunflower oil",
     "peanut oil",
-    "corn oil"
+    "corn oil",
+    "chili oil",
+    "walnut oil",
+    "grapeseed oil"
    ]
   },
   {
@@ -1130,6 +1168,30 @@
    ]
   },
   {
+   "key": "rahmjoghurt",
+   "name": "Rahmjoghurt (10 %)",
+   "category": "milch",
+   "kcal": 125.0,
+   "protein": 3.0,
+   "fat": 10.0,
+   "saturatedFat": 6.5,
+   "carbohydrates": 4.5,
+   "sugar": 4.5,
+   "fiber": 0.0,
+   "salt": 0.1,
+   "density": 1.03,
+   "piece": 0.0,
+   "units": {
+    "Becher": 150.0
+   },
+   "aliases": [
+    "rahmjoghurt",
+    "sahnejoghurt",
+    "griechischer joghurt 10 %",
+    "full fat greek yogurt"
+   ]
+  },
+  {
    "key": "quark",
    "name": "Magerquark",
    "category": "milch",
@@ -1300,7 +1362,6 @@
     "butterkäse",
     "edamer",
     "tilsiter",
-    "bergkäse",
     "emmentaler",
     "emmentaler käse",
     "gratinkäse",
@@ -1317,9 +1378,42 @@
     "monterey jack cheese",
     "colby",
     "american cheese",
-    "gruyere",
     "jarlsberg",
     "edam"
+   ]
+  },
+  {
+   "key": "hartkaese",
+   "name": "Hartkäse (Bergkäse, Greyerzer)",
+   "category": "kaese",
+   "kcal": 400.0,
+   "protein": 28.0,
+   "fat": 32.0,
+   "saturatedFat": 19.0,
+   "carbohydrates": 0.0,
+   "sugar": 0.0,
+   "fiber": 0.0,
+   "salt": 1.5,
+   "density": 0.5,
+   "piece": 0.0,
+   "units": {
+    "Scheibe": 25.0
+   },
+   "aliases": [
+    "hartkäse",
+    "bergkäse",
+    "greyerzer",
+    "gruyère",
+    "gruyere",
+    "comté",
+    "comte",
+    "appenzeller",
+    "alpkäse",
+    "sbrinz",
+    "beaufort",
+    "gruyere cheese",
+    "swiss gruyere",
+    "comte cheese"
    ]
   },
   {
@@ -1819,6 +1913,30 @@
     "buchweizen",
     "millet",
     "buckwheat"
+   ]
+  },
+  {
+   "key": "gruenkern",
+   "name": "Grünkern",
+   "category": "getreide",
+   "kcal": 330.0,
+   "protein": 11.0,
+   "fat": 2.7,
+   "saturatedFat": 0.4,
+   "carbohydrates": 63.0,
+   "sugar": 1.0,
+   "fiber": 9.0,
+   "salt": 0.0,
+   "density": 0.75,
+   "piece": 0.0,
+   "units": {},
+   "aliases": [
+    "grünkern",
+    "grünkernschrot",
+    "grünkernmehl",
+    "grünkerngrieß",
+    "green spelt",
+    "green spelt grains"
    ]
   },
   {
@@ -2979,6 +3097,9 @@
     "shiitake",
     "kräuterseitlinge",
     "egerlinge",
+    "morcheln",
+    "morchel",
+    "trompetenpilze",
     "mushrooms",
     "mushroom",
     "button mushrooms",
@@ -2986,7 +3107,8 @@
     "sliced mushrooms",
     "shiitake mushrooms",
     "cremini mushrooms",
-    "portobello mushrooms"
+    "portobello mushrooms",
+    "morels"
    ]
   },
   {
@@ -3964,13 +4086,17 @@
     "getrocknete feigen",
     "dörrobst",
     "cranberries getrocknet",
+    "backobst",
+    "dörrpflaumen",
+    "backpflaume",
     "dates",
     "figs",
     "dried apricots",
     "prunes",
     "dried figs",
     "dried cranberries",
-    "craisins"
+    "craisins",
+    "dried mixed fruit"
    ]
   },
   {
@@ -4729,6 +4855,104 @@
    ]
   },
   {
+   "key": "ente",
+   "name": "Ente / Entenbrust",
+   "category": "fleisch",
+   "kcal": 200.0,
+   "protein": 19.0,
+   "fat": 14.0,
+   "saturatedFat": 4.0,
+   "carbohydrates": 0.0,
+   "sugar": 0.0,
+   "fiber": 0.0,
+   "salt": 0.2,
+   "density": 1.0,
+   "piece": 300.0,
+   "units": {},
+   "aliases": [
+    "ente",
+    "entenbrust",
+    "entenbrüste",
+    "entenbrustfilet",
+    "entenkeule",
+    "entenkeulen",
+    "flugente",
+    "barbarie-ente",
+    "gans",
+    "gänsebrust",
+    "gänsekeule",
+    "duck",
+    "duck breast",
+    "duck legs",
+    "goose"
+   ]
+  },
+  {
+   "key": "kaninchen",
+   "name": "Kaninchen / Hase",
+   "category": "fleisch",
+   "kcal": 130.0,
+   "protein": 21.0,
+   "fat": 5.0,
+   "saturatedFat": 2.0,
+   "carbohydrates": 0.0,
+   "sugar": 0.0,
+   "fiber": 0.0,
+   "salt": 0.1,
+   "density": 1.0,
+   "piece": 0.0,
+   "units": {},
+   "aliases": [
+    "kaninchen",
+    "hase",
+    "hasenrücken",
+    "hasenrückenfilets",
+    "kaninchenrücken",
+    "kaninchenkeule",
+    "hasenkeule",
+    "hasenkeulen",
+    "wildhase",
+    "kaninchenfleisch",
+    "reh",
+    "rehrücken",
+    "hirsch",
+    "wild",
+    "rabbit",
+    "hare",
+    "venison"
+   ]
+  },
+  {
+   "key": "gefluegelleber",
+   "name": "Geflügelleber",
+   "category": "fleisch",
+   "kcal": 135.0,
+   "protein": 19.0,
+   "fat": 5.0,
+   "saturatedFat": 1.6,
+   "carbohydrates": 1.0,
+   "sugar": 0.0,
+   "fiber": 0.0,
+   "salt": 0.2,
+   "density": 1.0,
+   "piece": 0.0,
+   "units": {},
+   "aliases": [
+    "geflügelleber",
+    "hühnerleber",
+    "hähnchenleber",
+    "entenleber",
+    "leber",
+    "kalbsleber",
+    "schweineleber",
+    "rinderleber",
+    "chicken liver",
+    "chicken livers",
+    "liver",
+    "calf liver"
+   ]
+  },
+  {
    "key": "lamm",
    "name": "Lammfleisch",
    "category": "fleisch",
@@ -5303,6 +5527,11 @@
     "thymian getrocknet",
     "majoran",
     "getrockneter majoran",
+    "nelkenpulver",
+    "piment",
+    "pimentkörner",
+    "senfpulver",
+    "korianderkörner",
     "smoked paprika",
     "curry powder",
     "ground cumin",
@@ -5354,7 +5583,8 @@
     "msg",
     "taco seasoning",
     "cajun seasoning",
-    "old bay"
+    "old bay",
+    "allspice"
    ]
   },
   {
@@ -5435,6 +5665,9 @@
     "rosmarinzweig",
     "salbeiblätter",
     "basilikumblätter",
+    "borretsch",
+    "sauerampfer",
+    "pimpinelle",
     "parsley",
     "fresh parsley",
     "chopped parsley",
@@ -5459,7 +5692,9 @@
     "tarragon",
     "herbs",
     "fresh herbs",
-    "watercress"
+    "watercress",
+    "sorrel",
+    "borage"
    ]
   },
   {
@@ -5804,6 +6039,60 @@
     "gelatin dessert",
     "jell-o",
     "jello"
+   ]
+  },
+  {
+   "key": "speiseeis",
+   "name": "Speiseeis (Vanilleeis)",
+   "category": "suess",
+   "kcal": 200.0,
+   "protein": 3.5,
+   "fat": 11.0,
+   "saturatedFat": 7.0,
+   "carbohydrates": 23.0,
+   "sugar": 21.0,
+   "fiber": 0.0,
+   "salt": 0.2,
+   "density": 0.55,
+   "piece": 0.0,
+   "units": {
+    "Kugel": 50.0
+   },
+   "aliases": [
+    "speiseeis",
+    "vanilleeis",
+    "eiscreme",
+    "sahneeis",
+    "schokoladeneis",
+    "erdbeereis",
+    "milchspeiseeis",
+    "softeis",
+    "ice cream",
+    "vanilla ice cream",
+    "chocolate ice cream"
+   ]
+  },
+  {
+   "key": "sahnesteif",
+   "name": "Sahnesteif",
+   "category": "sonstiges",
+   "kcal": 370.0,
+   "protein": 0.0,
+   "fat": 0.0,
+   "saturatedFat": 0.0,
+   "carbohydrates": 92.0,
+   "sugar": 30.0,
+   "fiber": 0.0,
+   "salt": 0.0,
+   "density": 0.6,
+   "piece": 0.0,
+   "units": {
+    "Pck.": 8.0
+   },
+   "aliases": [
+    "sahnesteif",
+    "sahnefestiger",
+    "whipped cream stabilizer"
    ]
   },
   {

@@ -12,6 +12,8 @@
 namespace Glossary {
 
 bool looksEnglish(const QString &text);          // Sprache eines Rezepts schätzen
+// Sprache über häufige Funktionswörter schätzen: "de", "en", "fr", "it", "es", "nl" (Vorgabe "de")
+QString detectLanguage(const QString &text);
 // „all-purpose flour“ → „Weizenmehl“; vorangestellte Zubereitungswörter („chopped walnuts“) kommen in *leadNote
 QString ingredient(const QString &englishName, QString *leadNote = nullptr);
 QString note(const QString &englishNote);        // „finely chopped“ → „fein gehackt“
