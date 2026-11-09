@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "searchdialog.h"
 #include "icons.h"
 #include "recipedb.h"

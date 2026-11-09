@@ -22,6 +22,7 @@
         <file alias="ui/info.svg">icons/ui/info.svg</file>
         <file alias="ui/link.svg">icons/ui/link.svg</file>
         <file alias="ui/nutrition.svg">icons/ui/nutrition.svg</file>
+        <file alias="ui/odt.svg">icons/ui/odt.svg</file>
         <file alias="ui/open.svg">icons/ui/open.svg</file>
         <file alias="ui/pdf.svg">icons/ui/pdf.svg</file>
         <file alias="ui/plan.svg">icons/ui/plan.svg</file>

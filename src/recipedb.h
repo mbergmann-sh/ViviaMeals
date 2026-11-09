@@ -6,7 +6,7 @@
 //
 // Im Speicher stehen nur die Kurzfassungen (Titel, Tags, Nährwerte, Zutatennamen); vollständige
 // Rezepte (mit Bild) werden bei Bedarf geladen. So bleiben auch große Sammlungen schnell.
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 
 #include "recipe.h"
@@ -22,6 +22,7 @@ struct RecipeSummary {
     double servings = 1;
     QString yieldUnit;
     Nutrients perServing;
+    double servingGrams = 0;        // Gewicht einer Portion (aus den Zutaten)
     double coverage = 0;            // Anteil der Zutaten mit Nährwerten
     bool hasNutrition = false;
     QStringList ingredientNames;    // Namen klein geschrieben
@@ -60,6 +61,9 @@ public:
     bool load(const QString &id, Recipe *out, QString *error = nullptr) const;
     bool save(Recipe &r, QString *error = nullptr);     // setzt modified/created
     bool remove(const QString &id);
+    // alle Rezepte löschen; mit Sicherung werden die .vmr-Dateien vorher in einen Unterordner
+    // „sicherung-JJJJ-MM-TT-hhmmss“ der Datenbank verschoben (gibt dessen Pfad zurück)
+    int clear(bool backup, QString *backupFolder = nullptr, QString *error = nullptr);
     QString fileFor(const QString &id) const;
 
     QStringList duplicatesOf(const Recipe &r) const;    // IDs mit gleichem (normalisiertem) Titel

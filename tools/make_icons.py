@@ -44,6 +44,7 @@ icons = {
  "import-rk": f'<path d="M14 3H6v18h12V7z" {S}/><path d="M14 3v4h4" {S}/><path d="M9 11v6M9 11h2a1.5 1.5 0 0 1 0 3H9M11 14l1.5 3M14 11v6M17 11l-3 3 3 3" {A}/>',
  "import-mm": f'<path d="M14 3H6v18h12V7z" {S}/><path d="M14 3v4h4" {S}/><path d="M8 17v-6l2 3 2-3v6M12.5 17v-6l2 3 2-3v6" {A}/>',
  "web": f'<circle cx="12" cy="12" r="9" {S}/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18" {S}/><path d="M5.5 7h13M5.5 17h13" {A}/>',
+ "odt": f'<path d="M14 3H6v18h12V7z" {S}/><path d="M14 3v4h4" {S}/><path d="M8.5 11h5M8.5 14h7M8.5 17h7" {S}/><rect x="13.5" y="9.5" width="3" height="3" fill="#ACCENT" stroke="none"/>',
  "tex": f'<path d="M14 3H6v18h12V7z" {S}/><path d="M14 3v4h4" {S}/><path d="M8 11h4M10 11v6M12.5 13.5l3 3.5M15.5 13.5l-3 3.5" {A}/>',
  "quit": f'<path d="M15 4h4v16h-4" {S}/><path d="M10 8l-4 4 4 4M6 12h10" {S}/>',
  # Planung

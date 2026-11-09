@@ -1,7 +1,7 @@
 # VitaMeals
 
 Rezeptverwaltung mit **Nährwertanalyse**, **Kühlschrank-Vorschlägen**, **Wochenmenü-Plänen** und
-**Assistenten für Gewichtsverlust und Gewichtszunahme** – Deutsch, Qt 6 (bzw. Qt 5.15) / C++17 / qmake – MIT-Lizenz mit „Commons Clause“ (kein Verkauf).
+**Assistenten für Gewichtsverlust und Gewichtszunahme** – Deutsch, Qt 6 (bzw. Qt 5.15) / C++17 / qmake – PolyForm Noncommercial 1.0.0 (frei für nicht-kommerzielle Nutzung).
 Technisch und optisch an [VitaParms](https://github.com/mbergmann-sh/VitaParms) und
 [VitaBreathe](https://github.com/mbergmann-sh/VitaBreathe) angelehnt (Themes, Symbole, `screenfit`, `windowstate`).
 
@@ -19,14 +19,16 @@ Technisch und optisch an [VitaParms](https://github.com/mbergmann-sh/VitaParms) 
 | ![Suche](docs/images/suche.png) | ![Import](docs/images/import-vorschau.png) | ![Klein](docs/images/hauptfenster-klein.png) |
 | **Nährwerte aus CSV importieren** | **Import mit Umlaut-Korrektur** | **Einstellungen (DeepL)** |
 | ![Nährwert-Import](docs/images/naehrwerte-import.png) | ![Umlaute](docs/images/import-umlaute.png) | ![Einstellungen](docs/images/einstellungen.png) |
+| **Assistent: Tipps und Motivation** | **Rezeptbild zuschneiden** | |
+| ![Tipps](docs/images/assistent-tipps.png) | ![Zuschneiden](docs/images/bild-zuschneiden.png) | |
 
 ## Funktionen
 
 | Bereich | Umsetzung |
 |---|---|
 | **Rezeptfenster** | links die Rezeptliste (Schnellfilter nach Name/Zutat/Tag, Themenauswahl, Favoriten), rechts die HTML-Ansicht: Foto rechts oben, daneben Titel, Portionen, kcal/kJ je Portion, Tags; darunter Zutaten in deutschen Küchenmaßen, Zubereitung und **Nährwerttabelle**. Portionenzahl umstellbar (Mengen werden umgerechnet). Beim Start wird die zuletzt geöffnete Datenbank geöffnet und ein **zufälliges Rezept** gezeigt; ohne Datenbank fordert VitaMeals zum Anlegen auf (auf Wunsch mit Beispielrezepten) |
-| **Rezeptdatenbank** | ein Ordner mit `vitameals.vmdb` (Kennung) und je Rezept einer Datei `rezepte/<id>.vmr` (Eigenformat, JSON, Foto eingebettet) – sicherbar, synchronisierbar (Nextcloud/Dropbox), einzelne Rezepte weitergebbar; `index.json` hält Kurzfassungen für schnelle Listen und Suche |
-| **Editor** | Titel, Rezeptbild (Dateiauswahl, auf 800 px verkleinert), Portionen/Einheit, Zubereitungszeit, Tags (mit Vorschlägen), Quelle, Favorit, Zutatenliste (eine je Zeile, `== Abschnitt ==`), Zubereitung. **Live-Nährwertanalyse** während der Eingabe; Zuordnung einer Zutat zur Nährwerttabelle per Doppelklick änderbar und für alle Rezepte lernbar; Tags vegan/vegetarisch/fleischgerichte/fisch aus den Zutaten ergänzen |
+| **Rezeptdatenbank** | ein Ordner mit `vitameals.vmdb` (Kennung) und je Rezept einer Datei `rezepte/<id>.vmr` (Eigenformat, JSON, Foto eingebettet) – sicherbar, synchronisierbar (Nextcloud/Dropbox), einzelne Rezepte weitergebbar; `index.json` hält Kurzfassungen für schnelle Listen und Suche. *Datei → Datenbank leeren …* löscht alle Rezepte nach Eingabe des Datenbanknamens, wahlweise mit Sicherungskopie |
+| **Editor** | Titel, Rezeptbild (Dateiauswahl mit **Zuschneiden**: Ausschnitt 4:3, 3:2, 16:9, 1:1, 3:4 oder frei, drehen; gespeichert wird nur der Ausschnitt als PNG, höchstens 800 px breit), Portionen/Einheit, Zubereitungszeit, Tags (mit Vorschlägen), Quelle, Favorit, Zutatenliste (eine je Zeile, `== Abschnitt ==`), Zubereitung. **Live-Nährwertanalyse** während der Eingabe; Zuordnung einer Zutat zur Nährwerttabelle per Doppelklick änderbar und für alle Rezepte lernbar; Tags vegan/vegetarisch/fleischgerichte/fisch und Mahlzeit-Tags aus Titel, Zutaten und Nährwerten ergänzen |
 | **Nährwertanalyse** | Energie (kcal **und** kJ), Fett, gesättigte Fettsäuren, Kohlenhydrate, Zucker, Ballaststoffe, Eiweiß, Salz – gesamt, je Portion und in % der Referenzmenge (LMIV). Mengen werden in Gramm umgerechnet (Gewicht direkt, Volumen über die Dichte, Stück/Zehe/Dose/Pck. über Stückgewichte, „1 Süßkartoffel (ca. 400 g)“ über die Angabe). Ergebnis wird **im Rezept gespeichert**; nicht zuordenbare Zutaten werden genannt |
 | **Nährwerttabelle** | eingebaut: rund 210 Lebensmittelgruppen mit Richtwerten je 100 g, Dichte, Stückgewichten und deutschen/englischen Namen (`tools/make_foods.py`). Unter *Extras → Nährwerttabelle* eigene Lebensmittel anlegen und Werte überschreiben (`lebensmittel_eigene.json`) |
 | **Nährwerte importieren (CSV)** | *Extras → Nährwerttabelle → Importieren / Exportieren*: eigene Tabellen aus Excel/LibreOffice, die mitgelieferte **CSV-Vorlage** oder **Open-Food-Facts**-Exporte – Trennzeichen, Zeichensatz (UTF-8, Windows-1252, CP850), Dezimalkomma, „<0,1“ und kJ/Natrium werden erkannt bzw. umgerechnet, Spalten anhand der Überschriften zugeordnet (änderbar), mit Vorschau. Außerdem der entpackte CSV-Ordner von **USDA FoodData Central** (Foundation Foods, SR Legacy – gemeinfrei, CC0). Jeder Import erhält eine Herkunft und lässt sich wieder entfernen; wahlweise ersetzen eigene Werte die eingebauten gleichen Namens. Eigene Lebensmittel lassen sich als CSV exportieren |
@@ -34,12 +36,14 @@ Technisch und optisch an [VitaParms](https://github.com/mbergmann-sh/VitaParms) 
 | **Umlaut-Korrektur** | ältere RezKonv-/MealMaster-Sammlungen in ASCII-Umschrift („Kaese“, „Gemuesebruehe“, „heiss“) werden beim Import korrigiert: ae/oe/ue → ä/ö/ü mit Ausnahmen (Feuer, Sauerbraten, Quelle, zuerst, aktuell, Baguette, Fondue, Oetker, Balsamicoessig …), ss → ß nur in bekannten Wortstämmen (heiß, weiß, gießen, süß, Grieß, gleichmäßig …), sodass Wasser, Schüssel, Masse und Essig bleiben. Großgeschriebene Abschnitte werden normal geschrieben. Abschaltbar; außerdem im Editor („Umlaute korrigieren“) und für die ganze Datenbank (*Extras*) |
 | **Übersetzung mit DeepL (optional)** | fremdsprachige Rezepte (Englisch, Französisch, Italienisch, Spanisch, Niederländisch …) werden beim Import nach Rückfrage mit **DeepL** vollständig ins Deutsche übersetzt – Titel, Zutaten und Zubereitung; deutsche Rezepte werden nie gesendet. Jeder trägt seinen **eigenen API-Schlüssel** ein (kostenloser Tarif *DeepL API Free*, 500.000 Zeichen im Monat), Verbindungstest zeigt den Verbrauch. Ohne Schlüssel oder bei Fehlern übernimmt das Glossar. Auch im Editor und für alle vorhandenen Rezepte (*Extras*) |
 | **Englische Rezepte** | Einheiten werden automatisch umgerechnet (cups → ml bzw. g über die Dichte, oz/lb → g, fl oz/pt/qt → ml, tbsp/tsp → EL/TL, stick butter → g, „1 (16 oz) can“ → g), Zutaten und Zusätze über ein **Offline-Glossar** übersetzt („chopped walnuts“ → „Walnüsse, gehackt“), Temperaturen (°F → °C) und Zoll in der Anleitung umgerechnet. Ohne DeepL bleibt die Anleitung selbst englisch (Hinweis in der Ansicht) |
+| **Mahlzeit-Tags** | beim Import (abschaltbar), im Editor und unter *Extras* für alle Rezepte: **frühstück**, **hauptgerichte**, **zwischenmahlzeit**, **desserts**, **süßspeise**, **backen** – geschätzt aus Kategorien, Titel, Zutaten und Nährwerten (z. B. „Flammeri“ → Dessert, „Porridge“ → Frühstück, Vorspeisen mit wenig Energie → Zwischenmahlzeit) |
 | **Suche** | Rezeptnamen (auch Teilnamen), Zutaten, Tags (UND/ODER), höchstens kcal je Portion, Favoriten, mit Foto |
 | **Kühlschrank** | Bestandsliste und Grundvorrat pflegen → passende Rezepte mit „vorhanden x/y“ und fehlenden Zutaten, **Einkaufsliste** (nach Warengruppen, kopieren/drucken/speichern) |
-| **Assistent Gewichtskontrolle** | beliebig viele Personen mit Größe, Alter, Aktivität (PAL), Ziel (verlieren/halten/zunehmen), Zielgewicht, Tempo, Ernährungsform, ausgeschlossenen Zutaten und bevorzugten Themen; BMI, Grund- und Gesamtumsatz (Mifflin-St Jeor), Zielzufuhr mit Schutzgrenzen, Dauer bis zum Zielgewicht; **Gewichtsverlauf** mit Grafik |
-| **Wochenmenü-Plan** | Frühstück/Mittag/Abend (+ Zwischenmahlzeit) über 1–14 Tage passend zum Kalorienziel, Portionen in Vierteln bemessen, Abwechslung, Vorlieben; einzelne Mahlzeiten neu würfeln oder gezielt wählen; **Einkaufsliste** für die Woche (Vorrat abziehbar), Druck, Speichern im Profil |
+| **Assistent Gewichtskontrolle** | beliebig viele Personen mit Größe, Alter, Aktivität (PAL), Ziel (verlieren/halten/zunehmen), Zielgewicht, Tempo, Ernährungsform, ausgeschlossenen Zutaten und bevorzugten Themen; BMI, Grund- und Gesamtumsatz (Mifflin-St Jeor), Zielzufuhr mit Schutzgrenzen, Dauer bis zum Zielgewicht; **Gewichtsverlauf** mit Grafik; **Wiegetag** mit Erinnerung im Hauptfenster („Erledigt“ blendet sie bis zur nächsten Woche aus, ein Eintrag am Wiegetag ebenso); **Motivation** mit Fortschritt seit dem ersten Eintrag, kurze Erklärung zum Abnehmen/Halten/Zunehmen und Reiter **Tipps** („statt Butter lieber Tomatenmark …“, gute Gewohnheiten nach DGE „Gut essen und trinken“) |
+| **Wochenmenü-Plan** | Frühstück/Mittag/Abend (+ Zwischenmahlzeit) über 1–14 Tage passend zum Kalorienziel (Anteile 25/35/30/10 % bzw. 30/40/30 %). **Frühstück nur aus Frühstücksrezepten**, Zwischenmahlzeiten aus Snacks bzw. leichten Frühstücksrezepten, Mittag-/Abendessen aus Hauptgerichten; beim **Abnehmen** keine Desserts/Süßspeisen und Vorrang für leichte, eiweiß- und ballaststoffreiche Rezepte mit wenig Zucker. Portionen mit **Gramm** („1 ¼ Portionen (ca. 375 g)“), sinnvolle Höchstmengen je Mahlzeit, Tagessummen mit Eiweiß und Ballaststoffen, Wochendurchschnitt mit Hinweisen nach DGE-Richtwerten. Fehlen Frühstücks- oder Snack-Rezepte, weist der Plan darauf hin und bietet **zehn mitgelieferte gesunde Rezepte** an. Einzelne Mahlzeiten neu würfeln oder gezielt wählen; **Einkaufsliste** (Vorrat abziehbar), Druck, Speichern im Profil |
 | **Website-Export** | themenbasierte **HTML5/PHP-Website**: Startseite, Themenseiten (Tags), Rezeptseiten mit Foto und Nährwerten, Menü, responsives Layout; Suche serverseitig (`suche.php`, PHP 7.4+) und sofort im Browser (JavaScript) – Ordner nur noch hochladen |
 | **LaTeX-Export** | einzelnes Rezept als `.tex` für **book** oder **scrbook** – vollständiges Dokument oder Kapitel zum `\input`, mit Foto (JPEG daneben), Zutatentabelle und Nährwerttabelle (booktabs). Mit pdflatex geprüft |
+| **LibreOffice-Writer-Export** | einzelnes Rezept als `.odt` (A4): Titel, darunter **rechts das Rezeptbild, vom Text umflossen**, Portionen mit Gramm, Energie, Tags, Zutaten (Mengen an einem Tabulator ausgerichtet), Zubereitung, Nährwerttabelle; **Fußzeile mit Trennlinie** (Rezepttitel, „Seite x von y“). Ohne Fremdbibliothek erzeugt, mit LibreOffice geprüft |
 | **Darstellung** | alle Qt-Styles sowie „Dark“ und „Visual Studio Code Dark“ (aus VitaParms/VitaBreathe), sofort umschaltbar; Symbole passen sich hell/dunkel an |
 | **Fenster und Bildschirm** | Lage und Größe des Hauptfensters, der Aufteilung und aller Dialoge werden gemerkt (`windowstate`); auf kleinen Bildschirmen werden Dialoge rollbar und in den Bildschirm geholt (`screenfit`); **Schriftgröße automatisch** nach Bildschirmgröße oder fest (85–140 %) |
 | **Demo** | `VitaMeals --demo`: temporäre Datenbank mit Beispielrezepten, Bildern, Profil und Vorrat – eigene Daten bleiben unberührt |
@@ -86,6 +90,9 @@ src/
   ingredientparser.*  Zutatenzeilen zerlegen (Brüche, Bereiche, Packungsgrößen, Abschnitte)
   glossary.*          Offline-Glossar Englisch → Deutsch, Spracherkennung, Kategorien → Tags
   umlauts.*           Umlaut-Korrektur für ASCII-Umschrift (ae/oe/ue/ss)
+  mealtypes.*         Mahlzeit-Arten (Frühstück, Hauptgericht, Zwischenmahlzeit …), Portionsgewicht, Kennzahlen
+  coaching.*          Motivation, Erklärungen und Tipps für den Assistenten
+  odtexport.*         LibreOffice-Writer-Export (.odt, eigener ZIP-Schreiber)
   deepl.*             optionale Übersetzung mit der DeepL-API (eigener Schlüssel)
   foodtable.*         Nährwerttabelle (eingebaut + eigene + gelernte Zuordnungen), Namensabgleich
   foodcsv.*           CSV-Import/-Export eigener Nährwerte, USDA FoodData Central
@@ -98,7 +105,7 @@ src/
   fridge.*            Bestand, Vorschläge, Einkaufslisten
   profiles.*          Personen, Gewichtsverlauf, Energiebedarf
   mealplanner.*       Wochenmenü-Plan
-  mainwindow.*, recipeview.*, editordialog.*, searchdialog.*, importdialogs.*, exportdialogs.*,
+  mainwindow.*, recipeview.*, editordialog.*, imagecropdialog.*, searchdialog.*, importdialogs.*, exportdialogs.*,
   fridgedialog.*, assistantdialog.*, profiledialog.*, weightchart.*, mealplandialog.*, fooddialog.*,
   settingsdialog.*, uiscale.*             Oberfläche
   themes.*, icons.*, screenfit.*, windowstate.*, qtcompat.h   aus VitaBreathe/VitaParms übernommen
@@ -120,22 +127,24 @@ tests/coretest/ Test des Kerns
 ```json
 { "format": "VitaMeals-Recipe", "formatVersion": 1, "id": "…", "title": "…", "servings": 4,
   "tags": ["vegetarisch"], "ingredients": [ {"amount": 200, "unit": "g", "name": "Mehl", "food": "weizenmehl", "grams": 200},
-  {"heading": "Für die Füllung"} ], "instructions": "…", "image": "<Base64-JPEG>",
+  {"heading": "Für die Füllung"} ], "instructions": "…", "image": "<Base64-PNG/JPEG>",
   "nutrition": { "total": {…}, "perServing": {"kcal": 450, "kJ": 1883, "protein": 12.5, "fat": 18, "saturatedFat": 9,
   "carbohydrates": 55, "sugar": 20, "fiber": 4, "salt": 0.8}, "matched": 9, "countable": 10, "unmatched": ["…"] } }
 ```
 
 ## Lizenz
 
-© 2026 Michael Bergmann. VitaMeals steht unter der **MIT-Lizenz mit „Commons Clause“ v1.0**
-(Wortlaut in [LICENSE](LICENSE)):
+© 2026 Michael Bergmann. VitaMeals steht unter der **PolyForm Noncommercial License 1.0.0**
+(Wortlaut in [LICENSE](LICENSE), <https://polyformproject.org/licenses/noncommercial/1.0.0>):
 
-* **erlaubt** – kostenlos: das Programm nutzen (privat, im Verein, im Büro), den Quelltext lesen,
-  verändern und Veränderungen weitergeben; Weitergabe nur mit diesem Lizenztext.
-* **nicht erlaubt:** VitaMeals zu **verkaufen** – also das Programm oder ein Produkt bzw. eine
-  Dienstleistung, deren Wert ganz oder im Wesentlichen auf VitaMeals beruht, gegen Entgelt anzubieten
-  (auch als kostenpflichtiges Hosting oder kostenpflichtigen Support).
+* **erlaubt** – kostenlos – ist jede **nicht-kommerzielle** Nutzung: privat (Hobby, Studium, eigene
+  Gesundheitsplanung, Forschung ohne kommerzielle Absicht) und durch gemeinnützige Organisationen,
+  Schulen, Hochschulen und Behörden. Der Quelltext darf dafür gelesen, verändert und – zusammen mit
+  dem Lizenztext und der Zeile `Required Notice: …` – weitergegeben werden.
+* **nicht erlaubt** ist jede **kommerzielle** Nutzung, insbesondere der Verkauf von VitaMeals oder
+  von veränderten Fassungen und der Einsatz in kostenpflichtigen Produkten oder Dienstleistungen.
+  Dafür ist eine gesonderte Erlaubnis des Autors nötig.
 
-Durch die Commons Clause ist VitaMeals *quelloffen*, aber keine „Open Source“-Software im Sinne der
-Open Source Initiative. Die mit dem Windows-Installer ausgelieferten Qt-Bibliotheken stehen weiterhin
-unter der LGPL-3.0 und fallen nicht unter die Commons Clause.
+VitaMeals ist damit *quelloffen*, aber keine „Open Source“-Software im Sinne der Open Source
+Initiative. Die mit dem Windows-Installer ausgelieferten Qt-Bibliotheken stehen weiterhin unter der
+LGPL-3.0. Kein Medizinprodukt; ohne Gewähr.

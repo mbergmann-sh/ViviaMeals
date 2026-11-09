@@ -1,6 +1,7 @@
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "recipehtml.h"
 #include "nutrition.h"
+#include "mealtypes.h"
 
 #include <QCoreApplication>
 #include <QHash>
@@ -137,7 +138,7 @@ QString render(const Recipe &r, const Style &st, double servings)
     // Kopf: links Titel und Eckdaten, rechts oben das Foto
     QString img;
     if (!r.image.isEmpty()) {
-        const QString src = st.imageSrc.isEmpty() ? QStringLiteral("data:image/jpeg;base64,") + r.image : st.imageSrc;
+        const QString src = st.imageSrc.isEmpty() ? (r.image.startsWith(QLatin1String("iVBOR")) ? QStringLiteral("data:image/png;base64,") : QStringLiteral("data:image/jpeg;base64,")) + r.image : st.imageSrc;
         img = QStringLiteral("<img src=\"%1\" width=\"%2\" alt=\"%3\"/>").arg(src).arg(st.imageWidth).arg(escape(r.title));
     }
     h += QStringLiteral("<table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td valign=\"top\">");
@@ -148,6 +149,11 @@ QString render(const Recipe &r, const Style &st, double servings)
     QString portions = r.yieldUnit.isEmpty() ? (sv == 1.0 ? tr("1 Portion") : tr("%1 Portionen").arg(Fmt::number(sv, 1)))
                                              : Fmt::number(sv, 1) + QLatin1Char(' ') + escape(r.yieldUnit);
     meta += QStringLiteral("<b>%1</b>").arg(portions);
+    const double g = MealTypes::servingGrams(r);
+    if (g >= 10 && !Nutrition::isMenu(r))
+        meta += QStringLiteral(" &nbsp;<span style=\"color:%1;\">%2</span>")
+                    .arg(col(st.muted), r.yieldUnit.isEmpty() ? tr("(ca. %1 g je Portion)").arg(qRound(g / 5.0) * 5)
+                                                              : tr("(ca. %1 g je %2)").arg(qRound(g / 5.0) * 5).arg(escape(r.yieldUnit)));
     if (r.prepMinutes > 0) meta += QStringLiteral(" &nbsp;·&nbsp; ") + tr("%1 Minuten").arg(r.prepMinutes);
     h += QStringLiteral("<p style=\"margin-top:0;\">%1</p>").arg(meta);
     if (r.nutrition.valid() && r.nutrition.matched > 0) {

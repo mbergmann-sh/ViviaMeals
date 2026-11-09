@@ -5,6 +5,7 @@ SOURCES += \
     $$PWD/src/main.cpp \
     $$PWD/src/mainwindow.cpp \
     $$PWD/src/recipeview.cpp \
+    $$PWD/src/imagecropdialog.cpp \
     $$PWD/src/editordialog.cpp \
     $$PWD/src/searchdialog.cpp \
     $$PWD/src/importdialogs.cpp \
@@ -25,6 +26,7 @@ SOURCES += \
 HEADERS += \
     $$PWD/src/mainwindow.h \
     $$PWD/src/recipeview.h \
+    $$PWD/src/imagecropdialog.h \
     $$PWD/src/editordialog.h \
     $$PWD/src/searchdialog.h \
     $$PWD/src/importdialogs.h \

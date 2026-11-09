@@ -3,7 +3,7 @@
 // Bestand: Liste von Lebensmitteln („Eier“, „Milch“, „500 g Hackfleisch“), gespeichert in den
 // Einstellungen dieses Geräts. Vorschläge: Rezepte, deren Zutaten möglichst vollständig im Bestand
 // (bzw. im Grundvorrat wie Salz, Pfeffer, Öl, Wasser) vorhanden sind, mit fehlenden Zutaten.
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 
 #include "recipe.h"

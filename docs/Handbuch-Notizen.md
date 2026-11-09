@@ -1,6 +1,6 @@
 # VitaMeals – Notizen für das Handbuch
 
-Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.3.0.
+Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.4.0.
 
 ---
 
@@ -151,3 +151,91 @@ Nährwerttabelle die Zutaten wieder.
   nicht als Rezept berechnet.
 * Die Spracherkennung arbeitet mit häufigen Wörtern; sehr kurze Rezepte gelten im Zweifel als deutsch
   (sie werden also nicht unnötig an DeepL gesendet).
+
+---
+
+## Wochenmenü-Plan (ab 0.4.0)
+
+* **Welche Rezepte wohin?** Frühstück kommt nur aus Rezepten mit dem Tag „frühstück“, die
+  Zwischenmahlzeit aus „zwischenmahlzeit“ (oder leichten Frühstücksrezepten bis ca. 320 kcal),
+  Mittag- und Abendessen aus Hauptgerichten. Desserts, Kuchen und Grundrezepte (Soßen, Getränke)
+  werden nicht als Hauptmahlzeit verplant.
+* **Beim Abnehmen** werden Desserts und Süßspeisen gar nicht verplant; bevorzugt werden Rezepte mit
+  geringer Energiedichte (kcal je 100 g), wenig Zucker und viel Eiweiß bzw. Ballaststoffen – sie
+  machen satter. Beim Zunehmen ist es umgekehrt (energiereichere Rezepte, viel Eiweiß).
+* **Aufteilung des Tagesbedarfs:** mit Zwischenmahlzeit 25 % / 35 % / 30 % / 10 %, ohne 30 % / 40 % / 30 %.
+* **Portionen in Gramm:** „1 ¼ Portionen (ca. 375 g)“. Das Gewicht ergibt sich aus den Zutaten des
+  Rezepts. Höchstmengen je Mahlzeit: etwa 450 g zum Frühstück, 350 g als Zwischenmahlzeit, 800 g mittags
+  und abends – damit nicht „1,3 kg Suppe“ eingeplant werden.
+* **Zusammenfassung unter dem Plan:** Tagesdurchschnitt von Energie, Eiweiß, Fett, Kohlenhydraten,
+  Zucker und Ballaststoffen mit Hinweisen (z. B. „Ballaststoffe unter dem Richtwert von 30 g“) und
+  dem frei bleibenden Rest („Platz für ein Stück Obst …“).
+* **Fehlen Frühstücks- oder Snack-Rezepte**, steht ein Hinweis unter dem Plan; die Schaltfläche
+  **Gesunde Vorschläge übernehmen** fügt zehn mitgelieferte Rezepte hinzu (Porridge mit Beeren,
+  Vollkornbrot mit Kräuterquark, Rührei mit Spinat, Joghurt mit Apfel, Vollkornbrot mit
+  Tomatenmark-Aufstrich, Apfel mit Mandeln, Gemüsesticks mit Dip, Magerquark mit Beeren, Knäckebrot
+  mit Hüttenkäse, gekochtes Ei mit Paprika). Doppelte werden übersprungen.
+
+## Mahlzeit-Tags
+
+* Beim Import (Einstellung „Mahlzeit-Tags ergänzen“), im Editor über **Ergänzen** und für die ganze
+  Datenbank über **Extras → Mahlzeit-Tags für alle Rezepte ergänzen …** (mit Vorschau der Anzahl).
+* Erkannt werden **frühstück**, **hauptgerichte**, **zwischenmahlzeit**, **desserts**, **süßspeise**
+  und **backen** – aus Kategorien, Titel („Porridge“, „Flammeri“, „Gulasch“, „Bauernbrot“),
+  Zutaten (Fleisch/Fisch) und Nährwerten (Zuckeranteil, Energie je Portion). Vorspeisen und Salate
+  mit wenig Energie gelten als Zwischenmahlzeit.
+* Es werden nur Tags **ergänzt**, nie entfernt. Fehlgriffe im Editor einfach löschen.
+
+## Wiegetag und Erinnerung
+
+* Im Assistenten unter **Bearbeiten …** den **Wiegetag** wählen (z. B. Montag).
+* Am Wiegetag erscheint im Hauptfenster ein orangefarbener Hinweis „Heute (Montag) ist Wiegetag für …“
+  mit **Gewicht eintragen …** und **Erledigt**. Wird der Tag verpasst, bleibt der Hinweis bis zum
+  Eintrag stehen („Der Wiegetag am Montag, 09.11. steht noch aus“).
+* **Erledigt** blendet die Erinnerung bis zum nächsten Wiegetag aus; ein Gewichtseintrag am oder nach
+  dem Wiegetag erledigt sie automatisch.
+* Tipp für die Anleitung: immer am selben Wochentag, morgens nach dem Aufstehen, vor dem Frühstück wiegen.
+
+## Motivation und Tipps
+
+* In der **Übersicht** des Assistenten: Fortschritt seit dem ersten Eintrag („Seit dem 10.08. haben
+  Sie 5,9 kg abgenommen – weiter so! Bis zum Ziel sind es noch 5,5 kg.“) und eine kurze Erklärung, wie
+  Abnehmen, Halten bzw. Zunehmen funktioniert.
+* Reiter **Tipps**: Tabelle „statt … lieber …“ mit Effekt (z. B. Butter → Tomatenmark, Sahnesoße →
+  Milch mit Speisestärke, Limonade → Schorle 1 : 3) und gute Gewohnheiten nach den DGE-Empfehlungen
+  „Gut essen und trinken“ (2024) sowie der WHO-Bewegungsempfehlung. Für Zunehmen eigene Tipps
+  (mehrere kleine Mahlzeiten, Nüsse, Krafttraining).
+
+## Rezeptbild zuschneiden
+
+* Nach **Bild wählen …** öffnet sich der Zuschnitt: Rahmen verschieben, an den Ecken die Größe ändern
+  oder außerhalb einen neuen Rahmen aufziehen; Seitenverhältnis 4 : 3, 3 : 2, 16 : 9, 1 : 1, 3 : 4
+  oder frei; drehen in 90°-Schritten; „Größter Ausschnitt“ setzt zurück.
+* Gespeichert wird **nur der Ausschnitt** als PNG (höchstens 800 Pixel breit) im Rezept – das
+  Originalbild wird nicht übernommen und bleibt unverändert auf der Festplatte.
+
+*Bildschirmfoto: `docs/images/bild-zuschneiden.png`*
+
+## Export als LibreOffice-Writer-Datei (.odt)
+
+* **Datei → Export → Als LibreOffice-Writer-Datei (.odt) exportieren …** oder im Kontextmenü der
+  Rezeptliste. Die eingestellte Portionenzahl wird übernommen.
+* Aufbau: Titel, darunter rechts das Rezeptbild (der Text fließt links daran vorbei), Portionen mit
+  Gramm, Energie, Tags, Zutaten, Zubereitung, Nährwerttabelle, Quelle. Fußzeile mit Trennlinie:
+  Rezepttitel links, „Seite x von y“ rechts. Nach dem Speichern kann die Datei direkt geöffnet werden.
+* Die Datei lässt sich in LibreOffice, OpenOffice und Microsoft Word öffnen und weiterbearbeiten.
+
+## Datenbank leeren
+
+* **Datei → Datenbank leeren …** löscht alle Rezepte der geöffneten Datenbank.
+* Sicherheitsabfrage: Der Name der Datenbank muss eingetippt werden, erst dann wird die Schaltfläche
+  „Alle Rezepte löschen“ aktiv. Voreingestellt wird vorher eine **Sicherungskopie** angelegt
+  (Unterordner `sicherung-JJJJ-MM-TT-hhmmss` im Datenbankordner). Wiederherstellen: die `.vmr`-Dateien
+  über **Datei → Import → VitaMeals-Rezept (.vmr)** importieren.
+
+## Lizenz (Textbaustein)
+
+> VitaMeals steht unter der PolyForm Noncommercial License 1.0.0. Die Nutzung ist für alle
+> nicht-kommerziellen Zwecke kostenlos erlaubt – privat sowie durch gemeinnützige Organisationen,
+> Schulen und Behörden –, einschließlich Verändern und Weitergeben mit dem Lizenztext. Kommerzielle
+> Nutzung und Verkauf sind nur mit Erlaubnis des Autors gestattet.

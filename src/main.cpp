@@ -5,7 +5,7 @@
 //   VitaMeals --demo                Demo mit Beispielrezepten, Bildern und einem Profil in einem temporären
 //                                   Ordner, mit eigenen Einstellungen – berührt die eigenen Daten nicht
 //   VitaMeals --demo --screenshots <ordner>   Bildschirmfotos für Handbuch/README erzeugen
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "assistantdialog.h"
 #include "editordialog.h"
 #include "foodcsv.h"
@@ -17,6 +17,8 @@
 #include "importers.h"
 #include "mainwindow.h"
 #include "settingsdialog.h"
+#include "imagecropdialog.h"
+#include <QTabWidget>
 #include "mealplandialog.h"
 #include "profiles.h"
 #include "qtcompat.h"
@@ -117,7 +119,8 @@ void createDemo(const QString &folder)
     RecipeDb &db = RecipeDb::instance();
     db.create(folder, QObject::tr("Demo-Rezepte"));
     db.beginBatch();
-    for (const QString &f : { QStringLiteral(":/samples/beispiele.rk"), QStringLiteral(":/samples/beispiele.mmf"), QStringLiteral(":/samples/umlaute.rk") }) {
+    for (const QString &f : { QStringLiteral(":/samples/beispiele.rk"), QStringLiteral(":/samples/beispiele.mmf"), QStringLiteral(":/samples/umlaute.rk"),
+                            QStringLiteral(":/samples/gesund.rk") }) {
         const Importers::Result res = Importers::importFile(f, Importers::Format::Unknown);
         for (Recipe r : res.recipes) {
             r.image = demoImage(r);
@@ -142,7 +145,9 @@ void createDemo(const QString &folder)
     p.likedTags = { QStringLiteral("suppen"), QStringLiteral("vegetarisch") };
     p.excluded = { QStringLiteral("Walnüsse") };
     double kg = 79.4;
-    for (int d = 84; d >= 0; d -= 7) {
+    p.snack = true;
+    p.weighDay = QDate::currentDate().dayOfWeek();   // heute ist Wiegetag → Erinnerung im Hauptfenster
+    for (int d = 91; d >= 7; d -= 7) {
         p.weights << WeightEntry{ QDate::currentDate().addDays(-d), std::round(kg * 10) / 10.0, {} };
         kg -= 0.35 + QRandomGenerator::global()->bounded(30) / 100.0;
     }
@@ -201,6 +206,10 @@ void takeScreenshots(MainWindow *w, const QString &dir)
         AssistantDialog d(w);
         d.show();
         shot(&d, dir, QStringLiteral("assistent"));
+        if (auto *tabs = d.findChild<QTabWidget *>()) {
+            tabs->setCurrentIndex(2);
+            shot(&d, dir, QStringLiteral("assistent-tipps"));
+        }
         d.reject();
     }
     {
@@ -224,6 +233,39 @@ void takeScreenshots(MainWindow *w, const QString &dir)
                               w);
         d.show();
         shot(&d, dir, QStringLiteral("import-umlaute"));
+        d.reject();
+    }
+    {
+        QImage img(1200, 800, QImage::Format_RGB32);
+        Recipe demo;
+        demo.title = QStringLiteral("Gemüse-Curry");
+        img.loadFromData(QByteArray::fromBase64(demoImage(demo).toLatin1()));
+        if (img.isNull()) img.fill(QColor(200, 180, 120));
+        ImageCropDialog d(img.scaled(1200, 900), w);
+        d.show();
+        QApplication::processEvents();
+        // Ausschnitt per Maus verkleinern (prüft zugleich die Mausbedienung)
+        if (auto *cw = d.findChild<CropWidget *>()) {
+            const QRect before = cw->selection();
+            auto send = [cw](QEvent::Type t, QPointF p, Qt::MouseButtons b) {
+                QMouseEvent e(t, p, cw->mapToGlobal(p), t == QEvent::MouseMove ? Qt::NoButton : Qt::LeftButton, b, Qt::NoModifier);
+                QApplication::sendEvent(cw, &e);
+            };
+            const QRectF v(cw->rect());
+            // untere rechte Ecke liegt am Rand des Bildbereichs – etwas nach innen ziehen
+            QPointF corner(v.width() - 8 - (v.width() - 16 - (v.height() - 16) * 1200.0 / 900.0) / 2.0, v.height() - 8);
+            send(QEvent::MouseButtonPress, corner, Qt::LeftButton);
+            send(QEvent::MouseMove, corner - QPointF(200, 150), Qt::LeftButton);
+            send(QEvent::MouseButtonRelease, corner - QPointF(200, 150), Qt::NoButton);
+            send(QEvent::MouseButtonPress, QPointF(v.width() * 0.3, v.height() * 0.3), Qt::LeftButton);
+            send(QEvent::MouseMove, QPointF(v.width() * 0.3 + 80, v.height() * 0.3 + 60), Qt::LeftButton);
+            send(QEvent::MouseButtonRelease, QPointF(v.width() * 0.3 + 80, v.height() * 0.3 + 60), Qt::NoButton);
+            const QRect after = cw->selection();
+            const QImage res = d.result();
+            qInfo("Zuschneiden: %dx%d -> %dx%d bei %d,%d, Ergebnis %dx%d", before.width(), before.height(), after.width(), after.height(),
+                  after.x(), after.y(), res.width(), res.height());
+        }
+        shot(&d, dir, QStringLiteral("bild-zuschneiden"));
         d.reject();
     }
     {

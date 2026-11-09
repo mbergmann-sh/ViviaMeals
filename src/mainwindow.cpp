@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "mainwindow.h"
 #include "assistantdialog.h"
 #include "editordialog.h"
@@ -9,6 +9,7 @@
 #include "importdialogs.h"
 #include "mealplandialog.h"
 #include "nutrition.h"
+#include "profiles.h"
 #include "recipedb.h"
 #include "recipehtml.h"
 #include "recipeview.h"
@@ -16,6 +17,8 @@
 #include "settingsdialog.h"
 #include "themes.h"
 #include "umlauts.h"
+#include "mealtypes.h"
+#include "odtexport.h"
 #include "deepl.h"
 
 #include <QAction>
@@ -24,7 +27,11 @@
 #include <QRegularExpression>
 #include <QApplication>
 #include <QCloseEvent>
+#include <QCheckBox>
 #include <QComboBox>
+#include <QDesktopServices>
+#include <QDialogButtonBox>
+#include <QUrl>
 #include <QDir>
 #include <QFile>
 #include <QFileDialog>
@@ -85,6 +92,34 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     hl->addLayout(ht, 1);
     lay->addWidget(head);
 
+    // Erinnerung an den Wiegetag (Assistent Gewichtskontrolle)
+    m_reminder = new QFrame;
+    m_reminder->setObjectName(QStringLiteral("weighReminder"));
+    m_reminder->setFrameShape(QFrame::StyledPanel);
+    m_reminder->setStyleSheet(QStringLiteral("QFrame#weighReminder { background: rgba(224, 98, 13, 40); border: 1px solid #e0620d; border-radius: 4px; }"));
+    auto *rl = new QHBoxLayout(m_reminder);
+    rl->setContentsMargins(8, 4, 8, 4);
+    auto *ricon = new QLabel;
+    ricon->setPixmap(Icons::get(QStringLiteral("scale")).pixmap(22, 22));
+    rl->addWidget(ricon);
+    m_reminderText = new QLabel;
+    m_reminderText->setWordWrap(true);
+    rl->addWidget(m_reminderText, 1);
+    auto *weigh = new QPushButton(Icons::get(QStringLiteral("add")), tr("Gewicht eintragen …"));
+    auto *done = new QPushButton(tr("Erledigt"));
+    done->setToolTip(tr("Erinnerung bis zum nächsten Wiegetag ausblenden"));
+    rl->addWidget(weigh);
+    rl->addWidget(done);
+    lay->addWidget(m_reminder);
+    m_reminder->hide();
+    connect(weigh, &QPushButton::clicked, this, &MainWindow::openAssistant);
+    connect(done, &QPushButton::clicked, this, [this] {
+        for (Profile &p : Profiles::instance().all())
+            if (p.weighReminderDue()) p.markWeighDone();
+        Profiles::instance().save();
+        updateReminder();
+    });
+
     m_split = new QSplitter(Qt::Horizontal);
     auto *left = new QWidget;
     auto *ll = new QVBoxLayout(left);
@@ -128,6 +163,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
         QMenu menu(this);
         menu.addAction(Icons::get(QStringLiteral("edit")), tr("Bearbeiten …"), this, &MainWindow::editRecipe);
         menu.addAction(Icons::get(QStringLiteral("tex")), tr("Als LaTeX-Datei exportieren …"), this, &MainWindow::exportLatex);
+        menu.addAction(Icons::get(QStringLiteral("odt")), tr("Als LibreOffice-Writer-Datei (.odt) exportieren …"), this, &MainWindow::exportOdt);
         menu.addAction(Icons::get(QStringLiteral("save")), tr("Als .vmr-Datei speichern …"), this, &MainWindow::exportVmr);
         menu.addAction(Icons::get(QStringLiteral("print")), tr("Drucken …"), this, &MainWindow::printRecipe);
         menu.addSeparator();
@@ -155,6 +191,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     m_split->restoreState(s.value(QStringLiteral("ui/split")).toByteArray());
     refreshHeader();
     updateActions();
+    updateReminder();
     m_view->showMessage(tr("Willkommen bei VitaMeals"), tr("Keine Rezeptdatenbank geöffnet."));
 }
 
@@ -224,8 +261,15 @@ void MainWindow::buildMenus()
     a = exp->addAction(Icons::get(QStringLiteral("tex")), tr("Als &LaTeX-Datei exportieren …"), this, &MainWindow::exportLatex);
     a->setObjectName(QStringLiteral("actTex"));
     m_needRecipe << a;
+    a = exp->addAction(Icons::get(QStringLiteral("odt")), tr("Als Libre&Office-Writer-Datei (.odt) exportieren …"), this, &MainWindow::exportOdt);
+    a->setObjectName(QStringLiteral("actOdt"));
+    m_needRecipe << a;
     a = exp->addAction(Icons::get(QStringLiteral("save")), tr("Als VitaMeals-Rezept (.&vmr) speichern …"), this, &MainWindow::exportVmr);
     m_needRecipe << a;
+    file->addSeparator();
+    a = file->addAction(Icons::get(QStringLiteral("delete")), tr("Datenbank &leeren …"), this, &MainWindow::clearDatabase);
+    a->setStatusTip(tr("Alle Rezepte der geöffneten Datenbank löschen (mit Sicherheitsabfrage und Sicherungskopie)"));
+    m_needDb << a;
     file->addSeparator();
     a = file->addAction(Icons::get(QStringLiteral("print")), tr("&Drucken …"), this, &MainWindow::printRecipe);
     a->setShortcut(QKeySequence::Print);
@@ -256,6 +300,9 @@ void MainWindow::buildMenus()
     QMenu *extras = menuBar()->addMenu(tr("E&xtras"));
     a = extras->addAction(Icons::get(QStringLiteral("nutrition")), tr("&Nährwerttabelle …"), this, &MainWindow::openFoodTable);
     a = extras->addAction(Icons::get(QStringLiteral("refresh")), tr("Nährwerte aller Rezepte neu &berechnen"), this, &MainWindow::recalcAll);
+    m_needDb << a;
+    a = extras->addAction(Icons::get(QStringLiteral("tag")), tr("&Mahlzeit-Tags für alle Rezepte ergänzen …"), this, &MainWindow::mealTagsAll);
+    a->setStatusTip(tr("Frühstück, Hauptgericht, Zwischenmahlzeit, Dessert, Süßspeise und Backen aus Titel, Zutaten und Nährwerten ableiten"));
     m_needDb << a;
     a = extras->addAction(Icons::get(QStringLiteral("umlaut")), tr("&Umlaute in allen Rezepten korrigieren …"), this, &MainWindow::fixUmlautsAll);
     a->setStatusTip(tr("Rezepte ohne ä, ö, ü und ß (z. B. „Kaese“, „heiss“) in der ganzen Datenbank korrigieren"));
@@ -439,6 +486,7 @@ void MainWindow::openDatabaseDialog()
 
 void MainWindow::refreshHeader()
 {
+    updateReminder();
     const RecipeDb &db = RecipeDb::instance();
     if (!db.isOpen()) {
         m_headName->setText(QStringLiteral("VitaMeals"));
@@ -719,6 +767,106 @@ void MainWindow::exportLatex()
     d.exec();
 }
 
+void MainWindow::exportOdt()
+{
+    if (!m_view->hasRecipe()) return;
+    const Recipe &r = m_view->recipe();
+    QSettings s;
+    const QString dir = s.value(QStringLiteral("export/odtDir"), QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)).toString();
+    const QString f = QFileDialog::getSaveFileName(this, tr("Als LibreOffice-Writer-Datei exportieren"), QDir(dir).filePath(OdtExport::defaultFileName(r)),
+                                                   tr("OpenDocument-Text (*.odt)"));
+    if (f.isEmpty()) return;
+    s.setValue(QStringLiteral("export/odtDir"), QFileInfo(f).absolutePath());
+    OdtExport::Options o;
+    o.servings = m_view->servings();
+    QString err;
+    if (!OdtExport::write(r, f, o, &err)) {
+        QMessageBox::warning(this, tr("Export"), tr("Die Datei konnte nicht geschrieben werden:\n%1").arg(err));
+        return;
+    }
+    QMessageBox box(QMessageBox::Information, tr("Export"), tr("„%1“ wurde gespeichert.").arg(QDir::toNativeSeparators(f)), QMessageBox::Ok, this);
+    QPushButton *open = box.addButton(tr("Öffnen"), QMessageBox::ActionRole);
+    box.exec();
+    if (box.clickedButton() == open) QDesktopServices::openUrl(QUrl::fromLocalFile(f));
+}
+
+void MainWindow::clearDatabase()
+{
+    RecipeDb &db = RecipeDb::instance();
+    if (!db.isOpen()) return;
+    QDialog d(this);
+    d.setWindowTitle(tr("Datenbank leeren"));
+    auto *lay = new QVBoxLayout(&d);
+    auto *warn = new QLabel(tr("<p><b>Achtung:</b> Alle <b>%1 Rezepte</b> der Datenbank „%2“ werden gelöscht.</p>"
+                               "<p>Zur Bestätigung bitte den Namen der Datenbank eingeben:</p>")
+                                .arg(db.count())
+                                .arg(db.name().toHtmlEscaped()));
+    warn->setWordWrap(true);
+    lay->addWidget(warn);
+    auto *name = new QLineEdit;
+    name->setPlaceholderText(db.name());
+    lay->addWidget(name);
+    auto *backup = new QCheckBox(tr("Vorher Sicherungskopie anlegen (Unterordner „sicherung-…“ im Datenbankordner)"));
+    backup->setChecked(true);
+    lay->addWidget(backup);
+    auto *bb = new QDialogButtonBox(QDialogButtonBox::Cancel);
+    QPushButton *go = bb->addButton(tr("Alle Rezepte löschen"), QDialogButtonBox::DestructiveRole);
+    go->setIcon(Icons::get(QStringLiteral("delete")));
+    go->setEnabled(false);
+    lay->addWidget(bb);
+    connect(name, &QLineEdit::textChanged, &d, [&](const QString &t) { go->setEnabled(t.trimmed() == db.name()); });
+    connect(go, &QPushButton::clicked, &d, &QDialog::accept);
+    connect(bb, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+    bb->button(QDialogButtonBox::Cancel)->setDefault(true);
+    if (d.exec() != QDialog::Accepted) return;
+    QString folder, err;
+    const int n = db.clear(backup->isChecked(), &folder, &err);
+    if (n < 0) {
+        QMessageBox::warning(this, tr("Datenbank leeren"), err);
+        return;
+    }
+    QString msg = tr("%1 Rezepte gelöscht.").arg(n);
+    if (!folder.isEmpty()) msg += QLatin1Char('\n') + tr("Sicherung: %1 – zum Wiederherstellen die .vmr-Dateien über "
+                                                         "Datei → Import → VitaMeals-Rezept (.vmr) importieren.")
+                                                          .arg(QDir::toNativeSeparators(folder));
+    QMessageBox::information(this, tr("Datenbank leeren"), msg);
+    showCurrent();
+}
+
+void MainWindow::mealTagsAll()
+{
+    RecipeDb &db = RecipeDb::instance();
+    QList<Recipe> todo;
+    QHash<QString, int> counts;
+    for (const RecipeSummary &s : db.summaries()) {
+        Recipe r;
+        if (!db.load(s.id, &r) || Nutrition::isMenu(r)) continue;
+        const QStringList add = MealTypes::suggestTags(r);
+        if (add.isEmpty()) continue;
+        for (const QString &t : add) counts[t]++;
+        for (const QString &t : add) r.addTag(t);
+        todo << r;
+    }
+    if (todo.isEmpty()) {
+        QMessageBox::information(this, tr("Mahlzeit-Tags"), tr("Alle Rezepte haben bereits passende Mahlzeit-Tags."));
+        return;
+    }
+    QStringList lines;
+    for (const QString &t : MealTypes::mealTags())
+        if (counts.value(t)) lines << QStringLiteral("  %1: %2").arg(RecipeHtml::tagLabel(t)).arg(counts.value(t));
+    if (QMessageBox::question(this, tr("Mahlzeit-Tags"),
+                              tr("Für %1 Rezepte würden diese Tags ergänzt:\n\n%2\n\nVorhandene Tags bleiben erhalten. Fortfahren?")
+                                  .arg(todo.size())
+                                  .arg(lines.join(QLatin1Char('\n'))))
+        != QMessageBox::Yes)
+        return;
+    db.beginBatch();
+    for (Recipe &r : todo) db.save(r);
+    db.endBatch();
+    statusBar()->showMessage(tr("Mahlzeit-Tags für %1 Rezepte ergänzt.").arg(todo.size()), 5000);
+    showCurrent();
+}
+
 void MainWindow::exportVmr()
 {
     if (!m_view->hasRecipe()) return;
@@ -886,6 +1034,27 @@ void MainWindow::openAssistant()
     AssistantDialog d(this);
     connect(&d, &AssistantDialog::planRequested, this, [this](const QString &id) { openMealPlan(id); });
     d.exec();
+    updateReminder();
+}
+
+void MainWindow::updateReminder()
+{
+    QStringList who;
+    QString day;
+    for (const Profile &p : Profiles::instance().all())
+        if (p.weighReminderDue()) {
+            who << p.name.toHtmlEscaped();
+            const QDate d = p.lastWeighDay();
+            day = d == QDate::currentDate() ? tr("Heute (%1) ist Wiegetag").arg(Profile::dayName(d.dayOfWeek()))
+                                           : tr("Der Wiegetag am %1, %2 steht noch aus").arg(Profile::dayName(d.dayOfWeek()), d.toString(QStringLiteral("dd.MM.")));
+        }
+    if (who.isEmpty()) {
+        m_reminder->hide();
+        return;
+    }
+    m_reminderText->setText(tr("<b>%1</b> für %2 – am besten morgens vor dem Frühstück wiegen und das Gewicht im Assistenten eintragen.")
+                                .arg(day, who.join(QStringLiteral(", "))));
+    m_reminder->show();
 }
 
 void MainWindow::openMealPlan(const QString &profileId)
@@ -923,12 +1092,18 @@ void MainWindow::about()
                     .arg(QApplication::applicationVersion()));
     box.setInformativeText(tr("<p><b>VitaMeals ist kein Medizinprodukt.</b> Nährwerte und Energiebedarf sind Schätzwerte "
                               "und ersetzen keine ärztliche oder Ernährungsberatung.</p>"
-                              "<p>Importiert RezKonv und MealMaster, exportiert Websites (HTML5/PHP) und LaTeX (book, scrbook).<br/>"
+                              "<p>Importiert RezKonv und MealMaster, exportiert Websites (HTML5/PHP), LaTeX (book, scrbook) "
+                              "und LibreOffice Writer (.odt).<br/>"
                               "Optik und Bausteine aus VitaParms und VitaBreathe.</p>"
                               "<p>© 2026 Michael Bergmann<br/>"
-                              "Quelloffen unter der <b>MIT-Lizenz mit „Commons Clause“</b>: Nutzung, Weitergabe und Veränderung "
-                              "sind kostenlos erlaubt, der <b>Verkauf</b> von VitaMeals oder darauf beruhender Produkte und "
-                              "Dienstleistungen nicht.<br/>Verwendet Qt (LGPL-3.0).</p>"));
+                              "Quelloffen unter der <b>PolyForm Noncommercial License 1.0.0</b>: kostenlos für jede "
+                              "<b>nicht-kommerzielle</b> Nutzung – privat sowie durch gemeinnützige Organisationen, Schulen und "
+                              "Behörden –, einschließlich Verändern und Weitergeben. <b>Kommerzielle Nutzung und Verkauf</b> nur mit "
+                              "Erlaubnis des Autors.<br/>"
+                              "<a href=\"https://polyformproject.org/licenses/noncommercial/1.0.0\">polyformproject.org/licenses/noncommercial/1.0.0</a>"
+                              "<br/>Verwendet Qt (LGPL-3.0).</p>"));
+    box.setTextFormat(Qt::RichText);
+    box.setTextInteractionFlags(Qt::TextBrowserInteraction);
     QFile lic(QStringLiteral(":/doc/LICENSE"));
     if (lic.open(QIODevice::ReadOnly)) box.setDetailedText(QString::fromUtf8(lic.readAll()));   // „Details einblenden …“ zeigt den Lizenztext
     box.setStandardButtons(QMessageBox::Ok);

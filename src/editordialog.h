@@ -4,7 +4,7 @@
 // Zutat je Zeile, „== Überschrift ==“ für Abschnitte) und Zubereitung. Aus der Zutatenliste und
 // den erkannten Mengenangaben werden laufend Kalorien/Joule und alle Nährwerte je Portion
 // berechnet; die Zuordnung einer Zutat zur Nährwerttabelle lässt sich per Doppelklick ändern.
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 
 #include "recipe.h"

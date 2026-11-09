@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "settingsdialog.h"
 #include "deepl.h"
 #include "icons.h"
@@ -50,6 +50,10 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
                              "Wörter wie „Feuer“, „Sauerbraten“, „zuerst“, „Wasser“ oder „Masse“ bleiben unverändert."));
     m_umlauts->setChecked(s.value(QStringLiteral("import/fixUmlauts"), true).toBool());
     il->addWidget(m_umlauts);
+    m_mealTags = new QCheckBox(tr("Mahlzeit-Tags ergänzen (Frühstück, Hauptgericht, Zwischenmahlzeit, Dessert, Süßspeise, Backen)"));
+    m_mealTags->setToolTip(tr("Aus Kategorien, Titel, Zutaten und Nährwerten geschätzt – der Wochenplan verplant danach"));
+    m_mealTags->setChecked(s.value(QStringLiteral("import/mealTags"), true).toBool());
+    il->addWidget(m_mealTags);
     lay->addWidget(imp);
 
     // ---- DeepL
@@ -148,6 +152,7 @@ void SettingsDialog::accept()
     s.setValue(QStringLiteral("import/translate"), m_translate->isChecked());
     s.setValue(QStringLiteral("import/autoTags"), m_autoTags->isChecked());
     s.setValue(QStringLiteral("import/fixUmlauts"), m_umlauts->isChecked());
+    s.setValue(QStringLiteral("import/mealTags"), m_mealTags->isChecked());
     DeepL::Settings ds;
     ds.enabled = m_deepl->isChecked();
     ds.key = m_deeplKey->text();

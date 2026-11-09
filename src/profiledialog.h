@@ -1,5 +1,5 @@
 // VitaMeals – Personenprofil bearbeiten (Körperdaten, Ziel, Vorlieben)
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 
 #include "profiles.h"
@@ -37,4 +37,5 @@ private:
     QLineEdit *m_excluded;
     QLineEdit *m_liked;
     QCheckBox *m_snack;
+    QComboBox *m_weighDay;
 };

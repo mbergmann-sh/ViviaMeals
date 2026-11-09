@@ -11,10 +11,16 @@
 #include "units.h"
 #include "recipehtml.h"
 #include "umlauts.h"
+#include "mealplanner.h"
+#include "coaching.h"
+#include "odtexport.h"
+#include "mealtypes.h"
 #include "deepl.h"
 #include "glossary.h"
 
 #include <QCoreApplication>
+#include <QBuffer>
+#include <QImage>
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>
@@ -53,11 +59,33 @@ int main(int argc, char **argv)
 {
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName(QStringLiteral("VitaMealsTest"));
+    // coretest --odt <rezeptdatei> <ordner>: alle Rezepte als .odt (mit Testbild) schreiben
+    if (argc >= 4 && QString::fromLocal8Bit(argv[1]) == QLatin1String("--odt")) {
+        const auto res = Importers::importFile(QString::fromLocal8Bit(argv[2]), Importers::Format::Unknown);
+        QImage img(800, 600, QImage::Format_RGB32);
+        for (int y = 0; y < img.height(); ++y)
+            for (int x = 0; x < img.width(); ++x) img.setPixel(x, y, qRgb(60 + x / 5, 120 + y / 6, 200 - x / 8));
+        QByteArray png;
+        QBuffer buf(&png);
+        buf.open(QIODevice::WriteOnly);
+        img.save(&buf, "PNG");
+        int n = 0;
+        for (Recipe r : res.recipes) {
+            if (n % 2 == 0) r.image = QString::fromLatin1(png.toBase64());
+            QString err;
+            const QString f = QDir(QString::fromLocal8Bit(argv[3])).filePath(QStringLiteral("rezept-%1.odt").arg(++n));
+            if (!OdtExport::write(r, f, {}, &err)) out << "FEHLER " << err << "\n";
+            else out << f << "\n";
+        }
+        return 0;
+    }
     // coretest --dump <datei>: Import anzeigen (Titel, Zutaten mit Zuordnung, Anleitung)
     if (argc >= 3 && QString::fromLocal8Bit(argv[1]) == QLatin1String("--dump")) {
         const auto res = Importers::importFile(QString::fromLocal8Bit(argv[2]), Importers::Format::Unknown);
         for (const Recipe &r : res.recipes) {
-            out << "### " << r.title << "  [" << r.language << "] " << r.servingsText() << " " << r.tags.join(QLatin1Char(',')) << "\n";
+            out << "### " << r.title << "  [" << r.language << "] " << r.servingsText() << " " << r.tags.join(QLatin1Char(','))
+                << QStringLiteral("  | %1 kcal, %2 g/Portion %3").arg(qRound(r.nutrition.perServing.kcal)).arg(qRound(MealTypes::servingGrams(r)))
+                       .arg(MealTypes::healthNotes(MealTypes::from(r)).join(QLatin1Char(','))) << "\n";
             for (const Ingredient &i : r.ingredients)
                 out << "  " << (i.heading ? QStringLiteral("== ") : QString()) << i.displayLine() << "   -> " << (i.food.isEmpty() ? QStringLiteral("??") : i.food) << "\n";
             out << r.instructions << "\n\n";
@@ -429,6 +457,69 @@ int main(int argc, char **argv)
                   && !res.recipes.first().ingredients.value(0).name.startsWith(QLatin1String("DE:")) && res.warnings.size() == 1,
               "bei Fehler Glossar + Warnung");
         qunsetenv("VITAMEALS_DEEPL_URL");
+    }
+
+
+    // ---------------------------------------------------------------- Mahlzeit-Arten und Wochenplan
+    out << "\nWochenplan:\n";
+    {
+        QTemporaryDir tmp2;
+        RecipeDb &db = RecipeDb::instance();
+        CHECK(db.create(tmp2.filePath(QStringLiteral("plan")), QStringLiteral("Plan")), "Plan-Datenbank");
+        auto importAll = [&](const QString &f) {
+            for (Recipe r : Importers::importFile(f, Importers::Format::Unknown).recipes) db.save(r);
+        };
+        importAll(QStringLiteral(":/samples/beispiele.rk"));
+        importAll(QStringLiteral(":/samples/beispiele.mmf"));
+        importAll(QStringLiteral(":/samples/umlaute.rk"));
+        MealPlanner::Options o;
+        o.goal = Profile::Goal::Lose;
+        o.snack = true;
+        o.targetKcal = 1700;
+        QList<int> n = MealPlanner::slotCounts(o);
+        out << "  Kandidaten ohne gesunde Vorschläge (F/M/A/Z): " << n[0] << "/" << n[1] << "/" << n[2] << "/" << n[3] << "\n";
+        for (const QString &x : MealPlanner::notes(o)) out << "  Hinweis: " << x << "\n";
+        MealPlan plan = MealPlanner::create(o);
+        bool breakfastOk = true, noDessert = true;
+        for (const auto &day : plan.days) {
+            const RecipeSummary *b = db.summary(day.value(0).recipeId);
+            if (b && !b->tags.contains(QStringLiteral("frühstück"))) breakfastOk = false;
+            for (const PlanEntry &e : day)
+                if (const RecipeSummary *s = db.summary(e.recipeId))
+                    if (s->tags.contains(QStringLiteral("desserts")) || s->tags.contains(QStringLiteral("süßspeise"))) noDessert = false;
+        }
+        CHECK(breakfastOk, "Frühstück nur aus Frühstücksrezepten");
+        CHECK(noDessert, "beim Abnehmen keine Desserts/Süßspeisen");
+        importAll(QStringLiteral(":/samples/gesund.rk"));
+        n = MealPlanner::slotCounts(o);
+        out << "  mit gesunden Vorschlägen: " << n[0] << "/" << n[1] << "/" << n[2] << "/" << n[3] << "\n";
+        CHECK(n[0] >= 5 && n[3] >= 5, "Frühstück und Zwischenmahlzeiten verfügbar");
+        plan = MealPlanner::create(o);
+        int empty = 0;
+        bool grams = true;
+        for (const auto &day : plan.days)
+            for (const PlanEntry &e : day) {
+                if (e.recipeId.isEmpty()) ++empty;
+                else if (e.grams <= 0) grams = false;
+            }
+        CHECK(empty == 0, "Plan vollständig");
+        CHECK(grams, "Gramm je Mahlzeit bekannt");
+        for (int m = 0; m < plan.meals.size(); ++m)
+            out << "  " << plan.meals[m] << ": " << plan.days[0][m].title << " – " << MealPlanner::portionText(plan.days[0][m]) << ", "
+                << qRound(plan.days[0][m].kcal) << " kcal\n";
+        out << "  " << MealPlanner::summary(plan) << "\n";
+        Recipe pud;
+        pud.title = QStringLiteral("Grießflammeri mit Kirschsoße");
+        CHECK(MealTypes::classify(MealTypes::from(pud)) & MealTypes::Dessert, "Flammeri = Dessert");
+        Profile pr;
+        pr.weighDay = QDate(2026, 11, 9).dayOfWeek();   // Montag
+        CHECK(pr.weighReminderDue(QDate(2026, 11, 9)) && pr.weighReminderDue(QDate(2026, 11, 11)), "Wiegetag-Erinnerung fällig");
+        pr.markWeighDone(QDate(2026, 11, 10));
+        CHECK(!pr.weighReminderDue(QDate(2026, 11, 12)) && pr.weighReminderDue(QDate(2026, 11, 16)), "erledigt bis zum nächsten Wiegetag");
+        pr.weights << WeightEntry{ QDate(2026, 11, 16), 80, {} };
+        CHECK(!pr.weighReminderDue(QDate(2026, 11, 17)), "Eintrag am Wiegetag erledigt die Erinnerung");
+        CHECK(!Coaching::tipsHtml(pr, QStringLiteral("#000"), QStringLiteral("#f00")).isEmpty(), "Tipps");
+        db.close();
     }
 
     out << "\n" << (g_fail ? QStringLiteral("%1 Fehler").arg(g_fail) : QStringLiteral("Alle Prüfungen bestanden")) << "\n";

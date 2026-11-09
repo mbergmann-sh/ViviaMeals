@@ -3,7 +3,7 @@
 // Personen wählen/anlegen, Kennzahlen (BMI, Grund- und Gesamtumsatz, Zielzufuhr, voraussichtliche
 // Dauer bis zum Zielgewicht), Gewichtsverlauf mit Grafik und Start des Wochenplans.
 // KEIN Medizinprodukt – die Werte sind allgemeine Richtwerte.
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 
 #include <QDialog>
@@ -33,6 +33,9 @@ private:
     QString currentId() const;
     QComboBox *m_profiles;
     QTextBrowser *m_summary;
+    QTextBrowser *m_tips;
+    QWidget *m_reminder;
+    QLabel *m_reminderText;
     QTableWidget *m_weights;
     WeightChart *m_chart;
     QDateEdit *m_date;

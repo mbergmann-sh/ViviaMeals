@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "profiledialog.h"
 #include "recipedb.h"
 
@@ -99,6 +99,12 @@ ProfileDialog::ProfileDialog(const Profile &p, QWidget *parent) : QDialog(parent
     m_snack = new QCheckBox(tr("Zwischenmahlzeit einplanen"));
     m_snack->setChecked(p.snack);
     pf->addRow(QString(), m_snack);
+    m_weighDay = new QComboBox;
+    m_weighDay->addItem(tr("keine Erinnerung"), 0);
+    for (int d = 1; d <= 7; ++d) m_weighDay->addItem(Profile::dayName(d), d);
+    m_weighDay->setCurrentIndex(qMax(0, m_weighDay->findData(p.weighDay)));
+    m_weighDay->setToolTip(tr("Einmal pro Woche wiegen, am besten morgens vor dem Frühstück – VitaMeals erinnert an diesem Tag daran."));
+    pf->addRow(tr("Wiegetag:"), m_weighDay);
     lay->addWidget(pref);
 
     auto *bb = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
@@ -124,6 +130,7 @@ Profile ProfileDialog::profile() const
     p.likedTags.clear();
     for (const QString &x : m_liked->text().split(QLatin1Char(','), Qt::SkipEmptyParts)) p.likedTags << x.trimmed().toLower();
     p.snack = m_snack->isChecked();
+    p.weighDay = m_weighDay->currentData().toInt();
     const double kg = m_weight->value();
     if (qAbs(kg - p.currentKg()) > 0.05) {
         const QDate today = QDate::currentDate();

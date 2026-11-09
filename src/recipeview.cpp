@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "recipeview.h"
 #include "icons.h"
 #include "recipehtml.h"
@@ -172,4 +172,9 @@ void RecipeView::changeEvent(QEvent *e)
     if (e->type() == QEvent::PaletteChange || e->type() == QEvent::FontChange) {
         if (m_has) m_resizeTimer->start();
     }
+}
+
+double RecipeView::servings() const
+{
+    return m_servings ? m_servings->value() : m_recipe.servings;
 }

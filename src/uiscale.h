@@ -3,7 +3,7 @@
 // „Automatisch“: auf kleinen Bildschirmen (freie Höhe < 800 px, z. B. 1366 × 768) etwas kleiner,
 // auf großen (≥ 1400 px) etwas größer. Zusätzlich frei wählbar (90 … 140 %) unter
 // Extras → Einstellungen. Wirkt auf die Programmschrift und die Rezeptansicht.
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 
 #include <QList>

@@ -1,5 +1,5 @@
 // VitaMeals – Einstellungen: Darstellung (Theme, Schriftgröße), Import, Übersetzung (DeepL), Start
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 
 #include <QDialog>
@@ -31,6 +31,7 @@ private:
     QCheckBox *m_translate;
     QCheckBox *m_autoTags;
     QCheckBox *m_umlauts;
+    QCheckBox *m_mealTags;
     QCheckBox *m_deepl;
     QLineEdit *m_deeplKey;
     QLabel *m_deeplStatus;

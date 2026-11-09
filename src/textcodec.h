@@ -3,7 +3,7 @@
 // RezKonv- und MealMaster-Dateien stammen oft aus DOS- (CP437/CP850) oder Windows-Zeiten
 // (CP1252/ISO-8859-1), neuere sind UTF-8. Erkannt wird: UTF-8 (auch mit BOM), sonst anhand der
 // typischen Umlaut-Bytes CP850 oder CP1252.
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 
 #include <QByteArray>

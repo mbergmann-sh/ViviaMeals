@@ -1,5 +1,6 @@
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "recipedb.h"
+#include "mealtypes.h"
 
 #include <QDir>
 #include <QDirIterator>
@@ -15,7 +16,7 @@
 namespace {
 const char *kIndex = "index.json";
 const char *kRecipes = "rezepte";
-constexpr int kIndexVersion = 2;
+constexpr int kIndexVersion = 3;
 
 QStringList arr(const QJsonValue &v)
 {
@@ -37,6 +38,7 @@ RecipeSummary RecipeSummary::from(const Recipe &r)
     s.servings = r.servings;
     s.yieldUnit = r.yieldUnit;
     s.perServing = r.nutrition.perServing;
+    s.servingGrams = MealTypes::servingGrams(r);
     s.coverage = r.nutrition.coverage();
     s.hasNutrition = r.nutrition.valid() && r.nutrition.matched > 0;
     for (const Ingredient &i : r.ingredients) {
@@ -59,6 +61,7 @@ QJsonObject RecipeSummary::toJson() const
                         { QStringLiteral("servings"), servings },
                         { QStringLiteral("yieldUnit"), yieldUnit },
                         { QStringLiteral("perServing"), perServing.toJson() },
+                        { QStringLiteral("servingGrams"), servingGrams },
                         { QStringLiteral("coverage"), coverage },
                         { QStringLiteral("hasNutrition"), hasNutrition },
                         { QStringLiteral("ingredients"), QJsonArray::fromStringList(ingredientNames) },
@@ -80,6 +83,7 @@ RecipeSummary RecipeSummary::fromJson(const QJsonObject &o)
     s.servings = o.value(QStringLiteral("servings")).toDouble(1);
     s.yieldUnit = o.value(QStringLiteral("yieldUnit")).toString();
     s.perServing = Nutrients::fromJson(o.value(QStringLiteral("perServing")).toObject());
+    s.servingGrams = o.value(QStringLiteral("servingGrams")).toDouble();
     s.coverage = o.value(QStringLiteral("coverage")).toDouble();
     s.hasNutrition = o.value(QStringLiteral("hasNutrition")).toBool();
     s.ingredientNames = arr(o.value(QStringLiteral("ingredients")));
@@ -305,6 +309,32 @@ bool RecipeDb::remove(const QString &id)
     for (int i = 0; i < m_list.size(); ++i) m_pos.insert(m_list[i].id, i);
     touched();
     return true;
+}
+
+int RecipeDb::clear(bool backup, QString *backupFolder, QString *error)
+{
+    if (m_folder.isEmpty()) return 0;
+    QDir dir(QDir(m_folder).filePath(QLatin1String(kRecipes)));
+    const QStringList files = dir.entryList({ QStringLiteral("*.vmr") }, QDir::Files);
+    QString target;
+    if (backup && !files.isEmpty()) {
+        target = QDir(m_folder).filePath(QStringLiteral("sicherung-%1").arg(QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd-hhmmss"))));
+        if (!QDir().mkpath(target)) {
+            if (error) *error = tr("Der Sicherungsordner %1 kann nicht angelegt werden.").arg(QDir::toNativeSeparators(target));
+            return -1;
+        }
+        if (backupFolder) *backupFolder = target;
+    }
+    int n = 0;
+    for (const QString &f : files) {
+        const QString src = dir.filePath(f);
+        const bool ok = target.isEmpty() ? QFile::remove(src) : QFile::rename(src, QDir(target).filePath(f));
+        if (ok) ++n;
+    }
+    rebuildIndex();
+    writeIndex();
+    emit changed();
+    return n;
 }
 
 QStringList RecipeDb::duplicatesOf(const Recipe &r) const

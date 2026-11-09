@@ -1,5 +1,5 @@
 // VitaMeals – Import-Ablauf: Dateien wählen (einzeln oder mehrere), Vorschau, Doubletten-Abfrage
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 
 #include "importers.h"
@@ -19,7 +19,9 @@ QString run(QWidget *parent, Importers::Format format, const QStringList &files 
 std::function<bool(Recipe &, QString *)> deeplTranslator(QProgressDialog *progress = nullptr);
 // Sprache für Listen: „deutsch“, „englisch → DeepL“, „englisch (Glossar)“ …
 QString languageLabel(const Recipe &r);
-QString umlautNote(int recipes);   // Hinweis „In 3 Rezepten wurden fehlende Umlaute ergänzt …“
+QString umlautNote(int recipes);
+// mitgelieferte gesunde Frühstücks- und Zwischenmahlzeit-Rezepte übernehmen (ohne Doubletten); Anzahl neuer Rezepte
+int addHealthySuggestions(QWidget *parent);   // Hinweis „In 3 Rezepten wurden fehlende Umlaute ergänzt …“
 }
 
 // Vorschau der gefundenen Rezepte mit Auswahl

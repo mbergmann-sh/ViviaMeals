@@ -38,7 +38,7 @@ Alles wie von windeployqt vorgesehen bereitstellen (Software-OpenGL, D3D-Compile
 
 ## Eigenschaften des Installers
 
-* Zielordner Vorgabe **`C:\VitaMeals`** (änderbar); Lizenz (MIT mit „Commons Clause“) und Haftungshinweis
+* Zielordner Vorgabe **`C:\VitaMeals`** (änderbar); Lizenz (PolyForm Noncommercial 1.0.0) und Haftungshinweis
   („kein Medizinprodukt“) zum Annehmen
 * Installation auf **Deutsch** (fest über `<Translations>` in `config.xml`)
 * Startmenü: VitaMeals, VitaMeals – Demo (`--demo`), „VitaMeals aktualisieren oder entfernen“;

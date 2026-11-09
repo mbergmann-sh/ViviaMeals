@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "mealplandialog.h"
 #include "fridge.h"
 #include "icons.h"
@@ -15,6 +15,7 @@
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
+#include "importdialogs.h"
 #include <QLocale>
 #include <QMenu>
 #include <QMessageBox>
@@ -73,6 +74,20 @@ MealPlanDialog::MealPlanDialog(const QString &profileId, QWidget *parent) : QDia
     m_info = new QLabel;
     m_info->setWordWrap(true);
     lay->addWidget(m_info);
+    auto *nl = new QHBoxLayout;
+    m_notes = new QLabel;
+    m_notes->setWordWrap(true);
+    m_notes->setStyleSheet(QStringLiteral("QLabel { color: #b85400; }"));
+    nl->addWidget(m_notes, 1);
+    m_healthy = new QPushButton(Icons::get(QStringLiteral("add")), tr("Gesunde Vorschläge übernehmen"));
+    m_healthy->setToolTip(tr("Zehn mitgelieferte Rezepte für Frühstück und Zwischenmahlzeiten (Porridge, Vollkornbrot mit Quark, "
+                             "Rührei mit Spinat, Gemüsesticks mit Dip …) in die Datenbank übernehmen"));
+    nl->addWidget(m_healthy);
+    lay->addLayout(nl);
+    connect(m_healthy, &QPushButton::clicked, this, [this] {
+        const int n = ImportFlow::addHealthySuggestions(this);
+        if (n > 0) create();
+    });
 
     auto *bl = new QHBoxLayout;
     auto *shop = new QPushButton(Icons::get(QStringLiteral("cart")), tr("Einkaufsliste …"));
@@ -143,6 +158,7 @@ void MealPlanDialog::create()
         m_table->clear();
         m_table->setRowCount(0);
         m_table->setColumnCount(0);
+        updateNotes();
         m_info->setText(tr("<b>Keine passenden Rezepte.</b> Für den Wochenplan werden Rezepte mit berechneten Nährwerten gebraucht, "
                            "die zur Ernährungsform und den ausgeschlossenen Zutaten passen."));
         return;
@@ -167,9 +183,10 @@ void MealPlanDialog::fillTable()
         rows << de.toString(m_plan.start.addDays(d), QStringLiteral("ddd\ndd.MM."));
         for (int m = 0; m < m_plan.days[d].size(); ++m) {
             const PlanEntry &e = m_plan.days[d][m];
-            auto *it = new QTableWidgetItem(e.recipeId.isEmpty() ? tr("—")
-                                                                 : QStringLiteral("%1\n%2 · %3 kcal").arg(e.title, tr("%1 Port.").arg(Fmt::amount(e.portions, QString())))
+            auto *it = new QTableWidgetItem(e.recipeId.isEmpty() ? tr("— kein passendes Rezept —")
+                                                                 : QStringLiteral("%1\n%2 · %3 kcal").arg(e.title, MealPlanner::portionText(e))
                                                                        .arg(qRound(e.kcal)));
+            if (e.recipeId.isEmpty()) it->setForeground(QColor(0xd0, 0x60, 0x10));
             it->setToolTip(tr("Doppelklick: Rezept anzeigen · Rechtsklick: austauschen"));
             m_table->setItem(d, m, it);
         }
@@ -184,11 +201,22 @@ void MealPlanDialog::fillTable()
     m_table->setVerticalHeaderLabels(rows);
     m_table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     m_table->horizontalHeader()->setSectionResizeMode(int(m_plan.meals.size()), QHeaderView::ResizeToContents);
+    Q_UNUSED(sum)
     if (!m_plan.days.isEmpty())
-        m_info->setText(tr("Durchschnitt %1 kcal je Tag (Ziel %2 kcal). Portionen sind auf Viertel gerundet. "
-                           "Rechtsklick auf eine Mahlzeit, um sie auszutauschen.")
-                            .arg(qRound(sum / m_plan.days.size()))
-                            .arg(qRound(m_plan.targetKcal)));
+        m_info->setText(MealPlanner::summary(m_plan).toHtmlEscaped() + QStringLiteral("<br/><small>")
+                        + tr("Portionen gerundet (Zwischenmahlzeit auf halbe, sonst auf Viertel; höchstens etwa 450 g zum Frühstück, 350 g als Zwischenmahlzeit, 800 g mittags und abends), Gramm = Gewicht der "
+                             "Zutaten. Rechtsklick auf eine Mahlzeit, um sie auszutauschen.")
+                        + QStringLiteral("</small>"));
+    updateNotes();
+}
+
+void MealPlanDialog::updateNotes()
+{
+    const QStringList n = MealPlanner::notes(options());
+    m_notes->setText(n.join(QLatin1Char('\n')));
+    m_notes->setVisible(!n.isEmpty());
+    const QList<int> c = MealPlanner::slotCounts(options());
+    m_healthy->setVisible(c.value(0) < 3 || (m_snack->isChecked() && c.value(3) < 3));
 }
 
 void MealPlanDialog::cellMenu(const QPoint &pos)

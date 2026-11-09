@@ -1,5 +1,6 @@
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "assistantdialog.h"
+#include "coaching.h"
 #include "icons.h"
 #include "mealplanner.h"
 #include "profiledialog.h"
@@ -45,6 +46,26 @@ AssistantDialog::AssistantDialog(QWidget *parent) : QDialog(parent)
     top->addWidget(m_del);
     lay->addLayout(top);
 
+    // Erinnerung an den Wiegetag
+    m_reminder = new QWidget;
+    auto *rl = new QHBoxLayout(m_reminder);
+    rl->setContentsMargins(0, 0, 0, 0);
+    m_reminderText = new QLabel;
+    m_reminderText->setWordWrap(true);
+    m_reminderText->setStyleSheet(QStringLiteral("QLabel { color: #b85400; font-weight: bold; }"));
+    rl->addWidget(m_reminderText, 1);
+    auto *done = new QPushButton(tr("Erledigt"));
+    done->setToolTip(tr("Erinnerung bis zum nächsten Wiegetag ausblenden"));
+    rl->addWidget(done);
+    lay->addWidget(m_reminder);
+    connect(done, &QPushButton::clicked, this, [this] {
+        if (Profile *p = Profiles::instance().find(currentId())) {
+            p->markWeighDone();
+            Profiles::instance().save();
+        }
+        showProfile();
+    });
+
     auto *tabs = new QTabWidget;
     m_summary = new QTextBrowser;
     tabs->addTab(m_summary, Icons::get(QStringLiteral("scale")), tr("Übersicht"));
@@ -84,6 +105,9 @@ AssistantDialog::AssistantDialog(QWidget *parent) : QDialog(parent)
     split->addWidget(lower);
     wl->addWidget(split);
     tabs->addTab(wpage, Icons::get(QStringLiteral("chart")), tr("Gewichtsverlauf"));
+    m_tips = new QTextBrowser;
+    m_tips->setOpenExternalLinks(true);
+    tabs->addTab(m_tips, Icons::get(QStringLiteral("info")), tr("Tipps"));
     lay->addWidget(tabs, 1);
 
     auto *bl = new QHBoxLayout;
@@ -133,6 +157,7 @@ AssistantDialog::AssistantDialog(QWidget *parent) : QDialog(parent)
                 replaced = true;
             }
         if (!replaced) p->weights << WeightEntry{ m_date->date(), m_kg->value(), m_note->text() };
+        if (m_date->date() >= p->lastWeighDay()) p->markWeighDone();   // Wiegetag erledigt
         std::sort(p->weights.begin(), p->weights.end(), [](const WeightEntry &a, const WeightEntry &b) { return a.date < b.date; });
         Profiles::instance().save();
         m_note->clear();
@@ -180,6 +205,8 @@ void AssistantDialog::showProfile()
                               "einen Wochenplan aus Ihren Rezepten, der zu Ihren Vorlieben passt.</p>"));
         m_chart->setProfile(Profile());
         m_weights->setRowCount(0);
+        m_tips->setHtml(Coaching::tipsHtml(Profile(), QStringLiteral("#1474BC"), QStringLiteral("#E0620D")));
+        m_reminder->hide();
         return;
     }
     const Profile &p = *pp;
@@ -189,6 +216,8 @@ void AssistantDialog::showProfile()
     const double target = p.targetKcal(&hint);
     const QString blue = QStringLiteral("#1474BC"), orange = QStringLiteral("#E0620D");
     QString h = QStringLiteral("<h2 style=\"color:%1;\">%2</h2>").arg(blue, p.name.toHtmlEscaped());
+    h += QStringLiteral("<p style=\"color:%1;\"><b>%2</b></p>").arg(orange, Coaching::motivation(p).toHtmlEscaped());
+    h += QStringLiteral("<p><small>%1 %2</small></p>").arg(Coaching::explanation(p.goal).toHtmlEscaped(), tr("Mehr im Reiter <b>Tipps</b>."));
     h += QStringLiteral("<table cellpadding=\"4\">");
     auto row = [&](const QString &a, const QString &b) { h += QStringLiteral("<tr><td>%1</td><td><b>%2</b></td></tr>").arg(a, b); };
     row(tr("Alter, Größe"), tr("%1 Jahre, %2 cm").arg(p.age()).arg(Fmt::number(p.heightCm, 0)));
@@ -216,6 +245,8 @@ void AssistantDialog::showProfile()
                                          .arg(qRound(target * 0.30 / 9))
                                          .arg(qRound(target * 0.55 / 4)));
     row(tr("Ernährung"), Profile::dietName(p.diet));
+    row(tr("Wiegetag"), p.weighDay > 0 ? tr("%1 (Erinnerung im Hauptfenster)").arg(Profile::dayName(p.weighDay))
+                                       : tr("keiner – unter „Bearbeiten …“ einstellbar"));
     if (!p.excluded.isEmpty()) row(tr("Nicht verwenden"), p.excluded.join(QStringLiteral(", ")).toHtmlEscaped());
     if (!p.likedTags.isEmpty()) row(tr("Bevorzugt"), p.likedTags.join(QStringLiteral(", ")).toHtmlEscaped());
     h += QStringLiteral("</table>");
@@ -227,6 +258,16 @@ void AssistantDialog::showProfile()
                                                           "Energiedefizit bzw. -überschuss aus dem Wochenziel (ca. 7 000 kcal je kg), begrenzt auf "
                                                           "höchstens 1 000 kcal weniger bzw. 700 kcal mehr je Tag und nicht unter den Grundumsatz."));
     m_summary->setHtml(h);
+    m_tips->setHtml(Coaching::tipsHtml(p, blue, orange));
+    if (p.weighReminderDue()) {
+        const QDate d = p.lastWeighDay();
+        m_reminderText->setText(d == QDate::currentDate() ? tr("Heute ist Wiegetag – bitte im Reiter „Gewichtsverlauf“ eintragen.")
+                                                          : tr("Wiegetag %1 (%2) – Gewicht noch nicht eingetragen.")
+                                                                .arg(Profile::dayName(d.dayOfWeek()), d.toString(QStringLiteral("dd.MM."))));
+        m_reminder->show();
+    } else {
+        m_reminder->hide();
+    }
     m_chart->setProfile(p);
     m_kg->setValue(kg > 0 ? kg : 70);
     m_weights->setRowCount(0);

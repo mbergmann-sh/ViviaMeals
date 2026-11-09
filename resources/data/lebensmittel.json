@@ -2004,6 +2004,33 @@
    ]
   },
   {
+   "key": "knaeckebrot",
+   "name": "Knäckebrot (Vollkorn)",
+   "category": "backwaren",
+   "kcal": 340.0,
+   "protein": 10.0,
+   "fat": 1.5,
+   "saturatedFat": 0.3,
+   "carbohydrates": 65.0,
+   "sugar": 2.5,
+   "fiber": 15.0,
+   "salt": 1.0,
+   "density": 0.3,
+   "piece": 10.0,
+   "units": {
+    "Scheibe": 10.0,
+    "Stück": 10.0
+   },
+   "aliases": [
+    "knäckebrot",
+    "vollkornknäckebrot",
+    "roggenknäckebrot",
+    "knäcke",
+    "crispbread",
+    "rye crispbread"
+   ]
+  },
+  {
    "key": "broetchen",
    "name": "Brötchen",
    "category": "backwaren",

@@ -1,6 +1,8 @@
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "editordialog.h"
 #include "fooddialog.h"
+#include "imagecropdialog.h"
+#include "mealtypes.h"
 #include "foodtable.h"
 #include "glossary.h"
 #include "icons.h"
@@ -86,14 +88,16 @@ EditorDialog::EditorDialog(const Recipe &r, QWidget *parent) : QDialog(parent), 
                                                                               QStringLiteral("backen"), QStringLiteral("desserts"),
                                                                               QStringLiteral("menüs"), QStringLiteral("frühstück"),
                                                                               QStringLiteral("hauptgerichte"), QStringLiteral("suppen"),
-                                                                              QStringLiteral("salate") },
+                                                                              QStringLiteral("salate"), QStringLiteral("zwischenmahlzeit"),
+                                                                              QStringLiteral("süßspeise") },
                                 this);
     comp->setCaseSensitivity(Qt::CaseInsensitive);
     m_tags->setCompleter(comp);
     auto *tl = new QHBoxLayout;
     tl->addWidget(m_tags, 1);
     auto *autoTags = new QPushButton(Icons::get(QStringLiteral("tag")), tr("Ergänzen"));
-    autoTags->setToolTip(tr("Tags aus den Zutaten ableiten: vegan, vegetarisch, fleischgerichte, fisch"));
+    autoTags->setToolTip(tr("Tags aus Titel, Zutaten und Nährwerten ableiten: vegan, vegetarisch, fleischgerichte, fisch, "
+                            "frühstück, hauptgerichte, zwischenmahlzeit, desserts, süßspeise, backen"));
     tl->addWidget(autoTags);
     form->addRow(tr("Tags:"), tl);
     m_source = new QLineEdit(r.source);
@@ -202,6 +206,7 @@ EditorDialog::EditorDialog(const Recipe &r, QWidget *parent) : QDialog(parent), 
     connect(autoTags, &QPushButton::clicked, this, [this] {
         collect();
         Nutrition::applyTagSuggestions(m_recipe);
+        if (!Nutrition::isMenu(m_recipe)) MealTypes::applyTags(m_recipe);
         m_tags->setText(m_recipe.tags.join(QStringLiteral(", ")));
     });
     updateImage();
@@ -235,12 +240,14 @@ void EditorDialog::chooseImage()
         QMessageBox::warning(this, windowTitle(), tr("Das Bild kann nicht gelesen werden: %1").arg(reader.errorString()));
         return;
     }
-    // auf 800 px verkleinern und als JPEG einbetten
-    if (img.width() > 800 || img.height() > 800) img = img.scaled(800, 800, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    // zuschneiden; nur der Ausschnitt wird gespeichert (PNG), nicht das Original
+    ImageCropDialog crop(img, this);
+    if (crop.exec() != QDialog::Accepted) return;
+    img = crop.result();
     QByteArray ba;
     QBuffer buf(&ba);
     buf.open(QIODevice::WriteOnly);
-    img.convertToFormat(QImage::Format_RGB32).save(&buf, "JPG", 85);
+    img.convertToFormat(QImage::Format_RGB32).save(&buf, "PNG");
     m_recipe.image = QString::fromLatin1(ba.toBase64());
     updateImage();
 }

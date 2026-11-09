@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "profiles.h"
 #include "recipe.h"
 
@@ -105,6 +105,35 @@ QList<QPair<double, QString>> Profile::palLevels()
              { 2.0, tr("2,0 – körperlich anstrengend, viel Sport") } };
 }
 
+QDate Profile::lastWeighDay(const QDate &today) const
+{
+    if (weighDay < 1 || weighDay > 7) return {};
+    const int back = (today.dayOfWeek() - weighDay + 7) % 7;
+    return today.addDays(-back);
+}
+
+bool Profile::weighReminderDue(const QDate &today) const
+{
+    const QDate d = lastWeighDay(today);
+    if (!d.isValid()) return false;
+    if (weighDone.isValid() && weighDone >= d) return false;
+    for (const WeightEntry &e : weights)
+        if (e.date >= d && e.date <= today) return false;   // schon gewogen
+    return true;
+}
+
+void Profile::markWeighDone(const QDate &today)
+{
+    const QDate d = lastWeighDay(today);
+    if (d.isValid()) weighDone = d;
+}
+
+QString Profile::dayName(int weekday)
+{
+    static const char *n[] = { "", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag" };
+    return weekday >= 1 && weekday <= 7 ? QCoreApplication::translate("Profile", n[weekday]) : QString();
+}
+
 QJsonObject Profile::toJson() const
 {
     QJsonArray w;
@@ -125,6 +154,8 @@ QJsonObject Profile::toJson() const
                         { QStringLiteral("excluded"), QJsonArray::fromStringList(excluded) },
                         { QStringLiteral("likedTags"), QJsonArray::fromStringList(likedTags) },
                         { QStringLiteral("snack"), snack },
+                        { QStringLiteral("weighDay"), weighDay },
+                        { QStringLiteral("weighDone"), weighDone.toString(Qt::ISODate) },
                         { QStringLiteral("weights"), w },
                         { QStringLiteral("lastPlan"), lastPlan } };
 }
@@ -145,6 +176,8 @@ Profile Profile::fromJson(const QJsonObject &o)
     for (const auto &v : o.value(QStringLiteral("excluded")).toArray()) p.excluded << v.toString();
     for (const auto &v : o.value(QStringLiteral("likedTags")).toArray()) p.likedTags << v.toString();
     p.snack = o.value(QStringLiteral("snack")).toBool();
+    p.weighDay = qBound(0, o.value(QStringLiteral("weighDay")).toInt(), 7);
+    p.weighDone = QDate::fromString(o.value(QStringLiteral("weighDone")).toString(), Qt::ISODate);
     for (const auto &v : o.value(QStringLiteral("weights")).toArray()) {
         const QJsonObject e = v.toObject();
         WeightEntry w{ QDate::fromString(e.value(QStringLiteral("date")).toString(), Qt::ISODate), e.value(QStringLiteral("kg")).toDouble(),

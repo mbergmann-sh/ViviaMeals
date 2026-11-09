@@ -4,7 +4,7 @@
 // Gramm umrechnen (Gewicht direkt, Volumen über die Dichte, Stück/Packungen über Stückgewichte),
 // Nährwerte aufsummieren; Ergebnis gesamt und je Portion. Zutaten ohne Menge („Salz nach
 // Belieben“) zählen nicht; Zutaten ohne Zuordnung werden gemeldet.
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 
 #include "recipe.h"

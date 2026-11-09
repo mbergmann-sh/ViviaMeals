@@ -1,10 +1,11 @@
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "importers.h"
 #include "glossary.h"
 #include "ingredientparser.h"
 #include "nutrition.h"
 #include "textcodec.h"
 #include "umlauts.h"
+#include "mealtypes.h"
 #include "units.h"
 
 #include <QFile>
@@ -245,6 +246,7 @@ Recipe finish(RawRecipe &raw, const Options &opt, const QString &format, Result 
     }
     Nutrition::analyze(r);
     if (opt.autoTags) Nutrition::applyTagSuggestions(r);
+    if (opt.mealTags && !Nutrition::isMenu(r)) MealTypes::applyTags(r);
     return r;
 }
 

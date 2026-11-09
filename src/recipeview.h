@@ -3,7 +3,7 @@
 // Zeigt das gewählte Rezept als HTML: rechts oben das Foto, daneben Titel, Portionen, kcal/kJ,
 // Zutatenliste, Zubereitung und Nährwerttabelle. Über der Ansicht kann die Portionenzahl
 // geändert werden (Mengen werden umgerechnet). Das Foto passt sich der Fensterbreite an.
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 
 #include "recipe.h"
@@ -26,6 +26,7 @@ public:
     void showMessage(const QString &title, const QString &html);
     const Recipe &recipe() const { return m_recipe; }
     bool hasRecipe() const { return m_has; }
+    double servings() const;         // eingestellte Portionenzahl
     void fillDocument(QTextDocument *doc) const;   // für den Druck (helle Farben)
     void refresh();                  // nach Theme-Wechsel
 

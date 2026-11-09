@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "nutrition.h"
 #include "foodtable.h"
 #include "units.h"
@@ -112,7 +112,7 @@ QStringList suggestTags(const Recipe &r)
 {
     if (isMenu(r)) return {};
     FoodTable &table = FoodTable::instance();
-    bool meat = false, fish = false, gelatine = false, nonVegan = false;
+    bool meat = false, fish = false, gelatine = false, nonVegan = false, meatStock = false;
     int known = 0, all = 0;
     for (const Ingredient &ing : r.ingredients) {
         if (ing.heading) continue;
@@ -124,12 +124,18 @@ QStringList suggestTags(const Recipe &r)
         if (f->category == QLatin1String("fisch")) fish = true;
         if (f->category == QLatin1String("gelatine")) gelatine = true;
         if (f->isNonVegan()) nonVegan = true;
+        // Brühe/Fond aus Fleisch oder Fisch steht in der Tabelle unter „Brühe“ – trotzdem nicht vegetarisch
+        static const QRegularExpression animalStock(QStringLiteral("fleischbrühe|hühnerbrühe|rinderbrühe|kalbsbrühe|geflügelbrühe|"
+                                                                   "kalbsfond|wildfond|fischfond|geflügelfond|rinderfond|entenfond|knochenbrühe|"
+                                                                   "suppenknochen|chicken (broth|stock)|beef (broth|stock)|fish stock"),
+                                                    QRegularExpression::CaseInsensitiveOption);
+        if (ing.name.contains(animalStock)) meatStock = true;
     }
     QStringList tags;
     if (meat) tags << QStringLiteral("fleischgerichte");
     if (fish) tags << QStringLiteral("fisch");
     // vegetarisch/vegan nur, wenn (fast) alle Zutaten bekannt sind
-    if (all > 0 && known >= all * 0.85 && !meat && !fish && !gelatine) {
+    if (all > 0 && known >= all * 0.85 && !meat && !fish && !gelatine && !meatStock) {
         tags << QStringLiteral("vegetarisch");
         if (!nonVegan) tags << QStringLiteral("vegan");
     }

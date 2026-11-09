@@ -88,6 +88,7 @@ quinoa|Quinoa|getreide|370 14 6 0.7 64 0 7 0|0.8|0||quinoa,amaranth,hirse,buchwe
 gruenkern|Grünkern|getreide|330 11 2.7 0.4 63 1 9 0|0.75|0||grünkern,grünkernschrot,grünkernmehl,grünkerngrieß|green spelt,green spelt grains
 brot|Brot (Mischbrot)|backwaren|230 7 1.2 0.2 46 2.5 5 1.3|0.3|50|Scheibe=45|brot,mischbrot,graubrot,bauernbrot,weißbrot,toastbrot,toast,ciabatta,baguette,landbrot|bread,white bread,french bread,italian bread,sourdough bread,loaf,bread slices,toast
 vollkornbrot|Vollkornbrot|backwaren|210 7 1.3 0.2 39 3 8 1.1|0.4|50|Scheibe=50|vollkornbrot,schwarzbrot,roggenbrot,pumpernickel|whole wheat bread,wholemeal bread,rye bread,pumpernickel
+knaeckebrot|Knäckebrot (Vollkorn)|backwaren|340 10 1.5 0.3 65 2.5 15 1|0.3|10|Scheibe=10;Stück=10|knäckebrot,vollkornknäckebrot,roggenknäckebrot,knäcke|crispbread,rye crispbread
 broetchen|Brötchen|backwaren|260 8.5 1.5 0.3 51 2.5 3 1.2|0.2|50||brötchen,semmel,semmeln,schrippe,wecken,laugenbrötchen|roll,rolls,bun,buns,hamburger buns,hot dog buns,dinner rolls
 semmelbroesel|Semmelbrösel|backwaren|360 11 2 0.4 72 4 5 1.2|0.45|0||semmelbrösel,paniermehl,brösel,weckmehl|bread crumbs,breadcrumbs,dry bread crumbs,panko,cracker crumbs
 zwieback|Zwieback / Kekse|backwaren|420 9 9 4 72 15 3 0.7|0.4|10||zwieback,butterkekse,löffelbiskuits,biskuits,kekse,cantuccini,amarettini|crackers,graham crackers,graham cracker crumbs,cookies,ladyfingers,vanilla wafers,saltines

@@ -4,7 +4,7 @@
 // Zutaten werden zerlegt (Menge, Einheit, Name, Zusatz), englische Maße in deutsche umgerechnet,
 // englische Zutatennamen über das Glossar übersetzt, Temperaturen/Zoll in der Anleitung
 // umgerechnet und die Nährwerte berechnet.
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 
 #include "recipe.h"
@@ -21,6 +21,7 @@ enum class Format { Unknown, RezKonv, MealMaster, Vtm };
 struct Options {
     bool translate = true;    // englische Rezepte: Zutaten übersetzen, Maße umrechnen
     bool autoTags = true;     // vegan/vegetarisch/fleischgerichte/fisch aus den Zutaten ergänzen
+    bool mealTags = true;     // frühstück/hauptgerichte/zwischenmahlzeit/desserts/süßspeise/backen ergänzen
     bool fixUmlauts = true;   // deutsche Rezepte in ASCII-Umschrift: ae/oe/ue/ss → ä/ö/ü/ß
     // Übersetzer für fremdsprachige Rezepte (z. B. DeepL). Gesetzt → Zutaten werden nicht über das Glossar
     // übersetzt, sondern das fertige Rezept wird übergeben. Liefert false (mit Fehlertext), greift das Glossar.

@@ -3,7 +3,7 @@
 // Übersetzt Zutatennamen, Zusätze („chopped“ → „gehackt“) und Kategorien phrasenweise (längste
 // bekannte Wortfolge zuerst). Unbekannte Wörter bleiben unverändert. Ganze Anleitungstexte
 // werden nicht übersetzt; darin werden nur Temperaturen und Maße umgerechnet (Units).
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 
 #include <QString>

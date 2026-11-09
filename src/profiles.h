@@ -5,7 +5,7 @@
 //   Grundumsatz nach Mifflin-St Jeor, Gesamtbedarf = Grundumsatz × PAL (körperliche Aktivität),
 //   Energiedefizit bzw. -überschuss aus dem Wochenziel (≈ 7 000 kcal je kg Körpergewicht).
 // VitaMeals ist KEIN Medizinprodukt – die Werte ersetzen keine ärztliche oder Ernährungsberatung.
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 
 #include <QDate>
@@ -37,10 +37,18 @@ struct Profile {
     QStringList excluded;              // Zutaten, die nicht vorkommen sollen („Pilze“, „Koriander“)
     QStringList likedTags;             // bevorzugte Themen („italienisch“, „suppen“)
     bool snack = false;                // Zwischenmahlzeit einplanen
+    int weighDay = 0;                  // Wiegetag: 0 = keiner, 1 = Montag … 7 = Sonntag
+    QDate weighDone;                   // Wiegetag, dessen Erinnerung als „erledigt“ markiert wurde
     QList<WeightEntry> weights;        // Gewichtsverlauf, nach Datum sortiert
     QJsonObject lastPlan;              // zuletzt erstellter Wochenplan
 
     double currentKg() const;          // letzter Eintrag (0 = keiner)
+    // letzter Wiegetag bis heute (ungültig, wenn kein Wiegetag eingestellt ist)
+    QDate lastWeighDay(const QDate &today = QDate::currentDate()) const;
+    // Erinnerung fällig: Wiegetag erreicht, noch nicht „erledigt“ und seitdem kein Gewicht eingetragen
+    bool weighReminderDue(const QDate &today = QDate::currentDate()) const;
+    void markWeighDone(const QDate &today = QDate::currentDate());
+    static QString dayName(int weekday);   // 1 → „Montag“
     int age(const QDate &on = QDate::currentDate()) const;
     double bmi(double kg = -1) const;
     double bmr() const;                // Grundumsatz kcal/Tag

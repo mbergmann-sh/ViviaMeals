@@ -1,9 +1,9 @@
 // VitaMeals – Rezeptmodell und Eigenformat .vmr
 //
-// Ein Rezept wird als JSON-Datei mit der Endung .vmr gespeichert (UTF-8, Bild als Base64-JPEG
+// Ein Rezept wird als JSON-Datei mit der Endung .vmr gespeichert (UTF-8, Bild als Base64-PNG bzw. -JPEG
 // eingebettet). Aufbau siehe Recipe::toJson(). Die berechneten Nährwerte werden mitgespeichert,
 // damit Liste, Suche, Wochenplan und Website ohne Neuberechnung auskommen.
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 
 #include <QDateTime>
@@ -71,7 +71,7 @@ struct Recipe {
     QStringList tags;           // vegan, vegetarisch, fleischgerichte, backen, desserts, menüs …
     QList<Ingredient> ingredients;
     QString instructions;       // Zubereitung (Absätze durch Leerzeilen getrennt)
-    QString image;              // Base64-JPEG
+    QString image;              // Base64-PNG (zugeschnitten im Editor) oder -JPEG (ältere Rezepte)
     QString source;             // Quelle / Autor
     QString sourceFormat;       // "VitaMeals", "RezKonv", "MealMaster", "VTM"
     QString language = QStringLiteral("de");   // Sprache der Anleitung ("de", "en", "fr" …)

@@ -21,6 +21,9 @@ SOURCES += \
     $$PWD/src/profiles.cpp \
     $$PWD/src/mealplanner.cpp \
     $$PWD/src/umlauts.cpp \
+    $$PWD/src/mealtypes.cpp \
+    $$PWD/src/coaching.cpp \
+    $$PWD/src/odtexport.cpp \
     $$PWD/src/deepl.cpp
 
 HEADERS += \
@@ -42,4 +45,7 @@ HEADERS += \
     $$PWD/src/profiles.h \
     $$PWD/src/mealplanner.h \
     $$PWD/src/umlauts.h \
+    $$PWD/src/mealtypes.h \
+    $$PWD/src/coaching.h \
+    $$PWD/src/odtexport.h \
     $$PWD/src/deepl.h

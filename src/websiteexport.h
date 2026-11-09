@@ -8,7 +8,7 @@
 //   suche.php             Suche auf dem Server (Titel, Zutaten, Themen) – PHP 7.4 oder neuer
 //   daten/rezepte.json    Suchindex (auch für die Sofortsuche per JavaScript ohne PHP)
 //   assets/               style.css, suche.js, Logo
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 
 #include <QString>

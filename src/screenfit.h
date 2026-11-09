@@ -1,5 +1,5 @@
 // VitaMeals – Fenster an kleine Bildschirme anpassen (z. B. 1366 × 768)
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 //
 // Für alle Fenster des Programms (app-weiter Ereignisfilter, beim Anzeigen):
 //  * Ist der Inhalt eines Dialogs höher oder breiter als der freie Bildschirmbereich, kommt er in eine

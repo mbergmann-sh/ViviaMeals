@@ -1,6 +1,6 @@
 # ---------------------------------------------------------------------------
 #  VitaMeals – Rezeptverwaltung mit Nährwertanalyse und Gewichtskontrolle
-#  Copyright (c) 2026 Michael Bergmann – MIT-Lizenz mit „Commons Clause“ (siehe LICENSE)
+#  Copyright (c) 2026 Michael Bergmann – PolyForm Noncommercial License 1.0.0 (siehe LICENSE)
 #
 #  KEIN Medizinprodukt – VitaMeals ist eine persönliche Rezept- und Ernährungsverwaltung.
 #
@@ -36,7 +36,7 @@ macx:  ICON     = resources/icons/app/vitameals.icns
 QMAKE_TARGET_COMPANY     = Michael Bergmann
 QMAKE_TARGET_PRODUCT     = VitaMeals
 QMAKE_TARGET_DESCRIPTION = VitaMeals – Rezeptverwaltung mit Nährwertanalyse
-QMAKE_TARGET_COPYRIGHT   = (c) 2026 Michael Bergmann, MIT-Lizenz mit Commons Clause (kein Verkauf)
+QMAKE_TARGET_COPYRIGHT   = (c) 2026 Michael Bergmann, PolyForm Noncommercial 1.0.0 (nicht kommerziell)
 
 # Windows-Installer: Versionsnummer und Datum in die Installer-Dateien übernehmen
 # (*.in → Datei ohne .in; @VM_VERSION@, @VM_RELEASE_DATE@). Läuft auf allen Plattformen,

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "importdialogs.h"
 #include "deepl.h"
 #include "icons.h"
@@ -181,6 +181,7 @@ QString run(QWidget *parent, Importers::Format format, const QStringList &givenF
     opt.translate = s.value(QStringLiteral("import/translate"), true).toBool();
     opt.autoTags = s.value(QStringLiteral("import/autoTags"), true).toBool();
     opt.fixUmlauts = s.value(QStringLiteral("import/fixUmlauts"), true).toBool();
+    opt.mealTags = s.value(QStringLiteral("import/mealTags"), true).toBool();
 
     QList<Recipe> recipes;
     QStringList origins, warnings;
@@ -339,6 +340,27 @@ QString umlautNote(int recipes)
 {
     return (recipes == 1 ? QObject::tr("In einem Rezept") : QObject::tr("In %1 Rezepten").arg(recipes))
            + QObject::tr(" wurden fehlende Umlaute ergänzt (ae → ä, oe → ö, ue → ü, ss → ß).");
+}
+
+int addHealthySuggestions(QWidget *parent)
+{
+    RecipeDb &db = RecipeDb::instance();
+    if (!db.isOpen()) return 0;
+    const auto res = Importers::importFile(QStringLiteral(":/samples/gesund.rk"), Importers::Format::RezKonv);
+    int added = 0;
+    db.beginBatch();
+    for (Recipe r : res.recipes) {
+        if (!db.duplicatesOf(r).isEmpty()) continue;
+        r.source = QObject::tr("VitaMeals – gesunde Vorschläge");
+        if (db.save(r)) ++added;
+    }
+    db.endBatch();
+    QMessageBox::information(parent, QObject::tr("Gesunde Vorschläge"),
+                             added > 0 ? QObject::tr("%1 Rezepte für Frühstück und Zwischenmahlzeiten wurden übernommen. Sie tragen die Tags "
+                                                     "„frühstück“ bzw. „zwischenmahlzeit“ und lassen sich wie alle Rezepte bearbeiten.")
+                                             .arg(added)
+                                       : QObject::tr("Die Vorschläge sind bereits in der Datenbank."));
+    return added;
 }
 
 QString languageLabel(const Recipe &r)

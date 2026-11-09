@@ -1,5 +1,5 @@
 // VitaMeals – Wochenmenü-Plan anzeigen, anpassen, drucken und Einkaufsliste erstellen
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 
 #include "mealplanner.h"
@@ -10,6 +10,7 @@ class QCheckBox;
 class QComboBox;
 class QDateEdit;
 class QLabel;
+class QPushButton;
 class QSpinBox;
 class QTableWidget;
 
@@ -31,6 +32,7 @@ private:
     void shoppingList();
     void print();
     void save();
+    void updateNotes();
     MealPlanner::Options options() const;
     QComboBox *m_profile;
     QSpinBox *m_kcal;
@@ -39,5 +41,7 @@ private:
     QCheckBox *m_snack;
     QTableWidget *m_table;
     QLabel *m_info;
+    QLabel *m_notes;
+    QPushButton *m_healthy;
     MealPlan m_plan;
 };

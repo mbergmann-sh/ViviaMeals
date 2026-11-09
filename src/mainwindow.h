@@ -4,7 +4,7 @@
 // rechts die HTML-Ansicht des gewählten Rezepts. Beim Start wird die zuletzt geöffnete Datenbank
 // wieder geöffnet und ein zufälliges Rezept gezeigt; gibt es keine Datenbank, wird der Benutzer
 // aufgefordert, eine anzulegen.
-// SPDX-License-Identifier: MIT AND LicenseRef-Commons-Clause-1.0 (siehe LICENSE)
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 
 #include "importers.h"
@@ -13,6 +13,7 @@
 
 class QAction;
 class QComboBox;
+class QFrame;
 class QLabel;
 class QLineEdit;
 class QListWidget;
@@ -46,11 +47,15 @@ public slots:
     void importFormat(Importers::Format f);
     void exportWebsite();
     void exportLatex();
+    void exportOdt();
+    void clearDatabase();
+    void mealTagsAll();
     void exportVmr();
     void printRecipe();
     void showRandom();
     void openFridge();
     void openAssistant();
+    void updateReminder();
     void openMealPlan(const QString &profileId = QString());
     void openFoodTable();
     void recalcAll();
@@ -77,6 +82,8 @@ private:
 
     QLabel *m_headName;
     QLabel *m_headInfo;
+    QFrame *m_reminder;
+    QLabel *m_reminderText;
     QLineEdit *m_filter;
     QComboBox *m_tagFilter;
     QListWidget *m_list;
