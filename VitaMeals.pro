@@ -31,3 +31,30 @@ RESOURCES += resources/vitameals.qrc resources/data.qrc
 
 win32: RC_ICONS = resources/icons/app/vitameals.ico
 macx:  ICON     = resources/icons/app/vitameals.icns
+
+# Programminformationen für Windows (Eigenschaften der .exe)
+QMAKE_TARGET_COMPANY     = Michael Bergmann
+QMAKE_TARGET_PRODUCT     = VitaMeals
+QMAKE_TARGET_DESCRIPTION = VitaMeals – Rezeptverwaltung mit Nährwertanalyse
+QMAKE_TARGET_COPYRIGHT   = (c) 2026 Michael Bergmann, MIT-Lizenz
+
+# Windows-Installer: Versionsnummer und Datum in die Installer-Dateien übernehmen
+# (*.in → Datei ohne .in; @VM_VERSION@, @VM_RELEASE_DATE@). Läuft auf allen Plattformen,
+# damit die erzeugten Dateien im Quellbaum immer zur Programmversion passen (wie in VitaBreathe).
+VM_TEMPLATES = installer/qtifw/config/config.xml.in \
+               installer/qtifw/meta/package.xml.in
+for(t, VM_TEMPLATES) {
+    vm_in = $$cat($$PWD/$$t, blob)
+    vm_in = $$replace(vm_in, @VM_VERSION@, $$VERSION)
+    vm_in = $$replace(vm_in, @VM_RELEASE_DATE@, $$VM_RELEASE_DATE)
+    vm_out = $$PWD/$$replace(t, \.in$, )
+    vm_cur = $$cat($$vm_out, blob)
+    !equals(vm_cur, $$vm_in$$escape_expand(\\n)): write_file($$vm_out, vm_in)
+}
+
+# Windows: DLLs bereitstellen und Qt-Installer-Framework-Installer (C:\VitaMeals)
+win32: include(installer/windows_deploy.pri)
+
+OTHER_FILES += installer/README.md installer/windows_deploy.pri \
+    installer/qtifw/config/config.xml.in installer/qtifw/config/controlscript.qs \
+    installer/qtifw/meta/package.xml.in installer/qtifw/meta/installscript.qs installer/qtifw/meta/license.txt

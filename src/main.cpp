@@ -8,6 +8,8 @@
 // SPDX-License-Identifier: MIT
 #include "assistantdialog.h"
 #include "editordialog.h"
+#include "foodcsv.h"
+#include "fooddialog.h"
 #include "fridge.h"
 #include "fridgedialog.h"
 #include "icons.h"
@@ -31,9 +33,11 @@
 #include <QCheckBox>
 #include <QCommandLineParser>
 #include <QDir>
+#include <QFileInfo>
 #include <QEventLoop>
 #include <QLinearGradient>
 #include <QLibraryInfo>
+#include <QLineEdit>
 #include <QListWidget>
 #include <QLocale>
 #include <QTranslator>
@@ -211,6 +215,28 @@ void takeScreenshots(MainWindow *w, const QString &dir)
         shot(&d, dir, QStringLiteral("import-vorschau"));
         d.reject();
     }
+    {
+        // Nährwert-Import mit einer Tabelle im Stil einer Excel-Datei
+        const QString csv = dir + QStringLiteral("/naehrwerte-beispiel.csv");
+        QFile f(csv);
+        if (f.open(QIODevice::WriteOnly)) {
+            f.write("Bezeichnung;Warengruppe;Brennwert (kJ);Energie (kcal);Fett (g);davon ges\xe4ttigte Fetts\xe4uren (g);Kohlenhydrate (g);"
+                    "davon Zucker (g);Ballaststoffe (g);Eiwei\xdf (g);Salz (g)\r\n"
+                    "Dinkelvollkornmehl;Getreide;1402;335;2,5;0,4;61;1;10;14;0,01\r\nGr\xfcnkern geschrotet;Getreide;1440;344;2,7;0,5;63;1,5;8,8;11;<0,1\r\n"
+                    "Hafer-Joghurt natur;Milch;259;62;2,8;0,3;7,6;2,4;1,2;1,2;0,1\r\nBergk\xe4se 50 %;K\xe4se;1650;398;32;20;0;0;0;28;1,5\r\n"
+                    "Bio-Tofu geräuchert;Hülsenfrüchte;690;165;9,5;1,5;1,5;0,5;1;18;1,4\r\n");
+            f.close();
+        }
+        FoodImportDialog d(w);
+        d.show();
+        if (auto *le = d.findChild<QLineEdit *>(QStringLiteral("foodImportPath"))) {
+            le->setText(csv);
+            emit le->editingFinished();
+        }
+        shot(&d, dir, QStringLiteral("naehrwerte-import"));
+        d.reject();
+        QFile::remove(csv);
+    }
     // Dark-Theme
     Themes::apply(Themes::vscodeId());
     w->appearanceChanged();
@@ -249,6 +275,8 @@ int main(int argc, char *argv[])
     QCommandLineOption shots(QStringLiteral("screenshots"), QStringLiteral("Bildschirmfotos erzeugen (mit --demo)"), QStringLiteral("ordner"));
     QCommandLineOption dbOpt(QStringLiteral("database"), QStringLiteral("Rezeptdatenbank (Ordner)"), QStringLiteral("ordner"));
     parser.addOptions({ demo, shots, dbOpt });
+    parser.addPositionalArgument(QStringLiteral("dateien"), QStringLiteral("Rezepte (.vmr), Datenbank (vitameals.vmdb), RezKonv- oder MealMaster-Dateien"),
+                                 QStringLiteral("[dateien…]"));
     parser.process(app);
     const bool isDemo = parser.isSet(demo);
     if (isDemo) QApplication::setApplicationName(QStringLiteral("VitaMeals-Demo"));   // eigene Einstellungen und Profile
@@ -284,9 +312,14 @@ int main(int argc, char *argv[])
     }
     if (!isDemo) {
         QTimer::singleShot(0, &w, [&w, &parser, &dbOpt] {
-            const QString db = parser.value(dbOpt);
-            if (!db.isEmpty() && w.openDatabase(db)) return;
-            w.ensureDatabase();
+            QStringList files = parser.positionalArguments();
+            QString db = parser.value(dbOpt);
+            // per Doppelklick geöffnete Datenbank hat Vorrang vor der zuletzt geöffneten
+            for (const QString &f : files)
+                if (QFileInfo(f).fileName() == RecipeDb::markerName() || QFileInfo(f).isDir()) db = f;
+            files.removeAll(db);
+            if (db.isEmpty() || !w.openDatabase(db)) w.ensureDatabase();
+            if (!files.isEmpty()) w.openFiles(files);
         });
     }
     if (QSettings().value(QStringLiteral("ui/startNotice"), true).toBool()) {

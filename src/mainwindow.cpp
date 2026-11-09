@@ -552,6 +552,77 @@ void MainWindow::selectRecipe(const QString &id)
     }
 }
 
+void MainWindow::openFiles(const QStringList &files)
+{
+    QStringList vmr, rk, mm, vtm, other;
+    for (const QString &f : files) {
+        const QFileInfo fi(f);
+        const QString suf = fi.suffix().toLower();
+        if (fi.isDir() || fi.fileName() == RecipeDb::markerName()) {
+            openDatabase(fi.absoluteFilePath());
+            continue;
+        }
+        if (!fi.exists()) {
+            QMessageBox::warning(this, tr("Datei öffnen"), tr("Die Datei %1 gibt es nicht.").arg(QDir::toNativeSeparators(f)));
+            continue;
+        }
+        if (suf == QLatin1String("vmr")) vmr << fi.absoluteFilePath();
+        else if (suf == QLatin1String("rk") || suf == QLatin1String("rkv")) rk << fi.absoluteFilePath();
+        else if (suf == QLatin1String("mmf") || suf == QLatin1String("mm") || suf == QLatin1String("mxp")) mm << fi.absoluteFilePath();
+        else if (suf == QLatin1String("vtm")) vtm << fi.absoluteFilePath();
+        else other << fi.absoluteFilePath();
+    }
+    if (vmr.isEmpty() && rk.isEmpty() && mm.isEmpty() && vtm.isEmpty() && other.isEmpty()) return;
+    if (!RecipeDb::instance().isOpen() && !ensureDatabase()) return;
+    // Textdateien unbekannter Endung: Format am Inhalt erkennen
+    for (const QString &f : other) {
+        const Importers::Result probe = Importers::importFile(f, Importers::Format::Unknown);
+        if (probe.recipes.isEmpty()) {
+            QMessageBox::warning(this, tr("Datei öffnen"), tr("%1 enthält keine erkannten Rezepte.").arg(QFileInfo(f).fileName()));
+            continue;
+        }
+        (probe.recipes.first().sourceFormat == QLatin1String("MealMaster") ? mm : rk) << f;
+    }
+    QString first;
+    auto take = [&](const QString &id) { if (first.isEmpty()) first = id; };
+    if (!rk.isEmpty()) take(ImportFlow::run(this, Importers::Format::RezKonv, rk));
+    if (!mm.isEmpty()) take(ImportFlow::run(this, Importers::Format::MealMaster, mm));
+    if (!vtm.isEmpty()) take(ImportFlow::run(this, Importers::Format::Vtm, vtm));
+    for (const QString &f : vmr) {
+        Recipe r;
+        QString err;
+        if (!Recipe::load(f, &r, &err)) {
+            QMessageBox::warning(this, tr("Rezept öffnen"), QStringLiteral("%1: %2").arg(QFileInfo(f).fileName(), err));
+            continue;
+        }
+        RecipeDb &db = RecipeDb::instance();
+        if (const RecipeSummary *s = db.summary(r.id)) {
+            // dasselbe Rezept liegt schon in der Datenbank
+            if (s->modified >= r.modified) {
+                take(r.id);
+                continue;
+            }
+        } else if (!db.duplicatesOf(r).isEmpty()) {
+            Recipe existing;
+            db.load(db.duplicatesOf(r).first(), &existing);
+            DuplicateDialog d(r, existing, this);
+            d.exec();
+            if (d.choice() == DuplicateDialog::Skip) {
+                take(existing.id);
+                continue;
+            }
+            if (d.choice() == DuplicateDialog::Replace) {
+                r.id = existing.id;
+                r.created = existing.created;
+            }
+        }
+        if (r.id.isEmpty()) r.id = Recipe::newId();
+        if (!db.save(r, &err)) QMessageBox::warning(this, tr("Rezept öffnen"), err);
+        else take(r.id);
+    }
+    if (!first.isEmpty()) selectRecipe(first);
+}
+
 void MainWindow::showRandom()
 {
     const QStringList ids = visibleIds();

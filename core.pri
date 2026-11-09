@@ -10,6 +10,7 @@ SOURCES += \
     $$PWD/src/ingredientparser.cpp \
     $$PWD/src/glossary.cpp \
     $$PWD/src/foodtable.cpp \
+    $$PWD/src/foodcsv.cpp \
     $$PWD/src/nutrition.cpp \
     $$PWD/src/textcodec.cpp \
     $$PWD/src/importers.cpp \
@@ -28,6 +29,7 @@ HEADERS += \
     $$PWD/src/ingredientparser.h \
     $$PWD/src/glossary.h \
     $$PWD/src/foodtable.h \
+    $$PWD/src/foodcsv.h \
     $$PWD/src/nutrition.h \
     $$PWD/src/textcodec.h \
     $$PWD/src/importers.h \

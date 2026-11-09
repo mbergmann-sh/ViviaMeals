@@ -1,5 +1,6 @@
 // VitaMeals – Test des Kerns (ohne Fenster)
 //   coretest            alle Prüfungen, Ausgabe der importierten Beispielrezepte
+#include "foodcsv.h"
 #include "foodtable.h"
 #include "importers.h"
 #include "latexexport.h"
@@ -12,6 +13,7 @@
 #include <QCoreApplication>
 #include <QFile>
 #include <QFileInfo>
+#include <QDir>
 #include <QTemporaryDir>
 #include <QTextStream>
 #include <cmath>
@@ -104,6 +106,118 @@ int main(int argc, char **argv)
                     const QString f = QStringLiteral("%1/%2_%3_%4.tex").arg(QString::fromLocal8Bit(argv[1])).arg(QFileInfo(file).completeBaseName()).arg(k).arg(cls ? "book" : "scrbook");
                     CHECK(LatexExport::exportRecipe(res.recipes[k], f, lo), "LaTeX " + f);
                 }
+    }
+
+    // ---- CSV-Import eigener Nährwerte
+    {
+        QTemporaryDir ct;
+        auto writeBytes = [&](const QString &name, const QByteArray &b) {
+            QFile f(ct.filePath(name));
+            f.open(QIODevice::WriteOnly);
+            f.write(b);
+            return ct.filePath(name);
+        };
+        // 1. deutsche Excel-Tabelle: Semikolon, Dezimalkomma, Windows-1252, Feld in Anführungszeichen
+        QByteArray de = "Bezeichnung;Kategorie;Brennwert (kJ);Energie (kcal);Fett (g);davon ges\xe4ttigte Fetts\xe4uren (g);"
+                        "Kohlenhydrate (g);davon Zucker (g);Ballaststoffe (g);Eiwei\xdf (g);Salz (g)\r\n"
+                        "Dinkelvollkornmehl;Getreide;1402;335;2,5;0,4;61;1;10;14;0,01\r\n"
+                        "\"Gr\xfcnkern; geschrotet\";;1440;344;2,7;0,5;63;1,5;8,8;11;<0,1\r\n"
+                        "Hafer-Joghurt natur;Milch;259;;2,8;0,3;7,6;2,4;1,2;1,2;0,1\r\n"
+                        ";;;;;;;;;;\r\n";
+        FoodCsv::Table t;
+        QString err;
+        CHECK(FoodCsv::readTable(writeBytes(QStringLiteral("de.csv"), de), &t, &err), "CSV lesen: " + err);
+        CHECK(t.delimiter == QLatin1Char(';') && t.encoding == QLatin1String("Windows-1252"), "Trennzeichen/Zeichensatz " + t.encoding);
+        const FoodCsv::Mapping m = FoodCsv::autoMap(t.header);
+        QStringList map;
+        for (int f = 0; f < FoodCsv::FieldCount; ++f)
+            map << QStringLiteral("%1=%2").arg(FoodCsv::fieldName(FoodCsv::Field(f))).arg(m.col[f] >= 0 ? t.header[m.col[f]] : QStringLiteral("-"));
+        out << "CSV-Zuordnung: " << map.join(" | ") << "\n";
+        CHECK(m.col[FoodCsv::Name] == 0 && m.col[FoodCsv::KJ] == 2 && m.col[FoodCsv::Kcal] == 3 && m.col[FoodCsv::SatFat] == 5
+                  && m.col[FoodCsv::Fat] == 4 && m.col[FoodCsv::Sugar] == 7 && m.col[FoodCsv::Carbs] == 6 && m.col[FoodCsv::Protein] == 9
+                  && m.col[FoodCsv::Salt] == 10 && m.col[FoodCsv::Category] == 1,
+              "automatische Zuordnung (deutsch)");
+        FoodCsv::Options o;
+        o.source = QStringLiteral("Test-CSV");
+        QStringList warn;
+        const QList<Food> foods = FoodCsv::convert(t, m, o, &warn);
+        for (const Food &f : foods)
+            out << "  " << f.name << " [" << f.category << "] " << f.per100.kcal << " kcal, Fett " << f.per100.fat << ", Salz " << f.per100.salt << "\n";
+        CHECK(foods.size() == 3, "3 Lebensmittel");
+        CHECK(foods.size() == 3 && foods[1].name == QStringLiteral("Grünkern; geschrotet") && std::fabs(foods[1].per100.salt - 0.05) < 1e-9,
+              "Anführungszeichen, Umlaute, <-Wert");
+        CHECK(foods.size() == 3 && std::fabs(foods[2].per100.kcal - 259 / 4.184) < 0.1 && foods[2].category == QLatin1String("milch"), "kJ→kcal, Kategorie");
+        CHECK(foods.size() == 3 && foods[1].category == QLatin1String("sonstiges"), "ohne Kategorie und Ähnlichkeit: Standardkategorie");
+        // 2. Open-Food-Facts-Export: Tabulator, energy_100g in kJ, Natrium in g
+        QByteArray off = "code\tproduct_name\tgeneric_name\tcategories\tenergy_100g\tenergy-kcal_100g\tfat_100g\tsaturated-fat_100g\t"
+                         "carbohydrates_100g\tsugars_100g\tfiber_100g\tproteins_100g\tsodium_100g\n"
+                         "400\tKichererbsen-Aufstrich\tHummus\ten:spreads\t1100\t\t18\t2\t12\t1\t5\t7\t0.4\n";
+        FoodCsv::Table t2;
+        CHECK(FoodCsv::readTable(writeBytes(QStringLiteral("off.csv"), off), &t2, &err), "OFF lesen");
+        const FoodCsv::Mapping m2 = FoodCsv::autoMap(t2.header);
+        CHECK(m2.col[FoodCsv::Name] == 1 && m2.col[FoodCsv::KJ] == 4 && m2.col[FoodCsv::Kcal] == 5 && m2.col[FoodCsv::Sodium] == 12
+                  && m2.col[FoodCsv::Fat] == 6 && m2.col[FoodCsv::SatFat] == 7,
+              "automatische Zuordnung (Open Food Facts)");
+        const QList<Food> f2 = FoodCsv::convert(t2, m2, o);
+        CHECK(f2.size() == 1 && std::fabs(f2[0].per100.kcal - 1100 / 4.184) < 0.1 && std::fabs(f2[0].per100.salt - 1.0) < 1e-6,
+              "OFF: leere kcal → kJ, Natrium → Salz");
+        // 3. USDA FoodData Central (Aufbau wie Foundation Foods/SR Legacy)
+        QDir(ct.path()).mkpath(QStringLiteral("fdc"));
+        writeBytes(QStringLiteral("fdc/food.csv"), "\"fdc_id\",\"data_type\",\"description\",\"food_category_id\",\"publication_date\"\n"
+                                                    "\"1001\",\"sr_legacy_food\",\"Butter, salted\",\"1\",\"2019-04-01\"\n"
+                                                    "\"1002\",\"foundation_food\",\"Lentils, dry\",\"16\",\"2020-10-30\"\n"
+                                                    "\"1003\",\"sub_sample_food\",\"Lentils, dry (Probe)\",\"16\",\"2020-10-30\"\n");
+        writeBytes(QStringLiteral("fdc/food_category.csv"), "\"id\",\"code\",\"description\"\n\"1\",\"0100\",\"Dairy and Egg Products\"\n"
+                                                             "\"16\",\"1600\",\"Legumes and Legume Products\"\n");
+        writeBytes(QStringLiteral("fdc/nutrient.csv"), "\"id\",\"name\",\"unit_name\",\"nutrient_nbr\",\"rank\"\n"
+                                                        "\"1003\",\"Protein\",\"G\",\"203\",\"600\"\n\"1004\",\"Total lipid (fat)\",\"G\",\"204\",\"800\"\n"
+                                                        "\"1005\",\"Carbohydrate, by difference\",\"G\",\"205\",\"1110\"\n\"1008\",\"Energy\",\"KCAL\",\"208\",\"300\"\n"
+                                                        "\"2047\",\"Energy (Atwater General Factors)\",\"KCAL\",\"957\",\"280\"\n"
+                                                        "\"1093\",\"Sodium, Na\",\"MG\",\"307\",\"5800\"\n\"1258\",\"Fatty acids, total saturated\",\"G\",\"606\",\"9700\"\n");
+        writeBytes(QStringLiteral("fdc/food_nutrient.csv"), "\"id\",\"fdc_id\",\"nutrient_id\",\"amount\",\"data_points\"\n"
+                                                             "\"1\",\"1001\",\"1008\",\"717\",\"\"\n\"2\",\"1001\",\"1004\",\"81.11\",\"\"\n"
+                                                             "\"3\",\"1001\",\"1093\",\"643\",\"\"\n\"4\",\"1001\",\"1258\",\"51.37\",\"\"\n"
+                                                             "\"5\",\"1002\",\"2047\",\"360\",\"\"\n\"6\",\"1002\",\"1003\",\"23.6\",\"\"\n"
+                                                             "\"7\",\"1003\",\"2047\",\"999\",\"\"\n");
+        QList<Food> usda;
+        CHECK(FoodCsv::isUsdaFolder(ct.filePath(QStringLiteral("fdc"))), "USDA-Ordner erkannt");
+        CHECK(FoodCsv::readUsda(ct.filePath(QStringLiteral("fdc")), FoodCsv::Options(), &usda, &err), "USDA lesen: " + err);
+        for (const Food &f : usda)
+            out << "  USDA " << f.key << " " << f.name << " [" << f.category << "] " << f.per100.kcal << " kcal, Salz " << f.per100.salt << "\n";
+        CHECK(usda.size() == 2, "USDA: Einzelprobe ausgelassen");
+        CHECK(usda.size() == 2 && usda[0].name == QLatin1String("Butter, salted") && std::fabs(usda[0].per100.salt - 1.6075) < 1e-3
+                  && usda[0].category == QLatin1String("milch") && std::fabs(usda[0].per100.satFat - 51.37) < 1e-6,
+              "USDA: Butter (Natrium mg → Salz, Kategorie)");
+        CHECK(usda.size() == 2 && std::fabs(usda[1].per100.kcal - 360) < 1e-6 && usda[1].category == QLatin1String("huelsen"), "USDA: Atwater-Energie");
+        // 4. Übernehmen, eingebaute Werte überschreiben, wieder entfernen, Export/Vorlage einlesen
+        FoodCsv::Options ov;
+        ov.source = QStringLiteral("Test-Überschreiben");
+        ov.overrideBuiltin = true;
+        Food ownButter;
+        FoodCsv::Table tb;
+        writeBytes(QStringLiteral("butter.csv"), "Name;kcal;Fett\nButter;700;77\n");
+        FoodCsv::readTable(ct.filePath(QStringLiteral("butter.csv")), &tb);
+        const QList<Food> ob = FoodCsv::convert(tb, FoodCsv::autoMap(tb.header), ov);
+        CHECK(ob.size() == 1 && ob[0].key == QLatin1String("butter") && ob[0].aliases.contains(QStringLiteral("unsalted butter")), "eingebaute Butter überschreiben");
+        FoodTable &ft = FoodTable::instance();
+        CHECK(ft.saveUserFoods(ob, true) == 1 && std::fabs(ft.match(QStringLiteral("Butter"))->per100.kcal - 700) < 1e-6, "eigener Wert wirkt");
+        CHECK(ft.removeUserFoodsFrom(QStringLiteral("Test-Überschreiben")) == 1 && std::fabs(ft.match(QStringLiteral("Butter"))->per100.kcal - 740) < 1e-6,
+              "Herkunft entfernen → eingebauter Wert");
+        CHECK(ft.saveUserFoods(foods, true) == 3 && ft.match(QStringLiteral("Dinkelvollkornmehl"))->key == QLatin1String("csv_dinkelvollkornmehl"),
+              "importierte Zutat wird zugeordnet");
+        const QString exp = ct.filePath(QStringLiteral("export.csv"));
+        CHECK(FoodCsv::exportUserFoods(exp, &err), "Export");
+        FoodCsv::Table te;
+        CHECK(FoodCsv::readTable(exp, &te) && te.rows.size() == 3, "Export wieder einlesen");
+        const QList<Food> back = FoodCsv::convert(te, FoodCsv::autoMap(te.header), o);
+        CHECK(back.size() == 3 && std::fabs(back[0].per100.kcal - foods[0].per100.kcal) < 1 && back[0].category == foods[0].category,
+              "Export/Import verlustfrei");
+        CHECK(FoodCsv::writeTemplate(ct.filePath(QStringLiteral("vorlage.csv"))), "Vorlage");
+        FoodCsv::Table tv;
+        FoodCsv::readTable(ct.filePath(QStringLiteral("vorlage.csv")), &tv);
+        CHECK(FoodCsv::convert(tv, FoodCsv::autoMap(tv.header), o).size() == 2, "Vorlage einlesbar");
+        ft.removeUserFoodsFrom(QStringLiteral("Test-CSV"));
+        CHECK(FoodCsv::number(QStringLiteral("1.234,5")) == 1234.5 && FoodCsv::number(QStringLiteral("1,234.5")) == 1234.5, "Zahlenformate");
     }
 
     // Datenbank

@@ -24,6 +24,7 @@ struct Food {
     QHash<QString, double> unitGrams;   // g je Einheit (Pck., Dose, Zehe …)
     QStringList aliases;        // Namen (klein geschrieben), deutsch und englisch
     bool user = false;          // eigener bzw. geänderter Eintrag
+    QString source;             // Herkunft eigener Einträge („USDA FoodData Central“, Dateiname des CSV-Imports …)
 
     bool isAnimal() const;      // Fleisch, Fisch, Gelatine
     bool isNonVegan() const;    // zusätzlich Milch, Käse, Ei, Honig
@@ -46,6 +47,11 @@ public:
     // eigene Einträge
     void saveUserFood(const Food &f);
     void removeUserFood(const QString &key);     // eingebauter Eintrag gilt dann wieder
+    // viele Einträge auf einmal (CSV-Import); gibt die Anzahl übernommener Einträge zurück
+    int saveUserFoods(const QList<Food> &foods, bool replaceExisting);
+    int removeUserFoodsFrom(const QString &source);   // alle Einträge einer Herkunft entfernen
+    QStringList userSources() const;
+    QList<const Food *> userFoods() const;
     bool isBuiltin(const QString &key) const { return m_builtin.contains(key); }
     void learn(const QString &ingredientName, const QString &foodKey);
     QString learnedFor(const QString &ingredientName) const;

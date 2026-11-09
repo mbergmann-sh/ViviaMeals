@@ -44,7 +44,8 @@ QJsonObject Food::toJson() const
                         { QStringLiteral("density"), density },
                         { QStringLiteral("piece"), piece },
                         { QStringLiteral("units"), units },
-                        { QStringLiteral("aliases"), QJsonArray::fromStringList(aliases) } };
+                        { QStringLiteral("aliases"), QJsonArray::fromStringList(aliases) },
+                        { QStringLiteral("source"), source } };
 }
 
 Food Food::fromJson(const QJsonObject &o)
@@ -60,6 +61,7 @@ Food Food::fromJson(const QJsonObject &o)
     const QJsonObject u = o.value(QStringLiteral("units")).toObject();
     for (auto it = u.constBegin(); it != u.constEnd(); ++it) f.unitGrams.insert(it.key(), it.value().toDouble());
     for (const auto &a : o.value(QStringLiteral("aliases")).toArray()) f.aliases << a.toString().toLower();
+    f.source = o.value(QStringLiteral("source")).toString();
     return f;
 }
 
@@ -179,6 +181,59 @@ void FoodTable::removeUserFood(const QString &key)
     else m_foods.remove(key);
     rebuildAliases();
     saveUser();
+}
+
+int FoodTable::saveUserFoods(const QList<Food> &foods, bool replaceExisting)
+{
+    int n = 0;
+    for (Food f : foods) {
+        if (f.key.isEmpty() || f.name.isEmpty()) continue;
+        if (!replaceExisting && m_userFoods.contains(f.key)) continue;
+        f.user = true;
+        m_userFoods.insert(f.key, f);
+        m_foods.insert(f.key, f);
+        ++n;
+    }
+    if (n > 0) {
+        rebuildAliases();
+        saveUser();
+    }
+    return n;
+}
+
+int FoodTable::removeUserFoodsFrom(const QString &source)
+{
+    QStringList keys;
+    for (const Food &f : m_userFoods)
+        if (f.source == source) keys << f.key;
+    for (const QString &k : keys) {
+        m_userFoods.remove(k);
+        if (m_builtin.contains(k)) m_foods.insert(k, m_builtin.value(k));
+        else m_foods.remove(k);
+    }
+    if (!keys.isEmpty()) {
+        rebuildAliases();
+        saveUser();
+    }
+    return int(keys.size());
+}
+
+QStringList FoodTable::userSources() const
+{
+    QStringList l;
+    for (const Food &f : m_userFoods)
+        if (!f.source.isEmpty() && !l.contains(f.source)) l << f.source;
+    l.sort(Qt::CaseInsensitive);
+    return l;
+}
+
+QList<const Food *> FoodTable::userFoods() const
+{
+    QList<const Food *> l;
+    for (const Food &f : m_foods)
+        if (f.user) l << &f;
+    std::sort(l.begin(), l.end(), [](const Food *a, const Food *b) { return QString::localeAwareCompare(a->name, b->name) < 0; });
+    return l;
 }
 
 void FoodTable::learn(const QString &ingredientName, const QString &foodKey)

@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
+#include "foodcsv.h"
 #include "foodtable.h"
 
 #include <QDialog>
 
 class QCheckBox;
+class QLabel;
+class QRadioButton;
 class QComboBox;
 class QDoubleSpinBox;
 class QLineEdit;
@@ -47,6 +50,40 @@ private:
     QDoubleSpinBox *m_piece;
     QPlainTextEdit *m_aliases;
     QLineEdit *m_units;
+};
+
+// Nährwerte aus CSV bzw. USDA FoodData Central importieren
+class FoodImportDialog : public QDialog
+{
+    Q_OBJECT
+public:
+    explicit FoodImportDialog(QWidget *parent = nullptr);
+    int imported() const { return m_imported; }
+
+protected:
+    void accept() override;
+
+private:
+    void browse();
+    void load();
+    void preview();
+    FoodCsv::Options options() const;
+    QRadioButton *m_csv, *m_usda;
+    QLineEdit *m_path;
+    QLabel *m_info;
+    QWidget *m_mapBox;
+    QComboBox *m_map[FoodCsv::FieldCount];
+    QComboBox *m_sodiumUnit;
+    QComboBox *m_defCat;
+    QLineEdit *m_filter;
+    QLineEdit *m_source;
+    QCheckBox *m_replace;
+    QCheckBox *m_override;
+    QTableWidget *m_preview;
+    QLabel *m_count;
+    FoodCsv::Table m_table;
+    QList<Food> m_foods;
+    int m_imported = 0;
 };
 
 // Übersicht der Nährwerttabelle (Extras → Nährwerttabelle)

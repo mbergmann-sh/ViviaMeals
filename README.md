@@ -17,6 +17,8 @@ Technisch und optisch an [VitaParms](https://github.com/mbergmann-sh/VitaParms) 
 | ![Kühlschrank](docs/images/kuehlschrank.png) | ![Assistent](docs/images/assistent.png) | ![Wochenplan](docs/images/wochenplan.png) |
 | **Suche** | **Import-Vorschau mit Doubletten** | **Kleiner Bildschirm (1024 × 640)** |
 | ![Suche](docs/images/suche.png) | ![Import](docs/images/import-vorschau.png) | ![Klein](docs/images/hauptfenster-klein.png) |
+| **Nährwerte aus CSV importieren** | | |
+| ![Nährwert-Import](docs/images/naehrwerte-import.png) | | |
 
 ## Funktionen
 
@@ -27,6 +29,7 @@ Technisch und optisch an [VitaParms](https://github.com/mbergmann-sh/VitaParms) 
 | **Editor** | Titel, Rezeptbild (Dateiauswahl, auf 800 px verkleinert), Portionen/Einheit, Zubereitungszeit, Tags (mit Vorschlägen), Quelle, Favorit, Zutatenliste (eine je Zeile, `== Abschnitt ==`), Zubereitung. **Live-Nährwertanalyse** während der Eingabe; Zuordnung einer Zutat zur Nährwerttabelle per Doppelklick änderbar und für alle Rezepte lernbar; Tags vegan/vegetarisch/fleischgerichte/fisch aus den Zutaten ergänzen |
 | **Nährwertanalyse** | Energie (kcal **und** kJ), Fett, gesättigte Fettsäuren, Kohlenhydrate, Zucker, Ballaststoffe, Eiweiß, Salz – gesamt, je Portion und in % der Referenzmenge (LMIV). Mengen werden in Gramm umgerechnet (Gewicht direkt, Volumen über die Dichte, Stück/Zehe/Dose/Pck. über Stückgewichte, „1 Süßkartoffel (ca. 400 g)“ über die Angabe). Ergebnis wird **im Rezept gespeichert**; nicht zuordenbare Zutaten werden genannt |
 | **Nährwerttabelle** | eingebaut: rund 200 Lebensmittelgruppen mit Richtwerten je 100 g, Dichte, Stückgewichten und deutschen/englischen Namen (`tools/make_foods.py`). Unter *Extras → Nährwerttabelle* eigene Lebensmittel anlegen und Werte überschreiben (`lebensmittel_eigene.json`) |
+| **Nährwerte importieren (CSV)** | *Extras → Nährwerttabelle → Importieren / Exportieren*: eigene Tabellen aus Excel/LibreOffice, die mitgelieferte **CSV-Vorlage** oder **Open-Food-Facts**-Exporte – Trennzeichen, Zeichensatz (UTF-8, Windows-1252, CP850), Dezimalkomma, „<0,1“ und kJ/Natrium werden erkannt bzw. umgerechnet, Spalten anhand der Überschriften zugeordnet (änderbar), mit Vorschau. Außerdem der entpackte CSV-Ordner von **USDA FoodData Central** (Foundation Foods, SR Legacy – gemeinfrei, CC0). Jeder Import erhält eine Herkunft und lässt sich wieder entfernen; wahlweise ersetzen eigene Werte die eingebauten gleichen Namens. Eigene Lebensmittel lassen sich als CSV exportieren |
 | **Import** | **RezKonv** und **MealMaster** – einzelne Dateien und Sammlungen, mehrere Dateien auf einmal; Zeichensatz-Erkennung (UTF-8, Windows-1252, DOS-CP850); Abschnitte, Fortsetzungszeilen, zweispaltige MealMaster-Zutaten, Quelle. **Vorschau** mit Auswahl und **Doubletten-Abfrage** (Überspringen / Ersetzen / Beide behalten, „für alle übernehmen“). Außerdem `.vmr` und alte Listen `.vtm` des Prototyps |
 | **Englische Rezepte** | Einheiten werden automatisch umgerechnet (cups → ml bzw. g über die Dichte, oz/lb → g, fl oz/pt/qt → ml, tbsp/tsp → EL/TL, stick butter → g, „1 (16 oz) can“ → g), Zutaten und Zusätze über ein **Offline-Glossar** übersetzt („chopped walnuts“ → „Walnüsse, gehackt“), Temperaturen (°F → °C) und Zoll in der Anleitung umgerechnet. Die Anleitung selbst bleibt englisch (Hinweis in der Ansicht) |
 | **Suche** | Rezeptnamen (auch Teilnamen), Zutaten, Tags (UND/ODER), höchstens kcal je Portion, Favoriten, mit Foto |
@@ -38,6 +41,8 @@ Technisch und optisch an [VitaParms](https://github.com/mbergmann-sh/VitaParms) 
 | **Darstellung** | alle Qt-Styles sowie „Dark“ und „Visual Studio Code Dark“ (aus VitaParms/VitaBreathe), sofort umschaltbar; Symbole passen sich hell/dunkel an |
 | **Fenster und Bildschirm** | Lage und Größe des Hauptfensters, der Aufteilung und aller Dialoge werden gemerkt (`windowstate`); auf kleinen Bildschirmen werden Dialoge rollbar und in den Bildschirm geholt (`screenfit`); **Schriftgröße automatisch** nach Bildschirmgröße oder fest (85–140 %) |
 | **Demo** | `VitaMeals --demo`: temporäre Datenbank mit Beispielrezepten, Bildern, Profil und Vorrat – eigene Daten bleiben unberührt |
+| **Windows-Installer** | Qt Installer Framework, Zielordner-Vorgabe `C:\VitaMeals`, Startmenü und Desktop, Dateizuordnung `.vmr`/`.vmdb`, Update über neueren Installer – wird beim Release-Build automatisch erzeugt (siehe [installer/README.md](installer/README.md)) |
+| **Kommandozeile / Doppelklick** | `VitaMeals rezept.vmr`, `VitaMeals sammlung.mmf`, `VitaMeals <ordner>/vitameals.vmdb` – Rezepte übernehmen, Sammlungen importieren, Datenbank öffnen |
 
 ## Bauen
 
@@ -48,12 +53,15 @@ qmake6 VitaMeals.pro      # bzw. qmake (Qt 5.15)
 make -j8                  # Windows: mingw32-make (MinGW) bzw. nmake/jom (MSVC)
 ```
 
-Getestet mit Qt 6.4.2 unter Linux (GCC 13). Für deinen MinGW-Build in Qt Creator einfach `VitaMeals.pro` öffnen.
+Getestet mit Qt 6.4.2 unter Linux (GCC 13). Für den MinGW-Build in Qt Creator einfach `VitaMeals.pro` öffnen.
+**Windows:** Jeder Build ruft `windeployqt` auf; ein **Release-Build erzeugt zusätzlich den Installer**
+`installer/Output/VitaMeals-<Version>-Setup.exe`, sofern das Qt Installer Framework installiert ist –
+Einzelheiten in [installer/README.md](installer/README.md).
 Weitergabe: `windeployqt VitaMeals.exe` (kopiert auch die deutschen Qt-Übersetzungen, damit Standarddialoge
 „Speichern/Abbrechen“ zeigen), macOS `macdeployqt`. Das Programmsymbol liegt als `.ico`, `.icns`, `.png` und `.svg`
 in `resources/icons/app/`.
 
-Test des Kerns (Zutatenparser, Einheiten, Glossar, Nährwerte, Importe, Datenbank; optional LaTeX-Ausgabe):
+Test des Kerns (Zutatenparser, Einheiten, Glossar, Nährwerte, Rezept- und CSV-Importe, USDA, Datenbank; optional LaTeX-Ausgabe):
 
 ```sh
 cd tests/coretest && qmake6 && make && ./coretest [ordner-für-tex-dateien]
@@ -73,6 +81,7 @@ src/
   ingredientparser.*  Zutatenzeilen zerlegen (Brüche, Bereiche, Packungsgrößen, Abschnitte)
   glossary.*          Offline-Glossar Englisch → Deutsch, Spracherkennung, Kategorien → Tags
   foodtable.*         Nährwerttabelle (eingebaut + eigene + gelernte Zuordnungen), Namensabgleich
+  foodcsv.*           CSV-Import/-Export eigener Nährwerte, USDA FoodData Central
   nutrition.*         Nährwertanalyse, Referenzmengen, automatische Tags
   textcodec.*         Zeichensatz-Erkennung (UTF-8, CP1252, CP850)
   importers.*         RezKonv, MealMaster, .vtm
@@ -86,7 +95,8 @@ src/
   fridgedialog.*, assistantdialog.*, profiledialog.*, weightchart.*, mealplandialog.*, fooddialog.*,
   settingsdialog.*, uiscale.*             Oberfläche
   themes.*, icons.*, screenfit.*, windowstate.*, qtcompat.h   aus VitaBreathe/VitaParms übernommen
-tools/          make_icons.py (Symbole, ICO/ICNS), make_foods.py (Nährwerttabelle)
+tools/          make_icons.py (Symbole, ICO/ICNS), make_foods.py (Nährwerttabelle), make_installer_images.py
+installer/      Qt-Installer-Framework-Installer (windows_deploy.pri, qtifw/config, qtifw/meta)
 tests/coretest/ Test des Kerns
 ```
 

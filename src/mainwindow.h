@@ -29,6 +29,9 @@ public:
     bool ensureDatabase();                     // beim Start: letzte Datenbank öffnen oder anlegen lassen
     bool openDatabase(const QString &path, bool quiet = false);
     void selectRecipe(const QString &id);
+    // Dateien aus der Kommandozeile bzw. per Doppelklick (Dateizuordnung des Installers):
+    // vitameals.vmdb/Ordner → Datenbank öffnen, .vmr → Rezept übernehmen, .rk/.mmf/.vtm → Import
+    void openFiles(const QStringList &files);
     QStringList visibleIds() const;
     RecipeView *view() const { return m_view; }
     QListWidget *list() const { return m_list; }
