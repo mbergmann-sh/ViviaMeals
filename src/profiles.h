@@ -36,7 +36,8 @@ struct Profile {
     Diet diet = Diet::All;
     QStringList excluded;              // Zutaten, die nicht vorkommen sollen („Pilze“, „Koriander“)
     QStringList likedTags;             // bevorzugte Themen („italienisch“, „suppen“)
-    bool snack = false;                // Zwischenmahlzeit einplanen
+    bool snack = false;                // Zwischenmahlzeit einplanen (beim Zunehmen: Spätmahlzeit)
+    bool warmEvening = false;          // warme Hauptmahlzeit abends statt mittags (Wochenplan)
     int weighDay = 0;                  // Wiegetag: 0 = keiner, 1 = Montag … 7 = Sonntag
     QDate weighDone;                   // Wiegetag, dessen Erinnerung als „erledigt“ markiert wurde
     QList<WeightEntry> weights;        // Gewichtsverlauf, nach Datum sortiert

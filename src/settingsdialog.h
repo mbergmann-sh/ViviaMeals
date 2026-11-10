@@ -8,6 +8,7 @@ class QCheckBox;
 class QComboBox;
 class QLabel;
 class QLineEdit;
+namespace Escl { class Scanner; }
 
 class SettingsDialog : public QDialog
 {
@@ -41,6 +42,11 @@ private:
     QCheckBox *m_random;
     QString m_origTheme;
     QComboBox *m_scanner;
+    QLineEdit *m_esclAddress;
+    QLabel *m_esclStatus;
+    QLineEdit *m_watchDir;
+    QLineEdit *m_watchProgram;
+    Escl::Scanner *m_escl;
     QLineEdit *m_scanCommand;
     QCheckBox *m_scanColor;
     QLineEdit *m_tesseract;

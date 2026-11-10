@@ -39,6 +39,7 @@ private:
     QDateEdit *m_start;
     QSpinBox *m_days;
     QCheckBox *m_snack;
+    QComboBox *m_warm;
     QTableWidget *m_table;
     QLabel *m_info;
     QLabel *m_notes;

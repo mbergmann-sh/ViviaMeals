@@ -8,7 +8,12 @@
 //          und öffnet das Bild danach mit „Bild öffnen …“.
 // macOS:   „Digitale Bilder“ (Image Capture) bzw. Vorschau („Ablage → Von Scanner importieren“) –
 //          danach „Bild öffnen …“.
-// Überall: ein eigener Befehl mit dem Platzhalter %f für die Zieldatei.
+// Überall:
+//   * Netzwerkscanner über eSCL (AirScan/Mopria/AirPrint-Scan) – nur die IP-Adresse eintragen, kein
+//     Treiber nötig (escl.h); hilft z. B. bei WLAN-Druckern, die Windows nicht als WIA-Scanner kennt
+//   * Herstellerprogramm (z. B. Epson ScanSmart) + überwachter Ordner: ViviaMeals startet das Programm
+//     auf Wunsch und übernimmt jedes neue Bild, das dort gespeichert wird
+//   * ein eigener Befehl mit dem Platzhalter %f für die Zieldatei.
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 
@@ -28,6 +33,8 @@ struct Program {
     bool writesFile = false;   // legt das Bild selbst unter %f ab → automatische Übernahme
     bool toStdout = false;     // Bild kommt über stdout (scanimage)
     bool native = false;       // Windows-Scandialog
+    bool network = false;      // eSCL-Netzwerkscanner (Adresse in „scan/esclAddress“)
+    bool watchFolder = false;  // neue Bilder in „scan/watchDir“ übernehmen (Programm „scan/watchProgram“)
     QString hint;          // Hinweis nach dem Start
 };
 

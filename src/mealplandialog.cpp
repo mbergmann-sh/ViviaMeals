@@ -58,7 +58,14 @@ MealPlanDialog::MealPlanDialog(const QString &profileId, QWidget *parent) : QDia
     m_days->setSuffix(tr(" Tage"));
     top->addWidget(m_days);
     m_snack = new QCheckBox(tr("Zwischenmahlzeit"));
+    m_snack->setToolTip(tr("Abnehmen/Halten: eine Zwischenmahlzeit am Nachmittag · Zunehmen: zusätzlich eine Spätmahlzeit"));
     top->addWidget(m_snack);
+    m_warm = new QComboBox;
+    m_warm->addItem(tr("warm mittags"), false);
+    m_warm->addItem(tr("warm abends"), true);
+    m_warm->setToolTip(tr("Eine warme Hauptmahlzeit am Tag, die andere ist leicht (Salat, Suppe, Brotzeit …).\n"
+                          "Beim Zunehmen dürfen beide Hauptmahlzeiten warm sein."));
+    top->addWidget(m_warm);
     auto *make = new QPushButton(Icons::get(QStringLiteral("dice")), tr("Neu planen"));
     top->addWidget(make);
     lay->addLayout(top);
@@ -80,8 +87,8 @@ MealPlanDialog::MealPlanDialog(const QString &profileId, QWidget *parent) : QDia
     m_notes->setStyleSheet(QStringLiteral("QLabel { color: #b85400; }"));
     nl->addWidget(m_notes, 1);
     m_healthy = new QPushButton(Icons::get(QStringLiteral("add")), tr("Gesunde Vorschläge übernehmen"));
-    m_healthy->setToolTip(tr("Zehn mitgelieferte Rezepte für Frühstück und Zwischenmahlzeiten (Porridge, Vollkornbrot mit Quark, "
-                             "Rührei mit Spinat, Gemüsesticks mit Dip …) in die Datenbank übernehmen"));
+    m_healthy->setToolTip(tr("Mitgelieferte Rezepte für Frühstück, Zwischenmahlzeiten und leichte Abendessen (Porridge, Vollkornbrot mit Quark, "
+                             "Gemüsesticks mit Dip, Linsensalat, Tomatensuppe, Omelett mit Gemüse …) in die Datenbank übernehmen"));
     nl->addWidget(m_healthy);
     lay->addLayout(nl);
     connect(m_healthy, &QPushButton::clicked, this, [this] {
@@ -123,6 +130,7 @@ MealPlanner::Options MealPlanDialog::options() const
     if (Profile *p = Profiles::instance().find(m_profile->currentData().toString())) o = MealPlanner::fromProfile(*p);
     o.targetKcal = m_kcal->value();
     o.snack = m_snack->isChecked();
+    o.warmEvening = m_warm->currentData().toBool();
     o.days = m_days->value();
     o.start = m_start->date();
     return o;
@@ -135,6 +143,7 @@ void MealPlanDialog::profileChanged()
         const double t = p->targetKcal();
         if (t > 0) m_kcal->setValue(qRound(t / 10.0) * 10);
         m_snack->setChecked(p->snack);
+        m_warm->setCurrentIndex(p->warmEvening ? 1 : 0);
         if (!p->lastPlan.isEmpty()) {
             m_plan = MealPlan::fromJson(p->lastPlan);
             if (!m_plan.isEmpty()) {
@@ -163,6 +172,14 @@ void MealPlanDialog::create()
                            "die zur Ernährungsform und den ausgeschlossenen Zutaten passen."));
         return;
     }
+    // Einstellungen „Zwischenmahlzeit“ und „warm mittags/abends“ im Profil merken
+    if (Profile *p = Profiles::instance().find(m_profile->currentData().toString())) {
+        if (p->snack != o.snack || p->warmEvening != o.warmEvening) {
+            p->snack = o.snack;
+            p->warmEvening = o.warmEvening;
+            Profiles::instance().save();
+        }
+    }
     m_plan = MealPlanner::create(o);
     m_plan.profileId = m_profile->currentData().toString();
     fillTable();
@@ -174,7 +191,13 @@ void MealPlanDialog::fillTable()
     m_table->clear();
     m_table->setRowCount(int(m_plan.days.size()));
     m_table->setColumnCount(int(m_plan.meals.size()) + 1);
-    QStringList head = m_plan.meals;
+    QStringList head;
+    for (int m = 0; m < m_plan.meals.size(); ++m) {
+        const MealPlanner::Role r = m_plan.roles.value(m, MealPlanner::Role::Warm);
+        head << ((r == MealPlanner::Role::Warm || r == MealPlanner::Role::Light)
+                     ? QStringLiteral("%1\n(%2)").arg(m_plan.meals[m], MealPlanner::roleName(r))
+                     : m_plan.meals[m]);
+    }
     head << tr("Summe");
     m_table->setHorizontalHeaderLabels(head);
     QStringList rows;
@@ -204,7 +227,9 @@ void MealPlanDialog::fillTable()
     Q_UNUSED(sum)
     if (!m_plan.days.isEmpty())
         m_info->setText(MealPlanner::summary(m_plan).toHtmlEscaped() + QStringLiteral("<br/><small>")
-                        + tr("Portionen gerundet (Zwischenmahlzeit auf halbe, sonst auf Viertel; höchstens etwa 450 g zum Frühstück, 350 g als Zwischenmahlzeit, 800 g mittags und abends), Gramm = Gewicht der "
+                        + tr("Eine warme Hauptmahlzeit am Tag, die zweite leicht (beim Zunehmen dürfen beide warm sein); beide ohne gleiche Beilage und nicht "
+                             "zweimal Fleisch oder Fisch. Portionen gerundet (Zwischenmahlzeit auf halbe, sonst auf Viertel; höchstens etwa 450 g zum "
+                             "Frühstück, 350 g als Zwischenmahlzeit, 500 g als leichte und 750 g als warme Mahlzeit), Gramm = Gewicht der "
                              "Zutaten. Rechtsklick auf eine Mahlzeit, um sie auszutauschen.")
                         + QStringLiteral("</small>"));
     updateNotes();
@@ -216,7 +241,9 @@ void MealPlanDialog::updateNotes()
     m_notes->setText(n.join(QLatin1Char('\n')));
     m_notes->setVisible(!n.isEmpty());
     const QList<int> c = MealPlanner::slotCounts(options());
-    m_healthy->setVisible(c.value(0) < 3 || (m_snack->isChecked() && c.value(3) < 3));
+    const MealPlanner::Layout lay = MealPlanner::layout(options());
+    m_healthy->setVisible(c.value(0) < 3 || (lay.roles.contains(MealPlanner::Role::Snack) && c.value(3) < 3)
+                          || (lay.roles.contains(MealPlanner::Role::Light) && c.value(2) < 3));
 }
 
 void MealPlanDialog::cellMenu(const QPoint &pos)

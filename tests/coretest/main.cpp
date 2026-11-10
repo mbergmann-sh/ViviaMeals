@@ -20,6 +20,7 @@
 #include "glossary.h"
 #include "ocr.h"
 #include "recipescan.h"
+#include "escl.h"
 
 #include <QGuiApplication>
 #include <QPainter>
@@ -32,6 +33,8 @@
 #include <QDir>
 #include <QTemporaryDir>
 #include <QTcpServer>
+#include <QTimer>
+#include <QEventLoop>
 #include <QTcpSocket>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -505,7 +508,7 @@ int main(int argc, char **argv)
         o.snack = true;
         o.targetKcal = 1700;
         QList<int> n = MealPlanner::slotCounts(o);
-        out << "  Kandidaten ohne gesunde Vorschläge (F/M/A/Z): " << n[0] << "/" << n[1] << "/" << n[2] << "/" << n[3] << "\n";
+        out << "  Kandidaten ohne gesunde Vorschläge (Frühstück/warm/leicht/Zwischenmahlzeit): " << n[0] << "/" << n[1] << "/" << n[2] << "/" << n[3] << "\n";
         for (const QString &x : MealPlanner::notes(o)) out << "  Hinweis: " << x << "\n";
         MealPlan plan = MealPlanner::create(o);
         bool breakfastOk = true, noDessert = true;
@@ -521,7 +524,7 @@ int main(int argc, char **argv)
         importAll(QStringLiteral(":/samples/gesund.rk"));
         n = MealPlanner::slotCounts(o);
         out << "  mit gesunden Vorschlägen: " << n[0] << "/" << n[1] << "/" << n[2] << "/" << n[3] << "\n";
-        CHECK(n[0] >= 5 && n[3] >= 5, "Frühstück und Zwischenmahlzeiten verfügbar");
+        CHECK(n[0] >= 5 && n[3] >= 5 && n[2] >= 10, "Frühstück, Zwischenmahlzeiten und leichte Mahlzeiten verfügbar");
         plan = MealPlanner::create(o);
         int empty = 0;
         bool grams = true;
@@ -536,6 +539,69 @@ int main(int argc, char **argv)
             out << "  " << plan.meals[m] << ": " << plan.days[0][m].title << " – " << MealPlanner::portionText(plan.days[0][m]) << ", "
                 << qRound(plan.days[0][m].kcal) << " kcal\n";
         out << "  " << MealPlanner::summary(plan) << "\n";
+        // Tagesaufbau beim Abnehmen: Frühstück, Mittag (warm), Zwischenmahlzeit, Abend (leicht)
+        CHECK(plan.roles.size() == 4 && plan.roles[1] == MealPlanner::Role::Warm && plan.roles[3] == MealPlanner::Role::Light
+                  && plan.meals[3] == QStringLiteral("Abendessen"),
+              "Abnehmen: mittags warm, abends leicht");
+        auto checkDays = [&](const MealPlan &pl, const QString &what) {
+            bool lightOk = true, oneWarm = true, noDouble = true;
+            for (const auto &day : pl.days) {
+                int warm = 0, meatMeals = 0, fishMeals = 0;
+                QStringList starches;
+                for (int m = 0; m < day.size(); ++m) {
+                    const RecipeSummary *s = db.summary(day[m].recipeId);
+                    if (!s) continue;
+                    const MealPlanner::Role r = pl.roles[m];
+                    if (r == MealPlanner::Role::Warm) ++warm;
+                    if (r == MealPlanner::Role::Light && !(MealTypes::classify(MealTypes::from(*s)) & MealTypes::Light)) lightOk = false;
+                    if (r == MealPlanner::Role::Warm || r == MealPlanner::Role::Light) {
+                        bool meat = false, fish = false;
+                        for (const QString &k : s->foods)
+                            if (const Food *f = FoodTable::instance().find(k)) {
+                                meat |= f->category == QLatin1String("fleisch");
+                                fish |= f->category == QLatin1String("fisch");
+                            }
+                        meatMeals += meat;
+                        fishMeals += fish;
+                    }
+                }
+                if (warm != 1) oneWarm = false;
+                if (meatMeals > 1 || fishMeals > 1) noDouble = false;
+            }
+            CHECK(oneWarm, what + ": genau eine warme Hauptmahlzeit je Tag");
+            CHECK(lightOk, what + ": leichte Mahlzeit aus leichten Rezepten");
+            CHECK(noDouble, what + ": nicht zweimal Fleisch bzw. Fisch am Tag");
+        };
+        checkDays(plan, QStringLiteral("Abnehmen"));
+        const MealPlanner::WeekCheck wc = MealPlanner::weekCheck(plan);
+        out << "  Woche: Fisch " << wc.fish << "×, Hülsenfrüchte " << wc.legumes << "×, Fleisch " << wc.meat << "×\n";
+        CHECK(wc.fish >= wc.fishMin && wc.fish <= wc.fishMax + 1 && wc.legumes >= wc.legumesMin && wc.meat <= wc.meatMax,
+              "Wochenrichtwerte Fisch/Hülsenfrüchte/Fleisch");
+        // warm abends
+        o.warmEvening = true;
+        plan = MealPlanner::create(o);
+        CHECK(plan.roles[1] == MealPlanner::Role::Light && plan.roles[3] == MealPlanner::Role::Warm, "warm abends: mittags leicht");
+        checkDays(plan, QStringLiteral("warm abends"));
+        // gespeicherter Plan behält die Rollen
+        const MealPlan again = MealPlan::fromJson(plan.toJson());
+        CHECK(again.roles == plan.roles && again.goal == plan.goal, "Plan speichern/laden mit Rollen");
+        // Zunehmen: fünf bzw. sechs Mahlzeiten
+        o.goal = Profile::Goal::Gain;
+        o.warmEvening = false;
+        o.targetKcal = 2900;
+        plan = MealPlanner::create(o);
+        CHECK(plan.meals.size() == 6 && plan.meals[5] == QStringLiteral("Spätmahlzeit") && plan.roles[4] == MealPlanner::Role::Warm,
+              "Zunehmen: 6 Mahlzeiten, abends darf warm sein");
+        double dayAvg = 0;
+        for (int d = 0; d < plan.days.size(); ++d) dayAvg += plan.dayKcal(d) / plan.days.size();
+        out << "  Zunehmen: " << plan.meals.join(QStringLiteral(", ")) << " – Ø " << qRound(dayAvg) << " kcal\n";
+        o.snack = false;
+        CHECK(MealPlanner::layout(o).names.size() == 5, "Zunehmen ohne Spätmahlzeit: 5 Mahlzeiten");
+        // alter Plan (vor 0.6.1) ohne Rollen
+        QJsonObject old = plan.toJson();
+        old.remove(QStringLiteral("roles"));
+        old[QStringLiteral("meals")] = QJsonArray{ QStringLiteral("Frühstück"), QStringLiteral("Mittagessen"), QStringLiteral("Abendessen") };
+        CHECK(MealPlan::fromJson(old).roles.value(2) == MealPlanner::Role::Warm, "alter Plan: Rollen ergänzt");
         Recipe pud;
         pud.title = QStringLiteral("Grießflammeri mit Kirschsoße");
         CHECK(MealTypes::classify(MealTypes::from(pud)) & MealTypes::Dessert, "Flammeri = Dessert");
@@ -779,6 +845,125 @@ int main(int argc, char **argv)
             out << "  OCR: " << sr.title << ", " << qRound(sr.nutrition.perServing.kcal) << " kcal je Portion: " << s.text.ingredientLines.join(QStringLiteral(" | "))
                 << "\n";
         }
+    }
+
+    out << "\nNetzwerkscanner (eSCL):\n";
+    {
+        CHECK(Escl::baseUrl(QStringLiteral("192.168.178.101")).toString() == QStringLiteral("http://192.168.178.101/eSCL"), "eSCL-Adresse aus IP");
+        CHECK(Escl::baseUrl(QStringLiteral("https://drucker.fritz.box/eSCL/")).toString() == QStringLiteral("https://drucker.fritz.box/eSCL"),
+              "eSCL-Adresse aus URL");
+        const QByteArray capsXml =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?><scan:ScannerCapabilities xmlns:scan=\"http://schemas.hp.com/imaging/escl/2011/05/03\" "
+            "xmlns:pwg=\"http://www.pwg.org/schemas/2010/12/sm\"><pwg:Version>2.63</pwg:Version><pwg:MakeAndModel>EPSON ET-2870 Series</pwg:MakeAndModel>"
+            "<scan:Platen><scan:PlatenInputCaps><scan:MaxWidth>2550</scan:MaxWidth><scan:MaxHeight>3508</scan:MaxHeight>"
+            "<scan:SettingProfiles><scan:SettingProfile><scan:ColorModes><scan:ColorMode>BlackAndWhite1</scan:ColorMode><scan:ColorMode>Grayscale8</scan:ColorMode>"
+            "<scan:ColorMode>RGB24</scan:ColorMode></scan:ColorModes><scan:DocumentFormats><pwg:DocumentFormat>application/pdf</pwg:DocumentFormat>"
+            "<pwg:DocumentFormat>image/jpeg</pwg:DocumentFormat><scan:DocumentFormatExt>image/jpeg</scan:DocumentFormatExt></scan:DocumentFormats>"
+            "<scan:SupportedResolutions><scan:DiscreteResolutions><scan:DiscreteResolution><scan:XResolution>100</scan:XResolution><scan:YResolution>100</scan:YResolution></scan:DiscreteResolution>"
+            "<scan:DiscreteResolution><scan:XResolution>200</scan:XResolution><scan:YResolution>200</scan:YResolution></scan:DiscreteResolution>"
+            "<scan:DiscreteResolution><scan:XResolution>300</scan:XResolution><scan:YResolution>300</scan:YResolution></scan:DiscreteResolution>"
+            "<scan:DiscreteResolution><scan:XResolution>600</scan:XResolution><scan:YResolution>600</scan:YResolution></scan:DiscreteResolution>"
+            "</scan:DiscreteResolutions></scan:SupportedResolutions></scan:SettingProfile></scan:SettingProfiles></scan:PlatenInputCaps></scan:Platen>"
+            "</scan:ScannerCapabilities>";
+        const Escl::Capabilities caps = Escl::parseCapabilities(capsXml);
+        CHECK(caps.makeAndModel == QStringLiteral("EPSON ET-2870 Series") && caps.version == QStringLiteral("2.63") && caps.resolutions.size() == 4
+                  && caps.colorModes.contains(QStringLiteral("RGB24")) && Escl::chooseFormat(caps) == QStringLiteral("image/jpeg"),
+              "eSCL-Fähigkeiten lesen");
+        CHECK(Escl::chooseResolution(caps, 300) == 300 && Escl::chooseResolution(caps, 250) == 300, "Auflösung wählen");
+        const QByteArray settings = Escl::scanSettings(caps, true, 300);
+        CHECK(settings.contains("<scan:ColorMode>RGB24</scan:ColorMode>") && settings.contains("<pwg:DocumentFormat>image/jpeg")
+                  && settings.contains("<pwg:InputSource>Platen</pwg:InputSource>"),
+              "ScanSettings");
+
+        // kleiner eSCL-Server: Fähigkeiten, Auftrag, einmal „noch nicht fertig“ (503), dann das Bild
+        QImage page(850, 1170, QImage::Format_RGB32);
+        page.fill(Qt::white);
+        QByteArray jpeg;
+        {
+            QBuffer b(&jpeg);
+            b.open(QIODevice::WriteOnly);
+            page.save(&b, "JPEG");
+        }
+        QTcpServer server;
+        server.listen(QHostAddress::LocalHost);
+        int busyOnce = 1;
+        QByteArray postedBody;
+        QObject::connect(&server, &QTcpServer::newConnection, [&] {
+            QTcpSocket *sock = server.nextPendingConnection();
+            auto buf = std::make_shared<QByteArray>();
+            QObject::connect(sock, &QTcpSocket::readyRead, sock, [&, sock, buf] {
+                *buf += sock->readAll();
+                const int he = int(buf->indexOf("\r\n\r\n"));
+                if (he < 0) return;
+                const QByteArray head = buf->left(he);
+                int len = 0;
+                for (const QByteArray &l : head.split('\n'))
+                    if (l.toLower().startsWith("content-length:")) len = l.mid(15).trimmed().toInt();
+                if (buf->size() < he + 4 + len) return;
+                const QByteArray body = buf->mid(he + 4, len);
+                buf->remove(0, he + 4 + len);
+                QByteArray status = "200 OK", type = "text/xml", answer, extra;
+                if (head.startsWith("GET /eSCL/ScannerCapabilities")) {
+                    answer = capsXml;
+                } else if (head.startsWith("POST /eSCL/ScanJobs")) {
+                    postedBody = body;
+                    status = "201 Created";
+                    extra = "Location: http://127.0.0.1:" + QByteArray::number(server.serverPort()) + "/eSCL/ScanJobs/42\r\n";
+                } else if (head.startsWith("GET /eSCL/ScanJobs/42/NextDocument")) {
+                    if (busyOnce-- > 0) status = "503 Service Unavailable";
+                    else {
+                        type = "image/jpeg";
+                        answer = jpeg;
+                    }
+                } else {
+                    status = "404 Not Found";
+                }
+                sock->write("HTTP/1.1 " + status + "\r\nContent-Type: " + type + "\r\n" + extra + "Content-Length: " + QByteArray::number(answer.size())
+                            + "\r\n\r\n" + answer);
+            });
+        });
+        const QString addr = QStringLiteral("127.0.0.1:%1").arg(server.serverPort());
+        Escl::Scanner sc;
+        QEventLoop loop;
+        QString model, err;
+        bool ok = false;
+        QObject::connect(&sc, &Escl::Scanner::checked, &loop, [&](bool o, const QString &m, const QString &e) {
+            ok = o;
+            model = m;
+            err = e;
+            loop.quit();
+        });
+        sc.check(addr);
+        QTimer::singleShot(10000, &loop, &QEventLoop::quit);
+        loop.exec();
+        CHECK(ok && model == QStringLiteral("EPSON ET-2870 Series"), "eSCL: Verbindung prüfen " + err);
+        QImage got;
+        QObject::connect(&sc, &Escl::Scanner::finished, &loop, [&](const QImage &img) {
+            got = img;
+            loop.quit();
+        });
+        QObject::connect(&sc, &Escl::Scanner::failed, &loop, [&](const QString &e) {
+            err = e;
+            loop.quit();
+        });
+        sc.scan(addr, true, 300);
+        QTimer::singleShot(15000, &loop, &QEventLoop::quit);
+        loop.exec();
+        CHECK(got.size() == page.size(), "eSCL: Seite gescannt (mit 503-Wartezeit) " + err);
+        CHECK(postedBody.contains("<scan:XResolution>300</scan:XResolution>") && postedBody.contains("<pwg:Version>2.63</pwg:Version>"),
+              "eSCL: Auftrag mit 300 dpi");
+        // nicht erreichbare Adresse
+        bool failedOk = false;
+        Escl::Scanner bad;
+        QObject::connect(&bad, &Escl::Scanner::checked, &loop, [&](bool o, const QString &, const QString &e) {
+            failedOk = !o && !e.isEmpty();
+            loop.quit();
+        });
+        bad.check(QStringLiteral("127.0.0.1:1"));
+        QTimer::singleShot(15000, &loop, &QEventLoop::quit);
+        loop.exec();
+        CHECK(failedOk, "eSCL: Fehlermeldung bei falscher Adresse");
+        out << "  eSCL-Testserver: " << model << ", Bild " << got.width() << "×" << got.height() << "\n";
     }
 
     out << "\n" << (g_fail ? QStringLiteral("%1 Fehler").arg(g_fail) : QStringLiteral("Alle Prüfungen bestanden")) << "\n";

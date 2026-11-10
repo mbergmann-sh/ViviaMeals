@@ -96,7 +96,7 @@ ProfileDialog::ProfileDialog(const Profile &p, QWidget *parent) : QDialog(parent
     comp->setCaseSensitivity(Qt::CaseInsensitive);
     m_liked->setCompleter(comp);
     pf->addRow(tr("Bevorzugte Themen:"), m_liked);
-    m_snack = new QCheckBox(tr("Zwischenmahlzeit einplanen"));
+    m_snack = new QCheckBox(tr("Zwischenmahlzeit einplanen (beim Zunehmen zusätzlich eine Spätmahlzeit)"));
     m_snack->setChecked(p.snack);
     pf->addRow(QString(), m_snack);
     m_weighDay = new QComboBox;

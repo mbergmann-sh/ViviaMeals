@@ -1,6 +1,6 @@
 # ViviaMeals – Notizen für das Handbuch
 
-Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.6.0.
+Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.6.2.
 
 > **Name:** Das Programm heißt seit Version 0.6 **ViviaMeals** (vorher VitaMeals; die ganze Reihe heißt jetzt
 > Vivia – ViviaParms, ViviaBreathe). Alte Einstellungen, Profile, Tagebücher, eigene Lebensmittel und
@@ -330,8 +330,17 @@ vollständig auf dem eigenen Rechner), teilt ihn in Titel, Portionen, Zutaten un
     und lädt es mit „Bild öffnen …“.
   * macOS: „Digitale Bilder“ (Image Capture) oder Vorschau („Ablage → Von Scanner importieren“) –
     Bild speichern und mit „Bild öffnen …“ laden.
-  * Überall möglich: **eigener Befehl** mit `%f` als Platzhalter für die Zieldatei (z. B. NAPS2:
-    `naps2.console -o %f`).
+  * Überall möglich:
+    * **Netzwerkscanner (eSCL / AirScan / Mopria)**: Die meisten WLAN-Multifunktionsgeräte (Epson,
+      HP, Canon, Brother …) verstehen dieses offene Protokoll. Unter *Extras → Einstellungen → Scannen*
+      „Netzwerkscanner“ wählen, die **IP-Adresse** des Geräts eintragen (steht im Netzwerkstatus-Ausdruck
+      des Druckers bzw. in der Geräteliste des Routers, z. B. FRITZ!Box) und „Verbindung prüfen“. Kein
+      Treiber nötig. Tipp: im Router dem Drucker immer dieselbe IP-Adresse geben.
+    * **Programm des Herstellers + überwachter Ordner** (z. B. Epson ScanSmart, HP Smart, Canon IJ Scan
+      Utility): Ordner wählen, in dem das Programm die Scans speichert, und optional das Programm
+      selbst. „Scannen …“ startet es; jedes neue Bild (JPEG, PNG, TIFF) im Ordner wird automatisch
+      übernommen.
+    * **eigener Befehl** mit `%f` als Platzhalter für die Zieldatei (z. B. NAPS2: `naps2.console -o %f`).
 
 ### Ablauf
 
@@ -358,9 +367,59 @@ vollständig auf dem eigenen Rechner), teilt ihn in Titel, Portionen, Zutaten un
   verbessert (l/2 → ½, 1OO g → 100 g, El → EL, 180 *C → 180 °C, fehlende Umlaut-Punkte wie
   „Krauterquark“ → „Kräuterquark“). Handschrift erkennt Tesseract kaum.
 
+### Häufige Frage: „Es wurde kein Scanner gefunden“ (Windows)
+
+Der Windows-Scandialog zeigt nur Scanner, die Windows selbst eingerichtet hat. WLAN-Drucker, die nur
+mit dem Herstellerprogramm scannen (z. B. Epson ScanSmart über „Epson Scan 2“), fehlen dort oft.
+Abhilfe – eine der drei Möglichkeiten:
+1. In ViviaMeals „Netzwerkscanner (eSCL)“ mit der IP-Adresse des Druckers wählen (empfohlen).
+2. „Programm des Herstellers + Ordner überwachen“ wählen.
+3. Den Drucker in Windows unter *Einstellungen → Bluetooth & Geräte → Drucker & Scanner → Gerät
+   hinzufügen* als Scanner einrichten. Ob es geklappt hat, zeigt die App „Scan“ von Microsoft bzw.
+   „Windows-Fax und -Scan“: Erscheint er dort, findet ihn auch ViviaMeals.
+
 ### Grenzen
 
 * Zwei Rezepte auf einer Seite werden als eines erkannt – die überzähligen Zeilen im Editor löschen
   oder die Seite für das zweite Rezept erneut öffnen.
 * Stark gestaltete Seiten (Text auf Fotos, farbige Hintergründe) erkennt Tesseract schlechter.
 * Der Windows-Scandialog ist auf Windows beschränkt; unter Linux/macOS wird ein Scanprogramm gestartet.
+
+## Wochenmenü-Plan: Tagesablauf (ab 0.6.1)
+
+### Worum es geht
+
+Der Plan bietet nicht mehr zweimal am Tag ein aufwendiges Hauptgericht an. Es gibt **eine warme
+Hauptmahlzeit** und **eine leichte Mahlzeit** (Salat, Suppe, Brotzeit, Quark, Omelett …) – wahlweise
+mittags warm und abends leicht (Vorgabe) oder umgekehrt („warm abends“ im Wochenplan; wird im Profil
+gemerkt).
+
+### Aufteilung je Ziel (Textbaustein)
+
+| Ziel | Mahlzeiten | Anteile am Tagesbedarf |
+|---|---|---|
+| Abnehmen | Frühstück · warm · leicht (· Zwischenmahlzeit nachmittags) | 30 / 45 / 25 % (25 / 40 / 10 / 25 %) |
+| Halten | Frühstück · warm · leicht (· Zwischenmahlzeit) | 30 / 40 / 30 % (25 / 35 / 10 / 30 %) |
+| Zunehmen | Frühstück · Zwischenmahlzeit · Mittagessen · Zwischenmahlzeit · Abendessen (· Spätmahlzeit) | 22 / 10 / 32 / 11 / 25 % (20 / 10 / 28 / 10 / 24 / 8 %) |
+
+Grundlagen: Für die Gewichtsentwicklung entscheidet die Energiebilanz des ganzen Tages (DGE); eine feste
+Regel „abends nichts Warmes“ gibt es nicht. Ein großes Frühstück und ein kleineres Abendessen haben in
+Studien beim Abnehmen etwas besser abgeschnitten, und zwei große Mahlzeiten am Tag sind für die meisten
+zu viel – daher die Aufteilung oben. Das Energiedefizit beim Abnehmen kommt aus dem Kalorienziel des
+Profils (S3-Leitlinie Adipositas: etwa 500–600 kcal/Tag). Beim Zunehmen werden mehrere kleinere,
+energiedichte Mahlzeiten empfohlen (5–6 am Tag).
+
+### Abfolge und Wochenrichtwerte
+
+* Am selben Tag haben warme und leichte Mahlzeit **keine gleiche Beilage** (Nudeln, Reis, Kartoffeln,
+  Brot) und es gibt **nicht zweimal Fleisch oder Fisch**. Dasselbe Rezept kommt nicht an zwei Tagen
+  hintereinander.
+* Pro Woche (auf kürzere Pläne umgerechnet) nach DGE „Gut essen und trinken“: **Fisch 1–2×**,
+  **Hülsenfrüchte mindestens 1×**, **Fleisch höchstens etwa 300 g** (im Plan höchstens drei
+  Fleischmahlzeiten). Die Zusammenfassung unter dem Plan hakt die Werte ab; bei vegetarischer bzw.
+  veganer Ernährung entfallen Fisch und Fleisch.
+* Der Tag „leichte mahlzeit“ wird beim Import automatisch vergeben (abschaltbar mit den Mahlzeit-Tags)
+  und lässt sich wie jeder Tag von Hand setzen; *Extras → Mahlzeit- und Nährwert-Tags ergänzen* holt ihn
+  für vorhandene Rezepte nach.
+* Gibt es weniger als drei leichte Rezepte, verplant ViviaMeals ersatzweise kleine Portionen von
+  Hauptgerichten und bietet die mitgelieferten Vorschläge an (zehn davon sind leichte Abendessen).

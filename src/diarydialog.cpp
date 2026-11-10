@@ -637,7 +637,9 @@ void DiaryDialog::addFromPlan()
             e.perServing.carbs = pe.portions > 0 ? pe.carbs / pe.portions : 0;
         }
         e.setPortions(pe.portions);
-        const QString mealName = m == 0 ? dm[0] : m == 1 ? dm[2] : m == 2 ? dm[4] : dm[3];
+        // seit 0.6.1 tragen Pläne die Namen des Tagebuchs; ältere: Frühstück, Mittag, Abend, Zwischenmahlzeit
+        const QString planName = plan.meals.value(m);
+        const QString mealName = dm.contains(planName) ? planName : m == 0 ? dm[0] : m == 1 ? dm[2] : m == 2 ? dm[4] : dm[3];
         e.meal = mealName;
         e.when = QDateTime(day, Diary::defaultTime(mealName));
         m_book.add(e);

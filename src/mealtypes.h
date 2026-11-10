@@ -1,10 +1,15 @@
 // ViviaMeals – Mahlzeit-Arten erkennen und Rezepte gesundheitlich einordnen
 //
 // Aus Titel, Kategorien/Tags, Zutaten und Nährwerten wird geschätzt, wofür ein Rezept taugt:
-//   frühstück · hauptgerichte · zwischenmahlzeit · desserts · süßspeise · backen
+//   frühstück · hauptgerichte · leichte mahlzeit · zwischenmahlzeit · desserts · süßspeise · backen
 // Die Tags werden beim Import (abschaltbar), im Editor („Ergänzen“) und unter *Extras* vergeben.
-// Der Wochenplaner verplant danach: Frühstück nur aus „frühstück“, Mittag-/Abendessen aus
-// Hauptgerichten, Zwischenmahlzeiten aus „zwischenmahlzeit“ – beim Abnehmen ohne Desserts.
+// Der Wochenplaner verplant danach: Frühstück nur aus „frühstück“, die warme Hauptmahlzeit aus
+// Hauptgerichten, die zweite (leichte) Mahlzeit aus „leichte mahlzeit“, Zwischenmahlzeiten aus
+// „zwischenmahlzeit“ – beim Abnehmen ohne Desserts.
+// „leichte mahlzeit“: Salate, Suppen, Brotzeit/Abendbrot, Quark- und Eierspeisen, Wraps, Bowls …
+// mit 120–520 kcal je Portion und höchstens etwa 170 kcal/100 g; schwere Gerichte (Auflauf,
+// Braten, Sahnesoße, Pizza …) nie. Außerdem leichte, eiweißreiche Hauptgerichte (≤ 450 kcal,
+// ≤ 110 kcal/100 g) und herzhafte Frühstücksrezepte mit Brot, Quark oder Ei.
 //
 // Gesundheits-Kennzahlen (je Portion): Energiedichte (kcal/100 g), Zuckeranteil an der Energie,
 // Eiweißanteil (sättigt), Ballaststoffe je 100 kcal. Orientierung an den DGE-Empfehlungen
@@ -30,6 +35,7 @@ enum Type : int {
     Sweet = 16,
     Baking = 32,
     Basic = 64,      // Grundrezept, Soße, Getränk – nicht als Mahlzeit verplanen
+    Light = 128,     // leichte Mahlzeit (Abendbrot, Salat, Suppe, Quark …) – die zweite Hauptmahlzeit des Tages
 };
 
 // Tag-Namen

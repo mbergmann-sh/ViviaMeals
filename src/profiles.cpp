@@ -170,6 +170,7 @@ QJsonObject Profile::toJson() const
                         { QStringLiteral("excluded"), QJsonArray::fromStringList(excluded) },
                         { QStringLiteral("likedTags"), QJsonArray::fromStringList(likedTags) },
                         { QStringLiteral("snack"), snack },
+                        { QStringLiteral("warmEvening"), warmEvening },
                         { QStringLiteral("weighDay"), weighDay },
                         { QStringLiteral("weighDone"), weighDone.toString(Qt::ISODate) },
                         { QStringLiteral("weights"), w },
@@ -192,6 +193,7 @@ Profile Profile::fromJson(const QJsonObject &o)
     for (const auto &v : o.value(QStringLiteral("excluded")).toArray()) p.excluded << v.toString();
     for (const auto &v : o.value(QStringLiteral("likedTags")).toArray()) p.likedTags << v.toString();
     p.snack = o.value(QStringLiteral("snack")).toBool();
+    p.warmEvening = o.value(QStringLiteral("warmEvening")).toBool();
     p.weighDay = qBound(0, o.value(QStringLiteral("weighDay")).toInt(), 7);
     p.weighDone = QDate::fromString(o.value(QStringLiteral("weighDone")).toString(), Qt::ISODate);
     for (const auto &v : o.value(QStringLiteral("weights")).toArray()) {

@@ -1,13 +1,27 @@
 // ViviaMeals – Wochenmenü-Plan nach Kalorienziel und Vorlieben
 //
-// Für jeden Tag und jede Mahlzeit (Frühstück, Mittagessen, Abendessen, optional Zwischenmahlzeit)
-// wird ein passendes Rezept gewählt und die Portionsgröße so bemessen, dass die Tagessumme dem
-// Ziel nahekommt. Frühstück kommt nur aus Rezepten mit „frühstück“, Zwischenmahlzeiten aus
-// „zwischenmahlzeit“ (bzw. leichten Frühstücksrezepten), Mittag- und Abendessen aus Hauptgerichten
-// (siehe mealtypes.h). Beim Abnehmen werden Desserts und Süßspeisen nicht verplant und leichte,
-// eiweiß- und ballaststoffreiche Rezepte mit wenig Zucker bevorzugt. Berücksichtigt werden Ernährungsform (vegan/vegetarisch), ausgeschlossene
-// Zutaten, bevorzugte Themen und Abwechslung (kein Rezept zweimal am selben Tag, möglichst
-// selten in der Woche). Nur Rezepte mit berechneten Nährwerten werden verplant.
+// Für jeden Tag und jede Mahlzeit wird ein passendes Rezept gewählt und die Portionsgröße so
+// bemessen, dass die Tagessumme dem Ziel nahekommt. Nur Rezepte mit berechneten Nährwerten.
+//
+// Tagesaufbau je Ziel (Rolle der Mahlzeit in Klammern):
+//   Abnehmen  Frühstück 30 % · warme Hauptmahlzeit 45 % · leichte Mahlzeit 25 %
+//             (mit Zwischenmahlzeit 25 / 40 / 10 / 25 %)
+//   Halten    30 / 40 / 30 % (mit Zwischenmahlzeit 25 / 35 / 10 / 30 %), ebenfalls nur eine warme
+//             Hauptmahlzeit, die zweite leicht
+//   Zunehmen  5 Mahlzeiten: Frühstück, Zwischenmahlzeit, Mittagessen, Zwischenmahlzeit, Abendessen
+//             (beide Hauptmahlzeiten dürfen warm sein), optional Spätmahlzeit; energiedichte Rezepte
+// Ob warm mittags oder abends gegessen wird, ist einstellbar (Vorgabe mittags).
+// Die Rolle bestimmt die Auswahl: Frühstück nur aus „frühstück“, warm aus Hauptgerichten, leicht aus
+// „leichte mahlzeit“, Zwischenmahlzeiten aus „zwischenmahlzeit“ (siehe mealtypes.h).
+//
+// Abfolge innerhalb eines Tages: kein Rezept zweimal, die beiden Hauptmahlzeiten ohne gemeinsame
+// Sättigungsbeilage (Nudeln, Reis, Kartoffeln, Brot) und ohne zweimal Fleisch oder Fisch; dasselbe
+// Rezept nicht an zwei Tagen hintereinander.
+// Wochenrichtwerte (DGE „Gut essen und trinken“, 2024; auf die Planlänge umgerechnet): Fisch 1–2-mal,
+// Hülsenfrüchte mindestens einmal (gern öfter), Fleisch höchstens etwa 300 g – im Plan höchstens
+// drei Fleischmahlzeiten. Beim Abnehmen keine Desserts/Süßspeisen und Vorrang für leichte,
+// eiweiß- und ballaststoffreiche Rezepte mit wenig Zucker; Energiedefizit über das Kalorienziel
+// des Profils (S3-Leitlinie Adipositas: etwa 500–600 kcal/Tag). Richtwerte, kein Medizinprodukt.
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 
@@ -28,10 +42,18 @@ struct PlanEntry {
     double protein = 0, fat = 0, carbs = 0, sugar = 0, fiber = 0;
 };
 
+namespace MealPlanner {
+// Rolle einer Mahlzeit im Tagesablauf
+enum class Role { Breakfast = 0, Warm = 1, Light = 2, Snack = 3 };
+}
+
 struct MealPlan {
     QDate start;
-    QStringList meals;                 // Namen der Mahlzeiten
+    QStringList meals;                 // Namen der Mahlzeiten (wie im Ernährungstagebuch)
     QList<double> shares;              // Anteil am Tagesbedarf je Mahlzeit
+    QList<MealPlanner::Role> roles;    // Rolle je Mahlzeit
+    int goal = 1;                      // Profile::Goal
+    int diet = 0;                      // Profile::Diet
     double targetKcal = 0;
     QList<QList<PlanEntry>> days;      // days[Tag][Mahlzeit]
     QString profileId;
@@ -49,7 +71,8 @@ struct Options {
     int days = 7;
     QDate start = QDate::currentDate();
     double targetKcal = 2000;
-    bool snack = false;
+    bool snack = false;        // Zwischenmahlzeit (Abnehmen/Halten) bzw. Spätmahlzeit (Zunehmen)
+    bool warmEvening = false;  // warme Hauptmahlzeit abends
     Profile::Goal goal = Profile::Goal::Keep;   // Abnehmen: leichte, sättigende Rezepte bevorzugen
     Profile::Diet diet = Profile::Diet::All;
     QStringList excluded;
@@ -58,7 +81,15 @@ struct Options {
 };
 
 Options fromProfile(const Profile &p);
-QStringList mealNames(bool snack);
+
+// Tagesaufbau: Namen, Anteile und Rollen der Mahlzeiten
+struct Layout {
+    QStringList names;
+    QList<double> shares;
+    QList<Role> roles;
+};
+Layout layout(const Options &opt);
+QString roleName(Role r);   // „warm“, „leicht“ …
 MealPlan create(const Options &opt);
 // eine einzelne Mahlzeit neu würfeln
 void reroll(MealPlan &plan, int day, int meal, const Options &opt);
@@ -70,12 +101,16 @@ QString toHtml(const MealPlan &plan, const QString &personName);
 // Tagesdurchschnitt der Nährwerte mit Hinweisen nach DGE-Richtwerten
 QString summary(const MealPlan &plan);
 int candidateCount(const Options &opt);
-// passende Rezepte je Mahlzeit (Frühstück, Mittag, Abend, Zwischenmahlzeit)
+// passende Rezepte je Rolle (Frühstück, warm, leicht, Zwischenmahlzeit)
 QList<int> slotCounts(const Options &opt);
 // Hinweise zum Plan (fehlende Frühstücksrezepte …)
 QStringList notes(const Options &opt);
-// Anteile am Tagesbedarf (DGE-Orientierung): 25/35/30/10 % mit, 30/40/30 % ohne Zwischenmahlzeit
-QList<double> shares(bool snack);
+// Wochenbilanz nach DGE: Fisch-, Hülsenfrucht- und Fleischmahlzeiten
+struct WeekCheck {
+    int fish = 0, legumes = 0, meat = 0;
+    int fishMin = 1, fishMax = 2, legumesMin = 1, meatMax = 3;   // auf die Planlänge umgerechnet
+};
+WeekCheck weekCheck(const MealPlan &plan);
 // Text „1 ½ Portionen (ca. 380 g)“
 QString portionText(const PlanEntry &e);
 

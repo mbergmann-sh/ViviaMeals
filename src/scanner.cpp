@@ -16,6 +16,30 @@
 
 namespace Scanner {
 
+namespace {
+
+Program esclProgram()
+{
+    Program p;
+    p.id = QStringLiteral("escl");
+    p.name = QObject::tr("Netzwerkscanner (eSCL / AirScan / Mopria) über die IP-Adresse");
+    p.network = true;
+    return p;
+}
+
+Program folderProgram()
+{
+    Program p;
+    p.id = QStringLiteral("folder");
+    p.name = QObject::tr("Programm des Herstellers + Ordner überwachen (z. B. Epson ScanSmart)");
+    p.watchFolder = true;
+    p.hint = QObject::tr("Scannen Sie mit dem Programm des Herstellers und speichern Sie das Bild (JPEG oder PNG) im überwachten "
+                         "Ordner – ViviaMeals übernimmt es automatisch.");
+    return p;
+}
+
+} // namespace
+
 QList<Program> known()
 {
     QList<Program> l;
@@ -24,7 +48,7 @@ QList<Program> known()
     wia.id = QStringLiteral("wia");
     wia.name = QObject::tr("Windows-Scandialog (WIA)");
     wia.native = true;
-    l << wia;
+    l << wia << esclProgram() << folderProgram();
     Program wfs;
     wfs.id = QStringLiteral("wfs");
     wfs.name = QObject::tr("Windows-Fax und -Scan");
@@ -40,7 +64,7 @@ QList<Program> known()
     ic.args = QStringList{ QStringLiteral("-a"), QStringLiteral("Image Capture") };
     ic.hint = QObject::tr("Scannen Sie das Rezept in „Digitale Bilder“ (Format PNG oder JPEG) und öffnen Sie die Datei "
                           "anschließend mit „Bild öffnen …“.");
-    l << ic;
+    l << ic << esclProgram();
     Program pv;
     pv.id = QStringLiteral("preview");
     pv.name = QObject::tr("Vorschau (Ablage → Von Scanner importieren)");
@@ -48,7 +72,7 @@ QList<Program> known()
     pv.args = QStringList{ QStringLiteral("-a"), QStringLiteral("Preview") };
     pv.hint = QObject::tr("In „Vorschau“: Ablage → Von „Scanner“ importieren. Das Bild sichern und anschließend mit "
                           "„Bild öffnen …“ laden.");
-    l << pv;
+    l << pv << folderProgram();
 #else
     Program xs;
     xs.id = QStringLiteral("xsane");
@@ -68,7 +92,7 @@ QList<Program> known()
                            QStringLiteral("300") };
     si.toStdout = true;
     si.hint = QObject::tr("Scanne mit dem ersten gefundenen Scanner (300 dpi, Farbe) …");
-    l << si;
+    l << si << esclProgram();
     Program ss;
     ss.id = QStringLiteral("simple-scan");
     ss.name = QObject::tr("Dokumentenscanner (GNOME, simple-scan)");
@@ -89,7 +113,7 @@ QList<Program> known()
     sl.program = QStringLiteral("skanlite");
     sl.hint = sp.hint;
     sl.hint.replace(QStringLiteral("Skanpage"), QStringLiteral("Skanlite"));
-    l << sl;
+    l << sl << folderProgram();
 #endif
     Program c;
     c.id = QStringLiteral("custom");
@@ -107,7 +131,7 @@ bool installed(const Program &p)
         return false;
 #endif
     }
-    if (p.id == QLatin1String("custom")) return true;
+    if (p.id == QLatin1String("custom") || p.network || p.watchFolder) return true;
     if (p.program.isEmpty()) return false;
 #ifdef Q_OS_MACOS
     if (p.program == QLatin1String("open")) return true;

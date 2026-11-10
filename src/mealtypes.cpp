@@ -48,13 +48,14 @@ QString tagFor(Type t)
     case Dessert: return QStringLiteral("desserts");
     case Sweet: return QStringLiteral("süßspeise");
     case Baking: return QStringLiteral("backen");
+    case Light: return QStringLiteral("leichte mahlzeit");
     default: return {};
     }
 }
 
 QStringList mealTags()
 {
-    return { tagFor(Breakfast), tagFor(Main), tagFor(Snack), tagFor(Dessert), tagFor(Sweet), tagFor(Baking) };
+    return { tagFor(Breakfast), tagFor(Main), tagFor(Light), tagFor(Snack), tagFor(Dessert), tagFor(Sweet), tagFor(Baking) };
 }
 
 Input from(const Recipe &r)
@@ -107,6 +108,7 @@ int explicitTypes(const QStringList &tags)
     if (tagAny(tags, { "süßspeise", "süßspeisen", "süßigkeiten" })) t |= Sweet;
     if (tagAny(tags, { "backen", "kuchen", "torten", "gebäck", "brot", "plätzchen" })) t |= Baking;
     if (tagAny(tags, { "grundrezepte", "soßen", "saucen", "getränke", "dips", "marinade", "menüs" })) t |= Basic;
+    if (tagAny(tags, { "leichte mahlzeit", "abendbrot", "leichte küche", "abendessen" })) t |= Light;
     return t;
 }
 
@@ -171,6 +173,24 @@ int classify(const Input &in)
     }
     // Süßes mit viel Zucker, aber ohne eigenes Tag → zusätzlich Süßspeise
     if ((t & Dessert) && in.hasNutrition && sugar >= 0.35) t |= Sweet;
+    // leichte Mahlzeit (Abendbrot, Salat, Suppe …) – nicht bei Süßem, Gebäck und schweren Gerichten
+    if (!(t & (Dessert | Sweet | Baking | Basic))) {
+        const bool heavy = containsAny(title, { "auflauf", "braten", "gratin", "lasagne", "schnitzel", "gulasch", "roulade", "sahne",
+                                                "rahm", "käsespätzle", "pizza", "burger", "pommes", "frikassee", "knödel", "haxe",
+                                                "cordon", "paniert", "frittiert", "ente", "gans", "spareribs", "carbonara", "eintopf" });
+        static const QRegularExpression lightWords(QStringLiteral(
+            "salat|suppe|süppchen|brühe|brotzeit|abendbrot|stulle|brot mit|brote|quark|hüttenkäse|omelett|frittata|rührei|"
+            "spiegelei|eier|wrap|bowl|rohkost|carpaccio|antipasti|gazpacho|gemüsesticks|bruschetta|toast|gemüsepfanne|"
+            "tomaten mit|ofengemüse|knäckebrot|pellkartoffeln mit quark|salad|soup|sandwich|omelet"));
+        const double ed = energyDensity(in);
+        const bool kcalOk = !in.hasNutrition || (kcal >= 120 && kcal <= 520);
+        if (!heavy && kcalOk) {
+            if (title.contains(lightWords) && (ed <= 0 || ed <= 170)) t |= Light;
+            else if (in.hasNutrition && (t & Main) && kcal <= 450 && ed > 0 && ed <= 110 && proteinShare(in) >= 0.15) t |= Light;
+            else if ((t & Breakfast) && sugar < 0.20 && containsAny(title, { "brot", "quark", "rührei", "omelett", "hüttenkäse", "eier" }))
+                t |= Light;
+        }
+    }
     return t;
 }
 
@@ -179,7 +199,7 @@ QStringList suggestTags(const Recipe &r)
     const Input in = from(r);
     const int t = classify(in);
     QStringList out;
-    for (Type x : { Breakfast, Main, Snack, Dessert, Sweet, Baking })
+    for (Type x : { Breakfast, Main, Light, Snack, Dessert, Sweet, Baking })
         if ((t & x) && !r.hasTag(tagFor(x))) out << tagFor(x);
     return out;
 }

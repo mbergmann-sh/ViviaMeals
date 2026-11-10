@@ -357,8 +357,9 @@ int addHealthySuggestions(QWidget *parent)
     }
     db.endBatch();
     QMessageBox::information(parent, QObject::tr("Gesunde Vorschläge"),
-                             added > 0 ? QObject::tr("%1 Rezepte für Frühstück und Zwischenmahlzeiten wurden übernommen. Sie tragen die Tags "
-                                                     "„frühstück“ bzw. „zwischenmahlzeit“ und lassen sich wie alle Rezepte bearbeiten.")
+                             added > 0 ? QObject::tr("%1 Rezepte für Frühstück, Zwischenmahlzeiten und leichte Abendessen wurden übernommen. Sie tragen "
+                                                     "die Tags „frühstück“, „zwischenmahlzeit“ bzw. „leichte mahlzeit“ und lassen sich wie alle "
+                                                     "Rezepte bearbeiten.")
                                              .arg(added)
                                        : QObject::tr("Die Vorschläge sind bereits in der Datenbank."));
     return added;

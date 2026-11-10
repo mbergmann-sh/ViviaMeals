@@ -17,6 +17,7 @@
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QImageReader>
+#include <QInputDialog>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMessageBox>
@@ -506,9 +507,61 @@ void ScanDialog::scan()
         } else {
             setStatus(err.toHtmlEscaped(), true);
             QMessageBox::warning(this, tr("Scannen"),
-                                 tr("%1\n\nAlternativ können Sie die Seite mit der Software Ihres Scanners oder mit dem Handy "
-                                    "fotografieren und über „Bild öffnen …“ laden.").arg(err));
+                                 tr("%1\n\nWLAN-/Netzwerkgerät? Der Windows-Scandialog kennt nur Scanner, die unter Einstellungen → "
+                                    "Bluetooth & Geräte → Drucker & Scanner eingerichtet sind. Einfacher geht es meist mit "
+                                    "Extras → Einstellungen → Scannen → „Netzwerkscanner (eSCL)“ und der IP-Adresse des Geräts – "
+                                    "oder mit „Programm des Herstellers + Ordner überwachen“ (z. B. Epson ScanSmart).\n\n"
+                                    "Alternativ die Seite mit dem Handy fotografieren und über „Bild öffnen …“ laden.").arg(err));
         }
+        return;
+    }
+    if (p.network) {
+        QString addr = s.value(QStringLiteral("scan/esclAddress")).toString().trimmed();
+        if (addr.isEmpty()) {
+            bool ok = false;
+            addr = QInputDialog::getText(this, tr("Netzwerkscanner"),
+                                         tr("IP-Adresse oder Name des Scanners im Netzwerk (z. B. 192.168.178.101):"), QLineEdit::Normal,
+                                         QString(), &ok)
+                       .trimmed();
+            if (!ok || addr.isEmpty()) return;
+            s.setValue(QStringLiteral("scan/esclAddress"), addr);
+        }
+        if (!m_escl) {
+            m_escl = new Escl::Scanner(this);
+            connect(m_escl, &Escl::Scanner::progress, this, [this](const QString &t) { setBusy(t.toHtmlEscaped()); });
+            connect(m_escl, &Escl::Scanner::finished, this, [this](const QImage &img) {
+                m_scanBtn->setEnabled(true);
+                addImage(img, tr("Scan"));
+            });
+            connect(m_escl, &Escl::Scanner::failed, this, [this](const QString &e) {
+                m_scanBtn->setEnabled(true);
+                setStatus(e.toHtmlEscaped().replace(QLatin1Char('\n'), QStringLiteral("<br>")), true);
+            });
+        }
+        m_scanBtn->setEnabled(false);
+        m_escl->scan(addr, s.value(QStringLiteral("scan/color"), true).toBool(), s.value(QStringLiteral("scan/esclDpi"), 300).toInt());
+        return;
+    }
+    if (p.watchFolder) {
+        QString dir = s.value(QStringLiteral("scan/watchDir")).toString();
+        if (dir.isEmpty() || !QFileInfo(dir).isDir()) {
+            dir = QFileDialog::getExistingDirectory(this, tr("Ordner, in dem Ihr Scanprogramm die Bilder speichert"),
+                                                    QStandardPaths::writableLocation(QStandardPaths::PicturesLocation));
+            if (dir.isEmpty()) return;
+            s.setValue(QStringLiteral("scan/watchDir"), dir);
+        }
+        const QString exe = s.value(QStringLiteral("scan/watchProgram")).toString().trimmed();
+        if (!exe.isEmpty() && !QProcess::startDetached(exe, {}))
+            setStatus(tr("„%1“ kann nicht gestartet werden – bitte das Scanprogramm selbst öffnen.").arg(QDir::toNativeSeparators(exe)).toHtmlEscaped(), true);
+        if (m_watchDir != dir) {
+            m_watchDir = dir;
+            m_watchSince = QDateTime::currentDateTime().addSecs(-2);
+            m_watchSizes.clear();
+            m_watchDone.clear();
+        }
+        m_poll->start();
+        if (exe.isEmpty() || QFileInfo::exists(exe))
+            setStatus(tr("%1<br>Überwachter Ordner: %2").arg(p.hint.toHtmlEscaped(), QDir::toNativeSeparators(dir).toHtmlEscaped()));
         return;
     }
     if (p.program.isEmpty()) {
@@ -568,6 +621,26 @@ void ScanDialog::scan()
 
 void ScanDialog::pollFile()
 {
+    if (!m_watchDir.isEmpty()) {
+        // überwachter Ordner: neue, fertig geschriebene Bilder übernehmen
+        const QStringList filters{ QStringLiteral("*.jpg"), QStringLiteral("*.jpeg"), QStringLiteral("*.png"), QStringLiteral("*.tif"),
+                                   QStringLiteral("*.tiff"), QStringLiteral("*.bmp"), QStringLiteral("*.webp") };
+        const QFileInfoList files = QDir(m_watchDir).entryInfoList(filters, QDir::Files, QDir::Time | QDir::Reversed);
+        for (const QFileInfo &fi : files) {
+            const QString path = fi.absoluteFilePath();
+            if (m_watchDone.contains(path) || fi.lastModified() < m_watchSince || fi.size() == 0) continue;
+            if (m_watchSizes.value(path, -1) != fi.size()) {   // wird noch geschrieben
+                m_watchSizes.insert(path, fi.size());
+                continue;
+            }
+            QString err;
+            const QImage img = loadImage(path, &err);
+            if (img.isNull()) continue;
+            m_watchDone.insert(path);
+            addImage(img, fi.fileName());
+        }
+        return;
+    }
     const QString target = Scanner::targetFile();
     const QFileInfo fi(target);
     if (!fi.exists() || fi.size() == 0) {

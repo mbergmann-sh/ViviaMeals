@@ -6,6 +6,7 @@
 #include "uiscale.h"
 #include "ocr.h"
 #include "scanner.h"
+#include "escl.h"
 
 #include <QApplication>
 #include <QCheckBox>
@@ -143,18 +144,77 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
     m_scanCommand = new QLineEdit(s.value(QStringLiteral("scan/command")).toString());
     m_scanCommand->setPlaceholderText(tr("z. B. naps2.console -o %f   (%f = Zieldatei; ohne %f: Bild danach selbst öffnen)"));
     sf->addRow(tr("Eigener Befehl:"), m_scanCommand);
+    // Netzwerkscanner (eSCL)
+    auto *esclRow = new QWidget;
+    auto *el = new QHBoxLayout(esclRow);
+    el->setContentsMargins(0, 0, 0, 0);
+    m_esclAddress = new QLineEdit(s.value(QStringLiteral("scan/esclAddress")).toString());
+    m_esclAddress->setPlaceholderText(tr("IP-Adresse oder Name, z. B. 192.168.178.101"));
+    el->addWidget(m_esclAddress, 1);
+    auto *esclCheck = new QPushButton(Icons::get(QStringLiteral("refresh")), tr("Verbindung prüfen"));
+    el->addWidget(esclCheck);
+    sf->addRow(tr("Netzwerkscanner:"), esclRow);
+    m_esclStatus = new QLabel;
+    m_esclStatus->setWordWrap(true);
+    sf->addRow(QString(), m_esclStatus);
+    // Herstellerprogramm + überwachter Ordner
+    auto *watchRow = new QWidget;
+    auto *wl = new QHBoxLayout(watchRow);
+    wl->setContentsMargins(0, 0, 0, 0);
+    m_watchDir = new QLineEdit(QDir::toNativeSeparators(s.value(QStringLiteral("scan/watchDir")).toString()));
+    m_watchDir->setPlaceholderText(tr("Ordner, in dem das Scanprogramm speichert"));
+    wl->addWidget(m_watchDir, 1);
+    auto *watchBrowse = new QPushButton(Icons::get(QStringLiteral("open")), tr("Wählen …"));
+    wl->addWidget(watchBrowse);
+    sf->addRow(tr("Überwachter Ordner:"), watchRow);
+    auto *progRow = new QWidget;
+    auto *pl = new QHBoxLayout(progRow);
+    pl->setContentsMargins(0, 0, 0, 0);
+    m_watchProgram = new QLineEdit(QDir::toNativeSeparators(s.value(QStringLiteral("scan/watchProgram")).toString()));
+    m_watchProgram->setPlaceholderText(tr("optional: Scanprogramm, das beim Scannen gestartet wird (z. B. Epson ScanSmart)"));
+    pl->addWidget(m_watchProgram, 1);
+    auto *progBrowse = new QPushButton(Icons::get(QStringLiteral("open")), tr("Wählen …"));
+    pl->addWidget(progBrowse);
+    sf->addRow(tr("Scanprogramm:"), progRow);
+    connect(watchBrowse, &QPushButton::clicked, this, [this] {
+        const QString d = QFileDialog::getExistingDirectory(this, tr("Überwachter Ordner"), m_watchDir->text());
+        if (!d.isEmpty()) m_watchDir->setText(QDir::toNativeSeparators(d));
+    });
+    connect(progBrowse, &QPushButton::clicked, this, [this] {
+#ifdef Q_OS_WIN
+        const QString filter = tr("Programme (*.exe)");
+#else
+        const QString filter;
+#endif
+        const QString f = QFileDialog::getOpenFileName(this, tr("Scanprogramm wählen"), m_watchProgram->text(), filter);
+        if (!f.isEmpty()) m_watchProgram->setText(QDir::toNativeSeparators(f));
+    });
+    m_escl = new Escl::Scanner(this);
+    connect(esclCheck, &QPushButton::clicked, this, [this, esclCheck] {
+        m_esclStatus->setText(tr("Verbindung wird geprüft …"));
+        m_esclStatus->setVisible(true);
+        esclCheck->setEnabled(false);
+        m_escl->check(m_esclAddress->text());
+    });
+    connect(m_escl, &Escl::Scanner::checked, this, [this, esclCheck](bool ok, const QString &model, const QString &err) {
+        esclCheck->setEnabled(true);
+        m_esclStatus->setText(ok ? tr("✓ Gefunden: %1").arg(model) : QStringLiteral("✗ ") + err);
+        m_esclStatus->setVisible(true);
+    });
     m_scanColor = new QCheckBox(tr("In Farbe scannen (nötig, um Rezeptfotos zu übernehmen)"));
     m_scanColor->setChecked(s.value(QStringLiteral("scan/color"), true).toBool());
     sf->addRow(QString(), m_scanColor);
 #if defined(Q_OS_WIN)
-    const QString scanInfo = tr("Der Windows-Scandialog funktioniert mit jedem Scanner oder Multifunktionsgerät, für das ein "
-                                "WIA-Treiber installiert ist (bei Windows 10/11 meist automatisch).");
+    const QString scanInfo = tr("Der Windows-Scandialog funktioniert mit jedem Scanner, den Windows unter „Drucker & Scanner“ kennt. "
+                                "WLAN-Multifunktionsgeräte, die dort fehlen, lassen sich meist direkt als Netzwerkscanner (eSCL) über "
+                                "ihre IP-Adresse ansprechen; sonst das Programm des Herstellers mit überwachtem Ordner verwenden.");
 #elif defined(Q_OS_MACOS)
     const QString scanInfo = tr("Unter macOS wird „Digitale Bilder“ oder „Vorschau“ geöffnet. Das gespeicherte Bild danach im "
-                                "Scandialog mit „Bild öffnen …“ laden.");
+                                "Scandialog mit „Bild öffnen …“ laden. AirPrint-fähige WLAN-Geräte gehen auch direkt als Netzwerkscanner (eSCL).");
 #else
     const QString scanInfo = tr("XSane und scanimage legen das Bild direkt für ViviaMeals ab. Bei den anderen Programmen das Bild "
-                                "speichern und im Scandialog mit „Bild öffnen …“ laden. Installation z. B. „sudo apt install xsane“.");
+                                "speichern und im Scandialog mit „Bild öffnen …“ laden. Installation z. B. „sudo apt install xsane“. "
+                                "WLAN-Multifunktionsgeräte lassen sich ohne Treiber als Netzwerkscanner (eSCL) über die IP-Adresse ansprechen.");
 #endif
     auto *si = new QLabel(QStringLiteral("<small>%1</small>").arg(scanInfo.toHtmlEscaped()));
     si->setWordWrap(true);
@@ -187,7 +247,19 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
     of->addRow(oi);
     slay->addWidget(og);
     slay->addStretch(1);
-    auto updateScan = [this] { m_scanCommand->setEnabled(m_scanner->currentData().toString() == QLatin1String("custom")); };
+    // nur die Zeilen zeigen, die zum gewählten Weg gehören
+    auto updateScan = [this, sf, esclRow, watchRow, progRow] {
+        const QString id = m_scanner->currentData().toString();
+        auto show = [sf](QWidget *w, bool on) {
+            w->setVisible(on);
+            if (QWidget *l = sf->labelForField(w)) l->setVisible(on);
+        };
+        show(m_scanCommand, id == QLatin1String("custom"));
+        show(esclRow, id == QLatin1String("escl"));
+        m_esclStatus->setVisible(id == QLatin1String("escl") && !m_esclStatus->text().isEmpty());
+        show(watchRow, id == QLatin1String("folder"));
+        show(progRow, id == QLatin1String("folder"));
+    };
     connect(m_scanner, qOverload<int>(&QComboBox::currentIndexChanged), this, updateScan);
     updateScan();
     connect(browse, &QPushButton::clicked, this, [this] {
@@ -271,6 +343,9 @@ void SettingsDialog::accept()
     ds.save();
     s.setValue(QStringLiteral("scan/program"), m_scanner->currentData().toString());
     s.setValue(QStringLiteral("scan/command"), m_scanCommand->text().trimmed());
+    s.setValue(QStringLiteral("scan/esclAddress"), m_esclAddress->text().trimmed());
+    s.setValue(QStringLiteral("scan/watchDir"), QDir::fromNativeSeparators(m_watchDir->text().trimmed()));
+    s.setValue(QStringLiteral("scan/watchProgram"), QDir::fromNativeSeparators(m_watchProgram->text().trimmed()));
     s.setValue(QStringLiteral("scan/color"), m_scanColor->isChecked());
     s.setValue(QStringLiteral("scan/tesseract"), m_tesseract->text().trimmed());
     s.setValue(QStringLiteral("scan/languages"), m_ocrLangs->text().trimmed());

@@ -12,6 +12,11 @@
 #include "ocr.h"
 #include "recipe.h"
 #include "recipescan.h"
+#include "escl.h"
+
+#include <QDateTime>
+#include <QHash>
+#include <QSet>
 
 #include <QDialog>
 #include <QImage>
@@ -153,6 +158,12 @@ private:
     int m_ocrPage = -1;
     QTimer *m_poll;
     qint64 m_lastSize = -1;
+    // überwachter Ordner (Herstellerprogramm)
+    QString m_watchDir;
+    QDateTime m_watchSince;
+    QHash<QString, qint64> m_watchSizes;   // Datei → Größe beim letzten Blick (noch im Schreiben?)
+    QSet<QString> m_watchDone;
+    Escl::Scanner *m_escl = nullptr;
     bool m_filling = false, m_edited = false;
     RecipeScan::Parts m_parts;
     QImage m_photo;
