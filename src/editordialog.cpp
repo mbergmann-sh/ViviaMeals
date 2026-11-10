@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "editordialog.h"
+#include "foodwizard.h"
 #include "scandialog.h"
 #include "screenfit.h"
 #include "fooddialog.h"
@@ -43,7 +44,7 @@
 #include <QTimer>
 #include <QVBoxLayout>
 
-EditorDialog::EditorDialog(const Recipe &r, QWidget *parent) : QDialog(parent), m_recipe(r)
+EditorDialog::EditorDialog(const Recipe &r, QWidget *parent) : QDialog(parent), m_recipe(r), m_isNew(r.id.isEmpty())
 {
     setWindowTitle(r.title.isEmpty() ? tr("Neues Rezept") : tr("Rezept bearbeiten – %1").arg(r.title));
     setWindowFlag(Qt::WindowMaximizeButtonHint, true);
@@ -177,7 +178,13 @@ EditorDialog::EditorDialog(const Recipe &r, QWidget *parent) : QDialog(parent), 
     m_table->setWordWrap(false);
     nl->addWidget(m_table, 1);
     auto *assign = new QPushButton(Icons::get(QStringLiteral("nutrition")), tr("Zuordnung ändern …"));
-    nl->addWidget(assign);
+    auto *missing = new QPushButton(Icons::get(QStringLiteral("add")), tr("Fehlende Lebensmittel anlegen …"));
+    missing->setToolTip(tr("Für Zutaten ohne Nährwerte eigene Lebensmittel anlegen (z. B. Fertigprodukte mit den Angaben der Verpackung)"));
+    auto *nbl = new QHBoxLayout;
+    nbl->addWidget(assign);
+    nbl->addWidget(missing);
+    nl->addLayout(nbl);
+    connect(missing, &QPushButton::clicked, this, [this] { offerMissingFoods(false); });
     split->addWidget(nutBox);
     split->setStretchFactor(0, 3);
     split->setStretchFactor(1, 4);
@@ -424,6 +431,31 @@ void EditorDialog::assignFood(int row)
     analyze();
 }
 
+bool EditorDialog::offerMissingFoods(bool ask)
+{
+    collect();
+    Nutrition::analyze(m_recipe);
+    const auto missing = Nutrition::missingFoods({ m_recipe }, MissingFoodsDialog::ignoredNames());
+    if (missing.isEmpty()) {
+        if (!ask) QMessageBox::information(this, windowTitle(), tr("Alle Zutaten haben Nährwerte."));
+        return false;
+    }
+    if (ask) {
+        QStringList names;
+        for (const auto &m : missing) names << m.name;
+        const auto b = QMessageBox::question(this, windowTitle(),
+                                             (missing.size() == 1 ? tr("Für eine Zutat gibt es noch keine Nährwerte:\n%1\n\nJetzt ein eigenes Lebensmittel anlegen oder zuordnen?")
+                                                                  : tr("Für %1 Zutaten gibt es noch keine Nährwerte:\n%2\n\nJetzt eigene Lebensmittel anlegen oder zuordnen?").arg(missing.size()))
+                                                 .arg(names.mid(0, 8).join(QStringLiteral(", ")) + (names.size() > 8 ? QStringLiteral(" …") : QString())),
+                                             QMessageBox::Yes | QMessageBox::No);
+        if (b != QMessageBox::Yes) return false;
+    }
+    MissingFoodsDialog d(missing, tr("Diese Zutaten des Rezepts haben noch keine Nährwerte:"), this);
+    d.exec();
+    if (d.changed()) analyze();
+    return d.changed();
+}
+
 void EditorDialog::accept()
 {
     collect();
@@ -434,5 +466,10 @@ void EditorDialog::accept()
     }
     if (m_recipe.sourceFormat.isEmpty()) m_recipe.sourceFormat = QStringLiteral("ViviaMeals");
     Nutrition::analyze(m_recipe);
+    // neues Rezept: fehlende Lebensmittel einmalig anbieten
+    if (m_isNew && !m_offered && MissingFoodsDialog::offerEnabled()) {
+        m_offered = true;
+        offerMissingFoods(true);
+    }
     QDialog::accept();
 }

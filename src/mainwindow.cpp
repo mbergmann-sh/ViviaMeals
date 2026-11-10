@@ -1,5 +1,10 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "mainwindow.h"
+#include "foodwizard.h"
+#include "importdialogs.h"
+#include "mealtypes.h"
+#include "nutrition.h"
+#include "packagedialog.h"
 #include "scandialog.h"
 #include "duplicatesdialog.h"
 #include "assistantdialog.h"
@@ -270,6 +275,9 @@ void MainWindow::buildMenus()
         if (!first.isEmpty()) selectRecipe(first);
     });
     m_needDb << a;
+    imp->addSeparator();
+    a = imp->addAction(Icons::get(QStringLiteral("database")), tr("Rezept&paket (.vmpack) übernehmen …"), this, [this] { importPackage(); });
+    a->setStatusTip(tr("Eine von anderen ViviaMeals-Anwendern weitergegebene Rezeptsammlung übernehmen oder als neue Datenbank anlegen"));
     QMenu *exp = file->addMenu(Icons::get(QStringLiteral("web")), tr("&Export"));
     a = exp->addAction(Icons::get(QStringLiteral("web")), tr("Als &Website exportieren …"), this, &MainWindow::exportWebsite);
     a->setObjectName(QStringLiteral("actWeb"));
@@ -282,6 +290,11 @@ void MainWindow::buildMenus()
     m_needRecipe << a;
     a = exp->addAction(Icons::get(QStringLiteral("save")), tr("Als ViviaMeals-Rezept (.&vmr) speichern …"), this, &MainWindow::exportVmr);
     m_needRecipe << a;
+    exp->addSeparator();
+    a = exp->addAction(Icons::get(QStringLiteral("database")), tr("Rezept&datenbank weitergeben (.vmpack) …"), this, &MainWindow::exportPackage);
+    a->setStatusTip(tr("Rezeptsammlung als Paket für andere ViviaMeals-Anwender speichern – ohne Benutzer, Ziele, Tagebuch und Pläne"));
+    a->setObjectName(QStringLiteral("actPackage"));
+    m_needDb << a;
     file->addSeparator();
     a = file->addAction(Icons::get(QStringLiteral("delete")), tr("Datenbank &leeren …"), this, &MainWindow::clearDatabase);
     a->setStatusTip(tr("Alle Rezepte der geöffneten Datenbank löschen (mit Sicherheitsabfrage und Sicherungskopie)"));
@@ -324,6 +337,11 @@ void MainWindow::buildMenus()
 
     QMenu *extras = menuBar()->addMenu(tr("E&xtras"));
     a = extras->addAction(Icons::get(QStringLiteral("nutrition")), tr("&Nährwerttabelle …"), this, &MainWindow::openFoodTable);
+    a = extras->addAction(Icons::get(QStringLiteral("add")), tr("Eigenes &Lebensmittel anlegen …"), this, &MainWindow::newFood);
+    a->setStatusTip(tr("Assistent für Fertigprodukte und andere Lebensmittel mit den Nährwerten von der Verpackung"));
+    a = extras->addAction(Icons::get(QStringLiteral("nutrition")), tr("Zutaten &ohne Nährwerte …"), this, &MainWindow::missingFoods);
+    a->setStatusTip(tr("Alle Zutaten der Datenbank ohne Eintrag in der Nährwerttabelle auflisten, anlegen oder zuordnen"));
+    m_needDb << a;
     a = extras->addAction(Icons::get(QStringLiteral("duplicates")), tr("&Doubletten suchen …"), this, &MainWindow::findDuplicates);
     a->setObjectName(QStringLiteral("actDuplicates"));
     a->setStatusTip(tr("Rezepte mit gleichem oder ähnlichem Titel bzw. gleichen Zutaten finden, vergleichen, zusammenführen und löschen"));
@@ -483,26 +501,31 @@ bool MainWindow::ensureDatabase()
 
 void MainWindow::newDatabase()
 {
+    createDatabase(tr("Meine Rezepte"));
+}
+
+bool MainWindow::createDatabase(const QString &defaultName)
+{
     const QString base = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     bool ok = false;
     const QString name = QInputDialog::getText(this, tr("Neue Rezeptdatenbank"), tr("Name der Datenbank:"), QLineEdit::Normal,
-                                               tr("Meine Rezepte"), &ok);
-    if (!ok || name.trimmed().isEmpty()) return;
+                                               defaultName, &ok);
+    if (!ok || name.trimmed().isEmpty()) return false;
     const QString parentDir = QFileDialog::getExistingDirectory(this, tr("Ordner wählen, in dem die Datenbank angelegt wird"), base);
-    if (parentDir.isEmpty()) return;
+    if (parentDir.isEmpty()) return false;
     QString folderName = name.trimmed();
     folderName.replace(QRegularExpression(QStringLiteral("[\\\\/:*?\"<>|]")), QStringLiteral("_"));
     const QString folder = QDir(parentDir).filePath(folderName);
     if (QDir(folder).exists() && !QDir(folder).isEmpty() && !RecipeDb::isDatabaseFolder(folder)) {
         QMessageBox::warning(this, tr("Neue Rezeptdatenbank"), tr("Der Ordner %1 existiert bereits und ist nicht leer.").arg(QDir::toNativeSeparators(folder)));
-        return;
+        return false;
     }
     QString err;
     if (!RecipeDb::instance().create(folder, name.trimmed(), &err)) {
         QMessageBox::warning(this, tr("Neue Rezeptdatenbank"), err);
-        return;
+        return false;
     }
-    openDatabase(folder);
+    return openDatabase(folder);
 }
 
 void MainWindow::openDatabaseDialog()
@@ -653,6 +676,10 @@ void MainWindow::openFiles(const QStringList &files)
         }
         if (!fi.exists()) {
             QMessageBox::warning(this, tr("Datei öffnen"), tr("Die Datei %1 gibt es nicht.").arg(QDir::toNativeSeparators(f)));
+            continue;
+        }
+        if (suf == RecipePackage::suffix()) {
+            importPackage(fi.absoluteFilePath());   // auch ohne geöffnete Datenbank: als neue Datenbank anlegen
             continue;
         }
         if (suf == QLatin1String("vmr")) vmr << fi.absoluteFilePath();
@@ -1163,6 +1190,93 @@ void MainWindow::openMealPlan(const QString &profileId)
     MealPlanDialog d(profileId, this);
     connect(&d, &MealPlanDialog::showRecipe, this, &MainWindow::selectRecipe);
     d.exec();
+}
+
+void MainWindow::exportPackage()
+{
+    if (!RecipeDb::instance().isOpen()) return;
+    PackageExportDialog d(visibleIds(), this);
+    d.exec();
+}
+
+void MainWindow::importPackage(const QString &given)
+{
+    QSettings s;
+    QString file = given;
+    if (file.isEmpty()) {
+        file = QFileDialog::getOpenFileName(this, tr("Rezeptpaket übernehmen"),
+                                            s.value(QStringLiteral("package/dir"), QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)).toString(),
+                                            tr("ViviaMeals-Rezeptpaket (*.vmpack);;Alle Dateien (*)"));
+        if (file.isEmpty()) return;
+        s.setValue(QStringLiteral("package/dir"), QFileInfo(file).absolutePath());
+    }
+    RecipePackage::Content c;
+    QString err;
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    const bool ok = RecipePackage::read(file, &c, &err);
+    QApplication::restoreOverrideCursor();
+    if (!ok) {
+        QMessageBox::warning(this, tr("Rezeptpaket"), tr("„%1“ kann nicht gelesen werden:\n%2").arg(QFileInfo(file).fileName(), err));
+        return;
+    }
+    PackageImportDialog d(c, file, RecipeDb::instance().isOpen(), this);
+    if (d.exec() != QDialog::Accepted) return;
+    if (d.target() == PackageImportDialog::NewDatabase && !createDatabase(c.name.isEmpty() ? QFileInfo(file).completeBaseName() : c.name)) return;
+    int foods = 0, learned = 0;
+    if (d.importFoods()) foods = RecipePackage::importFoods(c, &learned);
+    // Nährwerte mit der eigenen Tabelle neu berechnen; manuelle Zuordnungen bleiben erhalten
+    RecipeDb &db = RecipeDb::instance();
+    for (Recipe &r : c.recipes) {
+        Nutrition::analyze(r);
+        if (QSettings().value(QStringLiteral("import/nutrientTags"), true).toBool()) MealTypes::applyNutrientTags(r);
+        // gleiche ID, aber anderes Rezept (z. B. umbenannt): eigene ID vergeben statt überschreiben
+        if (db.summary(r.id) && db.duplicatesOf(r).isEmpty()) r.id.clear();
+    }
+    QString title = tr("Rezeptpaket übernommen");
+    if (foods > 0 || learned > 0) title = tr("Rezeptpaket übernommen (%1 Lebensmittel, %2 Zuordnungen)").arg(foods).arg(learned);
+    const QString first = ImportFlow::store(this, c.recipes, c.warnings, title);
+    if (!first.isEmpty()) selectRecipe(first);
+}
+
+void MainWindow::newFood()
+{
+    FoodWizard w(QString(), this);
+    if (w.exec() != QDialog::Accepted || w.foodKey().isEmpty()) return;
+    if (RecipeDb::instance().isOpen()
+        && QMessageBox::question(this, tr("Nährwerttabelle"), tr("Das Lebensmittel wurde angelegt. Nährwerte aller Rezepte jetzt neu berechnen, "
+                                                                 "damit es überall berücksichtigt wird?"))
+               == QMessageBox::Yes)
+        recalcAll();
+}
+
+void MainWindow::missingFoods()
+{
+    RecipeDb &db = RecipeDb::instance();
+    if (!db.isOpen()) return;
+    QProgressDialog prog(tr("Zutaten werden geprüft …"), tr("Abbrechen"), 0, db.count(), this);
+    prog.setWindowModality(Qt::WindowModal);
+    prog.setMinimumDuration(400);
+    QList<Recipe> list;
+    int i = 0;
+    for (const RecipeSummary &s : db.summaries()) {
+        prog.setValue(i++);
+        if (prog.wasCanceled()) return;
+        if (s.coverage >= 0.999) continue;
+        Recipe r;
+        if (db.load(s.id, &r)) list << r;
+    }
+    prog.setValue(db.count());
+    const auto missing = Nutrition::missingFoods(list, MissingFoodsDialog::ignoredNames());
+    if (missing.isEmpty()) {
+        QMessageBox::information(this, tr("Zutaten ohne Nährwerte"), tr("Alle Zutaten mit Mengenangabe haben einen Eintrag in der Nährwerttabelle."));
+        return;
+    }
+    MissingFoodsDialog d(missing, (missing.size() == 1 ? tr("Eine Zutat der Datenbank hat noch keine Nährwerte:") : tr("%1 Zutaten der Datenbank haben noch keine Nährwerte (häufigste zuerst):").arg(missing.size())), this);
+    d.exec();
+    if (d.changed()
+        && QMessageBox::question(this, tr("Nährwerttabelle"), tr("Die Nährwerttabelle wurde geändert. Nährwerte aller Rezepte jetzt neu berechnen?"))
+               == QMessageBox::Yes)
+        recalcAll();
 }
 
 void MainWindow::openFoodTable()

@@ -39,6 +39,7 @@ public:
 
 public slots:
     void newDatabase();
+    bool createDatabase(const QString &defaultName);
     void openDatabaseDialog();
     void newRecipe();
     void findDuplicates();
@@ -54,6 +55,10 @@ public slots:
     void clearDatabase();
     void mealTagsAll();
     void exportVmr();
+    void exportPackage();
+    void importPackage(const QString &file = QString());
+    void newFood();
+    void missingFoods();
     void printRecipe();
     void showRandom();
     void openFridge();

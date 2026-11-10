@@ -3,7 +3,10 @@
 #include "foodtable.h"
 #include "units.h"
 
+#include <QHash>
 #include <QRegularExpression>
+
+#include <algorithm>
 #include <QSet>
 
 namespace Nutrition {
@@ -167,6 +170,44 @@ Nutrients referenceIntake()
     n.salt = 6;
     n.fiber = 30;   // keine EU-Referenzmenge; Richtwert der DGE für Erwachsene
     return n;
+}
+
+} // namespace Nutrition
+
+namespace Nutrition {
+
+QList<MissingFood> missingFoods(const QList<Recipe> &recipes, const QSet<QString> &ignored)
+{
+    QHash<QString, MissingFood> map;
+    QStringList order;
+    for (const Recipe &r : recipes) {
+        if (isMenu(r)) continue;
+        for (const Ingredient &i : r.ingredients) {
+            if (i.heading || !i.food.isEmpty()) continue;
+            const QString key = FoodTable::normalize(i.name);
+            if (key.size() < 3 || ignored.contains(key)) continue;
+            if (!map.contains(key)) {
+                MissingFood m;
+                m.name = i.name;
+                m.key = key;
+                map.insert(key, m);
+                order << key;
+            }
+            MissingFood &m = map[key];
+            ++m.count;
+            if (m.examples.size() < 3 && !m.examples.contains(i.displayLine())) m.examples << i.displayLine();
+            if (!m.recipes.contains(r.title)) m.recipes << r.title;
+        }
+    }
+    QList<MissingFood> out;
+    for (const QString &k : order) out << map.value(k);
+    std::stable_sort(out.begin(), out.end(), [](const MissingFood &a, const MissingFood &b) { return a.count > b.count; });
+    return out;
+}
+
+double energyFromMacros(const Nutrients &n)
+{
+    return n.protein * 4 + n.carbs * 4 + n.fat * 9 + n.fiber * 2;
 }
 
 } // namespace Nutrition

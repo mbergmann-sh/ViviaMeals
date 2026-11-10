@@ -22,6 +22,8 @@
 #include "recipescan.h"
 #include "escl.h"
 #include "duplicates.h"
+#include "recipepackage.h"
+#include "openfoodfacts.h"
 
 #include <QGuiApplication>
 #include <QPainter>
@@ -38,6 +40,8 @@
 #include <QTimer>
 #include <QEventLoop>
 #include <QTcpSocket>
+#include <QProcess>
+#include <QStandardPaths>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -1170,6 +1174,196 @@ int main(int argc, char **argv)
         loop.exec();
         CHECK(failedOk, "eSCL: Fehlermeldung bei falscher Adresse");
         out << "  eSCL-Testserver: " << model << ", Bild " << got.width() << "×" << got.height() << "\n";
+    }
+
+    // ---- eigene Lebensmittel: fehlende Zutaten, Energie aus Nährstoffen
+    out << "\n== Eigene Lebensmittel / fehlende Zutaten ==\n";
+    {
+        Nutrients n;
+        n.fat = 10; n.carbs = 20; n.protein = 5; n.fiber = 2;
+        CHECK(std::fabs(Nutrition::energyFromMacros(n) - 194) < 1e-9, "Energie aus Nährstoffen");
+        FoodTable &ft = FoodTable::instance();
+        ft.removeUserFood(QStringLiteral("u_buttaris_test"));
+        Recipe r;
+        r.title = QStringLiteral("Testkuchen");
+        r.servings = 4;
+        r.ingredients = IngredientParser::parseText(QStringLiteral("200 g Mehl\n100 g Buttaris Test\n50 g Buttaris Test, zerlassen\n1 Pck. Zauberpulver Xyz"));
+        Nutrition::analyze(r);
+        auto miss = Nutrition::missingFoods({ r });
+        CHECK(miss.size() == 2 && miss.first().count == 2 && miss.first().name.startsWith(QStringLiteral("Buttaris")), "fehlende Zutaten gruppiert");
+        const QString normXyz = FoodTable::normalize(QStringLiteral("Zauberpulver Xyz"));
+        CHECK(Nutrition::missingFoods({ r }, { normXyz }).size() == 1, "ausgeblendete Zutat");
+        Food f;
+        f.key = QStringLiteral("u_buttaris_test");
+        f.name = QStringLiteral("Buttaris Test");
+        f.category = QStringLiteral("fett");
+        f.per100.kcal = 900; f.per100.fat = 99.8;
+        f.aliases = { QStringLiteral("buttaris test") };
+        f.source = QStringLiteral("eigene Eingabe");
+        const QString key = ft.saveUserFood(f);
+        CHECK(key == QLatin1String("u_buttaris_test"), "saveUserFood gibt Schlüssel zurück");
+        Nutrition::analyze(r);
+        CHECK(Nutrition::missingFoods({ r }).size() == 1, "nach dem Anlegen nur noch eine fehlende Zutat");
+        CHECK(std::fabs(r.nutrition.total.kcal - (200 * 3.4 + 150 * 9.0)) < 40, "kcal mit eigenem Lebensmittel " + QString::number(r.nutrition.total.kcal));
+
+        // ---- Rezeptpaket: Hin und zurück
+        out << "\n== Rezeptpaket (.vmpack) ==\n";
+        r.id = Recipe::newId();
+        r.favorite = true;
+        r.image = QStringLiteral("iVBORw0KGgo=");
+        ft.learn(QStringLiteral("Zauberpulver Xyz"), QStringLiteral("zucker"));
+        Nutrition::analyze(r);
+        Recipe r2;
+        r2.id = Recipe::newId();
+        r2.title = QStringLiteral("Zweites Rezept – Ümlaut");
+        r2.ingredients = IngredientParser::parseText(QStringLiteral("1 l Milch"));
+        Nutrition::analyze(r2);
+        RecipePackage::Options o;
+        o.name = QStringLiteral("Testsammlung");
+        o.author = QStringLiteral("Tester");
+        int foods = 0;
+        const QByteArray zip = RecipePackage::build({ r, r2 }, o, &foods);
+        CHECK(foods == 1, "Paket: ein eigenes Lebensmittel");
+        RecipePackage::Content c;
+        QString err;
+        CHECK(RecipePackage::parse(zip, &c, &err), "Paket lesen: " + err);
+        CHECK(c.recipes.size() == 2 && c.name == QLatin1String("Testsammlung") && c.author == QLatin1String("Tester"), "Paket: Kopfdaten und Rezepte");
+        bool found = false;
+        for (const Recipe &x : c.recipes)
+            if (x.title == r.title) {
+                found = true;
+                CHECK(!x.favorite && x.image == r.image && x.ingredients.size() == 4, "Paket: Favorit entfernt, Foto und Zutaten erhalten");
+            }
+        CHECK(found, "Paket: Rezept wiedergefunden");
+        CHECK(c.foods.size() == 1 && c.foods.first().key == QLatin1String("u_buttaris_test") && c.foods.first().source.contains(QStringLiteral("Rezeptpaket")),
+              "Paket: Lebensmittel mit Herkunft");
+        CHECK(c.learned.value(normXyz) == QLatin1String("zucker"), "Paket: gelernte Zuordnung");
+        const auto files = RecipePackage::unzip(zip, &err);
+        CHECK(files.contains(QStringLiteral("viviameals-paket.json")) && files.size() == 4, "Paket: Dateien im Archiv");
+        for (auto it = files.begin(); it != files.end(); ++it)
+            CHECK(!it.key().contains(QStringLiteral("profil")) && !it.key().contains(QStringLiteral("tagebuch")) && !it.key().contains(QStringLiteral("plan")),
+                  "Paket ohne Benutzerdaten: " + it.key());
+        // ohne Fotos, ohne Lebensmittel
+        o.images = false;
+        o.foods = false;
+        RecipePackage::parse(RecipePackage::build({ r }, o), &c, &err);
+        CHECK(c.recipes.size() == 1 && c.recipes.first().image.isEmpty() && c.foods.isEmpty() && c.learned.isEmpty(), "Paket ohne Fotos/Lebensmittel");
+        // beschädigtes Paket
+        QByteArray broken = zip;
+        broken[200] = char(broken[200] ^ 0x55);
+        CHECK(!RecipePackage::parse(broken, &c, &err) && !err.isEmpty(), "beschädigtes Paket erkannt: " + err);
+        CHECK(!RecipePackage::parse(QByteArray("kein zip"), &c, &err), "kein ZIP erkannt");
+        // Empfänger: Lebensmittel übernehmen, vorhandene nicht überschreiben
+        RecipePackage::parse(zip, &c, &err);
+        ft.removeUserFood(QStringLiteral("u_buttaris_test"));
+        ft.learn(QStringLiteral("Zauberpulver Xyz"), QString());
+        int learned = 0;
+        CHECK(RecipePackage::importFoods(c, &learned) == 1 && learned == 1, "Lebensmittel und Zuordnung übernommen");
+        CHECK(RecipePackage::importFoods(c, &learned) == 0 && learned == 0, "zweites Mal nichts doppelt");
+        // mit Unzip-Programm lesbar?
+        QTemporaryDir td;
+        QFile zf(td.filePath(QStringLiteral("t.vmpack")));
+        zf.open(QIODevice::WriteOnly);
+        zf.write(zip);
+        zf.close();
+        if (!QStandardPaths::findExecutable(QStringLiteral("unzip")).isEmpty()) {
+            const int rc = QProcess::execute(QStringLiteral("unzip"), { QStringLiteral("-tq"), zf.fileName() });
+            CHECK(rc == 0, "unzip -t akzeptiert das Paket");
+        }
+        ft.removeUserFood(QStringLiteral("u_buttaris_test"));
+        ft.learn(QStringLiteral("Zauberpulver Xyz"), QString());
+        out << "  Paket: " << zip.size() << " Bytes, " << files.size() << " Dateien\n";
+    }
+
+    // ---- Open Food Facts
+    out << "\nOpen Food Facts:\n";
+    {
+        using namespace OpenFoodFacts;
+        CHECK(validGtin(QStringLiteral("3017620422003")) && validGtin(QStringLiteral("96385074")) && validGtin(QStringLiteral("036000291452")),
+              "GTIN gültig (EAN-13, EAN-8, UPC-A)");
+        CHECK(!validGtin(QStringLiteral("3017620422004")), "falsche Prüfziffer");
+        QString err;
+        CHECK(normalizeBarcode(QStringLiteral(" 3 017620 422003 "), &err) == QLatin1String("3017620422003"), "Barcode mit Leerzeichen");
+        CHECK(normalizeBarcode(QStringLiteral("12345"), &err).isEmpty() && err.contains(QStringLiteral("Ziffern")), "zu kurz: " + err);
+        CHECK(normalizeBarcode(QStringLiteral("3017620422004"), &err).isEmpty() && err.contains(QStringLiteral("Prüfziffer")), "Prüfziffer: " + err);
+        bool ml = false;
+        CHECK(parseQuantity(QStringLiteral("6 x 125 g"), &ml) == 750 && !ml, "6 x 125 g");
+        CHECK(parseQuantity(QStringLiteral("1,5 l"), &ml) == 1500 && ml, "1,5 l");
+        CHECK(parseQuantity(QStringLiteral("0.5 kg")) == 500, "0.5 kg");
+        CHECK(categoryFromTags({ QStringLiteral("en:spreads"), QStringLiteral("en:fats"), QStringLiteral("en:margarines") }) == QLatin1String("fett"), "Kategorie Fett");
+        const QByteArray nutella = R"({"code":"3017620422003","status":1,"product":{"code":"3017620422003","product_name":"Nutella","product_name_de":"Nutella",
+            "brands":"Ferrero,Nutella","quantity":"400 g","product_quantity":"400","product_quantity_unit":"g","serving_size":"15 g","serving_quantity":15,
+            "categories_tags":["en:breakfasts","en:spreads","en:sweet-spreads","en:cocoa-and-hazelnuts-spreads","en:chocolate-spreads"],
+            "nutriments":{"energy-kcal_100g":539,"energy-kj_100g":2252,"fat_100g":30.9,"saturated-fat_100g":10.6,"carbohydrates_100g":57.5,
+            "sugars_100g":56.3,"fiber_100g":0,"proteins_100g":6.3,"salt_100g":0.107}}})";
+        Product p;
+        CHECK(parseProductReply(nutella, &p, &err), "Nutella lesen: " + err);
+        CHECK(p.name == QLatin1String("Nutella") && p.brand == QLatin1String("Ferrero") && p.packageAmount == 400 && !p.perMl && p.servingGrams == 15,
+              "Produktdaten");
+        CHECK(std::fabs(p.per100.kcal - 539) < 1e-9 && std::fabs(p.per100.sugar - 56.3) < 1e-9 && std::fabs(p.per100.salt - 0.107) < 1e-9 && p.missing.isEmpty(),
+              "Nährwerte je 100 g");
+        // nur kJ und Natrium, Getränk in Litern, fehlende Ballaststoffe
+        const QByteArray drink = R"({"status":1,"product":{"code":"4006381333931","product_name":"Apfelschorle","brands":"Test","quantity":"1 l",
+            "categories_tags":["en:beverages"],"nutriments":{"energy_100g":105,"fat_100g":0,"carbohydrates_100g":"6,1","sugars_100g":6,"proteins_100g":0.1,"sodium_100g":0.004}}})";
+        CHECK(parseProductReply(drink, &p, &err), "Schorle lesen");
+        CHECK(p.perMl && p.packageAmount == 1000 && std::fabs(p.per100.kcal - 105 / 4.184) < 0.01 && std::fabs(p.per100.salt - 0.01) < 1e-9
+                  && std::fabs(p.per100.carbs - 6.1) < 1e-9 && p.missing.contains(QStringLiteral("Ballaststoffe")) && p.category == QLatin1String("getraenk"),
+              "kJ, Natrium, ml, Dezimalkomma, fehlende Werte");
+        CHECK(!parseProductReply(R"({"code":"0000000000000","status":0,"status_verbose":"product not found"})", &p, &err) && err.contains(QStringLiteral("nicht erfasst")),
+              "unbekanntes Produkt");
+        const QList<Product> found = parseSearchReply(R"({"count":2,"products":[{"code":"1","product_name":"Buttaris","brands":"Tegut","quantity":"250 g",
+            "nutriments":{"energy-kcal_100g":898,"fat_100g":99.8}},{"code":"","product_name":"ohne Code"}]})", &err);
+        CHECK(found.size() == 1 && found.first().name == QLatin1String("Buttaris") && found.first().missing.contains(QStringLiteral("Salz")), "Suchergebnis");
+        CHECK(productUrl(QStringLiteral("3017620422003")).toString().contains(QStringLiteral("/api/v2/product/3017620422003.json?fields=")), "Produkt-URL");
+        CHECK(userAgent().startsWith("ViviaMeals/"), "User-Agent");
+
+        // Abfrage gegen einen lokalen Testserver
+        QTcpServer server;
+        server.listen(QHostAddress::LocalHost);
+        QByteArray lastPath, lastAgent;
+        QObject::connect(&server, &QTcpServer::newConnection, [&] {
+            QTcpSocket *sock = server.nextPendingConnection();
+            auto buf = std::make_shared<QByteArray>();
+            QObject::connect(sock, &QTcpSocket::readyRead, sock, [sock, buf, &lastPath, &lastAgent, &nutella] {
+                *buf += sock->readAll();
+                const int he = int(buf->indexOf("\r\n\r\n"));
+                if (he < 0) return;
+                const QList<QByteArray> lines = buf->left(he).split('\n');
+                lastPath = lines.first().split(' ').value(1);
+                for (const QByteArray &l : lines)
+                    if (l.toLower().startsWith("user-agent:")) lastAgent = l.mid(11).trimmed();
+                QByteArray status = "200 OK", body;
+                if (lastPath.startsWith("/api/v2/product/3017620422003")) body = nutella;
+                else if (lastPath.startsWith("/api/v2/product/")) {
+                    status = "404 Not Found";
+                    body = R"({"status":0,"status_verbose":"product not found"})";
+                } else if (lastPath.startsWith("/cgi/search.pl")) body = R"({"products":[{"code":"3017620422003","product_name":"Nutella","nutriments":{"energy-kcal_100g":539}}]})";
+                sock->write("HTTP/1.1 " + status + "\r\nContent-Type: application/json\r\nContent-Length: " + QByteArray::number(body.size())
+                            + "\r\nConnection: close\r\n\r\n" + body);
+                sock->disconnectFromHost();
+            });
+        });
+        qputenv("VIVIA_OFF_URL", QStringLiteral("http://127.0.0.1:%1").arg(server.serverPort()).toLatin1());
+        Client client;
+        QEventLoop loop;
+        Product got;
+        QString failure;
+        QList<Product> results;
+        QObject::connect(&client, &Client::productFound, &loop, [&](const Product &x) { got = x; loop.quit(); });
+        QObject::connect(&client, &Client::failed, &loop, [&](const QString &e) { failure = e; loop.quit(); });
+        QObject::connect(&client, &Client::searchFinished, &loop, [&](const QList<Product> &l) { results = l; loop.quit(); });
+        auto run = [&] { QTimer::singleShot(10000, &loop, &QEventLoop::quit); loop.exec(); };
+        client.lookup(QStringLiteral("3017620422003"));
+        run();
+        CHECK(got.name == QLatin1String("Nutella") && lastAgent.startsWith("ViviaMeals/"), "Abfrage über HTTP: " + failure);
+        client.lookup(QStringLiteral("4006381333931"));
+        run();
+        CHECK(failure.contains(QStringLiteral("nicht erfasst")), "404 → nicht erfasst: " + failure);
+        client.search(QStringLiteral("Nutella Ferrero"));
+        run();
+        CHECK(results.size() == 1 && lastPath.contains("search_terms=Nutella"), "Namenssuche über HTTP");
+        qunsetenv("VIVIA_OFF_URL");
+        out << "  " << got.name << " (" << got.brand << "), " << got.quantity << ": " << qRound(got.per100.kcal) << " kcal/100 g\n";
     }
 
     out << "\n" << (g_fail ? QStringLiteral("%1 Fehler").arg(g_fail) : QStringLiteral("Alle Prüfungen bestanden")) << "\n";

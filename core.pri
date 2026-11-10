@@ -25,6 +25,8 @@ SOURCES += \
     $$PWD/src/coaching.cpp \
     $$PWD/src/diary.cpp \
     $$PWD/src/odtexport.cpp \
+    $$PWD/src/recipepackage.cpp \
+    $$PWD/src/openfoodfacts.cpp \
     $$PWD/src/deepl.cpp \
     $$PWD/src/ocr.cpp \
     $$PWD/src/recipescan.cpp \
@@ -54,6 +56,8 @@ HEADERS += \
     $$PWD/src/coaching.h \
     $$PWD/src/diary.h \
     $$PWD/src/odtexport.h \
+    $$PWD/src/recipepackage.h \
+    $$PWD/src/openfoodfacts.h \
     $$PWD/src/deepl.h \
     $$PWD/src/ocr.h \
     $$PWD/src/recipescan.h \

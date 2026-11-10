@@ -24,6 +24,7 @@ struct Food {
     QHash<QString, double> unitGrams;   // g je Einheit (Pck., Dose, Zehe …)
     QStringList aliases;        // Namen (klein geschrieben), deutsch und englisch
     bool user = false;          // eigener bzw. geänderter Eintrag
+    QString barcode;            // EAN/GTIN eines Fertigprodukts (Open Food Facts), sonst leer
     QString source;             // Herkunft eigener Einträge („USDA FoodData Central“, Dateiname des CSV-Imports …)
 
     bool isAnimal() const;      // Fleisch, Fisch, Gelatine
@@ -38,6 +39,7 @@ public:
     static FoodTable &instance();
 
     const Food *find(const QString &key) const;
+    const Food *findBarcode(const QString &code) const;   // eigenes Lebensmittel mit diesem Barcode
     // Zutatennamen einem Lebensmittel zuordnen (nullptr = keine Zuordnung)
     const Food *match(const QString &ingredientName) const;
     QList<const Food *> all() const;             // nach Name sortiert
@@ -45,7 +47,7 @@ public:
     static QStringList categories();
 
     // eigene Einträge
-    void saveUserFood(const Food &f);
+    QString saveUserFood(const Food &f);   // gibt den Schlüssel zurück
     void removeUserFood(const QString &key);     // eingebauter Eintrag gilt dann wieder
     // viele Einträge auf einmal (CSV-Import); gibt die Anzahl übernommener Einträge zurück
     int saveUserFoods(const QList<Food> &foods, bool replaceExisting);
@@ -55,6 +57,7 @@ public:
     bool isBuiltin(const QString &key) const { return m_builtin.contains(key); }
     void learn(const QString &ingredientName, const QString &foodKey);
     QString learnedFor(const QString &ingredientName) const;
+    const QHash<QString, QString> &learnedMap() const { return m_learned; }   // vereinfachter Name → Schlüssel
 
     static QString foldUmlauts(const QString &s);
     static QString normalize(const QString &name);   // Zutatennamen für den Abgleich vereinfachen

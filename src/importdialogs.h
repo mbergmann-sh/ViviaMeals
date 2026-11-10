@@ -14,6 +14,10 @@ class QProgressDialog;
 namespace ImportFlow {
 // Gibt die ID des ersten importierten Rezepts zurück (leer = nichts importiert)
 QString run(QWidget *parent, Importers::Format format, const QStringList &files = {});
+// Rezepte in die geöffnete Datenbank übernehmen (Doubletten-Abfrage, Abschlussmeldung, Angebot für fehlende Lebensmittel)
+QString store(QWidget *parent, const QList<Recipe> &recipes, QStringList warnings = {}, const QString &title = QString());
+// Zutaten ohne Nährwerte in diesen Rezepten anbieten; danach Nährwerte neu berechnen. Anzahl aktualisierter Rezepte
+int offerMissingFoods(QWidget *parent, const QStringList &ids);
 // Übersetzer für Importers::Options auf Grundlage der DeepL-Einstellungen (leer, wenn DeepL aus ist).
 // Zeigt den Fortschritt im Dialog und bricht nach einem Schlüssel-/Kontingentfehler weitere Versuche ab.
 std::function<bool(Recipe &, QString *)> deeplTranslator(QProgressDialog *progress = nullptr);

@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "importdialogs.h"
+#include "foodwizard.h"
+#include "mealtypes.h"
+#include "nutrition.h"
 #include "deepl.h"
 #include "icons.h"
 #include "recipedb.h"
@@ -254,13 +257,21 @@ QString run(QWidget *parent, Importers::Format format, const QStringList &givenF
     if (prev.exec() != QDialog::Accepted) return {};
     const QList<int> sel = prev.selected();
 
+    QList<Recipe> chosen;
+    for (int idx : sel) chosen << recipes[idx];
+    return store(parent, chosen, warnings);
+}
+
+QString store(QWidget *parent, const QList<Recipe> &chosen, QStringList warnings, const QString &title)
+{
+    RecipeDb &db = RecipeDb::instance();
     int added = 0, replaced = 0, skipped = 0;
     bool haveDefault = false;
     DuplicateDialog::Choice def = DuplicateDialog::Skip;
     QString firstId;
+    QStringList savedIds;
     db.beginBatch();
-    for (int idx : sel) {
-        Recipe r = recipes[idx];
+    for (Recipe r : chosen) {
         const QStringList dups = db.duplicatesOf(r);
         if (!dups.isEmpty()) {
             DuplicateDialog::Choice c = def;
@@ -289,6 +300,7 @@ QString run(QWidget *parent, Importers::Format format, const QStringList &givenF
                 }
                 ++replaced;
             } else {
+                r.id.clear();   // zweites Exemplar mit eigener ID
                 ++added;
             }
         } else {
@@ -299,12 +311,54 @@ QString run(QWidget *parent, Importers::Format format, const QStringList &givenF
             warnings << r.title + QStringLiteral(": ") + err;
             continue;
         }
+        savedIds << r.id;
         if (firstId.isEmpty()) firstId = r.id;
     }
     db.endBatch();
     QString msg = QObject::tr("%1 Rezepte neu aufgenommen, %2 ersetzt, %3 übersprungen.").arg(added).arg(replaced).arg(skipped);
-    QMessageBox::information(parent, QObject::tr("Import abgeschlossen"), msg);
+    QMessageBox::information(parent, title.isEmpty() ? QObject::tr("Import abgeschlossen") : title, msg);
+    if (!savedIds.isEmpty() && MissingFoodsDialog::offerEnabled()) offerMissingFoods(parent, savedIds);
     return firstId;
+}
+
+int offerMissingFoods(QWidget *parent, const QStringList &ids)
+{
+    RecipeDb &db = RecipeDb::instance();
+    QList<Recipe> list;
+    for (const QString &id : ids) {
+        Recipe r;
+        if (db.load(id, &r)) list << r;
+    }
+    const auto missing = Nutrition::missingFoods(list, MissingFoodsDialog::ignoredNames());
+    if (missing.isEmpty()) return 0;
+    int total = 0;
+    for (const auto &m : missing) total += m.count;
+    const auto b = QMessageBox::question(parent, QObject::tr("Zutaten ohne Nährwerte"),
+                                         QObject::tr("%1 verschiedene Zutaten (%2-mal verwendet) haben in der Nährwerttabelle keine Entsprechung, "
+                                                     "z. B. %3.\n\nJetzt eigene Lebensmittel anlegen oder vorhandenen zuordnen?")
+                                             .arg(missing.size())
+                                             .arg(total)
+                                             .arg(missing.first().name),
+                                         QMessageBox::Yes | QMessageBox::No);
+    if (b != QMessageBox::Yes) return 0;
+    MissingFoodsDialog d(missing, QObject::tr("Diese Zutaten der importierten Rezepte haben noch keine Nährwerte (häufigste zuerst):"), parent);
+    d.exec();
+    if (!d.changed()) return 0;
+    // Nährwerte der betroffenen Rezepte neu berechnen
+    const bool nutrientTags = QSettings().value(QStringLiteral("import/nutrientTags"), true).toBool();
+    int updated = 0;
+    db.beginBatch();
+    for (Recipe r : list) {
+        const double before = r.nutrition.total.kcal;
+        const int matchedBefore = r.nutrition.matched;
+        Nutrition::analyze(r);
+        if (nutrientTags) MealTypes::applyNutrientTags(r);
+        if (r.nutrition.matched != matchedBefore || !qFuzzyCompare(1 + before, 1 + r.nutrition.total.kcal)) {
+            if (db.save(r)) ++updated;
+        }
+    }
+    db.endBatch();
+    return updated;
 }
 
 std::function<bool(Recipe &, QString *)> deeplTranslator(QProgressDialog *progress)

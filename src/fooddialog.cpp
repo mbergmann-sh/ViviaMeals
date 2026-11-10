@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "fooddialog.h"
+#include "foodwizard.h"
 #include "icons.h"
 #include "recipe.h"
 
@@ -78,7 +79,18 @@ FoodPickerDialog::FoodPickerDialog(const QString &ingredientName, const QString 
     lay->addWidget(m_remember);
     auto *bb = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     auto *none = bb->addButton(tr("Keine Zuordnung"), QDialogButtonBox::ResetRole);
+    auto *create = bb->addButton(tr("Neues Lebensmittel anlegen …"), QDialogButtonBox::ActionRole);
+    create->setIcon(Icons::get(QStringLiteral("add")));
+    create->setToolTip(tr("Eigenes Lebensmittel mit den Nährwerten von der Verpackung anlegen (z. B. ein Fertigprodukt)"));
     lay->addWidget(bb);
+    connect(create, &QPushButton::clicked, this, [this, ingredientName] {
+        FoodWizard w(ingredientName, this, false);
+        if (w.exec() != QDialog::Accepted || w.foodKey().isEmpty()) return;
+        m_current = w.foodKey();
+        m_filter->clear();
+        fill();
+        accept();
+    });
     connect(bb, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(bb, &QDialogButtonBox::rejected, this, &QDialog::reject);
     connect(none, &QPushButton::clicked, this, [this] {
@@ -299,12 +311,9 @@ FoodTableDialog::FoodTableDialog(QWidget *parent) : QDialog(parent)
     connect(m_table, &QTableWidget::cellDoubleClicked, this, &FoodTableDialog::editCurrent);
     connect(edit, &QPushButton::clicked, this, &FoodTableDialog::editCurrent);
     connect(add, &QPushButton::clicked, this, [this] {
-        Food f;
-        f.category = QStringLiteral("sonstiges");
-        f.name = m_filter->text().trimmed();
-        FoodEditDialog d(f, this);
-        if (d.exec() != QDialog::Accepted) return;
-        FoodTable::instance().saveUserFood(d.food());
+        FoodWizard w(QString(), this, false);
+        w.setInitialName(m_filter->text().trimmed());
+        if (w.exec() != QDialog::Accepted || w.foodKey().isEmpty()) return;
         m_changed = true;
         fill();
     });

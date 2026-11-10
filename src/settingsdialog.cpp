@@ -76,6 +76,10 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
     m_nutrientTags->setToolTip(tr("Aus den berechneten Nährwerten je Portion bzw. 100 g; „vitaminreich“ nach der Menge an Gemüse, Obst und Kräutern"));
     m_nutrientTags->setChecked(s.value(QStringLiteral("import/nutrientTags"), true).toBool());
     il->addWidget(m_nutrientTags);
+    m_offerFoods = new QCheckBox(tr("Für Zutaten ohne Nährwerte den Lebensmittel-Assistenten anbieten (nach dem Import, beim Speichern neuer Rezepte)"));
+    m_offerFoods->setToolTip(tr("Eigene Lebensmittel, z. B. Fertigprodukte, mit den Angaben von der Verpackung anlegen oder vorhandenen zuordnen"));
+    m_offerFoods->setChecked(QSettings().value(QStringLiteral("foods/offerWizard"), true).toBool());
+    il->addWidget(m_offerFoods);
     ilay->addWidget(imp);
 
     // ---- DeepL
@@ -337,6 +341,7 @@ void SettingsDialog::accept()
     s.setValue(QStringLiteral("import/fixUmlauts"), m_umlauts->isChecked());
     s.setValue(QStringLiteral("import/mealTags"), m_mealTags->isChecked());
     s.setValue(QStringLiteral("import/nutrientTags"), m_nutrientTags->isChecked());
+    s.setValue(QStringLiteral("foods/offerWizard"), m_offerFoods->isChecked());
     DeepL::Settings ds;
     ds.enabled = m_deepl->isChecked();
     ds.key = m_deeplKey->text();

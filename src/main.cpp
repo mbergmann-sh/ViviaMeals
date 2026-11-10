@@ -10,6 +10,8 @@
 #include "editordialog.h"
 #include "foodcsv.h"
 #include "fooddialog.h"
+#include "foodwizard.h"
+#include "packagedialog.h"
 #include "fridge.h"
 #include "fridgedialog.h"
 #include "icons.h"
@@ -45,6 +47,7 @@
 #include <QDirIterator>
 #include <QBuffer>
 #include <QCheckBox>
+#include <QComboBox>
 #include <QCommandLineParser>
 #include <QDir>
 #include <QFileInfo>
@@ -517,6 +520,66 @@ void takeScreenshots(MainWindow *w, const QString &dir)
         shot(&d, dir, QStringLiteral("naehrwerte-import"));
         d.reject();
         QFile::remove(csv);
+    }
+    {
+        // Lebensmittel-Assistent: Fertigprodukt mit den Angaben der Verpackung
+        FoodWizard wz(QStringLiteral("Buttaris"), w);
+        Nutrients n;
+        n.kcal = 3690; n.fat = 99.8; n.satFat = 69; n.salt = 0;
+        wz.setEntered(n, QStringLiteral("Tegut"));
+        if (auto *cb = wz.findChildren<QComboBox *>().value(2)) cb->setCurrentIndex(1);   // kJ
+        wz.show();
+        wz.next();
+        shot(&wz, dir, QStringLiteral("lebensmittel-assistent"));
+        wz.next();
+        wz.next();
+        shot(&wz, dir, QStringLiteral("lebensmittel-assistent-uebersicht"));
+        wz.reject();
+        // Open Food Facts: Produkt per Barcode übernommen (Antwort wie vom Server)
+        FoodWizard wo(QStringLiteral("Nuss-Nougat-Creme"), w);
+        OpenFoodFacts::Product op;
+        OpenFoodFacts::parseProductReply(R"({"status":1,"product":{"code":"3017620422003","product_name_de":"Nutella","brands":"Ferrero",
+            "quantity":"400 g","categories_tags":["en:sweet-spreads"],"nutriments":{"energy-kcal_100g":539,"fat_100g":30.9,
+            "saturated-fat_100g":10.6,"carbohydrates_100g":57.5,"sugars_100g":56.3,"fiber_100g":0,"proteins_100g":6.3,"salt_100g":0.107}}})", &op);
+        wo.applyProduct(op);
+        wo.show();
+        shot(&wo, dir, QStringLiteral("lebensmittel-openfoodfacts"));
+        wo.reject();
+        QList<Nutrition::MissingFood> miss;
+        auto add = [&](const QString &name, int count, const QString &ex, const QString &recipe) {
+            Nutrition::MissingFood m;
+            m.name = name; m.key = FoodTable::normalize(name); m.count = count; m.examples = { ex }; m.recipes = { recipe };
+            miss << m;
+        };
+        add(QStringLiteral("Buttaris"), 14, QStringLiteral("2 EL Buttaris"), QStringLiteral("Bratkartoffeln"));
+        add(QStringLiteral("Fix für Spaghetti Bolognese"), 3, QStringLiteral("1 Pck. Fix für Spaghetti Bolognese"), QStringLiteral("Schnelle Bolognese"));
+        add(QStringLiteral("Bratensoße, hell"), 2, QStringLiteral("1/4 l Bratensoße, hell"), QStringLiteral("Kalbsröllchen"));
+        add(QStringLiteral("Kuchenglasur Zartbitter"), 2, QStringLiteral("1 Beutel Kuchenglasur Zartbitter"), QStringLiteral("Marmorkuchen"));
+        MissingFoodsDialog md(miss, QObject::tr("Diese Zutaten der importierten Rezepte haben noch keine Nährwerte (häufigste zuerst):"), w);
+        md.show();
+        shot(&md, dir, QStringLiteral("lebensmittel-fehlend"));
+        md.reject();
+    }
+    {
+        PackageExportDialog d(w->property("visibleIds").toStringList(), w);
+        d.show();
+        shot(&d, dir, QStringLiteral("paket-export"));
+        d.reject();
+        QList<Recipe> list;
+        for (const RecipeSummary &s : RecipeDb::instance().summaries()) {
+            Recipe r;
+            if (list.size() < 12 && RecipeDb::instance().load(s.id, &r)) list << r;
+        }
+        RecipePackage::Options o;
+        o.name = QStringLiteral("Familienrezepte");
+        o.author = QStringLiteral("Michael");
+        o.description = QStringLiteral("Unsere liebsten Alltagsrezepte – viel Spaß beim Nachkochen!");
+        RecipePackage::Content c;
+        RecipePackage::parse(RecipePackage::build(list, o), &c);
+        PackageImportDialog pd(c, QStringLiteral("Familienrezepte.vmpack"), true, w);
+        pd.show();
+        shot(&pd, dir, QStringLiteral("paket-import"));
+        pd.reject();
     }
     // Dark-Theme
     Themes::apply(Themes::vscodeId());

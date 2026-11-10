@@ -9,6 +9,8 @@
 
 #include "recipe.h"
 
+#include <QSet>
+
 struct Food;
 
 namespace Nutrition {
@@ -29,5 +31,19 @@ void applyTagSuggestions(Recipe &r);
 
 // Referenzmengen für Erwachsene (EU-Lebensmittelinformationsverordnung, Anhang XIII)
 Nutrients referenceIntake();
+
+// Zutaten ohne Lebensmittel-Zuordnung in mehreren Rezepten (für den Lebensmittel-Assistenten):
+// zusammengefasst nach dem vereinfachten Namen, häufigste zuerst. Menüfolgen, Abschnitte und
+// Namen aus „ignored“ (vereinfacht, siehe FoodTable::normalize) zählen nicht.
+struct MissingFood {
+    QString name;          // Name, wie er im Rezept steht (erstes Vorkommen)
+    QString key;           // vereinfachter Name
+    int count = 0;
+    QStringList examples;  // Zutatenzeilen
+    QStringList recipes;   // Rezepttitel
+};
+QList<MissingFood> missingFoods(const QList<Recipe> &recipes, const QSet<QString> &ignored = {});
+// Energie aus den Hauptnährstoffen (Eiweiß/KH 4, Fett 9, Ballaststoffe 2 kcal je g) – Plausibilitätsprüfung
+double energyFromMacros(const Nutrients &n);
 
 } // namespace Nutrition

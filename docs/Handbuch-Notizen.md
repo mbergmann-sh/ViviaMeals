@@ -1,6 +1,6 @@
 # ViviaMeals – Notizen für das Handbuch
 
-Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.6.6.
+Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.6.8.
 
 > **Name:** Das Programm heißt seit Version 0.6 **ViviaMeals** (vorher VitaMeals; die ganze Reihe heißt jetzt
 > Vivia – ViviaParms, ViviaBreathe). Alte Einstellungen, Profile, Tagebücher, eigene Lebensmittel und
@@ -463,3 +463,61 @@ Likör, Kekse/Lebkuchen, Maronen, Maronenpüree, Kalbfleisch, Wild (Reh, Hirsch)
 Werte überwiegend nach USDA FoodData Central (gemeinfrei), gerundet. Ergebnis: 99,6 % der Zutatenzeilen
 haben Nährwerte; übrig sind Hilfsmittel (Alufolie, Backpapier), Verweise auf Teilrezepte und Speisefarbe.
 Korrigiert dabei: Ente/Gans zählten als Hähnchen, „Johannisbeer…“ als Bier, Liköre als Spirituosen.
+
+
+## Eigene Lebensmittel anlegen (ab 0.6.7)
+
+Wozu: Fertigprodukte und Markenartikel („Buttaris“, „Fix für Spaghetti Bolognese“, eine bestimmte helle Bratensoße)
+stehen in keiner allgemeinen Nährwerttabelle. Mit dem Assistenten überträgt man die Angaben von der Verpackung.
+
+Aufruf:
+- *Extras → Eigenes Lebensmittel anlegen …*
+- *Extras → Nährwerttabelle → Neu …*
+- im Editor und beim Zuordnen einer Zutat: „Neues Lebensmittel anlegen …“
+- automatisch (abschaltbar unter *Einstellungen → Import und Übersetzung*): nach jedem Import und beim Speichern
+  eines **neuen** Rezepts, wenn Zutaten ohne Nährwerte übrig bleiben
+
+Schritte:
+1. **Bezeichnung** – Name, Marke (optional; erscheint in Klammern), Kategorie (wird vorgeschlagen), weitere Namen.
+   **Open Food Facts (ab 0.6.8):** Barcode (EAN-13/EAN-8/UPC) eintippen und „Abrufen“ (Eingabetaste genügt; ein
+   USB-Barcode-Handscanner tippt die Ziffern samt Eingabetaste selbst) oder „Nach Namen suchen …“ (Name + Marke,
+   Trefferliste mit Inhalt und kcal). Übernommen werden Name, Marke, Kategorie, Nährwerte je 100 g bzw. 100 ml
+   (Getränke), Packungsinhalt. Nicht erfasste Werte werden genannt („Nicht erfasst: Ballaststoffe“); Produkte ohne
+   Eintrag lassen sich über den Link bei Open Food Facts eintragen. Falsche Prüfziffer → Hinweis auf Tippfehler,
+   es wird nichts gesendet. Schon angelegte Produkte (gleicher Barcode) werden wiedererkannt.
+   Datenschutz: gesendet wird nur Barcode bzw. Suchbegriff (User-Agent „ViviaMeals/<Version>“). Herkunft im
+   Lebensmittel: „Open Food Facts (ODbL), EAN …“. Open Food Facts erlaubt höchstens 10 Namenssuchen je Minute.
+   Heißt die Zutat nur anders als ein vorhandener Eintrag („Pflanzenfett“ → Margarine), besser
+   „Doch ein vorhandenes Lebensmittel zuordnen …“ wählen.
+2. **Nährwerte** – „Angaben je“ 100 g, 100 ml oder Portion (Gewicht der Portion angeben); Energie in kcal **oder** kJ
+   (wird umgerechnet); Natrium statt Salz ankreuzbar (× 2,5). Unter den Feldern steht laufend das Ergebnis je 100 g
+   und eine Prüfung: gesättigte Fettsäuren > Fett, Zucker > Kohlenhydrate, Nährstoffe über 100 g → Fehler;
+   Energie weicht über 25 % von 4/9/4/2 kcal je g Eiweiß/Fett/Kohlenhydrate/Ballaststoffe ab → Hinweis
+   (meist kJ als kcal eingetragen).
+3. **Menge und Packung** – Dichte (g/ml; für EL/TL/ml-Angaben), Packungsinhalt mit Einheit (Pck., Becher, Dose,
+   Würfel …) und Stückgewicht. So wird „1 Pck. Fix für Bolognese“ zu 40 g.
+4. **Übersicht** – Werte je 100 g und je Packung; „Zutat … künftig immer diesem Lebensmittel zuordnen“.
+
+**Zutaten ohne Nährwerte** (Liste): Zutat, Häufigkeit, Beispielzeile; Tooltip mit den Rezepten.
+Anlegen (Doppelklick) · Zuordnen · Kein Lebensmittel (wird dauerhaft ausgeblendet). Danach werden die
+Nährwerte der betroffenen Rezepte neu berechnet (nach dem Import automatisch, sonst auf Rückfrage für alle).
+
+## Rezeptdatenbank weitergeben (ab 0.6.7)
+
+*Datei → Export → Rezeptdatenbank weitergeben (.vmpack) …*
+- Umfang: alle Rezepte · angezeigte Liste · nur Favoriten · Rezepte mit einem Tag
+- Mitgeben: Fotos (Standard: ja) · eigene Lebensmittel und Zuordnungen der vorkommenden Zutaten (ja) ·
+  Favoriten-Markierungen (nein)
+- **Nie enthalten:** Benutzerprofile, Ziele, Gewichtsverlauf, Tagebuch, Wochenpläne, Einkaufslisten,
+  Einstellungen (auch nicht der DeepL-Schlüssel), Sicherungskopien, Doubletten-Ausnahmen.
+  Diese Daten liegen ohnehin nicht im Datenbankordner, sondern im Benutzerprofil.
+- Aufbau: ZIP-Archiv (unkomprimiert, mit jedem Entpackprogramm lesbar): `viviameals-paket.json`
+  (Name, Beschreibung, Autor, Datum, Version), `rezepte/<id>.vmr`, `lebensmittel.json`.
+
+*Datei → Import → Rezeptpaket (.vmpack) übernehmen …* (oder Doppelklick auf die Datei, Windows-Installer
+registriert die Endung):
+- Vorschau mit Name, Beschreibung, Anzahl, Fotos, Absender
+- „in die geöffnete Datenbank übernehmen“ (Doubletten-Abfrage wie beim Import) oder „als neue Rezeptdatenbank anlegen“
+- eigene Lebensmittel des Pakets werden übernommen, **ohne** vorhandene Einträge oder Zuordnungen zu überschreiben;
+  ihre Herkunft heißt „Rezeptpaket „…““ (in der Nährwerttabelle gesammelt entfernbar)
+- Nährwerte werden mit der eigenen Tabelle neu berechnet; danach folgt ggf. die Liste der Zutaten ohne Nährwerte.

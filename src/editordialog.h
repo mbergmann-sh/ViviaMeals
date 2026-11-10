@@ -41,6 +41,7 @@ private:
     void updateImage();
     void chooseImage();
     void assignFood(int row);
+    bool offerMissingFoods(bool ask);   // true = Nährwerttabelle geändert
     void collect();
     void showRecipe();     // m_recipe in die Eingabefelder übernehmen
     void fixUmlauts();
@@ -60,5 +61,7 @@ private:
     QTimer *m_timer;
     QSplitter *m_split;
     Recipe m_recipe;
+    bool m_isNew = false;
+    bool m_offered = false;
     QHash<QString, QString> m_manual;   // Zutatenname (klein) → manuell gewähltes Lebensmittel
 };

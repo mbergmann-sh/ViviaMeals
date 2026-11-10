@@ -30,22 +30,24 @@ QJsonObject Food::toJson() const
 {
     QJsonObject units;
     for (auto it = unitGrams.constBegin(); it != unitGrams.constEnd(); ++it) units[it.key()] = it.value();
-    return QJsonObject{ { QStringLiteral("key"), key },
-                        { QStringLiteral("name"), name },
-                        { QStringLiteral("category"), category },
-                        { QStringLiteral("kcal"), per100.kcal },
-                        { QStringLiteral("protein"), per100.protein },
-                        { QStringLiteral("fat"), per100.fat },
-                        { QStringLiteral("saturatedFat"), per100.satFat },
-                        { QStringLiteral("carbohydrates"), per100.carbs },
-                        { QStringLiteral("sugar"), per100.sugar },
-                        { QStringLiteral("fiber"), per100.fiber },
-                        { QStringLiteral("salt"), per100.salt },
-                        { QStringLiteral("density"), density },
-                        { QStringLiteral("piece"), piece },
-                        { QStringLiteral("units"), units },
-                        { QStringLiteral("aliases"), QJsonArray::fromStringList(aliases) },
-                        { QStringLiteral("source"), source } };
+    QJsonObject o{ { QStringLiteral("key"), key },
+                   { QStringLiteral("name"), name },
+                   { QStringLiteral("category"), category },
+                   { QStringLiteral("kcal"), per100.kcal },
+                   { QStringLiteral("protein"), per100.protein },
+                   { QStringLiteral("fat"), per100.fat },
+                   { QStringLiteral("saturatedFat"), per100.satFat },
+                   { QStringLiteral("carbohydrates"), per100.carbs },
+                   { QStringLiteral("sugar"), per100.sugar },
+                   { QStringLiteral("fiber"), per100.fiber },
+                   { QStringLiteral("salt"), per100.salt },
+                   { QStringLiteral("density"), density },
+                   { QStringLiteral("piece"), piece },
+                   { QStringLiteral("units"), units },
+                   { QStringLiteral("aliases"), QJsonArray::fromStringList(aliases) },
+                   { QStringLiteral("source"), source } };
+    if (!barcode.isEmpty()) o[QStringLiteral("barcode")] = barcode;
+    return o;
 }
 
 Food Food::fromJson(const QJsonObject &o)
@@ -53,6 +55,7 @@ Food Food::fromJson(const QJsonObject &o)
     Food f;
     f.key = o.value(QStringLiteral("key")).toString();
     f.name = o.value(QStringLiteral("name")).toString();
+    f.barcode = o.value(QStringLiteral("barcode")).toString();
     f.category = o.value(QStringLiteral("category")).toString(QStringLiteral("sonstiges"));
     f.per100 = Nutrients::fromJson(o);
     f.density = o.value(QStringLiteral("density")).toDouble(1.0);
@@ -157,7 +160,7 @@ void FoodTable::saveUser() const
     f.commit();
 }
 
-void FoodTable::saveUserFood(const Food &food)
+QString FoodTable::saveUserFood(const Food &food)
 {
     Food f = food;
     f.user = true;
@@ -172,6 +175,7 @@ void FoodTable::saveUserFood(const Food &food)
     m_foods.insert(f.key, f);
     rebuildAliases();
     saveUser();
+    return f.key;
 }
 
 void FoodTable::removeUserFood(const QString &key)
@@ -248,6 +252,14 @@ void FoodTable::learn(const QString &ingredientName, const QString &foodKey)
 QString FoodTable::learnedFor(const QString &ingredientName) const
 {
     return m_learned.value(normalize(ingredientName));
+}
+
+const Food *FoodTable::findBarcode(const QString &code) const
+{
+    if (code.isEmpty()) return nullptr;
+    for (const Food &f : m_userFoods)
+        if (f.barcode == code) return &m_foods.find(f.key).value();
+    return nullptr;
 }
 
 const Food *FoodTable::find(const QString &key) const
