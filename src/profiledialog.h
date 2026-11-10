@@ -1,4 +1,4 @@
-// VitaMeals – Personenprofil bearbeiten (Körperdaten, Ziel, Vorlieben)
+// ViviaMeals – Personenprofil bearbeiten (Körperdaten, Ziel, Vorlieben)
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 

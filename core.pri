@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------
-#  VitaMeals – Kern ohne Fenster (auch für Tests und eine spätere mobile App)
+#  ViviaMeals – Kern ohne Fenster (auch für Tests und eine spätere mobile App)
 # ---------------------------------------------------------------------------
 INCLUDEPATH += $$PWD/src
 
@@ -25,7 +25,9 @@ SOURCES += \
     $$PWD/src/coaching.cpp \
     $$PWD/src/diary.cpp \
     $$PWD/src/odtexport.cpp \
-    $$PWD/src/deepl.cpp
+    $$PWD/src/deepl.cpp \
+    $$PWD/src/ocr.cpp \
+    $$PWD/src/recipescan.cpp
 
 HEADERS += \
     $$PWD/src/qtcompat.h \
@@ -50,4 +52,6 @@ HEADERS += \
     $$PWD/src/coaching.h \
     $$PWD/src/diary.h \
     $$PWD/src/odtexport.h \
-    $$PWD/src/deepl.h
+    $$PWD/src/deepl.h \
+    $$PWD/src/ocr.h \
+    $$PWD/src/recipescan.h

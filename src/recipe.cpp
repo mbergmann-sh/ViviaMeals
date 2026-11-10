@@ -205,7 +205,7 @@ QJsonObject Recipe::toJson() const
 {
     QJsonArray ing;
     for (const Ingredient &i : ingredients) ing.append(i.toJson());
-    QJsonObject o{ { QStringLiteral("format"), QStringLiteral("VitaMeals-Recipe") },
+    QJsonObject o{ { QStringLiteral("format"), QStringLiteral("ViviaMeals-Recipe") },
                    { QStringLiteral("formatVersion"), 1 },
                    { QStringLiteral("id"), id },
                    { QStringLiteral("title"), title },
@@ -279,8 +279,10 @@ bool Recipe::load(const QString &file, Recipe *out, QString *error)
     }
     QJsonParseError pe;
     const QJsonDocument d = QJsonDocument::fromJson(f.readAll(), &pe);
-    if (!d.isObject() || d.object().value(QStringLiteral("format")).toString() != QLatin1String("VitaMeals-Recipe")) {
-        if (error) *error = pe.error != QJsonParseError::NoError ? pe.errorString() : QStringLiteral("kein VitaMeals-Rezept");
+    // „VitaMeals-Recipe“: Rezepte aus der Zeit vor der Umbenennung in ViviaMeals
+    const QString fmt = d.object().value(QStringLiteral("format")).toString();
+    if (!d.isObject() || (fmt != QLatin1String("ViviaMeals-Recipe") && fmt != QLatin1String("VitaMeals-Recipe"))) {
+        if (error) *error = pe.error != QJsonParseError::NoError ? pe.errorString() : QStringLiteral("kein ViviaMeals-Rezept");
         return false;
     }
     *out = fromJson(d.object());

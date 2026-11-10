@@ -1,10 +1,10 @@
-// VitaMeals – Personenprofile für die Assistenten Gewichtsverlust/-zunahme und den Gewichtsverlauf
+// ViviaMeals – Personenprofile für die Assistenten Gewichtsverlust/-zunahme und den Gewichtsverlauf
 //
 // Gespeichert in <AppData>/profile.json (nicht in der Rezeptdatenbank – die Rezepte können geteilt
 // werden, die Profile sind persönlich). Die Berechnungen sind allgemeine Richtwerte:
 //   Grundumsatz nach Mifflin-St Jeor, Gesamtbedarf = Grundumsatz × PAL (körperliche Aktivität),
 //   Energiedefizit bzw. -überschuss aus dem Wochenziel (≈ 7 000 kcal je kg Körpergewicht).
-// VitaMeals ist KEIN Medizinprodukt – die Werte ersetzen keine ärztliche oder Ernährungsberatung.
+// ViviaMeals ist KEIN Medizinprodukt – die Werte ersetzen keine ärztliche oder Ernährungsberatung.
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 

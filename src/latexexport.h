@@ -1,4 +1,4 @@
-// VitaMeals – Einzelnes Rezept als LaTeX-Datei (.tex) für die Klassen book und scrbook
+// ViviaMeals – Einzelnes Rezept als LaTeX-Datei (.tex) für die Klassen book und scrbook
 //
 // Wahlweise als vollständiges Dokument (direkt mit pdflatex/lualatex übersetzbar) oder als Kapitel
 // zum Einbinden mit \input{} in ein eigenes Kochbuch. Das Foto wird als JPEG neben die .tex-Datei

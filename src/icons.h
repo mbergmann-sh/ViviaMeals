@@ -1,4 +1,4 @@
-// VitaMeals – Symbole der Oberfläche
+// ViviaMeals – Symbole der Oberfläche
 //
 // Die Symbole liegen als einfarbige SVG-Strichzeichnungen in resources/icons/ui. Beim Laden
 // wird die Strichfarbe an das aktuelle Theme angepasst (hell/dunkel), die Akzentfarbe ist das

@@ -78,7 +78,7 @@ FoodTable::FoodTable() { load(); }
 QString FoodTable::userFile() const
 {
     QString dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    if (dir.isEmpty()) dir = QDir::homePath() + QStringLiteral("/.vitameals");
+    if (dir.isEmpty()) dir = QDir::homePath() + QStringLiteral("/.viviameals");
     QDir().mkpath(dir);
     return QDir(dir).filePath(QStringLiteral("lebensmittel_eigene.json"));
 }
@@ -150,7 +150,7 @@ void FoodTable::saveUser() const
     for (auto it = m_learned.constBegin(); it != m_learned.constEnd(); ++it) learned[it.key()] = it.value();
     QSaveFile f(userFile());
     if (!f.open(QIODevice::WriteOnly)) return;
-    f.write(QJsonDocument(QJsonObject{ { QStringLiteral("format"), QStringLiteral("VitaMeals-UserFoods") },
+    f.write(QJsonDocument(QJsonObject{ { QStringLiteral("format"), QStringLiteral("ViviaMeals-UserFoods") },
                                        { QStringLiteral("foods"), foods },
                                        { QStringLiteral("learned"), learned } })
                 .toJson());

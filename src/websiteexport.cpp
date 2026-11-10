@@ -41,7 +41,7 @@ bool writeText(const QString &path, const QString &text, QString *error)
     return true;
 }
 
-const char *kCss = R"CSS(/* VitaMeals – Website (erzeugt) */
+const char *kCss = R"CSS(/* ViviaMeals – Website (erzeugt) */
 :root { --blau:#1474BC; --orange:#E0620D; --gruen:#2e9e6b; --text:#222; --grau:#6b6b6b; --linie:#dde3ea; --hell:#f4f7fa; }
 * { box-sizing:border-box; }
 body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; color:var(--text); background:#fff; line-height:1.5; }
@@ -94,7 +94,7 @@ footer { border-top:1px solid var(--linie); color:var(--grau); font-size:.85rem;
 @media print { header.top form, nav.themes, footer { display:none; } .layout { display:block; } }
 )CSS";
 
-const char *kJs = R"JS(// VitaMeals – Sofortsuche ohne Server (erzeugt). Ohne JavaScript übernimmt suche.php.
+const char *kJs = R"JS(// ViviaMeals – Sofortsuche ohne Server (erzeugt). Ohne JavaScript übernimmt suche.php.
 (function () {
   var form = document.getElementById('vm-search'); if (!form) return;
   var input = form.querySelector('input[type=search]');
@@ -124,7 +124,7 @@ const char *kJs = R"JS(// VitaMeals – Sofortsuche ohne Server (erzeugt). Ohne 
 )JS";
 
 const char *kPhp = R"PHP(<?php
-// VitaMeals – Suche auf dem Server (erzeugt). Benötigt PHP 7.4 oder neuer.
+// ViviaMeals – Suche auf dem Server (erzeugt). Benötigt PHP 7.4 oder neuer.
 declare(strict_types=1);
 header('Content-Type: text/html; charset=utf-8');
 $q = trim((string)($_GET['q'] ?? ''));
@@ -170,7 +170,7 @@ QString shell(const Options &opt, const QString &root, const QString &title, con
     QString h;
     h += QStringLiteral("<!DOCTYPE html>\n<html lang=\"de\"><head><meta charset=\"utf-8\">"
                         "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
-                        "<meta name=\"generator\" content=\"VitaMeals\">");
+                        "<meta name=\"generator\" content=\"ViviaMeals\">");
     h += QStringLiteral("<title>%1</title><link rel=\"stylesheet\" href=\"%2assets/style.css\"></head><body>\n")
              .arg(esc(title == opt.title ? title : title + QStringLiteral(" – ") + opt.title), root);
     h += QStringLiteral("<header class=\"top\"><a class=\"brand\" href=\"%1index.html\"><img src=\"%1assets/logo.svg\" alt=\"\"><span>%2"
@@ -181,7 +181,7 @@ QString shell(const Options &opt, const QString &root, const QString &title, con
              .arg(root, tr("Rezept, Zutat oder Thema …"), tr("Suchen"));
     h += QStringLiteral("<div class=\"layout\">%1<main>%2</main></div>\n").arg(nav, body);
     h += QStringLiteral("<footer>%1</footer><script src=\"%2assets/suche.js\"></script></body></html>\n")
-             .arg(esc(tr("Erstellt mit VitaMeals am %1").arg(QDate::currentDate().toString(QStringLiteral("dd.MM.yyyy")))
+             .arg(esc(tr("Erstellt mit ViviaMeals am %1").arg(QDate::currentDate().toString(QStringLiteral("dd.MM.yyyy")))
                       + (opt.author.isEmpty() ? QString() : QStringLiteral(" · ") + opt.author)),
                   root);
     return h;
@@ -365,7 +365,7 @@ bool exportSite(const QString &folder, const Options &opt, QString *error, const
     const QJsonObject site{ { QStringLiteral("title"), opt.title },
                             { QStringLiteral("subtitle"), opt.subtitle },
                             { QStringLiteral("themes"), th },
-                            { QStringLiteral("footer"), tr("Erstellt mit VitaMeals") } };
+                            { QStringLiteral("footer"), tr("Erstellt mit ViviaMeals") } };
     if (!writeText(out.filePath(QStringLiteral("daten/rezepte.json")),
                    QString::fromUtf8(QJsonDocument(QJsonObject{ { QStringLiteral("site"), site }, { QStringLiteral("recipes"), rec } }).toJson()), error))
         return false;
@@ -373,11 +373,11 @@ bool exportSite(const QString &folder, const Options &opt, QString *error, const
     if (!writeText(out.filePath(QStringLiteral("assets/suche.js")), QString::fromUtf8(kJs), error)) return false;
     if (!writeText(out.filePath(QStringLiteral("assets/logo.svg")), QString::fromUtf8(kLogo), error)) return false;
     // Logo des Programms bevorzugen
-    QFile appLogo(QStringLiteral(":/icons/vitameals.svg"));
+    QFile appLogo(QStringLiteral(":/icons/viviameals.svg"));
     if (appLogo.open(QIODevice::ReadOnly)) writeText(out.filePath(QStringLiteral("assets/logo.svg")), QString::fromUtf8(appLogo.readAll()), error);
     if (!writeText(out.filePath(QStringLiteral("suche.php")), QString::fromUtf8(kPhp), error)) return false;
     writeText(out.filePath(QStringLiteral("LIESMICH.txt")),
-              tr("Diese Website wurde von VitaMeals erzeugt.\n\n"
+              tr("Diese Website wurde von ViviaMeals erzeugt.\n\n"
                  "Hochladen: den gesamten Ordnerinhalt per FTP/SFTP auf den Webserver kopieren.\n"
                  "Die Suche funktioniert im Browser sofort (JavaScript) und zusätzlich serverseitig über suche.php (PHP 7.4+).\n"
                  "Startseite: index.html\n"),

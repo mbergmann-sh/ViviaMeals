@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "editordialog.h"
+#include "scandialog.h"
+#include "screenfit.h"
 #include "fooddialog.h"
 #include "imagecropdialog.h"
 #include "mealtypes.h"
@@ -141,6 +143,7 @@ EditorDialog::EditorDialog(const Recipe &r, QWidget *parent) : QDialog(parent), 
 
     // ---- Zutaten | Zubereitung | Nährwerte
     auto *split = new QSplitter(Qt::Horizontal);
+    m_split = split;
     split->setObjectName(QStringLiteral("editorSplit"));
     auto *ingBox = new QGroupBox(tr("&Zutaten (eine je Zeile)"));
     auto *il = new QVBoxLayout(ingBox);
@@ -187,7 +190,10 @@ EditorDialog::EditorDialog(const Recipe &r, QWidget *parent) : QDialog(parent), 
     lay->addWidget(bb);
     connect(bb, &QDialogButtonBox::accepted, this, &EditorDialog::accept);
     connect(bb, &QDialogButtonBox::rejected, this, &QDialog::reject);
-    connect(this, &QDialog::finished, this, [split] { QSettings().setValue(QStringLiteral("editor/split"), split->saveState()); });
+    connect(this, &QDialog::finished, this, [split] {
+        // mit Scanvorlage (4 Spalten) eigener Zustand
+        QSettings().setValue(split->count() > 3 ? QStringLiteral("editor/splitScan") : QStringLiteral("editor/split"), split->saveState());
+    });
 
     m_timer = new QTimer(this);
     m_timer->setSingleShot(true);
@@ -214,6 +220,24 @@ EditorDialog::EditorDialog(const Recipe &r, QWidget *parent) : QDialog(parent), 
     updateImage();
     analyze();
     resize(1180, 760);
+}
+
+void EditorDialog::setReference(const QList<QImage> &pages)
+{
+    if (pages.isEmpty() || m_split->count() > 3) return;
+    auto *box = new QGroupBox(tr("Vorlage (Scan)"));
+    auto *bl = new QVBoxLayout(box);
+    bl->addWidget(new ScanReferencePanel(pages));
+    m_split->addWidget(box);
+    const QByteArray st = QSettings().value(QStringLiteral("editor/splitScan")).toByteArray();
+    if (st.isEmpty() || !m_split->restoreState(st)) {
+        const int w = qMax(1000, m_split->width());
+        m_split->setSizes({ w * 22 / 100, w * 30 / 100, w * 20 / 100, w * 28 / 100 });
+    }
+    setWindowTitle(tr("Gescanntes Rezept bearbeiten"));
+    setProperty("windowStateKey", QStringLiteral("EditorDialogScan"));   // eigene Fenstergröße
+    resize(qMax(width(), 1500), height());
+    ScreenFit::fit(this);
 }
 
 void EditorDialog::updateImage()
@@ -408,7 +432,7 @@ void EditorDialog::accept()
         m_title->setFocus();
         return;
     }
-    if (m_recipe.sourceFormat.isEmpty()) m_recipe.sourceFormat = QStringLiteral("VitaMeals");
+    if (m_recipe.sourceFormat.isEmpty()) m_recipe.sourceFormat = QStringLiteral("ViviaMeals");
     Nutrition::analyze(m_recipe);
     QDialog::accept();
 }

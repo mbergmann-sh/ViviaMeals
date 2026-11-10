@@ -56,7 +56,7 @@ QString toLatex(const Recipe &r, const Options &opt, const QString &imageFile)
     QString t;
     const bool scr = opt.docClass == DocClass::ScrBook;
     if (opt.standalone) {
-        t += QStringLiteral("%% Erzeugt von VitaMeals – Rezept „%1“\n").arg(r.title);
+        t += QStringLiteral("%% Erzeugt von ViviaMeals – Rezept „%1“\n").arg(r.title);
         t += scr ? QStringLiteral("\\documentclass[paper=a4,fontsize=11pt,parskip=half,headings=normal]{scrbook}\n")
                  : QStringLiteral("\\documentclass[a4paper,11pt]{book}\n");
         t += QStringLiteral("\\usepackage[utf8]{inputenc}\n\\usepackage[T1]{fontenc}\n\\usepackage{lmodern}\n\\usepackage{textcomp}\n"
@@ -67,7 +67,7 @@ QString toLatex(const Recipe &r, const Options &opt, const QString &imageFile)
         if (scr) t += QStringLiteral("\\addtokomafont{disposition}{\\color{vmblau}}\n");
         t += QStringLiteral("\\begin{document}\n\n");
     } else {
-        t += QStringLiteral("%% Erzeugt von VitaMeals – zum Einbinden mit \\input{} in ein Dokument der Klasse %1.\n"
+        t += QStringLiteral("%% Erzeugt von ViviaMeals – zum Einbinden mit \\input{} in ein Dokument der Klasse %1.\n"
                             "%% Benötigt: graphicx, booktabs, tabularx, xcolor (Farben vmblau, vmorange), textcomp.\n"
                             "%% \\definecolor{vmblau}{HTML}{1474BC} \\definecolor{vmorange}{HTML}{E0620D}\n\n")
                  .arg(scr ? QStringLiteral("scrbook") : QStringLiteral("book"));
@@ -132,7 +132,7 @@ QString toLatex(const Recipe &r, const Options &opt, const QString &imageFile)
         t += row(tr("Salz"), p.salt, a.salt, ri.salt, QStringLiteral("g"), 2);
         t += QStringLiteral("\\bottomrule\n\\end{tabular}\\par\n\\smallskip\n{\\footnotesize %1}\n}\n")
                  .arg(escape(tr("* RM = Referenzmenge für einen durchschnittlichen Erwachsenen (8 400 kJ / 2 000 kcal). "
-                                "Richtwerte, berechnet von VitaMeals – keine Analysewerte.")));
+                                "Richtwerte, berechnet von ViviaMeals – keine Analysewerte.")));
     }
     if (!r.source.isEmpty()) t += QStringLiteral("\n\\medskip{\\small\\color{gray}%1 %2}\n").arg(tr("Quelle:"), escape(r.source));
     if (opt.standalone) t += QStringLiteral("\n\\end{document}\n");

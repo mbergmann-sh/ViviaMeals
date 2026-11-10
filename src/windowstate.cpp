@@ -26,6 +26,9 @@ QString keyFor(const QWidget *w)
     const Qt::WindowType t = w->windowType();
     if (t != Qt::Window && t != Qt::Dialog && t != Qt::Sheet && t != Qt::Tool) return {};
     if (isQtOwnDialog(w)) return {};
+    // eigener Eintrag für Sonderformen eines Fensters (z. B. Editor mit Scanvorlage)
+    const QString custom = w->property("windowStateKey").toString();
+    if (!custom.isEmpty()) return QStringLiteral("windows/") + custom;
     const QString cls = QString::fromLatin1(w->metaObject()->className());
     if (cls == QLatin1String("QDialog") || cls == QLatin1String("QWidget")) {
         // schlichte Dialoge nur mit eigenem Namen (sonst teilten sich alle denselben Eintrag)

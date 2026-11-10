@@ -1,4 +1,4 @@
-// VitaMeals – Gewichtsverlauf als Grafik (eigene QPainter-Zeichnung wie in VitaBreathe, kein Qt Charts)
+// ViviaMeals – Gewichtsverlauf als Grafik (eigene QPainter-Zeichnung wie in ViviaBreathe, kein Qt Charts)
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 

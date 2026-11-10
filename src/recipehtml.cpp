@@ -121,7 +121,7 @@ QString nutritionTable(const Recipe &r, const Style &st, double servings)
     QString foot = tr("Berechnet aus %1 von %2 Zutaten mit Mengenangabe.").arg(n.matched).arg(n.countable);
     if (!n.unmatched.isEmpty())
         foot += QLatin1Char(' ') + tr("Ohne Nährwerte: %1.").arg(escape(n.unmatched.join(QStringLiteral(", "))));
-    foot += QStringLiteral("<br/>") + tr("Richtwerte aus der VitaMeals-Nährwerttabelle – Schätzwerte, keine Analysewerte. "
+    foot += QStringLiteral("<br/>") + tr("Richtwerte aus der ViviaMeals-Nährwerttabelle – Schätzwerte, keine Analysewerte. "
                                          "* RM = Referenzmenge für einen durchschnittlichen Erwachsenen (8 400 kJ / 2 000 kcal); "
                                          "Ballaststoffe: Richtwert 30 g.");
     h += QStringLiteral("<p %1>%2</p>").arg(mstyle, foot);

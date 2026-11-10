@@ -1,4 +1,4 @@
-// VitaMeals – Nährwerttabelle (eingebaut + eigene Einträge + gelernte Zuordnungen)
+// ViviaMeals – Nährwerttabelle (eingebaut + eigene Einträge + gelernte Zuordnungen)
 //
 // Eingebaut:  :/data/lebensmittel.json (erzeugt mit tools/make_foods.py, Richtwerte je 100 g)
 // Eigene:     <AppData>/lebensmittel_eigene.json – eigene Lebensmittel und abweichende Werte

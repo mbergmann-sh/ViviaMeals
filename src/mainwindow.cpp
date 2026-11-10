@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "mainwindow.h"
+#include "scandialog.h"
 #include "assistantdialog.h"
 #include "editordialog.h"
 #include "exportdialogs.h"
@@ -63,14 +64,14 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
-    setWindowTitle(QStringLiteral("VitaMeals"));
+    setWindowTitle(QStringLiteral("ViviaMeals"));
     setWindowIcon(Icons::app());
 
     auto *central = new QWidget;
     auto *lay = new QVBoxLayout(central);
     lay->setContentsMargins(6, 6, 6, 2);
 
-    // Kopfbereich (wie das Stammblatt in VitaParms bzw. der Kopf in VitaBreathe)
+    // Kopfbereich (wie das Stammblatt in ViviaParms bzw. der Kopf in ViviaBreathe)
     auto *head = new QFrame;
     head->setFrameShape(QFrame::StyledPanel);
     head->setFrameShadow(QFrame::Sunken);
@@ -196,7 +197,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     refreshHeader();
     updateActions();
     updateReminder();
-    m_view->showMessage(tr("Willkommen bei VitaMeals"), tr("Keine Rezeptdatenbank geöffnet."));
+    m_view->showMessage(tr("Willkommen bei ViviaMeals"), tr("Keine Rezeptdatenbank geöffnet."));
 }
 
 // ---------------------------------------------------------------- Menüs und Werkzeugleiste
@@ -238,11 +239,21 @@ void MainWindow::buildMenus()
                        [this] { importFormat(Importers::Format::MealMaster); });
     a->setObjectName(QStringLiteral("actImportMm"));
     m_needDb << a;
-    a = imp->addAction(Icons::get(QStringLiteral("import")), tr("Alte VitaMeals-&Liste (.vtm) importieren …"), this,
+    imp->addSeparator();
+    a = imp->addAction(Icons::get(QStringLiteral("scan")), tr("Rezept &scannen …"), this, [this] { scanRecipe(false); });
+    a->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_S));
+    a->setObjectName(QStringLiteral("actScan"));
+    a->setStatusTip(tr("Rezeptseite scannen, Text erkennen und als neues Rezept übernehmen"));
+    m_needDb << a;
+    a = imp->addAction(Icons::get(QStringLiteral("ocr")), tr("Rezept aus &Bild oder Foto erkennen …"), this, [this] { scanRecipe(true); });
+    a->setObjectName(QStringLiteral("actScanImage"));
+    m_needDb << a;
+    imp->addSeparator();
+    a = imp->addAction(Icons::get(QStringLiteral("import")), tr("Alte ViviaMeals-&Liste (.vtm) importieren …"), this,
                        [this] { importFormat(Importers::Format::Vtm); });
     m_needDb << a;
-    a = imp->addAction(Icons::get(QStringLiteral("recipe")), tr("VitaMeals-Rezept (.vmr) importieren …"), this, [this] {
-        const QStringList files = QFileDialog::getOpenFileNames(this, tr("VitaMeals-Rezepte importieren"), QString(), tr("VitaMeals-Rezepte (*.vmr)"));
+    a = imp->addAction(Icons::get(QStringLiteral("recipe")), tr("ViviaMeals-Rezept (.vmr) importieren …"), this, [this] {
+        const QStringList files = QFileDialog::getOpenFileNames(this, tr("ViviaMeals-Rezepte importieren"), QString(), tr("ViviaMeals-Rezepte (*.vmr)"));
         QString first;
         for (const QString &f : files) {
             Recipe r;
@@ -268,7 +279,7 @@ void MainWindow::buildMenus()
     a = exp->addAction(Icons::get(QStringLiteral("odt")), tr("Als Libre&Office-Writer-Datei (.odt) exportieren …"), this, &MainWindow::exportOdt);
     a->setObjectName(QStringLiteral("actOdt"));
     m_needRecipe << a;
-    a = exp->addAction(Icons::get(QStringLiteral("save")), tr("Als VitaMeals-Rezept (.&vmr) speichern …"), this, &MainWindow::exportVmr);
+    a = exp->addAction(Icons::get(QStringLiteral("save")), tr("Als ViviaMeals-Rezept (.&vmr) speichern …"), this, &MainWindow::exportVmr);
     m_needRecipe << a;
     file->addSeparator();
     a = file->addAction(Icons::get(QStringLiteral("delete")), tr("Datenbank &leeren …"), this, &MainWindow::clearDatabase);
@@ -340,7 +351,7 @@ void MainWindow::buildMenus()
     a->setShortcut(QKeySequence::Preferences);
 
     QMenu *help = menuBar()->addMenu(tr("&Hilfe"));
-    help->addAction(Icons::get(QStringLiteral("info")), tr("&Über VitaMeals …"), this, &MainWindow::about);
+    help->addAction(Icons::get(QStringLiteral("info")), tr("&Über ViviaMeals …"), this, &MainWindow::about);
     help->addAction(tr("Über &Qt …"), qApp, &QApplication::aboutQt);
     updateRecentMenu();
 }
@@ -365,6 +376,7 @@ void MainWindow::buildToolBar()
     tb->addSeparator();
     add("actImportRk", tr("RezKonv"), false);
     add("actImportMm", tr("MealMaster"), false);
+    add("actScan", tr("Scannen"), true);
     add("actWeb", tr("Website"), false);
     add("actTex", tr("LaTeX"), false);
     tb->addSeparator();
@@ -435,10 +447,10 @@ bool MainWindow::ensureDatabase()
     if (!last.isEmpty() && RecipeDb::isDatabaseFolder(last) && openDatabase(last, true)) return true;
     // keine Datenbank: zum Anlegen auffordern
     QMessageBox box(this);
-    box.setWindowTitle(tr("Willkommen bei VitaMeals"));
+    box.setWindowTitle(tr("Willkommen bei ViviaMeals"));
     box.setIconPixmap(Icons::app().pixmap(64, 64));
     box.setText(tr("<b>Es ist noch keine Rezeptdatenbank vorhanden.</b>"));
-    box.setInformativeText(tr("Eine VitaMeals-Rezeptdatenbank ist ein Ordner, in dem jedes Rezept als eigene .vmr-Datei liegt. "
+    box.setInformativeText(tr("Eine ViviaMeals-Rezeptdatenbank ist ein Ordner, in dem jedes Rezept als eigene .vmr-Datei liegt. "
                               "Bitte legen Sie eine neue Datenbank an oder öffnen Sie eine vorhandene."));
     QPushButton *create = box.addButton(tr("Neue Datenbank anlegen …"), QMessageBox::AcceptRole);
     QPushButton *samples = box.addButton(tr("Mit Beispielrezepten anlegen …"), QMessageBox::AcceptRole);
@@ -493,7 +505,7 @@ void MainWindow::openDatabaseDialog()
     const QString start = RecipeDb::instance().isOpen() ? QFileInfo(RecipeDb::instance().folder()).absolutePath()
                                                          : QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     const QString file = QFileDialog::getOpenFileName(this, tr("Rezeptdatenbank öffnen"), start,
-                                                      tr("VitaMeals-Datenbank (%1);;Alle Dateien (*)").arg(RecipeDb::markerName()));
+                                                      tr("ViviaMeals-Datenbank (%1);;Alle Dateien (*)").arg(RecipeDb::markerName()));
     if (!file.isEmpty()) openDatabase(file);
 }
 
@@ -504,10 +516,10 @@ void MainWindow::refreshHeader()
     updateReminder();
     const RecipeDb &db = RecipeDb::instance();
     if (!db.isOpen()) {
-        m_headName->setText(QStringLiteral("VitaMeals"));
+        m_headName->setText(QStringLiteral("ViviaMeals"));
         m_headInfo->setText(tr("Rezeptverwaltung mit Nährwertanalyse und Gewichtskontrolle – keine Datenbank geöffnet"));
         m_statusDb->clear();
-        setWindowTitle(QStringLiteral("VitaMeals"));
+        setWindowTitle(QStringLiteral("ViviaMeals"));
         return;
     }
     int withNut = 0, fav = 0, veg = 0;
@@ -523,7 +535,7 @@ void MainWindow::refreshHeader()
                             .arg(veg)
                             .arg(fav));
     m_statusDb->setText(tr("Datenbank: %1").arg(QDir::toNativeSeparators(db.folder())));
-    setWindowTitle(QStringLiteral("%1 – VitaMeals").arg(db.name()));
+    setWindowTitle(QStringLiteral("%1 – ViviaMeals").arg(db.name()));
 }
 
 void MainWindow::refreshTags()
@@ -716,14 +728,30 @@ void MainWindow::newRecipe()
     r.servings = 4;
     EditorDialog d(r, this);
     if (d.exec() != QDialog::Accepted) return;
-    Recipe nr = d.recipe();
+    saveNewRecipe(d.recipe(), tr("Neues Rezept"));
+}
+
+void MainWindow::saveNewRecipe(const Recipe &r, const QString &title)
+{
+    Recipe nr = r;
     QString err;
     if (!RecipeDb::instance().duplicatesOf(nr).isEmpty()
-        && QMessageBox::question(this, tr("Neues Rezept"), tr("Ein Rezept „%1“ gibt es bereits. Trotzdem speichern?").arg(nr.title)) != QMessageBox::Yes)
+        && QMessageBox::question(this, title, tr("Ein Rezept „%1“ gibt es bereits. Trotzdem speichern?").arg(nr.title)) != QMessageBox::Yes)
         return;
     m_pendingSelect = nr.id.isEmpty() ? QString() : nr.id;
     if (!RecipeDb::instance().save(nr, &err)) QMessageBox::warning(this, tr("Speichern"), err);
     else selectRecipe(nr.id);
+}
+
+void MainWindow::scanRecipe(bool fromFile)
+{
+    if (!RecipeDb::instance().isOpen()) return;
+    ScanDialog scan(fromFile ? ScanDialog::StartOpen : ScanDialog::StartScan, this);
+    if (scan.exec() != QDialog::Accepted) return;
+    EditorDialog d(scan.recipe(), this);
+    d.setReference(scan.pages());
+    if (d.exec() != QDialog::Accepted) return;
+    saveNewRecipe(d.recipe(), tr("Rezept scannen"));
 }
 
 void MainWindow::editRecipe()
@@ -842,7 +870,7 @@ void MainWindow::clearDatabase()
     }
     QString msg = tr("%1 Rezepte gelöscht.").arg(n);
     if (!folder.isEmpty()) msg += QLatin1Char('\n') + tr("Sicherung: %1 – zum Wiederherstellen die .vmr-Dateien über "
-                                                         "Datei → Import → VitaMeals-Rezept (.vmr) importieren.")
+                                                         "Datei → Import → ViviaMeals-Rezept (.vmr) importieren.")
                                                           .arg(QDir::toNativeSeparators(folder));
     QMessageBox::information(this, tr("Datenbank leeren"), msg);
     showCurrent();
@@ -896,7 +924,7 @@ void MainWindow::exportVmr()
     base.replace(QRegularExpression(QStringLiteral("[^\\p{L}\\p{N}]+")), QStringLiteral("_"));
     const QString f = QFileDialog::getSaveFileName(this, tr("Rezept speichern"),
                                                    QDir(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)).filePath(base + QStringLiteral(".vmr")),
-                                                   tr("VitaMeals-Rezept (*.vmr)"));
+                                                   tr("ViviaMeals-Rezept (*.vmr)"));
     if (f.isEmpty()) return;
     QString err;
     if (!r.save(f, &err)) QMessageBox::warning(this, tr("Speichern"), err);
@@ -1140,23 +1168,24 @@ void MainWindow::openSettings()
 void MainWindow::about()
 {
     QMessageBox box(this);
-    box.setWindowTitle(tr("Über VitaMeals"));
+    box.setWindowTitle(tr("Über ViviaMeals"));
     box.setIconPixmap(Icons::app().pixmap(72, 72));
-    box.setText(tr("<h2>VitaMeals %1</h2><p>Rezeptverwaltung mit Nährwertanalyse, Kühlschrank-Vorschlägen, Wochenplänen "
+    box.setText(tr("<h2>ViviaMeals %1</h2><p>Rezeptverwaltung mit Nährwertanalyse, Kühlschrank-Vorschlägen, Wochenplänen "
                    "und Assistenten für die Gewichtskontrolle.</p>")
                     .arg(QApplication::applicationVersion()));
-    box.setInformativeText(tr("<p><b>VitaMeals ist kein Medizinprodukt.</b> Nährwerte und Energiebedarf sind Schätzwerte "
+    box.setInformativeText(tr("<p><b>ViviaMeals ist kein Medizinprodukt.</b> Nährwerte und Energiebedarf sind Schätzwerte "
                               "und ersetzen keine ärztliche oder Ernährungsberatung.</p>"
                               "<p>Importiert RezKonv und MealMaster, exportiert Websites (HTML5/PHP), LaTeX (book, scrbook) "
-                              "und LibreOffice Writer (.odt).<br/>"
-                              "Optik und Bausteine aus VitaParms und VitaBreathe.</p>"
+                              "und LibreOffice Writer (.odt). Rezepte scannen mit Texterkennung.<br/>"
+                              "Optik und Bausteine aus ViviaParms und ViviaBreathe (bis 2026: „Vita“-Reihe).</p>"
                               "<p>© 2026 Michael Bergmann<br/>"
                               "Quelloffen unter der <b>PolyForm Noncommercial License 1.0.0</b>: kostenlos für jede "
                               "<b>nicht-kommerzielle</b> Nutzung – privat sowie durch gemeinnützige Organisationen, Schulen und "
                               "Behörden –, einschließlich Verändern und Weitergeben. <b>Kommerzielle Nutzung und Verkauf</b> nur mit "
                               "Erlaubnis des Autors.<br/>"
                               "<a href=\"https://polyformproject.org/licenses/noncommercial/1.0.0\">polyformproject.org/licenses/noncommercial/1.0.0</a>"
-                              "<br/>Verwendet Qt (LGPL-3.0).</p>"));
+                              "<br/>Verwendet Qt (LGPL-3.0); die Texterkennung nutzt das eigenständige Programm "
+                              "<a href=\"https://github.com/tesseract-ocr/tesseract\">Tesseract</a> (Apache-2.0).</p>"));
     box.setTextFormat(Qt::RichText);
     box.setTextInteractionFlags(Qt::TextBrowserInteraction);
     QFile lic(QStringLiteral(":/doc/LICENSE"));

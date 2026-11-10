@@ -1,4 +1,4 @@
-// VitaMeals – Rezept als LibreOffice-Writer-Dokument (.odt, OpenDocument Text 1.2)
+// ViviaMeals – Rezept als LibreOffice-Writer-Dokument (.odt, OpenDocument Text 1.2)
 //
 // Aufbau: Titel, darunter rechts das Rezeptbild (vom Text umflossen), Portionen und Energie,
 // Tags, Zutaten (Menge rechtsbündig an einem Tabulator), Zubereitung, Nährwerttabelle, Quelle.

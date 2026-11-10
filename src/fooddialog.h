@@ -1,4 +1,4 @@
-// VitaMeals – Nährwerttabelle anzeigen/bearbeiten und Lebensmittel für eine Zutat auswählen
+// ViviaMeals – Nährwerttabelle anzeigen/bearbeiten und Lebensmittel für eine Zutat auswählen
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 

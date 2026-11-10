@@ -161,7 +161,7 @@ Book::Book(const QString &profileId)
 QString Book::fileFor(const QString &profileId)
 {
     QString dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    if (dir.isEmpty()) dir = QDir::homePath() + QStringLiteral("/.vitameals");
+    if (dir.isEmpty()) dir = QDir::homePath() + QStringLiteral("/.viviameals");
     dir = QDir(dir).filePath(QStringLiteral("tagebuch"));
     QDir().mkpath(dir);
     return QDir(dir).filePath(profileId + QStringLiteral(".json"));
@@ -197,7 +197,7 @@ bool Book::save(QString *error) const
         if (error) *error = f.errorString();
         return false;
     }
-    f.write(QJsonDocument(QJsonObject{ { QStringLiteral("format"), QStringLiteral("VitaMeals-Tagebuch") },
+    f.write(QJsonDocument(QJsonObject{ { QStringLiteral("format"), QStringLiteral("ViviaMeals-Tagebuch") },
                                        { QStringLiteral("version"), 1 },
                                        { QStringLiteral("profile"), m_profile },
                                        { QStringLiteral("entries"), a } })

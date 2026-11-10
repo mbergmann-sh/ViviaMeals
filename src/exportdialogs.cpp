@@ -54,7 +54,7 @@ WebsiteExportDialog::WebsiteExportDialog(const QStringList &filteredIds, QWidget
     form->addRow(QString(), m_nutrition);
     auto *fl = new QHBoxLayout;
     m_folder = new QLineEdit(s.value(QStringLiteral("web/folder"),
-                                     QDir(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)).filePath(QStringLiteral("VitaMeals-Website")))
+                                     QDir(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)).filePath(QStringLiteral("ViviaMeals-Website")))
                                  .toString());
     auto *browse = new QPushButton(Icons::get(QStringLiteral("open")), QString());
     fl->addWidget(m_folder, 1);

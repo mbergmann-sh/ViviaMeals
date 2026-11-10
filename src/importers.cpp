@@ -298,7 +298,7 @@ QString formatName(Format f)
     switch (f) {
     case Format::RezKonv: return QStringLiteral("RezKonv");
     case Format::MealMaster: return QStringLiteral("MealMaster");
-    case Format::Vtm: return QStringLiteral("VitaMeals-Liste (.vtm)");
+    case Format::Vtm: return QStringLiteral("ViviaMeals-Liste (.vtm)");
     case Format::Unknown: break;
     }
     return QObject::tr("unbekannt");
@@ -521,7 +521,7 @@ Result parseVtm(const QByteArray &json, const Options &opt)
     Result res;
     const QJsonDocument doc = QJsonDocument::fromJson(json);
     if (!doc.isArray()) {
-        res.warnings << QObject::tr("Die Datei ist keine VitaMeals-Liste (.vtm).");
+        res.warnings << QObject::tr("Die Datei ist keine ViviaMeals-Liste (.vtm).");
         return res;
     }
     for (const auto &v : doc.array()) {
@@ -543,6 +543,21 @@ Result parseVtm(const QByteArray &json, const Options &opt)
         if (opt.autoTags) Nutrition::applyTagSuggestions(r);
         res.recipes << r;
     }
+    return res;
+}
+
+Result fromParts(const TextParts &parts, const QString &format, const Options &opt)
+{
+    Result res;
+    RawRecipe raw;
+    raw.title = parts.title;
+    raw.yield = parts.yield;
+    raw.categories = parts.categories;
+    raw.ingredientLines = parts.ingredientLines;
+    raw.directionLines = parts.directionLines;
+    raw.sourceLines = parts.sourceLines;
+    raw.format = format;
+    res.recipes << finish(raw, opt, format, &res);
     return res;
 }
 

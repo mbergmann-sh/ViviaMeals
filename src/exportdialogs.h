@@ -1,4 +1,4 @@
-// VitaMeals – Export-Dialoge: Website (ganze Sammlung) und LaTeX (einzelnes Rezept)
+// ViviaMeals – Export-Dialoge: Website (ganze Sammlung) und LaTeX (einzelnes Rezept)
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 

@@ -1,4 +1,4 @@
-// VitaMeals – Kühlschrank-Bestandsliste, Rezeptvorschläge und Einkaufslisten
+// ViviaMeals – Kühlschrank-Bestandsliste, Rezeptvorschläge und Einkaufslisten
 //
 // Bestand: Liste von Lebensmitteln („Eier“, „Milch“, „500 g Hackfleisch“), gespeichert in den
 // Einstellungen dieses Geräts. Vorschläge: Rezepte, deren Zutaten möglichst vollständig im Bestand

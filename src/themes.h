@@ -1,4 +1,4 @@
-// VitaMeals – Erscheinungsbild (Qt-Styles der Plattform + Dark Themes aus AmigaED 4.0)
+// ViviaMeals – Erscheinungsbild (Qt-Styles der Plattform + Dark Themes aus AmigaED 4.0)
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 

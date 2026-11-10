@@ -1,4 +1,4 @@
-// VitaMeals – Rezept als HTML (Anzeigefenster und Website-Export)
+// ViviaMeals – Rezept als HTML (Anzeigefenster und Website-Export)
 //
 // Aufbau: Kopf mit Titel, Portionen, kcal/kJ und Tags, rechts oben das Rezeptfoto; darunter
 // Zutaten (deutsche Mengenangaben), Zubereitung und die Nährwerttabelle (je Portion, gesamt,
@@ -17,8 +17,8 @@ namespace RecipeHtml {
 struct Style {
     QColor text = QColor(0x20, 0x20, 0x20);
     QColor muted = QColor(0x70, 0x70, 0x70);
-    QColor accent = QColor(0xE0, 0x62, 0x0D);    // Orange der Vita-Programme
-    QColor primary = QColor(0x14, 0x74, 0xBC);   // Blau der Vita-Programme
+    QColor accent = QColor(0xE0, 0x62, 0x0D);    // Orange der Vivia-Programme
+    QColor primary = QColor(0x14, 0x74, 0xBC);   // Blau der Vivia-Programme
     QColor border = QColor(0xd0, 0xd0, 0xd0);
     QColor headBg = QColor(0xf2, 0xf6, 0xfa);
     int imageWidth = 300;          // Breite des Fotos in px

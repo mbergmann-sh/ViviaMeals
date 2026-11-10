@@ -111,7 +111,7 @@ AssistantDialog::AssistantDialog(QWidget *parent) : QDialog(parent)
     lay->addWidget(tabs, 1);
 
     auto *bl = new QHBoxLayout;
-    auto *note = new QLabel(tr("<small>VitaMeals ist <b>kein Medizinprodukt</b>. Die Werte sind allgemeine Richtwerte und ersetzen "
+    auto *note = new QLabel(tr("<small>ViviaMeals ist <b>kein Medizinprodukt</b>. Die Werte sind allgemeine Richtwerte und ersetzen "
                                "keine ärztliche oder Ernährungsberatung.</small>"));
     note->setWordWrap(true);
     bl->addWidget(note, 1);

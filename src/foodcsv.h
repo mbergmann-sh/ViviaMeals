@@ -1,8 +1,8 @@
-// VitaMeals – Nährwerte aus CSV-Dateien importieren und eigene Nährwerte als CSV exportieren
+// ViviaMeals – Nährwerte aus CSV-Dateien importieren und eigene Nährwerte als CSV exportieren
 //
 // Unterstützt werden
 //  * flache Tabellen (eine Zeile je Lebensmittel, Werte je 100 g): eigene Tabellen aus Excel/
-//    LibreOffice, die VitaMeals-Vorlage, CSV-Exporte von Open Food Facts u. ä. Trennzeichen
+//    LibreOffice, die ViviaMeals-Vorlage, CSV-Exporte von Open Food Facts u. ä. Trennzeichen
 //    (; , Tab |), Zeichensatz (UTF-8, Windows-1252, CP850) und Dezimalkomma werden erkannt, die
 //    Spalten anhand der Überschriften zugeordnet (deutsch/englisch) und lassen sich ändern.
 //  * USDA FoodData Central: der entpackte CSV-Ordner (food.csv, nutrient.csv, food_nutrient.csv,

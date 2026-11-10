@@ -1,4 +1,4 @@
-// VitaMeals – Umlaute in deutschen Rezepttexten wiederherstellen (ae → ä, oe → ö, ue → ü, ss → ß)
+// ViviaMeals – Umlaute in deutschen Rezepttexten wiederherstellen (ae → ä, oe → ö, ue → ü, ss → ß)
 //
 // Viele ältere RezKonv- und MealMaster-Sammlungen sind in reinem ASCII erfasst („Kaese“,
 // „Gemuesebruehe“, „heiss“). Die Korrektur arbeitet wortweise mit Regeln und Ausnahmen:

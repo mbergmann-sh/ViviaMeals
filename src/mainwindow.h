@@ -1,4 +1,4 @@
-// VitaMeals – Hauptfenster (Rezeptfenster)
+// ViviaMeals – Hauptfenster (Rezeptfenster)
 //
 // Links die Liste der Rezepte der geöffneten Datenbank (mit Schnellfilter und Themenauswahl),
 // rechts die HTML-Ansicht des gewählten Rezepts. Beim Start wird die zuletzt geöffnete Datenbank
@@ -31,7 +31,7 @@ public:
     bool openDatabase(const QString &path, bool quiet = false);
     void selectRecipe(const QString &id);
     // Dateien aus der Kommandozeile bzw. per Doppelklick (Dateizuordnung des Installers):
-    // vitameals.vmdb/Ordner → Datenbank öffnen, .vmr → Rezept übernehmen, .rk/.mmf/.vtm → Import
+    // viviameals.vmdb/Ordner → Datenbank öffnen, .vmr → Rezept übernehmen, .rk/.mmf/.vtm → Import
     void openFiles(const QStringList &files);
     QStringList visibleIds() const;
     RecipeView *view() const { return m_view; }
@@ -41,6 +41,8 @@ public slots:
     void newDatabase();
     void openDatabaseDialog();
     void newRecipe();
+    void scanRecipe(bool fromFile);   // Rezept scannen bzw. aus Bild/Foto erkennen
+    void saveNewRecipe(const Recipe &r, const QString &title);
     void editRecipe();
     void deleteRecipe();
     void search();

@@ -1,18 +1,18 @@
 # ---------------------------------------------------------------------------
-#  VitaMeals – Windows: DLLs bereitstellen und Qt-Installer-Framework-Installer bauen
-#  (Aufbau wie in VitaParms und VitaBreathe)
+#  ViviaMeals – Windows: DLLs bereitstellen und Qt-Installer-Framework-Installer bauen
+#  (Aufbau wie in ViviaParms und ViviaBreathe)
 #
 #  Nach jedem erfolgreichen Windows-Build (Qt Creator oder Konsole, MinGW oder MSVC):
 #    1. windeployqt kopiert die nötigen Qt-DLLs, Plugins und die deutschen Qt-Übersetzungen
-#       neben VitaMeals.exe – das Programm startet direkt aus dem Build-Ordner.
+#       neben ViviaMeals.exe – das Programm startet direkt aus dem Build-Ordner.
 #  Zusätzlich beim Release-Build (installer/make_installer.cmd; von Hand: mingw32-make installer):
-#    2. Bereitstellungsordner <Build>/installer-staging: NUR VitaMeals.exe, die von windeployqt
+#    2. Bereitstellungsordner <Build>/installer-staging: NUR ViviaMeals.exe, die von windeployqt
 #       ermittelten DLLs/Plugins, translations\qt_de.qm, LICENSE.txt, README.md –
 #       keine Quelltexte, Objekt- oder Debugdateien (werden zur Sicherheit zusätzlich gelöscht)
-#    3. Paketbaum <Build>/installer-packages/de.mbergmann.vitameals (meta + data)
-#    4. installer/Output/VitaMeals-<Version>-Setup.exe     (Zielordner-Vorgabe C:\VitaMeals),
-#       installer/Output/VitaMeals-<Version>-Inhalt.txt (Liste aller eingepackten Dateien) und
-#       installer/Output/VitaMeals-<Version>-Protokoll.txt (Ablauf, Fehlermeldungen)
+#    3. Paketbaum <Build>/installer-packages/de.mbergmann.viviameals (meta + data)
+#    4. installer/Output/ViviaMeals-<Version>-Setup.exe     (Zielordner-Vorgabe C:\ViviaMeals),
+#       installer/Output/ViviaMeals-<Version>-Inhalt.txt (Liste aller eingepackten Dateien) und
+#       installer/Output/ViviaMeals-<Version>-Protokoll.txt (Ablauf, Fehlermeldungen)
 #
 #  binarycreator.exe wird gesucht über
 #    VM_BINARYCREATOR (Umgebungsvariable, Pfad zu binarycreator.exe), QTIFWDIR,
@@ -77,18 +77,18 @@ debug_and_release:!build_pass {
     installer.commands = $$VM_MAKE_INSTALLER
     installer.depends = $(DESTDIR_TARGET)
 } else {
-    installer.commands = @echo VitaMeals: Der Installer wird aus dem Release-Build erstellt - bitte Release waehlen.
+    installer.commands = @echo ViviaMeals: Der Installer wird aus dem Release-Build erstellt - bitte Release waehlen.
 }
 QMAKE_EXTRA_TARGETS += installer
 
 CONFIG(release, debug|release) {
     vm_no_installer {
-        QMAKE_POST_LINK += $${VM_NL}@echo VitaMeals: Installer abgeschaltet (CONFIG+=vm_no_installer) - von Hand: mingw32-make installer
+        QMAKE_POST_LINK += $${VM_NL}@echo ViviaMeals: Installer abgeschaltet (CONFIG+=vm_no_installer) - von Hand: mingw32-make installer
     } else {
-        isEmpty(VM_BINARYCREATOR): message("VitaMeals: binarycreator.exe beim qmake-Lauf nicht gefunden – make_installer.cmd sucht beim Build erneut (siehe installer/README.md)")
-        else: message("VitaMeals: Qt Installer Framework gefunden – $$VM_BINARYCREATOR")
+        isEmpty(VM_BINARYCREATOR): message("ViviaMeals: binarycreator.exe beim qmake-Lauf nicht gefunden – make_installer.cmd sucht beim Build erneut (siehe installer/README.md)")
+        else: message("ViviaMeals: Qt Installer Framework gefunden – $$VM_BINARYCREATOR")
         QMAKE_POST_LINK += $${VM_NL}$$VM_MAKE_INSTALLER
     }
 } else {
-    QMAKE_POST_LINK += $${VM_NL}@echo VitaMeals: Debug-Build - der Installer wird nur beim Release-Build erstellt.
+    QMAKE_POST_LINK += $${VM_NL}@echo ViviaMeals: Debug-Build - der Installer wird nur beim Release-Build erstellt.
 }

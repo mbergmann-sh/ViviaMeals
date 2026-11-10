@@ -2,28 +2,28 @@
 <!-- ERZEUGT von qmake aus config.xml.in – Änderungen bitte dort vornehmen -->
 <!-- Installationssprache Deutsch (fest, unabhängig von der Windows-Sprache) -->
 <Installer>
-    <Name>VitaMeals</Name>
-    <Version>0.5.0</Version>
-    <Title>VitaMeals 0.5.0</Title>
+    <Name>ViviaMeals</Name>
+    <Version>0.6.0</Version>
+    <Title>ViviaMeals 0.6.0</Title>
     <Publisher>Michael Bergmann</Publisher>
     <ProductUrl>https://github.com/mbergmann-sh</ProductUrl>
-    <StartMenuDir>VitaMeals</StartMenuDir>
-    <TargetDir>C:/VitaMeals</TargetDir>
-    <AdminTargetDir>C:/VitaMeals</AdminTargetDir>
+    <StartMenuDir>ViviaMeals</StartMenuDir>
+    <TargetDir>C:/ViviaMeals</TargetDir>
+    <AdminTargetDir>C:/ViviaMeals</AdminTargetDir>
     <AllowSpaceInPath>true</AllowSpaceInPath>
     <AllowNonAsciiCharacters>true</AllowNonAsciiCharacters>
     <RemoveTargetDir>true</RemoveTargetDir>
-    <MaintenanceToolName>VitaMeals-Wartung</MaintenanceToolName>
-    <InstallerApplicationIcon>vitameals</InstallerApplicationIcon>
-    <InstallerWindowIcon>vitameals.png</InstallerWindowIcon>
+    <MaintenanceToolName>ViviaMeals-Wartung</MaintenanceToolName>
+    <InstallerApplicationIcon>viviameals</InstallerApplicationIcon>
+    <InstallerWindowIcon>viviameals.png</InstallerWindowIcon>
     <Logo>logo.png</Logo>
     <Banner>banner.png</Banner>
     <Watermark>watermark.png</Watermark>
     <WizardStyle>Modern</WizardStyle>
     <WizardDefaultWidth>720</WizardDefaultWidth>
     <WizardDefaultHeight>520</WizardDefaultHeight>
-    <RunProgram>@TargetDir@/VitaMeals.exe</RunProgram>
-    <RunProgramDescription>VitaMeals starten</RunProgramDescription>
+    <RunProgram>@TargetDir@/ViviaMeals.exe</RunProgram>
+    <RunProgramDescription>ViviaMeals starten</RunProgramDescription>
     <Translations>
         <Translation>ifw_de</Translation>
         <Translation>qt_de</Translation>

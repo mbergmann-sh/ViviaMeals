@@ -1,0 +1,21 @@
+Tesseract OCR
+=============
+
+ViviaMeals liefert in diesem Ordner das Texterkennungsprogramm Tesseract mit
+(nur genutzt fuer "Datei -> Import -> Rezept scannen").
+
+Tesseract ist ein eigenstaendiges, freies Programm und NICHT Teil von ViviaMeals.
+Es steht unter der Apache License 2.0:
+
+    https://github.com/tesseract-ocr/tesseract
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Die Sprachdaten (tessdata/*.traineddata) stammen aus
+https://github.com/tesseract-ocr/tessdata_fast bzw. tessdata (Apache License 2.0).
+
+Die Windows-Programmdateien stammen aus dem Installer der Universitaetsbibliothek
+Mannheim (https://github.com/UB-Mannheim/tesseract/wiki) und enthalten weitere
+freie Bibliotheken (u. a. Leptonica, libpng, libjpeg, libtiff, zlib, giflib,
+libwebp, libarchive) mit eigenen, freien Lizenzen; Einzelheiten dort.
+
+ViviaMeals selbst steht unter der PolyForm Noncommercial License 1.0.0 (siehe LICENSE.txt).

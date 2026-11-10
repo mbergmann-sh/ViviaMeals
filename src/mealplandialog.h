@@ -1,4 +1,4 @@
-// VitaMeals – Wochenmenü-Plan anzeigen, anpassen, drucken und Einkaufsliste erstellen
+// ViviaMeals – Wochenmenü-Plan anzeigen, anpassen, drucken und Einkaufsliste erstellen
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 

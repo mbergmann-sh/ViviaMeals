@@ -1,4 +1,4 @@
-// VitaMeals – Küchenmaßeinheiten (deutsch, englisch/US, MealMaster-Kürzel, RezKonv-Kürzel)
+// ViviaMeals – Küchenmaßeinheiten (deutsch, englisch/US, MealMaster-Kürzel, RezKonv-Kürzel)
 //
 // Alle Einheiten werden auf eine deutsche Küchenmaßeinheit abgebildet. Englische Maße werden beim
 // Import umgerechnet: Cups → ml bzw. g (über die Dichte der Zutat), Unzen/Pfund → g, Flüssigunzen,

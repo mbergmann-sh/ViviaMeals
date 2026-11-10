@@ -1,4 +1,4 @@
-// VitaMeals – Import von RezKonv-, MealMaster- und alten VitaMeals-Listen (.vtm)
+// ViviaMeals – Import von RezKonv-, MealMaster- und alten ViviaMeals-Listen (.vtm)
 //
 // Beide Textformate können beliebig viele Rezepte in einer Datei enthalten (Rezeptsammlungen).
 // Zutaten werden zerlegt (Menge, Einheit, Name, Zusatz), englische Maße in deutsche umgerechnet,
@@ -45,5 +45,18 @@ Result parseMealMaster(const QString &text, const Options &opt = {});
 Result parseVtm(const QByteArray &json, const Options &opt = {});
 // Datei lesen, Format erkennen (oder erzwingen) und zerlegen
 Result importFile(const QString &path, Format format, const Options &opt = {});
+
+// Rezept aus bereits getrennten Textteilen (z. B. Texterkennung eines gescannten Rezepts).
+// Durchläuft dieselbe Nachbearbeitung wie die Dateiimporte: Spracherkennung, Umlaut-Korrektur,
+// Übersetzung, Zutatenzerlegung, Nährwerte und Tags.
+struct TextParts {
+    QString title;
+    QString yield;               // z. B. „4 Portionen“, „für 6 Personen“
+    QStringList categories;
+    QStringList ingredientLines; // eine Zutat je Zeile, „== Abschnitt ==“ für Überschriften
+    QStringList directionLines;
+    QStringList sourceLines;
+};
+Result fromParts(const TextParts &parts, const QString &format, const Options &opt = {});
 
 } // namespace Importers

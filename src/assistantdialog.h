@@ -1,4 +1,4 @@
-// VitaMeals – Assistent für Gewichtsverlust und Gewichtszunahme
+// ViviaMeals – Assistent für Gewichtsverlust und Gewichtszunahme
 //
 // Personen wählen/anlegen, Kennzahlen (BMI, Grund- und Gesamtumsatz, Zielzufuhr, voraussichtliche
 // Dauer bis zum Zielgewicht), Gewichtsverlauf mit Grafik und Start des Wochenplans.

@@ -1,4 +1,4 @@
-// VitaMeals – Rezeptanzeige (HTML-Ansicht rechts im Hauptfenster)
+// ViviaMeals – Rezeptanzeige (HTML-Ansicht rechts im Hauptfenster)
 //
 // Zeigt das gewählte Rezept als HTML: rechts oben das Foto, daneben Titel, Portionen, kcal/kJ,
 // Zutatenliste, Zubereitung und Nährwerttabelle. Über der Ansicht kann die Portionenzahl

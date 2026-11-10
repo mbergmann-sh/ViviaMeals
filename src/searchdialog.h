@@ -1,4 +1,4 @@
-// VitaMeals – Suchdialog: Rezeptnamen (auch Teilnamen), Zutaten und Tags
+// ViviaMeals – Suchdialog: Rezeptnamen (auch Teilnamen), Zutaten und Tags
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 

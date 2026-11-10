@@ -135,7 +135,7 @@ of your licenses.
 -------------------------------------------------------------------------------
 Third-party components
 
-VitaMeals uses the Qt framework (https://www.qt.io), which is licensed under the
+ViviaMeals uses the Qt framework (https://www.qt.io), which is licensed under the
 GNU Lesser General Public License v3 (LGPL-3.0). Qt is linked dynamically; the
 Qt libraries shipped with the Windows installer (Qt*.dll, plugins) remain under
 the LGPL-3.0 and are not covered by the PolyForm Noncommercial License above.

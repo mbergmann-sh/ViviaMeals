@@ -219,7 +219,7 @@ Profiles::Profiles() { reload(); }
 QString Profiles::file() const
 {
     QString dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    if (dir.isEmpty()) dir = QDir::homePath() + QStringLiteral("/.vitameals");
+    if (dir.isEmpty()) dir = QDir::homePath() + QStringLiteral("/.viviameals");
     QDir().mkpath(dir);
     return QDir(dir).filePath(QStringLiteral("profile.json"));
 }
@@ -239,7 +239,7 @@ void Profiles::save()
     for (const Profile &p : m_list) a.append(p.toJson());
     QSaveFile f(file());
     if (!f.open(QIODevice::WriteOnly)) return;
-    f.write(QJsonDocument(QJsonObject{ { QStringLiteral("format"), QStringLiteral("VitaMeals-Profiles") },
+    f.write(QJsonDocument(QJsonObject{ { QStringLiteral("format"), QStringLiteral("ViviaMeals-Profiles") },
                                        { QStringLiteral("profiles"), a } })
                 .toJson());
     f.commit();

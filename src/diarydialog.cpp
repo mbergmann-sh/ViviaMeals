@@ -295,7 +295,7 @@ void DiaryEntryDialog::accept()
     if (m_saveToDb && m_saveToDb->isChecked() && m_entry.own) {
         Recipe r = m_entry.recipe();
         if (r.id.isEmpty() || RecipeDb::instance().summary(r.id)) r.id = Recipe::newId();
-        if (r.sourceFormat.isEmpty()) r.sourceFormat = QStringLiteral("VitaMeals");
+        if (r.sourceFormat.isEmpty()) r.sourceFormat = QStringLiteral("ViviaMeals");
         if (r.source.isEmpty()) r.source = tr("Ernährungstagebuch");
         MealTypes::applyTags(r);
         MealTypes::applyNutrientTags(r);
@@ -387,7 +387,7 @@ DiaryDialog::DiaryDialog(QWidget *parent) : QDialog(parent)
     m_week->setTextFormat(Qt::RichText);
     lay->addWidget(m_week);
     auto *foot = new QHBoxLayout;
-    auto *disc = new QLabel(tr("<small>Die Nährwerte sind aus den Zutaten berechnete Schätzwerte. VitaMeals ist <b>kein Medizinprodukt</b>.</small>"));
+    auto *disc = new QLabel(tr("<small>Die Nährwerte sind aus den Zutaten berechnete Schätzwerte. ViviaMeals ist <b>kein Medizinprodukt</b>.</small>"));
     disc->setWordWrap(true);
     foot->addWidget(disc, 1);
     auto *close = new QPushButton(Icons::get(QStringLiteral("quit")), tr("Schließen"));

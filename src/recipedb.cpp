@@ -106,7 +106,7 @@ RecipeDb &RecipeDb::instance()
 
 bool RecipeDb::isDatabaseFolder(const QString &folder)
 {
-    return QFileInfo::exists(QDir(folder).filePath(markerName()));
+    return QFileInfo::exists(QDir(folder).filePath(markerName())) || QFileInfo::exists(QDir(folder).filePath(legacyMarkerName()));
 }
 
 bool RecipeDb::create(const QString &folder, const QString &name, QString *error)
@@ -123,7 +123,7 @@ bool RecipeDb::create(const QString &folder, const QString &name, QString *error
         if (error) *error = f.errorString();
         return false;
     }
-    const QJsonObject o{ { QStringLiteral("format"), QStringLiteral("VitaMeals-Database") },
+    const QJsonObject o{ { QStringLiteral("format"), QStringLiteral("ViviaMeals-Database") },
                          { QStringLiteral("formatVersion"), 1 },
                          { QStringLiteral("name"), name },
                          { QStringLiteral("created"), QDateTime::currentDateTime().toString(Qt::ISODate) } };
@@ -141,13 +141,18 @@ bool RecipeDb::open(const QString &path, QString *error)
     QFileInfo fi(path);
     if (fi.isFile()) folder = fi.absolutePath();
     folder = QDir(folder).absolutePath();
+    // Datenbank aus der Zeit vor der Umbenennung (VitaMeals): Kennungsdatei übernehmen
+    if (!QFileInfo::exists(QDir(folder).filePath(markerName())) && QFileInfo::exists(QDir(folder).filePath(legacyMarkerName())))
+        if (!QFile::copy(QDir(folder).filePath(legacyMarkerName()), QDir(folder).filePath(markerName())))
+            QFile::rename(QDir(folder).filePath(legacyMarkerName()), QDir(folder).filePath(markerName()));
     QFile f(QDir(folder).filePath(markerName()));
     if (!f.open(QIODevice::ReadOnly)) {
-        if (error) *error = tr("%1 ist keine VitaMeals-Rezeptdatenbank.").arg(QDir::toNativeSeparators(folder));
+        if (error) *error = tr("%1 ist keine ViviaMeals-Rezeptdatenbank.").arg(QDir::toNativeSeparators(folder));
         return false;
     }
     const QJsonObject o = QJsonDocument::fromJson(f.readAll()).object();
-    if (o.value(QStringLiteral("format")).toString() != QLatin1String("VitaMeals-Database")) {
+    const QString fmt = o.value(QStringLiteral("format")).toString();
+    if (fmt != QLatin1String("ViviaMeals-Database") && fmt != QLatin1String("VitaMeals-Database")) {   // auch vor der Umbenennung angelegte
         if (error) *error = tr("Die Kennungsdatei der Datenbank ist beschädigt.");
         return false;
     }

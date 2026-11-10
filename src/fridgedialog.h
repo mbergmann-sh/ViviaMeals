@@ -1,4 +1,4 @@
-// VitaMeals – Kühlschrank: Bestandsliste pflegen, passende Rezepte vorschlagen, Einkaufsliste
+// ViviaMeals – Kühlschrank: Bestandsliste pflegen, passende Rezepte vorschlagen, Einkaufsliste
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 

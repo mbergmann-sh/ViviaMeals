@@ -1,4 +1,4 @@
-// VitaMeals – Fenster an kleine Bildschirme anpassen (siehe screenfit.h)
+// ViviaMeals – Fenster an kleine Bildschirme anpassen (siehe screenfit.h)
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "screenfit.h"
 

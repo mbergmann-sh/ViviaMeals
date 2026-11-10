@@ -1,4 +1,4 @@
-// VitaMeals – Positionen und Größen der Fenster merken und wiederherstellen
+// ViviaMeals – Positionen und Größen der Fenster merken und wiederherstellen
 //
 // App-weiter Ereignisfilter: Beim ersten Anzeigen eines Dialogs wird seine zuletzt gespeicherte
 // Geometrie (Position, Größe, ggf. maximiert) wiederhergestellt, beim Schließen bzw. Ausblenden

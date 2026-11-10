@@ -1,7 +1,7 @@
-VitaMeals – Lizenz und Haftungshinweis
+ViviaMeals – Lizenz und Haftungshinweis
 ======================================
 
-WICHTIG: VitaMeals ist eine persönliche Rezept- und Ernährungsverwaltung und
+WICHTIG: ViviaMeals ist eine persönliche Rezept- und Ernährungsverwaltung und
 KEIN Medizinprodukt. Nährwerte, Energiebedarf, Gewichtsziele und Wochenpläne
 sind Schätzwerte für die persönliche Planung. Sie ersetzen keine ärztliche
 oder Ernährungsberatung. Die Verwendung erfolgt auf eigene Gefahr. Bei
@@ -14,7 +14,7 @@ Gewichtsverlauf, eigene Nährwerte und Einstellungen liegen im Benutzerprofil.
 Bei der Deinstallation bleiben alle diese Daten erhalten.
 
 Lizenz in Kürze (maßgeblich ist der englische Lizenztext unten):
-VitaMeals steht unter der „PolyForm Noncommercial License 1.0.0“. Der
+ViviaMeals steht unter der „PolyForm Noncommercial License 1.0.0“. Der
 Quelltext ist offen. Erlaubt ist – kostenlos – jede NICHT-kommerzielle
 Nutzung: privat (Hobby, Studium, Forschung ohne kommerzielle Absicht) sowie
 durch gemeinnützige Organisationen, Schulen, Hochschulen und Behörden. Das
@@ -161,7 +161,7 @@ of your licenses.
 -------------------------------------------------------------------------------
 Third-party components
 
-VitaMeals uses the Qt framework (https://www.qt.io), which is licensed under the
+ViviaMeals uses the Qt framework (https://www.qt.io), which is licensed under the
 GNU Lesser General Public License v3 (LGPL-3.0). Qt is linked dynamically; the
 Qt libraries shipped with the Windows installer (Qt*.dll, plugins) remain under
 the LGPL-3.0 and are not covered by the PolyForm Noncommercial License above.

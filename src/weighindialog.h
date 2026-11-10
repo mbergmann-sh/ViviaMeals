@@ -1,4 +1,4 @@
-// VitaMeals – Gewicht schnell eintragen (Planen → Gewichtskontrolle)
+// ViviaMeals – Gewicht schnell eintragen (Planen → Gewichtskontrolle)
 //
 // Datum und Person wählen, Gewicht eingeben, „Eintragen“: das Gewicht kommt in den Gewichtsverlauf der
 // Person (ein Eintrag desselben Tages wird ersetzt). Zeigt den letzten Eintrag, die Veränderung und den

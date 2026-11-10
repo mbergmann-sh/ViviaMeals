@@ -1,4 +1,4 @@
-// VitaMeals – Offline-Glossar Englisch → Deutsch für importierte Rezepte
+// ViviaMeals – Offline-Glossar Englisch → Deutsch für importierte Rezepte
 //
 // Übersetzt Zutatennamen, Zusätze („chopped“ → „gehackt“) und Kategorien phrasenweise (längste
 // bekannte Wortfolge zuerst). Unbekannte Wörter bleiben unverändert. Ganze Anleitungstexte

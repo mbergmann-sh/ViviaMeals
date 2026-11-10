@@ -1,4 +1,4 @@
-// VitaMeals – Zeichensatz von Rezeptdateien erkennen
+// ViviaMeals – Zeichensatz von Rezeptdateien erkennen
 //
 // RezKonv- und MealMaster-Dateien stammen oft aus DOS- (CP437/CP850) oder Windows-Zeiten
 // (CP1252/ISO-8859-1), neuere sind UTF-8. Erkannt wird: UTF-8 (auch mit BOM), sonst anhand der

@@ -1,4 +1,4 @@
-// VitaMeals – Rezepteditor
+// ViviaMeals – Rezepteditor
 //
 // Eingabefelder für Titel, Rezeptbild (mit Dateiauswahl), Portionen, Tags, Zutatenliste (eine
 // Zutat je Zeile, „== Überschrift ==“ für Abschnitte) und Zubereitung. Aus der Zutatenliste und
@@ -10,6 +10,8 @@
 #include "recipe.h"
 
 #include <QDialog>
+#include <QImage>
+#include <QList>
 
 class QCheckBox;
 class QComboBox;
@@ -18,6 +20,7 @@ class QLabel;
 class QLineEdit;
 class QPlainTextEdit;
 class QSpinBox;
+class QSplitter;
 class QTableWidget;
 class QTimer;
 
@@ -27,6 +30,8 @@ class EditorDialog : public QDialog
 public:
     EditorDialog(const Recipe &r, QWidget *parent = nullptr);
     Recipe recipe() const { return m_recipe; }
+    // gescannte Vorlage rechts neben dem Editor anzeigen (Rezept scannen)
+    void setReference(const QList<QImage> &pages);
 
 protected:
     void accept() override;
@@ -53,6 +58,7 @@ private:
     QTableWidget *m_table;
     QLabel *m_summary;
     QTimer *m_timer;
+    QSplitter *m_split;
     Recipe m_recipe;
     QHash<QString, QString> m_manual;   // Zutatenname (klein) → manuell gewähltes Lebensmittel
 };

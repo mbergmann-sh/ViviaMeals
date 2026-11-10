@@ -1,4 +1,4 @@
-// VitaMeals – Wochenmenü-Plan nach Kalorienziel und Vorlieben
+// ViviaMeals – Wochenmenü-Plan nach Kalorienziel und Vorlieben
 //
 // Für jeden Tag und jede Mahlzeit (Frühstück, Mittagessen, Abendessen, optional Zwischenmahlzeit)
 // wird ein passendes Rezept gewählt und die Portionsgröße so bemessen, dass die Tagessumme dem

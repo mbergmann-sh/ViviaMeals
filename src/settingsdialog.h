@@ -1,4 +1,4 @@
-// VitaMeals – Einstellungen: Darstellung (Theme, Schriftgröße), Import, Übersetzung (DeepL), Start
+// ViviaMeals – Einstellungen: Darstellung (Theme, Schriftgröße), Import, Übersetzung (DeepL), Start, Scannen und Texterkennung
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 
@@ -20,6 +20,7 @@ signals:
 
 private slots:
     void testDeepL();
+    void checkTesseract();
 
 protected:
     void accept() override;
@@ -39,4 +40,10 @@ private:
     QCheckBox *m_notice;
     QCheckBox *m_random;
     QString m_origTheme;
+    QComboBox *m_scanner;
+    QLineEdit *m_scanCommand;
+    QCheckBox *m_scanColor;
+    QLineEdit *m_tesseract;
+    QLineEdit *m_ocrLangs;
+    QLabel *m_ocrStatus;
 };

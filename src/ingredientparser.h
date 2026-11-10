@@ -1,4 +1,4 @@
-// VitaMeals – Zutatenzeilen zerlegen
+// ViviaMeals – Zutatenzeilen zerlegen
 //
 //   „1 1/2 c all-purpose flour, sifted“  →  200 g | Weizenmehl | gesiebt   (englisch, umgerechnet)
 //   „2-3 EL Olivenöl“                     →  2–3 EL | Olivenöl

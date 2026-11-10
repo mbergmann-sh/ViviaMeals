@@ -1,4 +1,4 @@
-// VitaMeals – Rezeptbild zuschneiden
+// ViviaMeals – Rezeptbild zuschneiden
 //
 // Nach der Bildauswahl im Editor: Ausschnitt mit der Maus festlegen (verschieben, an den Ecken
 // ziehen, außerhalb neu aufziehen), Seitenverhältnis 4:3 / 3:2 / 1:1 / 16:9 / frei, drehen.

@@ -46,7 +46,7 @@ QColor primary() { return QColor(0x14, 0x74, 0xBC); }
 QIcon app()
 {
     QIcon i;
-    i.addFile(QStringLiteral(":/icons/vitameals.png"));
+    i.addFile(QStringLiteral(":/icons/viviameals.png"));
     return i;
 }
 

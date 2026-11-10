@@ -32,7 +32,7 @@ bool request(const QString &key, const QString &path, const QByteArray *body, QB
     QNetworkAccessManager nam;
     QNetworkRequest req(QUrl(baseUrl(key) + path));
     req.setRawHeader("Authorization", "DeepL-Auth-Key " + cleanKey(key).toUtf8());
-    req.setRawHeader("User-Agent", "VitaMeals/" + QCoreApplication::applicationVersion().toUtf8());
+    req.setRawHeader("User-Agent", "ViviaMeals/" + QCoreApplication::applicationVersion().toUtf8());
     QNetworkReply *reply = nullptr;
     if (body) {
         req.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("application/json"));
@@ -84,7 +84,8 @@ bool isFreeKey(const QString &key) { return cleanKey(key).endsWith(QLatin1String
 
 QString baseUrl(const QString &key)
 {
-    const QByteArray env = qgetenv("VITAMEALS_DEEPL_URL");
+    QByteArray env = qgetenv("VIVIAMEALS_DEEPL_URL");
+    if (env.isEmpty()) env = qgetenv("VITAMEALS_DEEPL_URL");   // alter Name
     if (!env.isEmpty()) return QString::fromUtf8(env);
     return isFreeKey(key) ? QStringLiteral("https://api-free.deepl.com") : QStringLiteral("https://api.deepl.com");
 }

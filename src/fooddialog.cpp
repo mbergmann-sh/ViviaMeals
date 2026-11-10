@@ -346,7 +346,7 @@ void FoodTableDialog::fill()
         const Nutrients &n = food->per100;
         const double v[8] = { n.kcal, n.protein, n.fat, n.satFat, n.carbs, n.sugar, n.fiber, n.salt };
         for (int c = 0; c < 8; ++c) m_table->setItem(r, c + 1, item(Fmt::number(v[c], c == 0 ? 0 : (c == 7 ? 2 : 1)), QString(), true));
-        m_table->setItem(r, 9, item(food->user ? (food->source.isEmpty() ? tr("eigener Wert") : food->source) : tr("VitaMeals")));
+        m_table->setItem(r, 9, item(food->user ? (food->source.isEmpty() ? tr("eigener Wert") : food->source) : tr("ViviaMeals")));
     }
     m_table->resizeColumnsToContents();
     m_table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
@@ -376,7 +376,7 @@ FoodImportDialog::FoodImportDialog(QWidget *parent) : QDialog(parent)
     auto *lay = new QVBoxLayout(this);
     auto *src = new QGroupBox(tr("Quelle"));
     auto *sl = new QVBoxLayout(src);
-    m_csv = new QRadioButton(tr("CSV-Datei – eigene Tabelle (Excel/LibreOffice), VitaMeals-Vorlage, Open-Food-Facts-Export …"));
+    m_csv = new QRadioButton(tr("CSV-Datei – eigene Tabelle (Excel/LibreOffice), ViviaMeals-Vorlage, Open-Food-Facts-Export …"));
     m_usda = new QRadioButton(tr("USDA FoodData Central – entpackter CSV-Ordner (z. B. „Foundation Foods“ oder „SR Legacy“, gemeinfrei)"));
     m_csv->setChecked(true);
     sl->addWidget(m_csv);

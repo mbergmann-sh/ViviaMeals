@@ -1,10 +1,10 @@
-// VitaMeals – Programmstart
+// ViviaMeals – Programmstart
 //
-//   VitaMeals                       zuletzt geöffnete Rezeptdatenbank öffnen (sonst zum Anlegen auffordern)
-//   VitaMeals --database <ordner>   bestimmte Datenbank öffnen
-//   VitaMeals --demo                Demo mit Beispielrezepten, Bildern und einem Profil in einem temporären
+//   ViviaMeals                       zuletzt geöffnete Rezeptdatenbank öffnen (sonst zum Anlegen auffordern)
+//   ViviaMeals --database <ordner>   bestimmte Datenbank öffnen
+//   ViviaMeals --demo                Demo mit Beispielrezepten, Bildern und einem Profil in einem temporären
 //                                   Ordner, mit eigenen Einstellungen – berührt die eigenen Daten nicht
-//   VitaMeals --demo --screenshots <ordner>   Bildschirmfotos für Handbuch/README erzeugen
+//   ViviaMeals --demo --screenshots <ordner>   Bildschirmfotos für Handbuch/README erzeugen
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "assistantdialog.h"
 #include "editordialog.h"
@@ -16,6 +16,7 @@
 #include "importdialogs.h"
 #include "importers.h"
 #include "mainwindow.h"
+#include "scandialog.h"
 #include "settingsdialog.h"
 #include "imagecropdialog.h"
 #include "weighindialog.h"
@@ -40,6 +41,7 @@
 #include "windowstate.h"
 
 #include <QApplication>
+#include <QDirIterator>
 #include <QBuffer>
 #include <QCheckBox>
 #include <QCommandLineParser>
@@ -212,6 +214,98 @@ void createDemo(const QString &folder)
                        QObject::tr("Würstchen"), QObject::tr("Haferflocken"), QObject::tr("Joghurt"), QObject::tr("Quark") });
 }
 
+// Rezeptseite wie aus dem Scanner (Screenshots des Scandialogs)
+QImage demoScanPage()
+{
+    QImage page(1654, 2339, QImage::Format_RGB32);   // A4 mit 200 dpi
+    page.fill(QColor(250, 248, 242));
+    QPainter p(&page);
+    p.setRenderHint(QPainter::Antialiasing);
+    p.setRenderHint(QPainter::TextAntialiasing);
+    Recipe demo;
+    demo.title = QStringLiteral("Gemüse-Curry");
+    QImage photo;
+    photo.loadFromData(QByteArray::fromBase64(demoImage(demo).toLatin1()));
+    if (!photo.isNull()) p.drawImage(QRect(900, 330, 620, 465), photo);
+    auto font = [](int px, bool bold) {
+        QFont f(QStringLiteral("DejaVu Serif"));
+        f.setPixelSize(px);
+        f.setBold(bold);
+        return f;
+    };
+    p.setPen(QColor(150, 40, 30));
+    p.setFont(font(76, true));
+    p.drawText(130, 200, QStringLiteral("Ofengemüse mit Kräuterquark"));
+    p.setPen(QColor(50, 50, 50));
+    p.setFont(font(30, false));
+    p.drawText(130, 270, QStringLiteral("Bunt, sättigend und schnell vorbereitet – den Rest erledigt der Ofen."));
+    p.drawText(130, 320, QStringLiteral("Zubereitungszeit: 45 Min."));
+    p.setPen(QColor(150, 40, 30));
+    p.setFont(font(40, true));
+    p.drawText(130, 420, QStringLiteral("Zutaten für 4 Personen"));
+    p.setPen(QColor(25, 25, 25));
+    p.setFont(font(32, false));
+    const QStringList ing{ QStringLiteral("800 g Kartoffeln"), QStringLiteral("2 rote Paprikaschoten"), QStringLiteral("1 Zucchini"),
+                           QStringLiteral("2 rote Zwiebeln"), QStringLiteral("3 EL Olivenöl"), QStringLiteral("1 TL Paprikapulver"),
+                           QStringLiteral("Salz, Pfeffer"), QStringLiteral("500 g Magerquark"), QStringLiteral("100 ml Milch"),
+                           QStringLiteral("1 Bund Schnittlauch"), QStringLiteral("½ Bund Petersilie") };
+    int y = 490;
+    for (const QString &t : ing) {
+        p.drawText(130, y, QStringLiteral("• ") + t);
+        y += 50;
+    }
+    y += 60;
+    p.setPen(QColor(150, 40, 30));
+    p.setFont(font(40, true));
+    p.drawText(130, y, QStringLiteral("So wird's gemacht"));
+    p.setPen(QColor(25, 25, 25));
+    p.setFont(font(32, false));
+    y += 70;
+    const QStringList dir{ QStringLiteral("1. Den Backofen auf 200 °C vorheizen. Kartoffeln waschen und vierteln, Paprika,"),
+                           QStringLiteral("Zucchini und Zwiebeln in grobe Stücke schneiden."), QString(),
+                           QStringLiteral("2. Gemüse mit Öl, Paprikapulver, Salz und Pfeffer mischen, auf einem Blech verteilen"),
+                           QStringLiteral("und etwa 35 Minuten backen, dabei einmal wenden."), QString(),
+                           QStringLiteral("3. Quark mit Milch glatt rühren, Kräuter fein schneiden und unterrühren, mit Salz"),
+                           QStringLiteral("und Pfeffer abschmecken. Zum Ofengemüse servieren.") };
+    for (const QString &t : dir) {
+        if (!t.isEmpty()) p.drawText(130, y, t);
+        y += t.isEmpty() ? 30 : 50;
+    }
+    p.setPen(QColor(110, 110, 110));
+    p.setFont(font(26, false));
+    p.drawText(130, 2200, QStringLiteral("Pro Portion: ca. 380 kcal"));
+    p.end();
+    return page;
+}
+
+// Das Programm hieß bis Version 0.5 „VitaMeals“. Beim ersten Start von ViviaMeals werden Einstellungen
+// (Registrierung bzw. .conf) und Benutzerdaten (Profile, Tagebücher, eigene Lebensmittel) übernommen.
+// Die alten Daten bleiben unverändert erhalten.
+void migrateFromVitaMeals()
+{
+    QSettings now;
+    if (now.value(QStringLiteral("migration/fromVitaMeals")).toBool()) return;
+    QSettings old(QStringLiteral("mbergmann-sh"), QStringLiteral("VitaMeals"));
+    if (now.allKeys().isEmpty())
+        for (const QString &k : old.allKeys()) now.setValue(k, old.value(k));
+    const QString newDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QString oldDir = newDir;
+    oldDir.replace(QStringLiteral("ViviaMeals"), QStringLiteral("VitaMeals"));
+    if (oldDir != newDir && QFileInfo(oldDir).isDir()) {
+        // rekursiv kopieren, vorhandene Dateien nicht überschreiben
+        QDirIterator it(oldDir, QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+        while (it.hasNext()) {
+            const QString src = it.next();
+            const QString dst = QDir(newDir).filePath(QDir(oldDir).relativeFilePath(src));
+            if (QFileInfo::exists(dst)) continue;
+            QDir().mkpath(QFileInfo(dst).absolutePath());
+            QFile::copy(src, dst);
+        }
+        Profiles::instance().reload();
+    }
+    now.setValue(QStringLiteral("migration/fromVitaMeals"), true);
+}
+
 void wait(int ms)
 {
     QEventLoop loop;
@@ -348,7 +442,29 @@ void takeScreenshots(MainWindow *w, const QString &dir)
         SettingsDialog d(w);
         d.show();
         shot(&d, dir, QStringLiteral("einstellungen"));
+        if (auto *tabs = d.findChild<QTabWidget *>()) {
+            tabs->setCurrentIndex(2);
+            wait(1500);   // Tesseract prüfen
+            shot(&d, dir, QStringLiteral("einstellungen-scannen"));
+        }
         static_cast<QDialog &>(d).reject();
+    }
+    {
+        // Rezept scannen: gerenderte Rezeptseite mit Foto
+        ScanDialog d(ScanDialog::StartNothing, w);
+        d.show();
+        d.addImage(demoScanPage(), QStringLiteral("demo"));
+        for (int i = 0; i < 300 && d.busy(); ++i) wait(100);
+        shot(&d, dir, QStringLiteral("scannen"));
+        if (!d.pages().isEmpty()) {
+            static_cast<QDialog &>(d).accept();
+            EditorDialog e(d.recipe(), w);
+            e.setReference(d.pages());
+            e.resize(1500, 800);
+            e.show();
+            shot(&e, dir, QStringLiteral("scannen-editor"));
+            e.reject();
+        }
     }
     {
         // Nährwert-Import mit einer Tabelle im Stil einer Excel-Datei
@@ -398,23 +514,24 @@ int main(int argc, char *argv[])
 #endif
     QApplication app(argc, argv);
     QApplication::setOrganizationName(QStringLiteral("mbergmann-sh"));
-    QApplication::setApplicationName(QStringLiteral("VitaMeals"));
-    QApplication::setApplicationVersion(QStringLiteral(VITAMEALS_VERSION));
+    QApplication::setApplicationName(QStringLiteral("ViviaMeals"));
+    QApplication::setApplicationVersion(QStringLiteral(VIVIAMEALS_VERSION));
     QApplication::setWindowIcon(Icons::app());
 
     QCommandLineParser parser;
-    parser.setApplicationDescription(QStringLiteral("VitaMeals – Rezeptverwaltung mit Nährwertanalyse und Gewichtskontrolle"));
+    parser.setApplicationDescription(QStringLiteral("ViviaMeals – Rezeptverwaltung mit Nährwertanalyse und Gewichtskontrolle"));
     parser.addHelpOption();
     parser.addVersionOption();
     QCommandLineOption demo(QStringLiteral("demo"), QStringLiteral("Demo mit Beispielrezepten in einem temporären Ordner"));
     QCommandLineOption shots(QStringLiteral("screenshots"), QStringLiteral("Bildschirmfotos erzeugen (mit --demo)"), QStringLiteral("ordner"));
     QCommandLineOption dbOpt(QStringLiteral("database"), QStringLiteral("Rezeptdatenbank (Ordner)"), QStringLiteral("ordner"));
     parser.addOptions({ demo, shots, dbOpt });
-    parser.addPositionalArgument(QStringLiteral("dateien"), QStringLiteral("Rezepte (.vmr), Datenbank (vitameals.vmdb), RezKonv- oder MealMaster-Dateien"),
+    parser.addPositionalArgument(QStringLiteral("dateien"), QStringLiteral("Rezepte (.vmr), Datenbank (viviameals.vmdb), RezKonv- oder MealMaster-Dateien"),
                                  QStringLiteral("[dateien…]"));
     parser.process(app);
     const bool isDemo = parser.isSet(demo);
-    if (isDemo) QApplication::setApplicationName(QStringLiteral("VitaMeals-Demo"));   // eigene Einstellungen und Profile
+    if (isDemo) QApplication::setApplicationName(QStringLiteral("ViviaMeals-Demo"));   // eigene Einstellungen und Profile
+    else migrateFromVitaMeals();
 
     // Programm ist deutschsprachig: Zahlen/Datumsformate und Qt-eigene Texte (Schaltflächen, Dialoge) auf Deutsch
     QLocale::setDefault(QLocale(QLocale::German, QLocale::Germany));
@@ -432,7 +549,7 @@ int main(int argc, char *argv[])
 
     MainWindow w;
     if (isDemo) {
-        const QString folder = QDir::temp().filePath(QStringLiteral("vitameals-demo"));
+        const QString folder = QDir::temp().filePath(QStringLiteral("viviameals-demo"));
         createDemo(folder);
         w.openDatabase(folder);
     }
@@ -462,7 +579,7 @@ int main(int argc, char *argv[])
             QMessageBox box(&w);
             box.setWindowTitle(QObject::tr("Hinweis"));
             box.setIcon(QMessageBox::Information);
-            box.setText(QObject::tr("<b>VitaMeals ist kein Medizinprodukt.</b><br/>Nährwerte, Energiebedarf und Wochenpläne sind "
+            box.setText(QObject::tr("<b>ViviaMeals ist kein Medizinprodukt.</b><br/>Nährwerte, Energiebedarf und Wochenpläne sind "
                                     "Schätzwerte für die persönliche Planung und ersetzen keine ärztliche oder Ernährungsberatung."));
             auto *dont = new QCheckBox(QObject::tr("Nicht mehr anzeigen"));
             box.setCheckBox(dont);

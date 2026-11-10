@@ -331,7 +331,7 @@ QList<Food> convert(const Table &t, const Mapping &m, const Options &opt, QStrin
         const double kcal = m.col[Kcal] >= 0 ? number(cell(row, Kcal), &hasKcal) : 0;
         const double kj = m.col[KJ] >= 0 ? number(cell(row, KJ), &hasKj) : 0;
         f.per100.kcal = hasKcal && kcal > 0 ? kcal : (hasKj ? kj / 4.184 : 0);
-        if (!hasKcal && !hasKj) {   // ohne Energiewert ist der Eintrag für VitaMeals wertlos
+        if (!hasKcal && !hasKj) {   // ohne Energiewert ist der Eintrag für ViviaMeals wertlos
             ++skipped;
             continue;
         }

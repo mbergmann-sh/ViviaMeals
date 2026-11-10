@@ -1,4 +1,4 @@
-// VitaMeals – Import-Ablauf: Dateien wählen (einzeln oder mehrere), Vorschau, Doubletten-Abfrage
+// ViviaMeals – Import-Ablauf: Dateien wählen (einzeln oder mehrere), Vorschau, Doubletten-Abfrage
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 

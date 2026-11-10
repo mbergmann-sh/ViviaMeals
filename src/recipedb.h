@@ -1,6 +1,6 @@
-// VitaMeals – Rezeptdatenbank als Ordner
+// ViviaMeals – Rezeptdatenbank als Ordner
 //
-//   <Ordner>/vitameals.vmdb     Kennung der Datenbank (JSON: Name, Formatversion, angelegt)
+//   <Ordner>/viviameals.vmdb     Kennung der Datenbank (JSON: Name, Formatversion, angelegt)
 //   <Ordner>/rezepte/<id>.vmr   ein Rezept je Datei (siehe recipe.h)
 //   <Ordner>/index.json         Zwischenspeicher mit Kurzfassungen (wird bei Bedarf neu aufgebaut)
 //
@@ -43,7 +43,8 @@ class RecipeDb : public QObject
     Q_OBJECT
 public:
     static RecipeDb &instance();
-    static QString markerName() { return QStringLiteral("vitameals.vmdb"); }
+    static QString markerName() { return QStringLiteral("viviameals.vmdb"); }
+    static QString legacyMarkerName() { return QStringLiteral("vitameals.vmdb"); }   // vor der Umbenennung in ViviaMeals
 
     // Neue Datenbank in einem (leeren oder neuen) Ordner anlegen
     bool create(const QString &folder, const QString &name, QString *error = nullptr);

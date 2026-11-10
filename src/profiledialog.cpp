@@ -103,7 +103,7 @@ ProfileDialog::ProfileDialog(const Profile &p, QWidget *parent) : QDialog(parent
     m_weighDay->addItem(tr("keine Erinnerung"), 0);
     for (int d = 1; d <= 7; ++d) m_weighDay->addItem(Profile::dayName(d), d);
     m_weighDay->setCurrentIndex(qMax(0, m_weighDay->findData(p.weighDay)));
-    m_weighDay->setToolTip(tr("Einmal pro Woche wiegen, am besten morgens vor dem Frühstück – VitaMeals erinnert an diesem Tag daran."));
+    m_weighDay->setToolTip(tr("Einmal pro Woche wiegen, am besten morgens vor dem Frühstück – ViviaMeals erinnert an diesem Tag daran."));
     pf->addRow(tr("Wiegetag:"), m_weighDay);
     lay->addWidget(pref);
 

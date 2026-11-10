@@ -1,4 +1,4 @@
-// VitaMeals – Nährwertanalyse eines Rezepts
+// ViviaMeals – Nährwertanalyse eines Rezepts
 //
 // Für jede Zutat: Lebensmittel zuordnen (manuell festgelegt > gelernt > automatisch), Menge in
 // Gramm umrechnen (Gewicht direkt, Volumen über die Dichte, Stück/Packungen über Stückgewichte),

@@ -1,4 +1,4 @@
-// VitaMeals – Rezeptsammlung als Website exportieren (HTML5 + PHP)
+// ViviaMeals – Rezeptsammlung als Website exportieren (HTML5 + PHP)
 //
 // Erzeugt einen Ordner, der nur noch auf den eigenen Webserver hochgeladen werden muss:
 //   index.html            Startseite mit Themen-Menü (Tags) und allen Rezepten

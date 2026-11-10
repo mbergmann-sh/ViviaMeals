@@ -1,23 +1,29 @@
 @echo off
 rem ---------------------------------------------------------------------------
-rem  VitaMeals - Windows-Installer bauen (Qt Installer Framework)
+rem  ViviaMeals - Windows-Installer bauen (Qt Installer Framework)
 rem
 rem  Wird nach jedem Release-Build von installer/windows_deploy.pri aufgerufen
 rem  (auch: mingw32-make installer / nmake installer), kann aber auch von Hand
 rem  gestartet werden:
 rem
-rem    make_installer.cmd <VitaMeals.exe> <Qt-bin> <Qt-translations> <binarycreator|-> <Arbeitsordner> <Version> [qt68] [full]
+rem    make_installer.cmd <ViviaMeals.exe> <Qt-bin> <Qt-translations> <binarycreator|-> <Arbeitsordner> <Version> [qt68] [full]
 rem
 rem  1. Bereitstellungsordner <Arbeitsordner>\installer-staging frisch anlegen:
-rem     NUR VitaMeals.exe und die von windeployqt ermittelten DLLs/Plugins
+rem     NUR ViviaMeals.exe und die von windeployqt ermittelten DLLs/Plugins
 rem  2. Uebersetzungsschritt: deutsche Qt-Uebersetzungen nach translations\
 rem     (windeployqt --translations de, sonst qtbase_de.qm/qt_de.qm aus Qt)
 rem  3. Sicherheitsnetz: Quelltext- und Zwischendateien (*.h, *.cpp, *.o, *.obj,
 rem     *.pdb ...) entfernen, LICENSE.txt und README.md dazu
-rem  4. Paketbaum (meta + data) und installer\Output\VitaMeals-<Version>-Setup.exe
+rem  4. Paketbaum (meta + data) und installer\Output\ViviaMeals-<Version>-Setup.exe
 rem
-rem  Protokoll (immer):   installer\Output\VitaMeals-<Version>-Protokoll.txt
-rem  Inhaltsliste:        installer\Output\VitaMeals-<Version>-Inhalt.txt
+rem  Optional: Texterkennung Tesseract mitliefern (fuer "Rezept scannen")
+rem    set VIVIA_TESSERACT_DIR=C:\Program Files\Tesseract-OCR
+rem    set VIVIA_TESSERACT_LANGS=deu eng osd       (Vorgabe)
+rem  Kopiert tesseract.exe, die DLLs, die Sprachdaten und tessdata\configs nach
+rem  <Installationsordner>\tesseract\ - ViviaMeals findet es dort von selbst.
+rem
+rem  Protokoll (immer):   installer\Output\ViviaMeals-<Version>-Protokoll.txt
+rem  Inhaltsliste:        installer\Output\ViviaMeals-<Version>-Inhalt.txt
 rem ---------------------------------------------------------------------------
 setlocal EnableExtensions
 
@@ -36,21 +42,21 @@ set "INST=%~dp0"
 if "%INST:~-1%"=="\" set "INST=%INST:~0,-1%"
 set "STAGE=%WORK%\installer-staging"
 set "PKGS=%WORK%\installer-packages"
-set "PKG=%PKGS%\de.mbergmann.vitameals"
+set "PKG=%PKGS%\de.mbergmann.viviameals"
 set "OUT=%INST%\Output"
-set "SETUP=%OUT%\VitaMeals-%VERSION%-Setup.exe"
-set "LIST=%OUT%\VitaMeals-%VERSION%-Inhalt.txt"
-set "LOG=%OUT%\VitaMeals-%VERSION%-Protokoll.txt"
+set "SETUP=%OUT%\ViviaMeals-%VERSION%-Setup.exe"
+set "LIST=%OUT%\ViviaMeals-%VERSION%-Inhalt.txt"
+set "LOG=%OUT%\ViviaMeals-%VERSION%-Protokoll.txt"
 rem windeployqt braucht Qt (und bei MinGW den Compiler) im Suchpfad
 set "PATH=%QTBIN%;%PATH%"
 
 if not exist "%OUT%" mkdir "%OUT%"
-> "%LOG%" echo VitaMeals %VERSION% - Installer-Protokoll %DATE% %TIME%
-call :log "VitaMeals: Installer %VERSION% wird vorbereitet ..."
+> "%LOG%" echo ViviaMeals %VERSION% - Installer-Protokoll %DATE% %TIME%
+call :log "ViviaMeals: Installer %VERSION% wird vorbereitet ..."
 call :log "  Programm:  %EXE%"
 call :log "  Qt:        %QTBIN%"
 if not exist "%EXE%" (
-    call :log "error: VitaMeals.exe nicht gefunden: %EXE%"
+    call :log "error: ViviaMeals.exe nicht gefunden: %EXE%"
     goto fail
 )
 if not exist "%QTBIN%\windeployqt.exe" (
@@ -63,15 +69,15 @@ if exist "%STAGE%" rmdir /s /q "%STAGE%"
 if exist "%PKGS%" rmdir /s /q "%PKGS%"
 mkdir "%STAGE%"
 if errorlevel 1 goto fail
-copy /y "%EXE%" "%STAGE%\VitaMeals.exe" >nul
+copy /y "%EXE%" "%STAGE%\ViviaMeals.exe" >nul
 if errorlevel 1 goto fail
 
 rem ---- DLLs, Plugins und Uebersetzungen ermitteln
 set "OPTS=--verbose 1 --translations de"
 if /i not "%FULL%"=="full" set "OPTS=%OPTS% --no-opengl-sw --no-system-d3d-compiler"
 if /i not "%FULL%"=="full" if "%QT68%"=="qt68" set "OPTS=%OPTS% --no-system-dxc-compiler"
-call :log "VitaMeals: windeployqt %OPTS%"
-"%QTBIN%\windeployqt.exe" %OPTS% "%STAGE%\VitaMeals.exe" >> "%LOG%" 2>&1
+call :log "ViviaMeals: windeployqt %OPTS%"
+"%QTBIN%\windeployqt.exe" %OPTS% "%STAGE%\ViviaMeals.exe" >> "%LOG%" 2>&1
 if errorlevel 1 (
     call :log "error: windeployqt ist fehlgeschlagen - Einzelheiten im Protokoll."
     goto fail
@@ -82,9 +88,9 @@ if not exist "%STAGE%\translations" mkdir "%STAGE%\translations"
 if not exist "%STAGE%\translations\qt_de.qm" if exist "%QTTR%\qt_de.qm" copy /y "%QTTR%\qt_de.qm" "%STAGE%\translations\qt_de.qm" >nul
 if not exist "%STAGE%\translations\qt_de.qm" if exist "%QTTR%\qtbase_de.qm" copy /y "%QTTR%\qtbase_de.qm" "%STAGE%\translations\qtbase_de.qm" >nul
 if exist "%STAGE%\translations\qt_de.qm" (
-    call :log "VitaMeals: Qt-Uebersetzung translations\qt_de.qm"
+    call :log "ViviaMeals: Qt-Uebersetzung translations\qt_de.qm"
 ) else if exist "%STAGE%\translations\qtbase_de.qm" (
-    call :log "VitaMeals: Qt-Uebersetzung translations\qtbase_de.qm"
+    call :log "ViviaMeals: Qt-Uebersetzung translations\qtbase_de.qm"
 ) else (
     call :log "warning: Keine deutschen Qt-Uebersetzungen gefunden - Standarddialoge erscheinen englisch."
     call :log "warning: Abhilfe: im Qt Maintenance Tool die Komponente Qt Translations installieren."
@@ -96,6 +102,19 @@ for /d /r "%STAGE%" %%d in (debug release .moc .obj .rcc .ui) do if exist "%%d" 
 copy /y "%INST%\..\LICENSE" "%STAGE%\LICENSE.txt" >nul
 if errorlevel 1 goto fail
 copy /y "%INST%\..\README.md" "%STAGE%\README.md" >nul
+
+rem ---- 3b. optional: Tesseract (Texterkennung) mitliefern
+if not defined VIVIA_TESSERACT_DIR goto notess
+if not exist "%VIVIA_TESSERACT_DIR%\tesseract.exe" (
+    call :log "warning: VIVIA_TESSERACT_DIR gesetzt, aber dort fehlt tesseract.exe: %VIVIA_TESSERACT_DIR%"
+    goto notess
+)
+call :bundletess
+if errorlevel 1 goto fail
+goto tessdone
+:notess
+call :log "ViviaMeals: Tesseract wird nicht mitgeliefert (optional: VIVIA_TESSERACT_DIR setzen)."
+:tessdone
 
 rem ---- 4. Paketbaum
 mkdir "%PKG%\meta"
@@ -114,7 +133,7 @@ if not exist "%INST%\qtifw\config\config.xml" (
 xcopy "%STAGE%\*" "%PKG%\data\" /e /i /q /y >nul
 if errorlevel 1 goto fail
 dir /s /b /a-d "%STAGE%" > "%LIST%"
-call :log "VitaMeals: Inhalt des Installers: %LIST%"
+call :log "ViviaMeals: Inhalt des Installers: %LIST%"
 
 rem ---- 5. Installer: binarycreator suchen (auch, wenn das IFW erst nach dem qmake-Lauf installiert wurde)
 if not defined BC if defined QTIFWDIR if exist "%QTIFWDIR%\bin\binarycreator.exe" set "BC=%QTIFWDIR%\bin\binarycreator.exe"
@@ -129,19 +148,47 @@ if not defined BC (
     exit /b 0
 )
 if exist "%SETUP%" del /q "%SETUP%"
-call :log "VitaMeals: %BC%"
+call :log "ViviaMeals: %BC%"
 "%BC%" --offline-only -c "%INST%\qtifw\config\config.xml" -p "%PKGS%" "%SETUP%" >> "%LOG%" 2>&1
 if errorlevel 1 (
     call :log "error: binarycreator ist fehlgeschlagen - Einzelheiten im Protokoll."
     goto fail
 )
 if not exist "%SETUP%" goto fail
-call :log "VitaMeals: Installer erstellt: %SETUP%"
+call :log "ViviaMeals: Installer erstellt: %SETUP%"
 exit /b 0
 
 :fail
-call :log "error: VitaMeals-Installer konnte nicht erstellt werden. Protokoll: %LOG%"
+call :log "error: ViviaMeals-Installer konnte nicht erstellt werden. Protokoll: %LOG%"
 exit /b 1
+
+:bundletess
+set "TS=%VIVIA_TESSERACT_DIR%"
+set "TD=%STAGE%\tesseract"
+if not defined VIVIA_TESSERACT_LANGS set "VIVIA_TESSERACT_LANGS=deu eng osd"
+mkdir "%TD%\tessdata" >nul 2>&1
+copy /y "%TS%\tesseract.exe" "%TD%\tesseract.exe" >nul
+if errorlevel 1 exit /b 1
+copy /y "%TS%\*.dll" "%TD%\" >nul
+if errorlevel 1 (
+    call :log "error: Keine DLLs neben tesseract.exe gefunden: %TS%"
+    exit /b 1
+)
+for %%l in (%VIVIA_TESSERACT_LANGS%) do call :tesslang %%l
+if exist "%TS%\tessdata\configs" xcopy "%TS%\tessdata\configs" "%TD%\tessdata\configs\" /e /i /q /y >nul
+if exist "%TS%\tessdata\tessconfigs" xcopy "%TS%\tessdata\tessconfigs" "%TD%\tessdata\tessconfigs\" /e /i /q /y >nul
+if not exist "%TD%\tessdata\configs\tsv" call :log "warning: tessdata\configs\tsv fehlt - die Texterkennung braucht diese Datei."
+copy /y "%INST%\THIRD-PARTY-Tesseract.txt" "%TD%\LIZENZ-Tesseract.txt" >nul
+call :log "ViviaMeals: Tesseract mitgeliefert aus %TS% (Sprachen: %VIVIA_TESSERACT_LANGS%)"
+exit /b 0
+
+:tesslang
+if exist "%TS%\tessdata\%~1.traineddata" (
+    copy /y "%TS%\tessdata\%~1.traineddata" "%TD%\tessdata\%~1.traineddata" >nul
+) else (
+    call :log "warning: Sprachdaten %~1.traineddata fehlen in %TS%\tessdata"
+)
+exit /b 0
 
 :log
 echo %~1

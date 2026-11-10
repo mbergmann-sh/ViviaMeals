@@ -1,6 +1,10 @@
-# VitaMeals – Notizen für das Handbuch
+# ViviaMeals – Notizen für das Handbuch
 
-Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.5.0.
+Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.6.0.
+
+> **Name:** Das Programm heißt seit Version 0.6 **ViviaMeals** (vorher VitaMeals; die ganze Reihe heißt jetzt
+> Vivia – ViviaParms, ViviaBreathe). Alte Einstellungen, Profile, Tagebücher, eigene Lebensmittel und
+> Rezeptdatenbanken werden beim ersten Start automatisch übernommen bzw. weiter geöffnet.
 
 ---
 
@@ -8,7 +12,7 @@ Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Versio
 
 ### Worum es geht
 
-VitaMeals versteht englische Rezepte auch ohne Internet: Maße werden umgerechnet (cups, oz, °F …)
+ViviaMeals versteht englische Rezepte auch ohne Internet: Maße werden umgerechnet (cups, oz, °F …)
 und die Zutaten über ein eingebautes Wörterbuch (Glossar) übersetzt. Die Zubereitung bleibt dabei
 englisch. Wer Rezepte **vollständig** auf Deutsch haben möchte – Titel, Zutaten und Zubereitung –
 oder Rezepte in anderen Sprachen (Französisch, Italienisch, Spanisch, Niederländisch …) importiert,
@@ -16,24 +20,24 @@ kann die Übersetzung durch **DeepL** einschalten.
 
 * **Nur fremdsprachige Rezepte** werden übersetzt. Deutsche Rezepte werden nie an DeepL gesendet.
 * Die Übersetzung ist **freiwillig** und standardmäßig ausgeschaltet.
-* Jeder Benutzer verwendet **seinen eigenen DeepL-Schlüssel**. VitaMeals enthält keinen Schlüssel.
+* Jeder Benutzer verwendet **seinen eigenen DeepL-Schlüssel**. ViviaMeals enthält keinen Schlüssel.
 
 ### Kosten und Lizenz
 
 * Der Tarif **DeepL API Free** ist kostenlos und erlaubt **500.000 Zeichen im Monat**.
   Ein durchschnittliches Rezept hat 1.000–2.500 Zeichen, also reichen 500.000 Zeichen für etwa
-  200–400 Rezepte im Monat. Ist das Kontingent aufgebraucht, übersetzt VitaMeals bis zum Monatsende
+  200–400 Rezepte im Monat. Ist das Kontingent aufgebraucht, übersetzt ViviaMeals bis zum Monatsende
   wieder mit dem Glossar.
 * Für die Anmeldung erfasst DeepL Zahlungsdaten (zum Schutz vor Missbrauch); der Free-Tarif kostet
   trotzdem nichts.
-* Wer mehr braucht, kann *DeepL API Pro* buchen (Grundgebühr plus Preis je Zeichen). VitaMeals
+* Wer mehr braucht, kann *DeepL API Pro* buchen (Grundgebühr plus Preis je Zeichen). ViviaMeals
   erkennt den Tarif am Schlüssel selbst: Free-Schlüssel enden auf `:fx`.
 
 ### Einrichten – Schritt für Schritt
 
 1. Auf <https://www.deepl.com/pro-api> den Tarif **DeepL API Free** wählen und ein Konto anlegen.
 2. Im DeepL-Konto unter **API Keys** den Schlüssel kopieren (Form `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx:fx`).
-3. In VitaMeals **Extras → Einstellungen** öffnen.
+3. In ViviaMeals **Extras → Einstellungen** öffnen.
 4. Im Abschnitt **Übersetzung fremdsprachiger Rezepte (DeepL)** das Häkchen setzen und den
    Schlüssel einfügen (das Auge-Symbol zeigt den Schlüssel im Klartext).
 5. **Verbindung testen** – angezeigt werden Tarif und Verbrauch des laufenden Monats,
@@ -44,7 +48,7 @@ kann die Übersetzung durch **DeepL** einschalten.
 
 ### Beim Import
 
-* Nach dem Einlesen prüft VitaMeals die Sprache jedes Rezepts. Sind fremdsprachige darunter, fragt
+* Nach dem Einlesen prüft ViviaMeals die Sprache jedes Rezepts. Sind fremdsprachige darunter, fragt
   es nach: „3 der 25 Rezepte sind nicht deutschsprachig. Sollen sie mit DeepL ins Deutsche übersetzt
   werden? Dazu werden … Zeichen an DeepL gesendet.“
   * **Ja:** Titel, Zutaten, Zwischenüberschriften und Zubereitung werden übersetzt. Maße und
@@ -56,24 +60,24 @@ kann die Übersetzung durch **DeepL** einschalten.
   in °C und cm.“
 * Klappt die Übersetzung nicht (falscher Schlüssel, Kontingent erschöpft, keine Verbindung), wird
   das Rezept trotzdem importiert – mit dem Glossar – und in der Vorschau ein Hinweis angezeigt.
-  Nach einem Schlüssel- oder Verbindungsfehler versucht VitaMeals es bei den übrigen Rezepten des
+  Nach einem Schlüssel- oder Verbindungsfehler versucht ViviaMeals es bei den übrigen Rezepten des
   Imports nicht erneut.
 
 ### Bereits vorhandene Rezepte übersetzen
 
 * **Einzeln:** im Editor auf **Mit DeepL übersetzen** klicken. Das Ergebnis erscheint sofort in den
   Feldern und wird erst mit **Speichern** übernommen.
-* **Alle auf einmal:** **Extras → Fremdsprachige Rezepte mit DeepL übersetzen …** – VitaMeals
+* **Alle auf einmal:** **Extras → Fremdsprachige Rezepte mit DeepL übersetzen …** – ViviaMeals
   nennt Anzahl und Zeichenmenge und fragt vor dem Senden nach. Nährwerte und Tags werden danach neu
   berechnet.
 
 ### Datenschutz (Textbaustein)
 
-> Wenn die DeepL-Übersetzung eingeschaltet ist, sendet VitaMeals Titel, Zutaten und Zubereitung
+> Wenn die DeepL-Übersetzung eingeschaltet ist, sendet ViviaMeals Titel, Zutaten und Zubereitung
 > **fremdsprachiger** Rezepte verschlüsselt (HTTPS) an die DeepL SE, Köln. Deutsche Rezepte,
 > Fotos, Profile, Gewichtsverlauf und alle übrigen Daten verlassen den Rechner nie. Vor jedem
-> Senden fragt VitaMeals nach. Der API-Schlüssel wird nur in den Einstellungen dieses Rechners
-> gespeichert (Windows: Registrierung, `HKEY_CURRENT_USER\Software\mbergmann-sh\VitaMeals`).
+> Senden fragt ViviaMeals nach. Der API-Schlüssel wird nur in den Einstellungen dieses Rechners
+> gespeichert (Windows: Registrierung, `HKEY_CURRENT_USER\Software\mbergmann-sh\ViviaMeals`).
 > Beim kostenlosen Tarif **DeepL API Free** behält sich DeepL vor, die Texte für begrenzte Zeit
 > zu speichern und zum Verbessern seiner Übersetzungen zu verwenden; nur bei **DeepL API Pro**
 > werden sie nach der Übersetzung gelöscht. Für Rezepte ist das in aller Regel unbedenklich –
@@ -96,7 +100,7 @@ kann die Übersetzung durch **DeepL** einschalten.
 ### Worum es geht
 
 Viele ältere Rezeptsammlungen (RezKonv, MealMaster, Mailinglisten der 1990er) sind ohne Umlaute
-geschrieben: „Kaese“, „Gemuesebruehe“, „heiss“, „Schuessel“. VitaMeals erkennt solche Rezepte beim
+geschrieben: „Kaese“, „Gemuesebruehe“, „heiss“, „Schuessel“. ViviaMeals erkennt solche Rezepte beim
 Import und schreibt sie richtig: „Käse“, „Gemüsebrühe“, „heiß“, „Schüssel“. Dadurch findet auch die
 Nährwerttabelle die Zutaten wieder.
 
@@ -231,11 +235,11 @@ Nährwerttabelle die Zutaten wieder.
 * Sicherheitsabfrage: Der Name der Datenbank muss eingetippt werden, erst dann wird die Schaltfläche
   „Alle Rezepte löschen“ aktiv. Voreingestellt wird vorher eine **Sicherungskopie** angelegt
   (Unterordner `sicherung-JJJJ-MM-TT-hhmmss` im Datenbankordner). Wiederherstellen: die `.vmr`-Dateien
-  über **Datei → Import → VitaMeals-Rezept (.vmr)** importieren.
+  über **Datei → Import → ViviaMeals-Rezept (.vmr)** importieren.
 
 ## Lizenz (Textbaustein)
 
-> VitaMeals steht unter der PolyForm Noncommercial License 1.0.0. Die Nutzung ist für alle
+> ViviaMeals steht unter der PolyForm Noncommercial License 1.0.0. Die Nutzung ist für alle
 > nicht-kommerziellen Zwecke kostenlos erlaubt – privat sowie durch gemeinnützige Organisationen,
 > Schulen und Behörden –, einschließlich Verändern und Weitergeben mit dem Lizenztext. Kommerzielle
 > Nutzung und Verkauf sind nur mit Erlaubnis des Autors gestattet.
@@ -272,7 +276,7 @@ werden diese Tags aus den berechneten Nährwerten bestimmt:
   der Abstand zum Zielgewicht.
 * Ein Eintrag am oder nach dem Wiegetag erledigt die Wiegetag-Erinnerung; „Gewicht eintragen …“ in der
   Erinnerung öffnet diesen Dialog.
-* Ist noch keine Person angelegt, bietet VitaMeals an, den Assistenten Gewichtskontrolle zu öffnen.
+* Ist noch keine Person angelegt, bietet ViviaMeals an, den Assistenten Gewichtskontrolle zu öffnen.
 
 ## Ernährungstagebuch (ab 0.5.0)
 
@@ -280,7 +284,7 @@ werden diese Tags aus den berechneten Nährwerten bestimmt:
 „Ins Ernährungstagebuch eintragen …“.
 
 * **Je Person ein eigenes Tagebuch** – die Personen sind die im Assistenten Gewichtskontrolle
-  angelegten. Gibt es noch keine, bietet VitaMeals an, den Assistenten zu öffnen.
+  angelegten. Gibt es noch keine, bietet ViviaMeals an, den Assistenten zu öffnen.
 * Oben: Person, Tag (◀ ▶, Kalender, „Heute“). Darunter **Ziel · gegessen · noch verfügbar**
   (Restkalorien) mit Balken – orange, wenn das Ziel überschritten ist –, die Nährwerte des Tages
   (Eiweiß, Fett, Kohlenhydrate mit Energieanteil, Zucker, Ballaststoffe, Salz) und unten die letzten
@@ -297,5 +301,66 @@ werden diese Tags aus den berechneten Nährwerten bestimmt:
 * **Bearbeiten** (auch Doppelklick), **Auf heute kopieren** (z. B. das tägliche Frühstück), **Löschen**.
 * Beim Eintragen werden Titel, Nährwerte je Portion und Portionsgewicht ins Tagebuch kopiert. Spätere
   Änderungen am Rezept oder das Löschen der Datenbank verändern alte Einträge daher nicht.
-* Gespeichert wird in `%APPDATA%\mbergmann-sh\VitaMeals\tagebuch\<Person>.json`. Beim Löschen einer
+* Gespeichert wird in `%APPDATA%\mbergmann-sh\ViviaMeals\tagebuch\<Person>.json`. Beim Löschen einer
   Person im Assistenten wird ihr Tagebuch mit gelöscht.
+
+## Rezept scannen (ab 0.6.0)
+
+### Worum es geht
+
+Rezepte aus Kochbüchern, Zeitschriften oder von Karteikarten lassen sich einscannen oder mit dem Handy
+fotografieren. ViviaMeals liest den Text (Texterkennung mit dem freien Programm **Tesseract**, läuft
+vollständig auf dem eigenen Rechner), teilt ihn in Titel, Portionen, Zutaten und Zubereitung auf und
+öffnet das Ergebnis im Rezepteditor – mit Nährwerten und Tags wie bei einem Import.
+
+### Was man braucht
+
+* **Tesseract** mit deutschen Sprachdaten:
+  * Windows: Installer der UB Mannheim (https://github.com/UB-Mannheim/tesseract/wiki), bei
+    „Additional language data“ **German** ankreuzen. Wird ggf. auch mit dem ViviaMeals-Installer mitgeliefert.
+  * Linux: `sudo apt install tesseract-ocr tesseract-ocr-deu` (Fedora: `tesseract tesseract-langpack-deu`).
+  * macOS: `brew install tesseract tesseract-lang`.
+  * *Extras → Einstellungen → Scannen → Prüfen* zeigt Version und installierte Sprachen.
+* **Zum Scannen** (sonst einfach ein Bild oder Foto öffnen):
+  * Windows: nichts – der Scandialog von Windows (WIA) wird benutzt. Jeder Scanner bzw. jedes
+    Multifunktionsgerät mit WIA-Treiber funktioniert (bei Windows 10/11 meist automatisch installiert).
+  * Linux: **XSane** (`sudo apt install xsane`) – das gescannte Bild wird automatisch übernommen, für
+    weitere Seiten einfach erneut scannen. Ohne Oberfläche: `scanimage` (SANE, nimmt den ersten Scanner).
+    Mit GNOME-Dokumentenscanner (simple-scan), Skanpage oder Skanlite (KDE) speichert man das Bild selbst
+    und lädt es mit „Bild öffnen …“.
+  * macOS: „Digitale Bilder“ (Image Capture) oder Vorschau („Ablage → Von Scanner importieren“) –
+    Bild speichern und mit „Bild öffnen …“ laden.
+  * Überall möglich: **eigener Befehl** mit `%f` als Platzhalter für die Zieldatei (z. B. NAPS2:
+    `naps2.console -o %f`).
+
+### Ablauf
+
+1. *Datei → Import → Rezept scannen …* (Strg+Umschalt+S, Werkzeugleiste „Scannen“) – oder
+   *Rezept aus Bild oder Foto erkennen …*.
+2. Seite scannen bzw. Bild öffnen. **Fotos auf der Seite** werden orange markiert und bei der
+   Texterkennung ausgelassen (Bilder erzeugen sonst Buchstabensalat). Falsch markiert? Anklicken
+   entfernt die Markierung; ein nicht erkanntes Foto mit der Maus aufziehen. Danach „Text erkennen“.
+3. Das größte Foto wird als **Rezeptbild** vorgeschlagen; „Aus der Seite zuschneiden …“ wählt einen
+   anderen Ausschnitt, „Kein Rezeptbild“ verwirft es.
+4. Rechts Titel, Portionen, Zutaten und Zubereitung prüfen und korrigieren. Was nicht zugeordnet werden
+   konnte (Einleitung, Nährwertangaben, Schwierigkeit), steht im Reiter „Nicht zugeordnet“, der
+   komplette erkannte Text unter „Erkannter Text“.
+5. **Mehrseitige Rezepte:** weitere Seiten scannen oder öffnen – sie werden angehängt.
+6. „Im Editor öffnen“: Der Rezepteditor zeigt den Scan rechts als **Vorlage** (zoombar, Strg+Mausrad);
+   nach „Speichern“ steht das Rezept in der Datenbank. Der Scan selbst wird nicht gespeichert.
+
+### Tipps für gute Ergebnisse (Textbaustein)
+
+* Mit **300 dpi** scannen; Farbe nur, wenn das Foto mit übernommen werden soll.
+* Handyfotos: Seite flach hinlegen, gerade von oben, ohne Schatten und bei gutem Licht.
+* Die Aufteilung richtet sich nach Überschriften („Zutaten“, „Zubereitung“, „So wird’s gemacht“),
+  Mengenangaben am Zeilenanfang und der Schriftgröße des Titels. Typische Lesefehler werden
+  verbessert (l/2 → ½, 1OO g → 100 g, El → EL, 180 *C → 180 °C, fehlende Umlaut-Punkte wie
+  „Krauterquark“ → „Kräuterquark“). Handschrift erkennt Tesseract kaum.
+
+### Grenzen
+
+* Zwei Rezepte auf einer Seite werden als eines erkannt – die überzähligen Zeilen im Editor löschen
+  oder die Seite für das zweite Rezept erneut öffnen.
+* Stark gestaltete Seiten (Text auf Fotos, farbige Hintergründe) erkennt Tesseract schlechter.
+* Der Windows-Scandialog ist auf Windows beschränkt; unter Linux/macOS wird ein Scanprogramm gestartet.

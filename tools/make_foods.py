@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Erzeugt resources/data/lebensmittel.json – die eingebaute Nährwerttabelle von VitaMeals.
+# Erzeugt resources/data/lebensmittel.json – die eingebaute Nährwerttabelle von ViviaMeals.
 #
 # Werte: Richtwerte je 100 g essbarer Anteil (roh, sofern nicht anders angegeben), gerundet,
 # zusammengestellt aus allgemein zugänglichen Durchschnittswerten. Es sind Schätzwerte für die
@@ -266,7 +266,7 @@ if __name__ == "__main__":
     out = os.path.join(root, "resources", "data", "lebensmittel.json")
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
-        json.dump({"format": "VitaMeals-Foods", "version": 1,
+        json.dump({"format": "ViviaMeals-Foods", "version": 1,
                    "note": "Richtwerte je 100 g – Schätzwerte für die Rezeptplanung, keine Analysewerte.",
                    "foods": foods}, f, ensure_ascii=False, indent=1)
     print(len(foods), "Lebensmittel ->", out)

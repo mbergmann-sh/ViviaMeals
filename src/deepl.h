@@ -1,4 +1,4 @@
-// VitaMeals – optionale Übersetzung fremdsprachiger Rezepte mit der DeepL-API
+// ViviaMeals – optionale Übersetzung fremdsprachiger Rezepte mit der DeepL-API
 //
 // Jeder Benutzer trägt in den Einstellungen seinen eigenen DeepL-API-Schlüssel ein (kostenloser
 // Tarif „DeepL API Free“: 500.000 Zeichen im Monat). Der Schlüssel ist nicht im Programm enthalten.
@@ -7,7 +7,7 @@
 // Ohne Schlüssel oder bei Fehlern übersetzt das eingebaute Glossar die Zutaten.
 //
 // Die Aufrufe blockieren (eigene Ereignisschleife mit Zeitlimit) und sind für den Import gedacht.
-// Zum Testen kann die Umgebungsvariable VITAMEALS_DEEPL_URL einen anderen Server angeben.
+// Zum Testen kann die Umgebungsvariable VIVIAMEALS_DEEPL_URL einen anderen Server angeben.
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 

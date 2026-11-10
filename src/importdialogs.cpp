@@ -170,7 +170,7 @@ QString run(QWidget *parent, Importers::Format format, const QStringList &givenF
             filter = QObject::tr("MealMaster-Rezepte (*.mmf *.mm *.mxp *.txt);;Alle Dateien (*)");
             break;
         default:
-            filter = QObject::tr("Alte VitaMeals-Listen (*.vtm);;Alle Dateien (*)");
+            filter = QObject::tr("Alte ViviaMeals-Listen (*.vtm);;Alle Dateien (*)");
         }
         const QString dir = s.value(QStringLiteral("import/dir"), QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)).toString();
         files = QFileDialog::getOpenFileNames(parent, QObject::tr("%1 importieren").arg(Importers::formatName(format)), dir, filter);
@@ -352,7 +352,7 @@ int addHealthySuggestions(QWidget *parent)
     db.beginBatch();
     for (Recipe r : res.recipes) {
         if (!db.duplicatesOf(r).isEmpty()) continue;
-        r.source = QObject::tr("VitaMeals – gesunde Vorschläge");
+        r.source = QObject::tr("ViviaMeals – gesunde Vorschläge");
         if (db.save(r)) ++added;
     }
     db.endBatch();

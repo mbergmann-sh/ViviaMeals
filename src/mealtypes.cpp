@@ -133,7 +133,13 @@ int classify(const Input &in)
     if (containsAny(text, { "süßspeise", "milchreis", "grießbrei", "griesbrei", "dampfnudel", "kaiserschmarrn", "germknödel",
                             "pfannkuchen mit apfel", "apfelstrudel", "waffel", "crêpe", "crepe", "schokoladen" }))
         t |= Sweet;
-    if (containsAny(title, { "kuchen", "torte", "gebäck", "plätzchen", "kekse", "cookies", "muffin", "brownie",
+    // Pfannkuchen, Eierkuchen, Reibekuchen werden in der Pfanne gebacken – kein „Backen“
+    QString bakeTitle = title;
+    for (const char *pan : { "pfannkuchen", "eierkuchen", "reibekuchen", "kartoffelkuchen", "fischkuchen", "pancake" })
+        bakeTitle.remove(QLatin1String(pan));
+    if (!meat && containsAny(title, { "pfannkuchen", "eierkuchen", "pancake" }) && !containsAny(title, { "käse", "spinat", "schinken", "speck", "lachs", "pilz" }))
+        t |= Sweet;
+    if (containsAny(bakeTitle, { "kuchen", "torte", "gebäck", "plätzchen", "kekse", "cookies", "muffin", "brownie",
                             "cake", "bread", "pie", "tarte", "strudel", "stollen", "zopf", "hefeteig", "scones" }))
         t |= Baking;
     if ((t & Baking) && meat && !(explicitTypes(in.tags) & Baking)) t &= ~Baking;   // „Putenschnitzel mit Maisplätzchen“

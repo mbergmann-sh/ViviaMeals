@@ -1,4 +1,4 @@
-// VitaMeals – Ernährungstagebuch (Planen → Ernährungstagebuch)
+// ViviaMeals – Ernährungstagebuch (Planen → Ernährungstagebuch)
 //
 // DiaryDialog: Person und Tag wählen, Mahlzeiten des Tages mit Uhrzeit, Menge und Nährwerten,
 // Ziel/gegessen/Restkalorien, Wochenübersicht. Einträge aus einem Rezept der Datenbank, als eigenes

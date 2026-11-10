@@ -1,4 +1,4 @@
-// VitaMeals – Ernährungstagebuch je Person
+// ViviaMeals – Ernährungstagebuch je Person
 //
 // Jede Person (Profil aus dem Assistenten Gewichtskontrolle) hat ein eigenes Tagebuch:
 //   <AppData>/tagebuch/<Profil-ID>.json

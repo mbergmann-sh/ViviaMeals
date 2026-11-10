@@ -15,7 +15,7 @@ QString esc(const QString &s) { return s.toHtmlEscaped(); }
 QString motivation(const Profile &p)
 {
     if (p.weights.isEmpty())
-        return tr("Tragen Sie Ihr aktuelles Gewicht ein – ab dem zweiten Eintrag zeigt VitaMeals Ihren Fortschritt.");
+        return tr("Tragen Sie Ihr aktuelles Gewicht ein – ab dem zweiten Eintrag zeigt ViviaMeals Ihren Fortschritt.");
     const WeightEntry &first = p.weights.first();
     const WeightEntry &last = p.weights.last();
     const double diff = last.kg - first.kg;                  // + zugenommen, − abgenommen

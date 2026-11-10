@@ -1,4 +1,4 @@
-// VitaMeals – Motivation, Erklärungen und Alltagstipps zu Abnehmen, Gewicht halten und Zunehmen
+// ViviaMeals – Motivation, Erklärungen und Alltagstipps zu Abnehmen, Gewicht halten und Zunehmen
 //
 // Texte für den Assistenten (Übersicht und Reiter „Tipps“). Grundlage sind allgemein anerkannte
 // Empfehlungen, vor allem „Gut essen und trinken“ der Deutschen Gesellschaft für Ernährung (DGE, 2024)

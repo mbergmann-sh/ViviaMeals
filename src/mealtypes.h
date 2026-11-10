@@ -1,4 +1,4 @@
-// VitaMeals – Mahlzeit-Arten erkennen und Rezepte gesundheitlich einordnen
+// ViviaMeals – Mahlzeit-Arten erkennen und Rezepte gesundheitlich einordnen
 //
 // Aus Titel, Kategorien/Tags, Zutaten und Nährwerten wird geschätzt, wofür ein Rezept taugt:
 //   frühstück · hauptgerichte · zwischenmahlzeit · desserts · süßspeise · backen

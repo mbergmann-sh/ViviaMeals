@@ -1,4 +1,4 @@
-// VitaMeals – Hilfen, damit derselbe Code mit Qt 5.15 und Qt 6 übersetzt.
+// ViviaMeals – Hilfen, damit derselbe Code mit Qt 5.15 und Qt 6 übersetzt.
 //
 // Qt 5.15 ist die letzte Qt-Version für ältere macOS-Versionen (10.13–10.15). Unterschiede, die
 // hier ausgeglichen werden:

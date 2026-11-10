@@ -1,4 +1,4 @@
-// VitaMeals – Test des Kerns (ohne Fenster)
+// ViviaMeals – Test des Kerns (ohne Fenster)
 //   coretest            alle Prüfungen, Ausgabe der importierten Beispielrezepte
 #include "foodcsv.h"
 #include "foodtable.h"
@@ -18,8 +18,13 @@
 #include "mealtypes.h"
 #include "deepl.h"
 #include "glossary.h"
+#include "ocr.h"
+#include "recipescan.h"
 
-#include <QCoreApplication>
+#include <QGuiApplication>
+#include <QPainter>
+#include <QFont>
+#include <QRandomGenerator>
 #include <QBuffer>
 #include <QImage>
 #include <QFile>
@@ -58,8 +63,30 @@ static void line(const QString &l, const IngredientParser::Options &o, double am
 
 int main(int argc, char **argv)
 {
-    QCoreApplication app(argc, argv);
-    QCoreApplication::setApplicationName(QStringLiteral("VitaMealsTest"));
+    if (!qEnvironmentVariableIsSet("QT_QPA_PLATFORM")) qputenv("QT_QPA_PLATFORM", "offscreen");
+    QGuiApplication app(argc, argv);
+    QCoreApplication::setApplicationName(QStringLiteral("ViviaMealsTest"));
+    // coretest --scan <bild>: Fotoerkennung, Texterkennung, Aufteilung anzeigen
+    if (argc >= 3 && QString::fromLocal8Bit(argv[1]) == QLatin1String("--scan")) {
+        QImage img = RecipeScan::normalize(QImage(QString::fromLocal8Bit(argv[2])));
+        const QList<QRect> photos = RecipeScan::findPhotos(img);
+        for (const QRect &r : photos) out << "Foto: " << r.x() << "," << r.y() << " " << r.width() << "x" << r.height() << "\n";
+        QList<Ocr::Line> lines;
+        QString err;
+        if (!Ocr::recognize(RecipeScan::blank(img, photos), Ocr::findTesseract(), QStringLiteral("deu+eng"), &lines, &err)) {
+            out << err << "\n";
+            return 1;
+        }
+        out << "--- Text ---\n" << Ocr::plainText(lines) << "\n";
+        const RecipeScan::Parts p = RecipeScan::split(lines);
+        out << "--- Titel: " << p.text.title << "\n--- Portionen: " << p.text.yield << "  Zeit: " << p.prepMinutes
+            << "\n--- Zutaten:\n  " << p.text.ingredientLines.join(QStringLiteral("\n  ")) << "\n--- Zubereitung:\n"
+            << p.text.directionLines.join(QStringLiteral("\n")) << "\n--- nicht zugeordnet:\n  " << p.unassigned.join(QStringLiteral("\n  ")) << "\n";
+        const Recipe r = RecipeScan::toRecipe(p);
+        out << "--- Rezept: " << r.title << " / " << r.servingsText() << " / " << qRound(r.nutrition.perServing.kcal) << " kcal je Portion / Tags: "
+            << r.tags.join(QStringLiteral(", ")) << "\n";
+        return 0;
+    }
     // coretest --odt <rezeptdatei> <ordner>: alle Rezepte als .odt (mit Testbild) schreiben
     if (argc >= 4 && QString::fromLocal8Bit(argv[1]) == QLatin1String("--odt")) {
         const auto res = Importers::importFile(QString::fromLocal8Bit(argv[2]), Importers::Format::Unknown);
@@ -410,7 +437,7 @@ int main(int argc, char **argv)
                 sock->disconnectFromHost();
             });
         });
-        qputenv("VITAMEALS_DEEPL_URL", QStringLiteral("http://127.0.0.1:%1").arg(server.serverPort()).toUtf8());
+        qputenv("VIVIAMEALS_DEEPL_URL", QStringLiteral("http://127.0.0.1:%1").arg(server.serverPort()).toUtf8());
         DeepL::Usage u;
         QString err;
         CHECK(DeepL::usage(QStringLiteral("test:fx"), &u, &err) && u.characterCount == 1234 && u.characterLimit == 500000, "Kontingent: " + err);
@@ -457,7 +484,7 @@ int main(int argc, char **argv)
         CHECK(res.recipes.size() == 1 && res.recipes.first().ingredients.value(0).food == QLatin1String("weizenmehl")
                   && !res.recipes.first().ingredients.value(0).name.startsWith(QLatin1String("DE:")) && res.warnings.size() == 1,
               "bei Fehler Glossar + Warnung");
-        qunsetenv("VITAMEALS_DEEPL_URL");
+        qunsetenv("VIVIAMEALS_DEEPL_URL");
     }
 
 
@@ -609,6 +636,149 @@ int main(int argc, char **argv)
         CHECK(again.day(QDate(2026, 11, 10)).size() == 1, "Eintrag löschen");
         Diary::Book::removeFor(pid);
         CHECK(!QFile::exists(Diary::Book::fileFor(pid)), "Tagebuch einer gelöschten Person entfernt");
+    }
+
+    out << "\nRezept scannen:\n";
+    {
+        // Erkennungsfehler korrigieren
+        CHECK(RecipeScan::fixLine(QStringLiteral("l/2 TL Salz")) == QStringLiteral("½ TL Salz"), "l/2 → ½");
+        CHECK(RecipeScan::fixLine(QStringLiteral("1OO g Mehl")) == QStringLiteral("100 g Mehl"), "1OO → 100");
+        CHECK(RecipeScan::fixLine(QStringLiteral("1l Milch")) == QStringLiteral("1l Milch"), "1l bleibt");
+        CHECK(RecipeScan::fixLine(QStringLiteral("2 El Öl")) == QStringLiteral("2 EL Öl"), "El → EL");
+        CHECK(RecipeScan::fixLine(QStringLiteral("Va Bund Petersilie")) == QStringLiteral("½ Bund Petersilie"), "Va → ½");
+        CHECK(RecipeScan::fixLine(QStringLiteral("bei 180 *C backen")) == QStringLiteral("bei 180 °C backen"), "°C");
+        CHECK(RecipeScan::fixLine(QStringLiteral("| ﬁnden")) == QStringLiteral("finden"), "Ligatur, Rahmen");
+
+        // Aufteilung aus Zeilen (wie Tesseract sie liefert: Block, Absatz, Höhe)
+        auto L = [](const QString &t, int block, int par, int h) {
+            Ocr::Line l;
+            l.text = t;
+            l.block = block;
+            l.par = par;
+            l.box = QRect(0, 0, 400, h);
+            l.conf = 90;
+            return l;
+        };
+        QList<Ocr::Line> page{
+            L(QStringLiteral("Kartoffel-Lauch-"), 1, 1, 60), L(QStringLiteral("Suppe"), 1, 1, 60),
+            L(QStringLiteral("Eine wärmende Suppe für kalte Tage, schnell gemacht und sättigend."), 2, 1, 22),
+            L(QStringLiteral("Zubereitungszeit: 35 Min."), 3, 1, 22),
+            L(QStringLiteral("Zutaten für 4 Personen"), 4, 1, 26),
+            L(QStringLiteral("• 600 g Kartoffeln"), 4, 2, 22), L(QStringLiteral("2 Stangen Lauch"), 4, 2, 22),
+            L(QStringLiteral("1 Zwiebel, fein"), 4, 2, 22), L(QStringLiteral("gewürfelt"), 4, 2, 22),
+            L(QStringLiteral("2 El Rapsöl 1 l Gemüsebrühe"), 4, 2, 22),
+            L(QStringLiteral("Salz"), 4, 2, 22), L(QStringLiteral("Pfeffer"), 4, 2, 22),
+            L(QStringLiteral("So wird's gemacht"), 5, 1, 26),
+            L(QStringLiteral("1. Kartoffeln schälen und würfeln. Lauch putzen, in Ringe schnei-"), 5, 2, 22),
+            L(QStringLiteral("den und waschen."), 5, 2, 22),
+            L(QStringLiteral("2. Zwiebel im Öl andünsten, Gemüse zugeben und mit der Brühe"), 5, 3, 22),
+            L(QStringLiteral("aufgießen. 20 Minuten köcheln lassen, pürieren und abschmecken."), 5, 3, 22),
+            L(QStringLiteral("Pro Portion: 210 kcal"), 6, 1, 20),
+        };
+        const RecipeScan::Parts p = RecipeScan::split(page);
+        CHECK(p.text.title == QStringLiteral("Kartoffel-Lauch-Suppe"), "Titel zweizeilig: " + p.text.title);
+        CHECK(p.text.yield == QStringLiteral("4 Portionen"), "Portionen: " + p.text.yield);
+        CHECK(p.prepMinutes == 35, "Zubereitungszeit");
+        CHECK(p.text.ingredientLines.size() == 7, "Zutaten: " + p.text.ingredientLines.join(QStringLiteral(" | ")));
+        CHECK(p.text.ingredientLines.value(2) == QStringLiteral("1 Zwiebel, fein gewürfelt"), "Fortsetzungszeile");
+        CHECK(p.text.ingredientLines.value(3) == QStringLiteral("2 EL Rapsöl") && p.text.ingredientLines.value(4) == QStringLiteral("1 l Gemüsebrühe"),
+              "zwei Spalten in einer Zeile");
+        const QString dirText = p.text.directionLines.join(QLatin1Char('\n'));
+        CHECK(dirText.contains(QStringLiteral("schnei-")) && dirText.contains(QStringLiteral("aufgießen")), "Zubereitung");
+        CHECK(p.unassigned.size() == 3, "Einleitung und Nährwertzeile nicht zugeordnet: " + p.unassigned.join(QStringLiteral(" | ")));
+        const Recipe r = RecipeScan::toRecipe(p);
+        CHECK(r.servings == 4 && r.ingredients.size() == 7 && r.instructions.contains(QStringLiteral("schneiden und waschen")),
+              "Rezept aus Scan (Silbentrennung zusammengefügt)");
+        CHECK(r.nutrition.perServing.kcal > 100 && r.prepMinutes == 35 && r.hasTag(QStringLiteral("vegan")), "Nährwerte und Tags beim Scan");
+        out << "  " << r.title << ": " << r.servingsText() << ", " << qRound(r.nutrition.perServing.kcal) << " kcal je Portion, Tags "
+            << r.tags.join(QStringLiteral(", ")) << "\n";
+
+        // Ohne Überschriften: Zutatenblock und Anleitung aus der Form erkennen
+        QList<Ocr::Line> plain{
+            L(QStringLiteral("Quarkspeise"), 1, 1, 40),
+            L(QStringLiteral("500 g Magerquark"), 2, 1, 20), L(QStringLiteral("250 g Erdbeeren"), 2, 1, 20), L(QStringLiteral("2 EL Honig"), 2, 1, 20),
+            L(QStringLiteral("Die Erdbeeren waschen und halbieren. Quark mit Honig glatt rühren und"), 3, 1, 20),
+            L(QStringLiteral("die Früchte unterheben. Kalt servieren."), 3, 1, 20),
+        };
+        const RecipeScan::Parts q = RecipeScan::split(plain);
+        CHECK(q.text.title == QStringLiteral("Quarkspeise") && q.text.ingredientLines.size() == 3 && q.text.directionLines.size() == 2,
+              "ohne Überschriften: " + q.text.ingredientLines.join(QStringLiteral(" | ")) + " // " + q.text.directionLines.join(QStringLiteral(" | ")));
+
+        // Seite rendern: Text links, Foto rechts oben
+        QImage pageImg(1700, 2200, QImage::Format_RGB32);
+        pageImg.fill(Qt::white);
+        const QRect photoRect(1000, 150, 560, 420);
+        {
+            QPainter pt(&pageImg);
+            QLinearGradient grad(photoRect.topLeft(), photoRect.bottomRight());
+            grad.setColorAt(0, QColor(200, 120, 40));
+            grad.setColorAt(1, QColor(60, 140, 60));
+            pt.fillRect(photoRect, grad);
+            QRandomGenerator rng(7);
+            for (int k = 0; k < 4000; ++k)
+                pt.fillRect(photoRect.x() + int(rng.bounded(photoRect.width() - 4)), photoRect.y() + int(rng.bounded(photoRect.height() - 4)), 4, 4,
+                            QColor::fromHsv(int(rng.bounded(360)), 180, 120 + int(rng.bounded(100))));
+            pt.setPen(Qt::black);
+            QFont f(QStringLiteral("DejaVu Sans"));
+            f.setPixelSize(64);
+            f.setBold(true);
+            pt.setFont(f);
+            pt.drawText(120, 230, QStringLiteral("Linsensalat"));
+            f.setPixelSize(36);
+            pt.setFont(f);
+            pt.drawText(120, 700, QStringLiteral("Zutaten für 2 Personen"));
+            f.setBold(false);
+            pt.setFont(f);
+            const QStringList ingr{ QStringLiteral("150 g Berglinsen"), QStringLiteral("1 rote Paprikaschote"), QStringLiteral("2 Frühlingszwiebeln"),
+                                    QStringLiteral("3 EL Olivenöl"), QStringLiteral("2 EL Apfelessig"), QStringLiteral("1 TL Senf") };
+            int y = 770;
+            for (const QString &t : ingr) {
+                pt.drawText(120, y, t);
+                y += 56;
+            }
+            f.setBold(true);
+            pt.setFont(f);
+            y += 50;
+            pt.drawText(120, y, QStringLiteral("Zubereitung"));
+            f.setBold(false);
+            pt.setFont(f);
+            const QStringList dirs{ QStringLiteral("Die Linsen in Wasser etwa 25 Minuten garen und abtropfen"),
+                                    QStringLiteral("lassen. Paprika und Frühlingszwiebeln klein schneiden."),
+                                    QStringLiteral("Öl, Essig und Senf verrühren und alles mischen.") };
+            y += 70;
+            for (const QString &t : dirs) {
+                pt.drawText(120, y, t);
+                y += 56;
+            }
+        }
+        const QImage norm = RecipeScan::normalize(pageImg);
+        const QList<QRect> photos = RecipeScan::findPhotos(norm);
+        CHECK(photos.size() == 1, "genau ein Foto gefunden: " + QString::number(photos.size()));
+        if (!photos.isEmpty()) {
+            const QRect inter = photos.first().intersected(photoRect);
+            CHECK(inter.width() * inter.height() > 0.85 * photoRect.width() * photoRect.height()
+                      && photos.first().width() * photos.first().height() < 1.4 * photoRect.width() * photoRect.height(),
+                  "Fotobereich passt");
+        }
+        const QString exe = Ocr::findTesseract();
+        if (exe.isEmpty()) {
+            out << "  (Tesseract nicht installiert – Texterkennung übersprungen)\n";
+        } else {
+            out << "  Tesseract " << Ocr::version(exe) << ", Sprachen " << Ocr::languages(exe).join(QLatin1Char(',')) << "\n";
+            QList<Ocr::Line> lines;
+            QString err;
+            const bool ok = Ocr::recognize(RecipeScan::blank(norm, photos), exe, Ocr::defaultLanguages(Ocr::languages(exe)), &lines, &err);
+            CHECK(ok, "Texterkennung: " + err);
+            const RecipeScan::Parts s = RecipeScan::split(lines);
+            CHECK(s.text.title == QStringLiteral("Linsensalat"), "OCR Titel: " + s.text.title);
+            CHECK(s.text.yield == QStringLiteral("2 Portionen"), "OCR Portionen: " + s.text.yield);
+            CHECK(s.text.ingredientLines.size() == 6, "OCR Zutaten: " + s.text.ingredientLines.join(QStringLiteral(" | ")));
+            CHECK(s.text.directionLines.join(QLatin1Char(' ')).contains(QStringLiteral("Senf verrühren")), "OCR Zubereitung");
+            const Recipe sr = RecipeScan::toRecipe(s);
+            CHECK(sr.nutrition.coverage() > 0.8, "OCR Nährwerte zugeordnet");
+            out << "  OCR: " << sr.title << ", " << qRound(sr.nutrition.perServing.kcal) << " kcal je Portion: " << s.text.ingredientLines.join(QStringLiteral(" | "))
+                << "\n";
+        }
     }
 
     out << "\n" << (g_fail ? QStringLiteral("%1 Fehler").arg(g_fail) : QStringLiteral("Alle Prüfungen bestanden")) << "\n";

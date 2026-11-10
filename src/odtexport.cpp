@@ -369,7 +369,7 @@ QByteArray toOdt(const Recipe &r, const Options &opt)
 
     const QString now = QDateTime::currentDateTime().toString(Qt::ISODate);
     const QString meta = QStringLiteral("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<office:document-meta") + QString::fromLatin1(kNamespaces)
-                         + QStringLiteral("><office:meta><meta:generator>VitaMeals/%1</meta:generator><dc:title>%2</dc:title>"
+                         + QStringLiteral("><office:meta><meta:generator>ViviaMeals/%1</meta:generator><dc:title>%2</dc:title>"
                                           "<dc:language>de-DE</dc:language><meta:creation-date>%3</meta:creation-date></office:meta></office:document-meta>")
                                .arg(esc(QCoreApplication::applicationVersion()), esc(r.title), now);
     QString manifest = QStringLiteral("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"

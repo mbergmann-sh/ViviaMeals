@@ -1,4 +1,4 @@
-// VitaMeals – Schriftgröße automatisch an den Bildschirm anpassen
+// ViviaMeals – Schriftgröße automatisch an den Bildschirm anpassen
 //
 // „Automatisch“: auf kleinen Bildschirmen (freie Höhe < 800 px, z. B. 1366 × 768) etwas kleiner,
 // auf großen (≥ 1400 px) etwas größer. Zusätzlich frei wählbar (90 … 140 %) unter

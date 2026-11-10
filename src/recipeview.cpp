@@ -19,7 +19,7 @@
 #include <QVBoxLayout>
 
 namespace {
-const QUrl kImageUrl(QStringLiteral("vitameals://rezeptbild.jpg"));
+const QUrl kImageUrl(QStringLiteral("viviameals://rezeptbild.jpg"));
 
 RecipeHtml::Style styleFromPalette(int imageWidth)
 {
