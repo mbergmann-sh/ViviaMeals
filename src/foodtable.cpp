@@ -351,6 +351,11 @@ bool isPartWord(QString rest)
         QStringLiteral("flocken"), QStringLiteral("spitzen"), QStringLiteral("ringe"), QStringLiteral("haelften"),
         QStringLiteral("samen"), QStringLiteral("kerne"), QStringLiteral("stangen"), QStringLiteral("roeschen"),
         QStringLiteral("knollen"), QStringLiteral("zehen"), QStringLiteral("fleisch"), QStringLiteral("sirup"),
+        QStringLiteral("blaettchen"), QStringLiteral("zweig"), QStringLiteral("zweige"), QStringLiteral("zweiglein"),
+        QStringLiteral("stengel"), QStringLiteral("stiele"), QStringLiteral("wuerfelchen"), QStringLiteral("splitter"),
+        QStringLiteral("floeckchen"), QStringLiteral("stueck"), QStringLiteral("pueree"), QStringLiteral("herzen"),
+        QStringLiteral("stauden"), QStringLiteral("raspeln"), QStringLiteral("rispen"), QStringLiteral("wurzelstueck"),
+        QStringLiteral("viertel"), QStringLiteral("medaillons"), QStringLiteral("stangenstueck"),
     };
     for (const QString &link : { QString(), QStringLiteral("n"), QStringLiteral("en"), QStringLiteral("s"), QStringLiteral("es") }) {
         if (!rest.startsWith(link)) continue;

@@ -92,6 +92,32 @@ int main(int argc, char **argv)
             << r.tags.join(QStringLiteral(", ")) << "\n";
         return 0;
     }
+    // coretest --unmatched <dateien…>: Zutaten ohne Nährwert-Zuordnung zählen (TSV: Anzahl, Name, Beispiele)
+    if (argc >= 3 && QString::fromLocal8Bit(argv[1]) == QLatin1String("--unmatched")) {
+        QHash<QString, int> count;
+        QHash<QString, QStringList> examples;
+        int recipes = 0, lines = 0, unmatched = 0;
+        for (int a = 2; a < argc; ++a) {
+            for (const Recipe &r : Importers::importFile(QString::fromLocal8Bit(argv[a]), Importers::Format::Unknown).recipes) {
+                if (Nutrition::isMenu(r)) continue;   // Menüfolgen: „Zutaten“ sind Gerichte
+                ++recipes;
+                for (const Ingredient &i : r.ingredients) {
+                    if (i.heading) continue;
+                    ++lines;
+                    if (!i.food.isEmpty()) continue;
+                    ++unmatched;
+                    const QString key = FoodTable::normalize(i.name);
+                    count[key]++;
+                    if (examples[key].size() < 3 && !examples[key].contains(i.displayLine())) examples[key] << i.displayLine();
+                }
+            }
+        }
+        QStringList keys = count.keys();
+        std::sort(keys.begin(), keys.end(), [&](const QString &x, const QString &y) { return count[x] != count[y] ? count[x] > count[y] : x < y; });
+        out << "# " << recipes << " Rezepte, " << lines << " Zutatenzeilen, " << unmatched << " ohne Zuordnung, " << keys.size() << " verschiedene\n";
+        for (const QString &k : keys) out << count[k] << "\t" << k << "\t" << examples[k].join(QStringLiteral(" | ")) << "\n";
+        return 0;
+    }
     // coretest --dups <rezeptdatei>: Sammlung in eine Testdatenbank laden und Doubletten anzeigen
     if (argc >= 3 && QString::fromLocal8Bit(argv[1]) == QLatin1String("--dups")) {
         QTemporaryDir tmp;
@@ -912,6 +938,30 @@ int main(int argc, char **argv)
             out << "  OCR: " << sr.title << ", " << qRound(sr.nutrition.perServing.kcal) << " kcal je Portion: " << s.text.ingredientLines.join(QStringLiteral(" | "))
                 << "\n";
         }
+    }
+
+    out << "\nNährwerttabelle (Erweiterung aus den Rezeptarchiven):\n";
+    {
+        const QList<QPair<QString, QString>> cases{
+            { QStringLiteral("Fett für die Form"), QStringLiteral("margarine") }, { QStringLiteral("Plattenfett"), QStringLiteral("kokosfett") },
+            { QStringLiteral("Kokos-Mandel-Konfekt"), QStringLiteral("marzipan") }, { QStringLiteral("Raffaello"), QStringLiteral("marzipan") },
+            { QStringLiteral("Rehrückenmedaillons"), QStringLiteral("wild") }, { QStringLiteral("Kalbsfilet"), QStringLiteral("kalbfleisch") },
+            { QStringLiteral("Lammkeule"), QStringLiteral("lamm") }, { QStringLiteral("Creme double"), QStringLiteral("creme_double") },
+            { QStringLiteral("Amaretto"), QStringLiteral("likoer") }, { QStringLiteral("Rum"), QStringLiteral("spirituosen") },
+            { QStringLiteral("Spekulatius"), QStringLiteral("kekse") }, { QStringLiteral("Esskastanien"), QStringLiteral("maronen") },
+            { QStringLiteral("Rote Currypaste"), QStringLiteral("wuerzpaste") }, { QStringLiteral("Hoisinsauce"), QStringLiteral("hoisinsauce") },
+            { QStringLiteral("Johannisbeergelee"), QStringLiteral("marmelade") }, { QStringLiteral("Johannisbeer-Rispen"), QStringLiteral("beeren") },
+            { QStringLiteral("Wildente"), QStringLiteral("ente") }, { QStringLiteral("Poularde"), QStringLiteral("haehnchenschenkel") },
+            { QStringLiteral("Cidre"), QStringLiteral("bier") }, { QStringLiteral("Thymianblättchen"), QStringLiteral("kraeuter") },
+            { QStringLiteral("Mandelsplitter"), QStringLiteral("mandeln") }, { QStringLiteral("Kuchenglasur"), QStringLiteral("schokolade_zartbitter") },
+        };
+        QStringList wrong;
+        for (const auto &c : cases) {
+            const Food *f = FoodTable::instance().match(c.first);
+            if (!f || f->key != c.second) wrong << c.first + QStringLiteral(" → ") + (f ? f->key : QStringLiteral("—"));
+        }
+        CHECK(wrong.isEmpty(), "Zuordnungen: " + wrong.join(QStringLiteral(", ")));
+        out << "  " << FoodTable::instance().all().size() << " Lebensmittel, " << cases.size() - wrong.size() << "/" << cases.size() << " Stichproben richtig\n";
     }
 
     out << "\nMealMaster aus RezKonv (Kochkiste):\n";

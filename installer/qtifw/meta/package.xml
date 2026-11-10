@@ -3,7 +3,7 @@
 <Package>
     <DisplayName>ViviaMeals</DisplayName>
     <Description>Rezeptverwaltung mit Nährwertanalyse, Kühlschrank-Vorschlägen, Wochenplänen und Gewichtskontrolle</Description>
-    <Version>0.6.5</Version>
+    <Version>0.6.6</Version>
     <ReleaseDate>2026-11-10</ReleaseDate>
     <Default>true</Default>
     <ForcedInstallation>true</ForcedInstallation>

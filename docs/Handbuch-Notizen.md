@@ -1,6 +1,6 @@
 # ViviaMeals – Notizen für das Handbuch
 
-Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.6.4.
+Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.6.6.
 
 > **Name:** Das Programm heißt seit Version 0.6 **ViviaMeals** (vorher VitaMeals; die ganze Reihe heißt jetzt
 > Vivia – ViviaParms, ViviaBreathe). Alte Einstellungen, Profile, Tagebücher, eigene Lebensmittel und
@@ -452,3 +452,14 @@ energiedichte Mahlzeiten empfohlen (5–6 am Tag).
   werden die übrigen gelöscht. Eine Rückfrage zeigt vorher genau, was übernommen und gelöscht wird.
 * **Keine Doublette(n):** Gruppe bzw. ausgewähltes Rezept wird künftig nicht mehr gemeldet. Die
   Ausnahmen stehen in der Datenbank (`doubletten-ignoriert.json`) und reisen mit ihr mit.
+
+## Nährwerttabelle: Erweiterung 0.6.6
+
+Anhand von 12 Rezeptarchiven (Kochkiste menue97–menue04, Brot, Fisch, Rind, Weihnachten; 386 Rezepte,
+4740 Zutatenzeilen) erweitert: rund 150 neue Namen für vorhandene Lebensmittel (u. a. „Fett für die
+Form“ → Margarine, Kuchenglasur, Nougat, Chicorée/Radicchio, Wermut, Cidre, Markennamen wie Palmin,
+Biskin, Rama, Raffaello, Philadelphia, Milchmädchen, Mondamin) und neun neue Einträge: Crème double,
+Likör, Kekse/Lebkuchen, Maronen, Maronenpüree, Kalbfleisch, Wild (Reh, Hirsch), Würzpaste, Hoisinsauce.
+Werte überwiegend nach USDA FoodData Central (gemeinfrei), gerundet. Ergebnis: 99,6 % der Zutatenzeilen
+haben Nährwerte; übrig sind Hilfsmittel (Alufolie, Backpapier), Verweise auf Teilrezepte und Speisefarbe.
+Korrigiert dabei: Ente/Gans zählten als Hähnchen, „Johannisbeer…“ als Bier, Liköre als Spirituosen.

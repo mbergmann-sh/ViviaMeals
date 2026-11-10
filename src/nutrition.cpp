@@ -74,6 +74,8 @@ void analyze(Recipe &r)
             if (!learned.isEmpty()) food = table.find(learned);
         }
         if (!food) food = table.match(ing.name);
+        // „1 Reife, aromatische Melone“, „After Eight, Schoko-Minz-Täfelchen“: das Lebensmittel steht im Zusatz
+        if (!food && !ing.note.isEmpty()) food = table.match(ing.note);
         // „1 Zitrone, Saft davon“ / „abgeriebene Schale von 1 Orange“
         if (food && !ing.foodManual && (food->key == QLatin1String("zitrone") || food->key == QLatin1String("orange"))) {
             const QString n = (ing.note + QLatin1Char(' ') + ing.name).toLower();

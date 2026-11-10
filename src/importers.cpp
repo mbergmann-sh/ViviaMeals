@@ -434,7 +434,8 @@ Result parseRezKonv(const QString &text, const Options &opt)
 {
     Result res;
     const QStringList lines = text.split(QLatin1Char('\n'));
-    static const QRegularExpression start(QStringLiteral("^[=M]{5}.*REZKONV"), QRegularExpression::CaseInsensitiveOption);
+    // „MMMMM----- *REZKONV* … nach Meal-Master“ ist MealMaster-Format (parseMealMaster)
+    static const QRegularExpression start(QStringLiteral("^[=M]{5}(?!.*Meal-?Master).*REZKONV"), QRegularExpression::CaseInsensitiveOption);
     static const QRegularExpression section(QStringLiteral("^={3,}\\s*(.*?)\\s*={3,}$"));
     static const QRegularExpression field(QStringLiteral("^\\s*(Titel|Kategorien|Menge|Rezeptname|Rezept Name|Portionen)\\s*:\\s*(.*)$"),
                                           QRegularExpression::CaseInsensitiveOption);
@@ -611,6 +612,19 @@ Result importFile(const QString &path, Format format, const Options &opt)
     // erzwungenes Format, aber Datei passt offensichtlich zum anderen
     const Format d = detect(text);
     if (d == Format::RezKonv || d == Format::MealMaster) f = d;
+    // gemischte Sammlungen (MealMaster- und RezKonv-Rezepte in einer Datei): beide Leser, Ergebnisse zusammen
+    static const QRegularExpression mmStart(QStringLiteral("^(?:MMMMM|-----).*Meal-?Master"), QRegularExpression::MultilineOption | QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression rkStart(QStringLiteral("^[=M]{5}(?!.*Meal-?Master).*REZKONV"), QRegularExpression::MultilineOption | QRegularExpression::CaseInsensitiveOption);
+    if (text.contains(mmStart) && text.contains(rkStart)) {
+        res = parseMealMaster(text, opt);
+        const Result rk = parseRezKonv(text, opt);
+        res.recipes << rk.recipes;
+        res.warnings << rk.warnings;
+        res.umlautsFixed += rk.umlautsFixed;
+        res.translated += rk.translated;
+        res.encoding = enc;
+        return res;
+    }
     if (f == Format::RezKonv) res = parseRezKonv(text, opt);
     else if (f == Format::MealMaster) res = parseMealMaster(text, opt);
     else res.warnings << QObject::tr("Das Format der Datei wurde nicht erkannt.");
