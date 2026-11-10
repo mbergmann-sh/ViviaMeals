@@ -17,6 +17,7 @@
 #include "settingsdialog.h"
 #include "themes.h"
 #include "umlauts.h"
+#include "weighindialog.h"
 #include "mealtypes.h"
 #include "odtexport.h"
 #include "deepl.h"
@@ -112,7 +113,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     rl->addWidget(done);
     lay->addWidget(m_reminder);
     m_reminder->hide();
-    connect(weigh, &QPushButton::clicked, this, &MainWindow::openAssistant);
+    connect(weigh, &QPushButton::clicked, this, &MainWindow::openWeighIn);
     connect(done, &QPushButton::clicked, this, [this] {
         for (Profile &p : Profiles::instance().all())
             if (p.weighReminderDue()) p.markWeighDone();
@@ -287,6 +288,10 @@ void MainWindow::buildMenus()
     a = plan->addAction(Icons::get(QStringLiteral("scale")), tr("&Assistent Gewichtskontrolle …"), this, &MainWindow::openAssistant);
     a->setShortcut(QKeySequence(Qt::Key_F6));
     a->setObjectName(QStringLiteral("actAssistant"));
+    a = plan->addAction(Icons::get(QStringLiteral("chart")), tr("&Gewichtskontrolle …"), this, &MainWindow::openWeighIn);
+    a->setShortcut(QKeySequence(Qt::Key_F8));
+    a->setObjectName(QStringLiteral("actWeighIn"));
+    a->setStatusTip(tr("Gewicht für eine Person eintragen – es wird in ihren Gewichtsverlauf übernommen"));
     a = plan->addAction(Icons::get(QStringLiteral("plan")), tr("&Wochenmenü-Plan …"), this, [this] { openMealPlan(); });
     a->setShortcut(QKeySequence(Qt::Key_F7));
     a->setObjectName(QStringLiteral("actPlan"));
@@ -301,8 +306,9 @@ void MainWindow::buildMenus()
     a = extras->addAction(Icons::get(QStringLiteral("nutrition")), tr("&Nährwerttabelle …"), this, &MainWindow::openFoodTable);
     a = extras->addAction(Icons::get(QStringLiteral("refresh")), tr("Nährwerte aller Rezepte neu &berechnen"), this, &MainWindow::recalcAll);
     m_needDb << a;
-    a = extras->addAction(Icons::get(QStringLiteral("tag")), tr("&Mahlzeit-Tags für alle Rezepte ergänzen …"), this, &MainWindow::mealTagsAll);
-    a->setStatusTip(tr("Frühstück, Hauptgericht, Zwischenmahlzeit, Dessert, Süßspeise und Backen aus Titel, Zutaten und Nährwerten ableiten"));
+    a = extras->addAction(Icons::get(QStringLiteral("tag")), tr("&Mahlzeit- und Nährwert-Tags für alle Rezepte ergänzen …"), this, &MainWindow::mealTagsAll);
+    a->setStatusTip(tr("Frühstück, Hauptgericht, Zwischenmahlzeit, Dessert, Süßspeise, Backen sowie eiweißreich, kalorienarm, fettarm, "
+                       "hochkalorisch, vitaminreich und reduktionsdiät aus Titel, Zutaten und Nährwerten ableiten"));
     m_needDb << a;
     a = extras->addAction(Icons::get(QStringLiteral("umlaut")), tr("&Umlaute in allen Rezepten korrigieren …"), this, &MainWindow::fixUmlautsAll);
     a->setStatusTip(tr("Rezepte ohne ä, ö, ü und ß (z. B. „Kaese“, „heiss“) in der ganzen Datenbank korrigieren"));
@@ -837,25 +843,31 @@ void MainWindow::mealTagsAll()
 {
     RecipeDb &db = RecipeDb::instance();
     QList<Recipe> todo;
-    QHash<QString, int> counts;
+    QHash<QString, int> added, removed;
     for (const RecipeSummary &s : db.summaries()) {
         Recipe r;
         if (!db.load(s.id, &r) || Nutrition::isMenu(r)) continue;
-        const QStringList add = MealTypes::suggestTags(r);
-        if (add.isEmpty()) continue;
-        for (const QString &t : add) counts[t]++;
-        for (const QString &t : add) r.addTag(t);
+        const QStringList before = r.tags;
+        MealTypes::applyTags(r);
+        MealTypes::applyNutrientTags(r);
+        if (r.tags == before) continue;
+        for (const QString &t : r.tags)
+            if (!before.contains(t)) added[t]++;
+        for (const QString &t : before)
+            if (!r.tags.contains(t)) removed[t]++;
         todo << r;
     }
     if (todo.isEmpty()) {
-        QMessageBox::information(this, tr("Mahlzeit-Tags"), tr("Alle Rezepte haben bereits passende Mahlzeit-Tags."));
+        QMessageBox::information(this, tr("Tags ergänzen"), tr("Alle Rezepte haben bereits passende Mahlzeit- und Nährwert-Tags."));
         return;
     }
     QStringList lines;
-    for (const QString &t : MealTypes::mealTags())
-        if (counts.value(t)) lines << QStringLiteral("  %1: %2").arg(RecipeHtml::tagLabel(t)).arg(counts.value(t));
-    if (QMessageBox::question(this, tr("Mahlzeit-Tags"),
-                              tr("Für %1 Rezepte würden diese Tags ergänzt:\n\n%2\n\nVorhandene Tags bleiben erhalten. Fortfahren?")
+    for (const QString &t : MealTypes::mealTags() + MealTypes::nutrientTagNames()) {
+        if (added.value(t)) lines << tr("  + %1: %2").arg(RecipeHtml::tagLabel(t)).arg(added.value(t));
+        if (removed.value(t)) lines << tr("  − %1: %2 (trifft nach den Nährwerten nicht mehr zu)").arg(RecipeHtml::tagLabel(t)).arg(removed.value(t));
+    }
+    if (QMessageBox::question(this, tr("Tags ergänzen"),
+                              tr("Für %1 Rezepte ändern sich die Tags:\n\n%2\n\nAndere Tags bleiben erhalten. Fortfahren?")
                                   .arg(todo.size())
                                   .arg(lines.join(QLatin1Char('\n'))))
         != QMessageBox::Yes)
@@ -863,7 +875,7 @@ void MainWindow::mealTagsAll()
     db.beginBatch();
     for (Recipe &r : todo) db.save(r);
     db.endBatch();
-    statusBar()->showMessage(tr("Mahlzeit-Tags für %1 Rezepte ergänzt.").arg(todo.size()), 5000);
+    statusBar()->showMessage(tr("Tags für %1 Rezepte aktualisiert.").arg(todo.size()), 5000);
     showCurrent();
 }
 
@@ -910,6 +922,7 @@ void MainWindow::recalcAll()
         Recipe r;
         if (!db.load(id, &r)) continue;
         Nutrition::analyze(r);
+        MealTypes::applyNutrientTags(r);   // abgeleitete Tags passend zu den neuen Werten
         db.save(r);
     }
     db.endBatch();
@@ -1037,6 +1050,23 @@ void MainWindow::openAssistant()
     updateReminder();
 }
 
+void MainWindow::openWeighIn()
+{
+    if (!WeighInDialog::hasProfiles()) {
+        if (QMessageBox::question(this, tr("Gewichtskontrolle"),
+                                  tr("Es ist noch keine Person angelegt. Jetzt den Assistenten Gewichtskontrolle öffnen und eine Person anlegen?"))
+            == QMessageBox::Yes)
+            openAssistant();
+        return;
+    }
+    WeighInDialog d(QString(), this);
+    if (d.exec() == QDialog::Accepted) {
+        if (const Profile *p = Profiles::instance().find(d.profileId()))
+            statusBar()->showMessage(tr("Gewicht für %1 in den Gewichtsverlauf eingetragen.").arg(p->name), 6000);
+    }
+    updateReminder();
+}
+
 void MainWindow::updateReminder()
 {
     QStringList who;
@@ -1052,7 +1082,7 @@ void MainWindow::updateReminder()
         m_reminder->hide();
         return;
     }
-    m_reminderText->setText(tr("<b>%1</b> für %2 – am besten morgens vor dem Frühstück wiegen und das Gewicht im Assistenten eintragen.")
+    m_reminderText->setText(tr("<b>%1</b> für %2 – am besten morgens vor dem Frühstück wiegen und das Gewicht eintragen (Planen → Gewichtskontrolle, F8).")
                                 .arg(day, who.join(QStringLiteral(", "))));
     m_reminder->show();
 }

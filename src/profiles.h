@@ -48,6 +48,8 @@ struct Profile {
     // Erinnerung fällig: Wiegetag erreicht, noch nicht „erledigt“ und seitdem kein Gewicht eingetragen
     bool weighReminderDue(const QDate &today = QDate::currentDate()) const;
     void markWeighDone(const QDate &today = QDate::currentDate());
+    // Gewicht eintragen (ersetzt einen Eintrag desselben Tages), sortiert; erledigt ggf. die Wiegetag-Erinnerung
+    void addWeight(const QDate &date, double kg, const QString &note = QString());
     static QString dayName(int weekday);   // 1 → „Montag“
     int age(const QDate &on = QDate::currentDate()) const;
     double bmi(double kg = -1) const;

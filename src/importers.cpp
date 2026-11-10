@@ -247,6 +247,7 @@ Recipe finish(RawRecipe &raw, const Options &opt, const QString &format, Result 
     Nutrition::analyze(r);
     if (opt.autoTags) Nutrition::applyTagSuggestions(r);
     if (opt.mealTags && !Nutrition::isMenu(r)) MealTypes::applyTags(r);
+    if (opt.nutrientTags) MealTypes::applyNutrientTags(r);
     return r;
 }
 

@@ -54,6 +54,10 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
     m_mealTags->setToolTip(tr("Aus Kategorien, Titel, Zutaten und Nährwerten geschätzt – der Wochenplan verplant danach"));
     m_mealTags->setChecked(s.value(QStringLiteral("import/mealTags"), true).toBool());
     il->addWidget(m_mealTags);
+    m_nutrientTags = new QCheckBox(tr("Nährwert-Tags vergeben (eiweißreich, kalorienarm, fettarm, hochkalorisch, vitaminreich, reduktionsdiät)"));
+    m_nutrientTags->setToolTip(tr("Aus den berechneten Nährwerten je Portion bzw. 100 g; „vitaminreich“ nach der Menge an Gemüse, Obst und Kräutern"));
+    m_nutrientTags->setChecked(s.value(QStringLiteral("import/nutrientTags"), true).toBool());
+    il->addWidget(m_nutrientTags);
     lay->addWidget(imp);
 
     // ---- DeepL
@@ -153,6 +157,7 @@ void SettingsDialog::accept()
     s.setValue(QStringLiteral("import/autoTags"), m_autoTags->isChecked());
     s.setValue(QStringLiteral("import/fixUmlauts"), m_umlauts->isChecked());
     s.setValue(QStringLiteral("import/mealTags"), m_mealTags->isChecked());
+    s.setValue(QStringLiteral("import/nutrientTags"), m_nutrientTags->isChecked());
     DeepL::Settings ds;
     ds.enabled = m_deepl->isChecked();
     ds.key = m_deeplKey->text();

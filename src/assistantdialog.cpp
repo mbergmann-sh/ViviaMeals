@@ -149,16 +149,7 @@ AssistantDialog::AssistantDialog(QWidget *parent) : QDialog(parent)
     connect(addW, &QPushButton::clicked, this, [this] {
         Profile *p = Profiles::instance().find(currentId());
         if (!p) return;
-        bool replaced = false;
-        for (WeightEntry &e : p->weights)
-            if (e.date == m_date->date()) {
-                e.kg = m_kg->value();
-                e.note = m_note->text();
-                replaced = true;
-            }
-        if (!replaced) p->weights << WeightEntry{ m_date->date(), m_kg->value(), m_note->text() };
-        if (m_date->date() >= p->lastWeighDay()) p->markWeighDone();   // Wiegetag erledigt
-        std::sort(p->weights.begin(), p->weights.end(), [](const WeightEntry &a, const WeightEntry &b) { return a.date < b.date; });
+        p->addWeight(m_date->date(), m_kg->value(), m_note->text());
         Profiles::instance().save();
         m_note->clear();
         showProfile();

@@ -97,7 +97,8 @@ EditorDialog::EditorDialog(const Recipe &r, QWidget *parent) : QDialog(parent), 
     tl->addWidget(m_tags, 1);
     auto *autoTags = new QPushButton(Icons::get(QStringLiteral("tag")), tr("Ergänzen"));
     autoTags->setToolTip(tr("Tags aus Titel, Zutaten und Nährwerten ableiten: vegan, vegetarisch, fleischgerichte, fisch, "
-                            "frühstück, hauptgerichte, zwischenmahlzeit, desserts, süßspeise, backen"));
+                            "frühstück, hauptgerichte, zwischenmahlzeit, desserts, süßspeise, backen sowie aus den Nährwerten "
+                            "eiweißreich, kalorienarm, fettarm, hochkalorisch, vitaminreich, reduktionsdiät"));
     tl->addWidget(autoTags);
     form->addRow(tr("Tags:"), tl);
     m_source = new QLineEdit(r.source);
@@ -207,6 +208,7 @@ EditorDialog::EditorDialog(const Recipe &r, QWidget *parent) : QDialog(parent), 
         collect();
         Nutrition::applyTagSuggestions(m_recipe);
         if (!Nutrition::isMenu(m_recipe)) MealTypes::applyTags(m_recipe);
+        MealTypes::applyNutrientTags(m_recipe);
         m_tags->setText(m_recipe.tags.join(QStringLiteral(", ")));
     });
     updateImage();

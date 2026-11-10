@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "mealtypes.h"
 #include "foodtable.h"
+#include "nutrition.h"
 #include "recipedb.h"
 
 #include <QCoreApplication>
@@ -182,6 +183,77 @@ int applyTags(Recipe &r)
     const QStringList s = suggestTags(r);
     for (const QString &t : s) r.addTag(t);
     return int(s.size());
+}
+
+QStringList nutrientTagNames()
+{
+    return { QStringLiteral("eiweißreich"), QStringLiteral("kalorienarm"), QStringLiteral("fettarm"),
+             QStringLiteral("hochkalorisch"), QStringLiteral("vitaminreich"), QStringLiteral("reduktionsdiät") };
+}
+
+double produceGrams(const Recipe &r)
+{
+    double g = 0;
+    for (const Ingredient &i : r.ingredients) {
+        if (i.heading || i.food.isEmpty()) continue;
+        const Food *f = FoodTable::instance().find(i.food);
+        if (!f) continue;
+        // Kartoffeln zählen nicht (stärkereich), Trockenobst/Konfitüre stehen nicht unter „obst“/„gemuese“ bzw. werden ausgenommen
+        if ((f->category == QLatin1String("gemuese") || f->category == QLatin1String("obst") || f->category == QLatin1String("kraeuter"))
+            && f->key != QLatin1String("rosinen") && f->key != QLatin1String("trockenobst") && f->key != QLatin1String("oliven")
+            && f->key != QLatin1String("avocado") && f->key != QLatin1String("apfelmus"))
+            g += i.grams;
+        else if (f->key == QLatin1String("avocado"))
+            g += i.grams;   // fettreich, aber vitaminreich
+    }
+    return r.servings > 0 ? g / r.servings : g;
+}
+
+QStringList nutrientTags(const Recipe &r)
+{
+    QStringList t;
+    if (Nutrition::isMenu(r) || !r.nutrition.valid() || r.nutrition.matched == 0 || r.nutrition.coverage() < 0.8) return t;
+    const Input in = from(r);
+    const Nutrients &p = r.nutrition.perServing;
+    if (p.kcal <= 0) return t;
+    const double grams = in.servingGrams;
+    const double per100 = grams > 20 ? 100.0 / grams : 0;      // Umrechnung Portion → 100 g
+    const double ed = energyDensity(in);
+    const double fatShare = p.fat * 9.0 / p.kcal;
+    const int types = classify(in);
+    if (proteinShare(in) >= 0.20 && p.protein >= 15) t << QStringLiteral("eiweißreich");
+    if (per100 > 0 && p.fat * per100 <= 3.0) t << QStringLiteral("fettarm");
+    if (ed > 0 && ed <= 80 && p.kcal <= 400) t << QStringLiteral("kalorienarm");
+    if ((ed >= 250) || p.kcal >= 800) t << QStringLiteral("hochkalorisch");
+    const double produce = produceGrams(r);
+    // Kuchen und Gebäck nie; Desserts/Süßspeisen nur mit viel Obst (≥ 200 g je Portion)
+    const bool sweet = types & (Dessert | Sweet);
+    if (!(types & Baking) && (produce >= 200 || (!sweet && grams > 0 && produce >= 0.5 * grams && produce >= 100)))
+        t << QStringLiteral("vitaminreich");
+    if (p.kcal <= 600 && ed > 0 && ed <= 150 && fatShare <= 0.35 && sugarShare(in) <= 0.20 && proteinShare(in) >= 0.15
+        && !(types & (Dessert | Sweet | Baking)))
+        t << QStringLiteral("reduktionsdiät");
+    return t;
+}
+
+int applyNutrientTags(Recipe &r)
+{
+    // ohne (ausreichende) Nährwerte nichts ändern – auch vorhandene Tags bleiben
+    if (Nutrition::isMenu(r) || !r.nutrition.valid() || r.nutrition.matched == 0 || r.nutrition.coverage() < 0.8 || r.nutrition.perServing.kcal <= 0)
+        return 0;
+    const QStringList want = nutrientTags(r);
+    int changes = 0;
+    for (const QString &t : nutrientTagNames()) {
+        const bool has = r.hasTag(t);
+        if (want.contains(t) && !has) {
+            r.addTag(t);
+            ++changes;
+        } else if (!want.contains(t) && has) {
+            r.tags.removeAll(t);
+            ++changes;
+        }
+    }
+    return changes;
 }
 
 double energyDensity(const Input &in)

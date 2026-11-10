@@ -1,6 +1,6 @@
 # VitaMeals – Notizen für das Handbuch
 
-Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.4.0.
+Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.4.1.
 
 ---
 
@@ -239,3 +239,37 @@ Nährwerttabelle die Zutaten wieder.
 > nicht-kommerziellen Zwecke kostenlos erlaubt – privat sowie durch gemeinnützige Organisationen,
 > Schulen und Behörden –, einschließlich Verändern und Weitergeben mit dem Lizenztext. Kommerzielle
 > Nutzung und Verkauf sind nur mit Erlaubnis des Autors gestattet.
+
+## Nährwert-Tags (ab 0.4.1)
+
+Beim Import (Einstellung „Nährwert-Tags vergeben“), im Editor über **Ergänzen**, bei *Extras → Nährwerte
+aller Rezepte neu berechnen* und bei *Extras → Mahlzeit- und Nährwert-Tags für alle Rezepte ergänzen …*
+werden diese Tags aus den berechneten Nährwerten bestimmt:
+
+| Tag | Bedingung (je Portion bzw. je 100 g) |
+|---|---|
+| eiweißreich | mind. 20 % der Energie aus Eiweiß und mind. 15 g Eiweiß je Portion |
+| fettarm | höchstens 3 g Fett je 100 g |
+| kalorienarm | höchstens 80 kcal je 100 g und höchstens 400 kcal je Portion |
+| hochkalorisch | mind. 250 kcal je 100 g oder mind. 800 kcal je Portion |
+| vitaminreich | mind. 200 g Gemüse, Obst und Kräuter je Portion – oder mind. die Hälfte des Portionsgewichts (nicht bei Kuchen/Gebäck; Desserts nur mit mind. 200 g Obst) |
+| reduktionsdiät | höchstens 600 kcal je Portion und 150 kcal je 100 g, höchstens 35 % der Energie aus Fett und 20 % aus Zucker, mind. 15 % aus Eiweiß, kein Dessert |
+
+* „eiweißreich“ und „fettarm“ folgen den Grenzwerten der EU-Verordnung über nährwertbezogene Angaben
+  (1924/2006). Die übrigen Werte sind an ganze Mahlzeiten angepasst (die EU-Angabe „energiearm“ mit
+  40 kcal je 100 g erreichen fast nur Salate und Brühen).
+* **vitaminreich** ist ein Näherungswert: Die Nährwerttabelle enthält keine Vitamine; Gemüse und Obst
+  sind deren wichtigste Quelle.
+* Die Tags gelten nur bei Rezepten, für die mindestens 80 % der Zutaten Nährwerte haben. Nach einer
+  Änderung der Zutaten werden nicht mehr zutreffende Nährwert-Tags beim Neuberechnen entfernt.
+
+## Gewicht eintragen (Planen → Gewichtskontrolle, F8)
+
+* Datum (Vorgabe: heute, keine Zukunft) und Person wählen, Gewicht eingeben, **Eintragen** – oder **Abbrechen**.
+* Das Gewicht kommt in den Gewichtsverlauf der Person; gibt es für das Datum schon einen Eintrag, wird er
+  ersetzt (Hinweis im Dialog).
+* Angezeigt werden der letzte Eintrag mit Veränderung (grün in Zielrichtung, orange dagegen), BMI und
+  der Abstand zum Zielgewicht.
+* Ein Eintrag am oder nach dem Wiegetag erledigt die Wiegetag-Erinnerung; „Gewicht eintragen …“ in der
+  Erinnerung öffnet diesen Dialog.
+* Ist noch keine Person angelegt, bietet VitaMeals an, den Assistenten Gewichtskontrolle zu öffnen.

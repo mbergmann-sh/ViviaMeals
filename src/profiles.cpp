@@ -128,6 +128,21 @@ void Profile::markWeighDone(const QDate &today)
     if (d.isValid()) weighDone = d;
 }
 
+void Profile::addWeight(const QDate &date, double kg, const QString &note)
+{
+    bool replaced = false;
+    for (WeightEntry &e : weights)
+        if (e.date == date) {
+            e.kg = kg;
+            if (!note.isEmpty()) e.note = note;
+            replaced = true;
+        }
+    if (!replaced) weights << WeightEntry{ date, kg, note };
+    std::sort(weights.begin(), weights.end(), [](const WeightEntry &a, const WeightEntry &b) { return a.date < b.date; });
+    const QDate due = lastWeighDay();
+    if (due.isValid() && date >= due && date <= QDate::currentDate()) markWeighDone();
+}
+
 QString Profile::dayName(int weekday)
 {
     static const char *n[] = { "", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag" };

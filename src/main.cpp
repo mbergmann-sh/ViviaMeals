@@ -18,6 +18,7 @@
 #include "mainwindow.h"
 #include "settingsdialog.h"
 #include "imagecropdialog.h"
+#include "weighindialog.h"
 #include <QTabWidget>
 #include "mealplandialog.h"
 #include "profiles.h"
@@ -266,6 +267,12 @@ void takeScreenshots(MainWindow *w, const QString &dir)
                   after.x(), after.y(), res.width(), res.height());
         }
         shot(&d, dir, QStringLiteral("bild-zuschneiden"));
+        d.reject();
+    }
+    {
+        WeighInDialog d(QString(), w);
+        d.show();
+        shot(&d, dir, QStringLiteral("gewichtskontrolle"));
         d.reject();
     }
     {

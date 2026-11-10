@@ -13,14 +13,15 @@ Technisch und optisch an [VitaParms](https://github.com/mbergmann-sh/VitaParms) 
 | Rezepteditor mit Nährwertanalyse | Englisches MealMaster-Rezept, umgerechnet | Dark-Theme (VS Code) |
 |---|---|---|
 | ![Editor](docs/images/editor.png) | ![Englisch](docs/images/hauptfenster-englisch.png) | ![Dark](docs/images/hauptfenster-dark.png) |
-| **Kühlschrank & Einkaufsliste** | **Assistent Gewichtskontrolle** | **Wochenmenü-Plan** |
+| **Kühlschrank & Einkaufsliste** | **Assistent Gewichtskontrolle** | **Gewichtskontrolle** | *Planen → Gewichtskontrolle* (F8): Datum und Person wählen, Gewicht eintragen – es kommt in den Gewichtsverlauf (ein Eintrag desselben Tages wird ersetzt). Zeigt letzten Eintrag, Veränderung, BMI und Abstand zum Zielgewicht; erledigt die Wiegetag-Erinnerung |
+| **Wochenmenü-Plan** |
 | ![Kühlschrank](docs/images/kuehlschrank.png) | ![Assistent](docs/images/assistent.png) | ![Wochenplan](docs/images/wochenplan.png) |
 | **Suche** | **Import-Vorschau mit Doubletten** | **Kleiner Bildschirm (1024 × 640)** |
 | ![Suche](docs/images/suche.png) | ![Import](docs/images/import-vorschau.png) | ![Klein](docs/images/hauptfenster-klein.png) |
 | **Nährwerte aus CSV importieren** | **Import mit Umlaut-Korrektur** | **Einstellungen (DeepL)** |
 | ![Nährwert-Import](docs/images/naehrwerte-import.png) | ![Umlaute](docs/images/import-umlaute.png) | ![Einstellungen](docs/images/einstellungen.png) |
-| **Assistent: Tipps und Motivation** | **Rezeptbild zuschneiden** | |
-| ![Tipps](docs/images/assistent-tipps.png) | ![Zuschneiden](docs/images/bild-zuschneiden.png) | |
+| **Assistent: Tipps und Motivation** | **Rezeptbild zuschneiden** | **Gewichtskontrolle** |
+| ![Tipps](docs/images/assistent-tipps.png) | ![Zuschneiden](docs/images/bild-zuschneiden.png) | ![Gewichtskontrolle](docs/images/gewichtskontrolle.png) |
 
 ## Funktionen
 
@@ -37,9 +38,11 @@ Technisch und optisch an [VitaParms](https://github.com/mbergmann-sh/VitaParms) 
 | **Übersetzung mit DeepL (optional)** | fremdsprachige Rezepte (Englisch, Französisch, Italienisch, Spanisch, Niederländisch …) werden beim Import nach Rückfrage mit **DeepL** vollständig ins Deutsche übersetzt – Titel, Zutaten und Zubereitung; deutsche Rezepte werden nie gesendet. Jeder trägt seinen **eigenen API-Schlüssel** ein (kostenloser Tarif *DeepL API Free*, 500.000 Zeichen im Monat), Verbindungstest zeigt den Verbrauch. Ohne Schlüssel oder bei Fehlern übernimmt das Glossar. Auch im Editor und für alle vorhandenen Rezepte (*Extras*) |
 | **Englische Rezepte** | Einheiten werden automatisch umgerechnet (cups → ml bzw. g über die Dichte, oz/lb → g, fl oz/pt/qt → ml, tbsp/tsp → EL/TL, stick butter → g, „1 (16 oz) can“ → g), Zutaten und Zusätze über ein **Offline-Glossar** übersetzt („chopped walnuts“ → „Walnüsse, gehackt“), Temperaturen (°F → °C) und Zoll in der Anleitung umgerechnet. Ohne DeepL bleibt die Anleitung selbst englisch (Hinweis in der Ansicht) |
 | **Mahlzeit-Tags** | beim Import (abschaltbar), im Editor und unter *Extras* für alle Rezepte: **frühstück**, **hauptgerichte**, **zwischenmahlzeit**, **desserts**, **süßspeise**, **backen** – geschätzt aus Kategorien, Titel, Zutaten und Nährwerten (z. B. „Flammeri“ → Dessert, „Porridge“ → Frühstück, Vorspeisen mit wenig Energie → Zwischenmahlzeit) |
+| **Nährwert-Tags** | ebenso automatisch aus den berechneten Nährwerten: **eiweißreich** (≥ 20 % der Energie aus Eiweiß und ≥ 15 g je Portion), **fettarm** (≤ 3 g Fett je 100 g), **kalorienarm** (≤ 80 kcal je 100 g und ≤ 400 kcal je Portion), **hochkalorisch** (≥ 250 kcal je 100 g oder ≥ 800 kcal je Portion), **vitaminreich** (≥ 200 g Gemüse, Obst und Kräuter je Portion bzw. ≥ 50 % des Portionsgewichts; nicht bei Gebäck), **reduktionsdiät** (≤ 600 kcal und ≤ 150 kcal/100 g, ≤ 35 % Fett-, ≤ 20 % Zucker-, ≥ 15 % Eiweißenergie, kein Dessert). Grenzwerte für „eiweißreich“ und „fettarm“ nach der EU-Verordnung 1924/2006, die übrigen an Mahlzeiten angepasst. Nicht mehr zutreffende Nährwert-Tags werden beim Neuberechnen entfernt; Rezepte mit zu wenigen bekannten Zutaten bleiben unverändert |
 | **Suche** | Rezeptnamen (auch Teilnamen), Zutaten, Tags (UND/ODER), höchstens kcal je Portion, Favoriten, mit Foto |
 | **Kühlschrank** | Bestandsliste und Grundvorrat pflegen → passende Rezepte mit „vorhanden x/y“ und fehlenden Zutaten, **Einkaufsliste** (nach Warengruppen, kopieren/drucken/speichern) |
 | **Assistent Gewichtskontrolle** | beliebig viele Personen mit Größe, Alter, Aktivität (PAL), Ziel (verlieren/halten/zunehmen), Zielgewicht, Tempo, Ernährungsform, ausgeschlossenen Zutaten und bevorzugten Themen; BMI, Grund- und Gesamtumsatz (Mifflin-St Jeor), Zielzufuhr mit Schutzgrenzen, Dauer bis zum Zielgewicht; **Gewichtsverlauf** mit Grafik; **Wiegetag** mit Erinnerung im Hauptfenster („Erledigt“ blendet sie bis zur nächsten Woche aus, ein Eintrag am Wiegetag ebenso); **Motivation** mit Fortschritt seit dem ersten Eintrag, kurze Erklärung zum Abnehmen/Halten/Zunehmen und Reiter **Tipps** („statt Butter lieber Tomatenmark …“, gute Gewohnheiten nach DGE „Gut essen und trinken“) |
+| **Gewichtskontrolle** | *Planen → Gewichtskontrolle* (F8): Datum und Person wählen, Gewicht eintragen – es kommt in den Gewichtsverlauf (ein Eintrag desselben Tages wird ersetzt). Zeigt letzten Eintrag, Veränderung, BMI und Abstand zum Zielgewicht; erledigt die Wiegetag-Erinnerung |
 | **Wochenmenü-Plan** | Frühstück/Mittag/Abend (+ Zwischenmahlzeit) über 1–14 Tage passend zum Kalorienziel (Anteile 25/35/30/10 % bzw. 30/40/30 %). **Frühstück nur aus Frühstücksrezepten**, Zwischenmahlzeiten aus Snacks bzw. leichten Frühstücksrezepten, Mittag-/Abendessen aus Hauptgerichten; beim **Abnehmen** keine Desserts/Süßspeisen und Vorrang für leichte, eiweiß- und ballaststoffreiche Rezepte mit wenig Zucker. Portionen mit **Gramm** („1 ¼ Portionen (ca. 375 g)“), sinnvolle Höchstmengen je Mahlzeit, Tagessummen mit Eiweiß und Ballaststoffen, Wochendurchschnitt mit Hinweisen nach DGE-Richtwerten. Fehlen Frühstücks- oder Snack-Rezepte, weist der Plan darauf hin und bietet **zehn mitgelieferte gesunde Rezepte** an. Einzelne Mahlzeiten neu würfeln oder gezielt wählen; **Einkaufsliste** (Vorrat abziehbar), Druck, Speichern im Profil |
 | **Website-Export** | themenbasierte **HTML5/PHP-Website**: Startseite, Themenseiten (Tags), Rezeptseiten mit Foto und Nährwerten, Menü, responsives Layout; Suche serverseitig (`suche.php`, PHP 7.4+) und sofort im Browser (JavaScript) – Ordner nur noch hochladen |
 | **LaTeX-Export** | einzelnes Rezept als `.tex` für **book** oder **scrbook** – vollständiges Dokument oder Kapitel zum `\input`, mit Foto (JPEG daneben), Zutatentabelle und Nährwerttabelle (booktabs). Mit pdflatex geprüft |
@@ -105,7 +108,7 @@ src/
   fridge.*            Bestand, Vorschläge, Einkaufslisten
   profiles.*          Personen, Gewichtsverlauf, Energiebedarf
   mealplanner.*       Wochenmenü-Plan
-  mainwindow.*, recipeview.*, editordialog.*, imagecropdialog.*, searchdialog.*, importdialogs.*, exportdialogs.*,
+  mainwindow.*, recipeview.*, editordialog.*, imagecropdialog.*, weighindialog.*, searchdialog.*, importdialogs.*, exportdialogs.*,
   fridgedialog.*, assistantdialog.*, profiledialog.*, weightchart.*, mealplandialog.*, fooddialog.*,
   settingsdialog.*, uiscale.*             Oberfläche
   themes.*, icons.*, screenfit.*, windowstate.*, qtcompat.h   aus VitaBreathe/VitaParms übernommen

@@ -55,6 +55,27 @@ int classify(const Input &in);
 QStringList suggestTags(const Recipe &r);
 int applyTags(Recipe &r);
 
+// Nährwert-Tags: eiweißreich, kalorienarm, fettarm, hochkalorisch, vitaminreich, reduktionsdiät.
+// Sie werden aus den berechneten Nährwerten (und den Gemüse-/Obstmengen) abgeleitet und bei jeder
+// Anwendung neu bestimmt – nicht mehr zutreffende werden entfernt. Schwellen (je Portion bzw. 100 g):
+//   eiweißreich    ≥ 20 % der Energie aus Eiweiß und ≥ 15 g Eiweiß je Portion
+//                  (20 %: Anhang der EU-Verordnung 1924/2006 „hoher Proteingehalt“)
+//   fettarm        ≤ 3 g Fett je 100 g (EU-Verordnung 1924/2006 „fettarm“, feste Lebensmittel)
+//   kalorienarm    ≤ 80 kcal je 100 g und ≤ 400 kcal je Portion (an Mahlzeiten angepasst;
+//                  die EU-Angabe „energiearm“ verlangt ≤ 40 kcal je 100 g)
+//   hochkalorisch  ≥ 250 kcal je 100 g oder ≥ 800 kcal je Portion
+//   vitaminreich   ≥ 200 g Gemüse, Obst und Kräuter je Portion bzw. ≥ 50 % des Portionsgewichts
+//                  (die Nährwerttabelle enthält keine Vitaminwerte – Gemüse und Obst sind die
+//                  wichtigsten Vitaminquellen, daher dieser Näherungswert); nicht bei Kuchen/Gebäck,
+//                  bei Desserts nur mit ≥ 200 g Obst je Portion
+//   reduktionsdiät ≤ 600 kcal je Portion, ≤ 150 kcal je 100 g, ≤ 35 % Energie aus Fett,
+//                  ≤ 20 % aus Zucker, ≥ 15 % aus Eiweiß – kein Dessert/Gebäck
+// Nur bei Rezepten mit Nährwerten für mindestens 80 % der Zutaten; sonst bleiben die Tags unverändert.
+QStringList nutrientTagNames();
+QStringList nutrientTags(const Recipe &r);
+int applyNutrientTags(Recipe &r);   // gibt die Zahl der Änderungen zurück
+double produceGrams(const Recipe &r);   // Gemüse, Obst, Kräuter je Portion
+
 // Kennzahlen
 double energyDensity(const Input &in);   // kcal je 100 g (0 = unbekannt)
 double sugarShare(const Input &in);      // Anteil Zucker an der Energie (0…1)

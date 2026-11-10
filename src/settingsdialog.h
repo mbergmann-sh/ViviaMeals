@@ -32,6 +32,7 @@ private:
     QCheckBox *m_autoTags;
     QCheckBox *m_umlauts;
     QCheckBox *m_mealTags;
+    QCheckBox *m_nutrientTags;
     QCheckBox *m_deepl;
     QLineEdit *m_deeplKey;
     QLabel *m_deeplStatus;

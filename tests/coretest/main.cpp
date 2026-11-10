@@ -522,6 +522,46 @@ int main(int argc, char **argv)
         db.close();
     }
 
+
+    // ---------------------------------------------------------------- Nährwert-Tags
+    out << "\nNährwert-Tags:\n";
+    {
+        const auto res = Importers::importFile(QStringLiteral(":/samples/gesund.rk"), Importers::Format::Unknown);
+        auto find = [&](const QString &t) -> Recipe {
+            for (const Recipe &r : res.recipes)
+                if (r.title.startsWith(t)) return r;
+            return Recipe();
+        };
+        const Recipe quark = find(QStringLiteral("Magerquark"));
+        CHECK(quark.hasTag(QStringLiteral("eiweißreich")) && quark.hasTag(QStringLiteral("fettarm")) && !quark.hasTag(QStringLiteral("hochkalorisch")),
+              "Magerquark mit Beeren: eiweißreich, fettarm");
+        const Recipe sticks = find(QStringLiteral("Gemüsesticks"));
+        CHECK(sticks.hasTag(QStringLiteral("vitaminreich")) && sticks.hasTag(QStringLiteral("kalorienarm")), "Gemüsesticks: vitaminreich, kalorienarm");
+        const Recipe porridge = find(QStringLiteral("Haferflocken"));
+        CHECK(porridge.hasTag(QStringLiteral("reduktionsdiät")), "Porridge: reduktionsdiät");
+        const auto rk = Importers::importFile(QStringLiteral(":/samples/umlaute.rk"), Importers::Format::Unknown);
+        CHECK(!rk.recipes.isEmpty() && rk.recipes.first().hasTag(QStringLiteral("hochkalorisch"))
+                  && !rk.recipes.first().hasTag(QStringLiteral("reduktionsdiät")),
+              "Käsespätzle: hochkalorisch, keine Reduktionsdiät");
+        const auto bk = Importers::importFile(QStringLiteral(":/samples/beispiele.rk"), Importers::Format::Unknown);
+        CHECK(!bk.recipes.isEmpty() && !bk.recipes.first().hasTag(QStringLiteral("vitaminreich")), "Apfelkuchen nicht vitaminreich");
+        // abgeleitete Tags werden entfernt, wenn sie nicht mehr passen; ohne Nährwerte bleibt alles
+        Recipe r = quark;
+        r.addTag(QStringLiteral("hochkalorisch"));
+        CHECK(MealTypes::applyNutrientTags(r) == 1 && !r.hasTag(QStringLiteral("hochkalorisch")), "unpassendes Tag entfernt");
+        Recipe empty;
+        empty.title = QStringLiteral("ohne Nährwerte");
+        empty.addTag(QStringLiteral("kalorienarm"));
+        CHECK(MealTypes::applyNutrientTags(empty) == 0 && empty.hasTag(QStringLiteral("kalorienarm")), "ohne Nährwerte unverändert");
+        Profile w;
+        w.weighDay = QDate::currentDate().dayOfWeek();
+        w.addWeight(QDate::currentDate(), 72.5);
+        w.addWeight(QDate::currentDate().addDays(-7), 73.4);
+        w.addWeight(QDate::currentDate(), 72.3);
+        CHECK(w.weights.size() == 2 && w.weights.last().kg == 72.3 && w.weights.first().kg == 73.4 && !w.weighReminderDue(),
+              "Gewicht eintragen: sortiert, gleicher Tag ersetzt, Erinnerung erledigt");
+    }
+
     out << "\n" << (g_fail ? QStringLiteral("%1 Fehler").arg(g_fail) : QStringLiteral("Alle Prüfungen bestanden")) << "\n";
     return g_fail ? 1 : 0;
 }

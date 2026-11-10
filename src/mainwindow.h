@@ -56,6 +56,7 @@ public slots:
     void openFridge();
     void openAssistant();
     void updateReminder();
+    void openWeighIn();
     void openMealPlan(const QString &profileId = QString());
     void openFoodTable();
     void recalcAll();

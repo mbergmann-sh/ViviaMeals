@@ -182,6 +182,7 @@ QString run(QWidget *parent, Importers::Format format, const QStringList &givenF
     opt.autoTags = s.value(QStringLiteral("import/autoTags"), true).toBool();
     opt.fixUmlauts = s.value(QStringLiteral("import/fixUmlauts"), true).toBool();
     opt.mealTags = s.value(QStringLiteral("import/mealTags"), true).toBool();
+    opt.nutrientTags = s.value(QStringLiteral("import/nutrientTags"), true).toBool();
 
     QList<Recipe> recipes;
     QStringList origins, warnings;

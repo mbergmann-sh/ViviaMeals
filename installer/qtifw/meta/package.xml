@@ -3,8 +3,8 @@
 <Package>
     <DisplayName>VitaMeals</DisplayName>
     <Description>Rezeptverwaltung mit Nährwertanalyse, Kühlschrank-Vorschlägen, Wochenplänen und Gewichtskontrolle</Description>
-    <Version>0.4.0</Version>
-    <ReleaseDate>2026-11-09</ReleaseDate>
+    <Version>0.4.1</Version>
+    <ReleaseDate>2026-11-10</ReleaseDate>
     <Default>true</Default>
     <ForcedInstallation>true</ForcedInstallation>
     <SortingPriority>100</SortingPriority>
