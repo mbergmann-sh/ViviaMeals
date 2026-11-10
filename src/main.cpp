@@ -17,6 +17,7 @@
 #include "importers.h"
 #include "mainwindow.h"
 #include "scandialog.h"
+#include "duplicatesdialog.h"
 #include "settingsdialog.h"
 #include "imagecropdialog.h"
 #include "weighindialog.h"
@@ -448,6 +449,35 @@ void takeScreenshots(MainWindow *w, const QString &dir)
             shot(&d, dir, QStringLiteral("einstellungen-scannen"));
         }
         static_cast<QDialog &>(d).reject();
+    }
+    {
+        // Doubletten: zwei Kopien aus der Demo-Datenbank (danach wieder entfernt)
+        RecipeDb &db = RecipeDb::instance();
+        QStringList added;
+        for (const RecipeSummary &s : QList<RecipeSummary>(db.summaries())) {
+            Recipe r;
+            if (!db.load(s.id, &r)) continue;
+            if (s.title.contains(QStringLiteral("Curry"))) {
+                r.id.clear();
+                r.title = QStringLiteral("GEMUESE-CURRY MIT KICHERERBSEN");
+                r.image.clear();
+                r.favorite = false;
+            } else if (s.title.startsWith(QStringLiteral("Apfelkuchen"))) {
+                r.id.clear();
+                r.title = QStringLiteral("Omas ") + r.title;
+                r.image.clear();
+            } else {
+                continue;
+            }
+            r.id = Recipe::newId();
+            db.save(r);
+            added << r.id;
+        }
+        DuplicatesDialog d(w);
+        d.show();
+        shot(&d, dir, QStringLiteral("doubletten"));
+        d.reject();
+        for (const QString &id : added) db.remove(id);
     }
     {
         // Rezept scannen: gerenderte Rezeptseite mit Foto

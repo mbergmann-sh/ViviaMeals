@@ -1,6 +1,6 @@
 # ViviaMeals – Notizen für das Handbuch
 
-Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.6.3.
+Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.6.4.
 
 > **Name:** Das Programm heißt seit Version 0.6 **ViviaMeals** (vorher VitaMeals; die ganze Reihe heißt jetzt
 > Vivia – ViviaParms, ViviaBreathe). Alte Einstellungen, Profile, Tagebücher, eigene Lebensmittel und
@@ -427,3 +427,28 @@ energiedichte Mahlzeiten empfohlen (5–6 am Tag).
   für vorhandene Rezepte nach.
 * Gibt es weniger als drei leichte Rezepte, verplant ViviaMeals ersatzweise kleine Portionen von
   Hauptgerichten und bietet die mitgelieferten Vorschläge an (zehn davon sind leichte Abendessen).
+
+## Doubletten suchen (ab 0.6.4)
+
+*Extras → Doubletten suchen …* durchsucht die geöffnete Datenbank.
+
+**Was als Doublette gilt** (Textbaustein):
+* **gleicher Titel** – Groß-/Kleinschreibung, Satzzeichen und Umlaut-Schreibweise spielen keine Rolle
+  („Käsekuchen“, „Kaesekuchen“ und „KÄSEKUCHEN!“ sind gleich);
+* **ähnlicher Titel** (Tippfehler, Zusätze wie „Omas …“, „… nach Art des Hauses“) **und** weitgehend
+  gleiche Zutaten – „Apfelkuchen“ und „Nudelkuchen“ gelten dagegen als verschieden;
+* **gleiche Zutaten** (mindestens fünf) unter anderem Namen, z. B. „Pfannkuchen“ und „Eierkuchen“.
+
+**Suchstufen:** „nur gleiche Titel“ (sicher), „empfohlen“, „großzügig“ (findet mehr, auch Fehltreffer).
+
+**Bedienung:**
+* Links die Gruppen, darunter die Rezepte mit Portionen, kcal je Portion, Zutatenzahl, Bild, Favorit
+  und Änderungsdatum. Das Häkchen markiert das vollständigste Rezept (Nährwerte, Bild, Zutaten,
+  Favorit) als Vorschlag zum Behalten.
+* Rechts zwei Rezepte nebeneinander; „Vergleich mit“ wählt das zweite.
+* **Bearbeiten** (auch Doppelklick), **Löschen** (mehrere mit Strg/Umschalt auswählbar).
+* **Dieses behalten, übrige zusammenführen:** Das ausgewählte Rezept bleibt; fehlendes Bild, Quelle,
+  Zubereitungszeit sowie alle Tags und die Favoriten-Markierung der übrigen werden übernommen, dann
+  werden die übrigen gelöscht. Eine Rückfrage zeigt vorher genau, was übernommen und gelöscht wird.
+* **Keine Doublette(n):** Gruppe bzw. ausgewähltes Rezept wird künftig nicht mehr gemeldet. Die
+  Ausnahmen stehen in der Datenbank (`doubletten-ignoriert.json`) und reisen mit ihr mit.

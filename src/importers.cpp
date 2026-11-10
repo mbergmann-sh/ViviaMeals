@@ -274,6 +274,7 @@ RawRecipe::ColumnIngredient mmIngredient(const QString &part)
     c.amount = part.left(7).trimmed();
     c.unit = part.mid(8, 2).trimmed();
     c.name = part.mid(11).trimmed();
+    while (c.name.startsWith(QLatin1Char(';')) || c.name.startsWith(QLatin1Char(','))) c.name = c.name.mid(1).trimmed();   // „1 1/2 tb ;Salz“
     c.original = part.trimmed();
     return c;
 }
@@ -282,8 +283,16 @@ RawRecipe::ColumnIngredient mmIngredient(const QString &part)
 
 Format detect(const QString &text)
 {
-    const QString head = text.left(4000);
-    if (head.contains(QRegularExpression(QStringLiteral("^[=M]{5}.*REZKONV"), QRegularExpression::MultilineOption | QRegularExpression::CaseInsensitiveOption)))
+    const QString head = text.left(20000);
+    // Feldnamen entscheiden: MealMaster „Title:“, RezKonv „Titel:“. RezKonv kann auch MealMaster
+    // schreiben – dann steht „*REZKONV* … nach Meal-Master“ in der Startzeile (z. B. Kochkiste-Archive).
+    static const QRegularExpression enTitle(QStringLiteral("^\\s*Title\\s*:"), QRegularExpression::MultilineOption | QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression deTitle(QStringLiteral("^\\s*Titel\\s*:"), QRegularExpression::MultilineOption | QRegularExpression::CaseInsensitiveOption);
+    const bool en = head.contains(enTitle), de = head.contains(deTitle);
+    if (en && !de) return Format::MealMaster;
+    if (de && !en) return Format::RezKonv;
+    if (head.contains(QRegularExpression(QStringLiteral("^[=M]{5}(?!.*Meal-?Master).*REZKONV"),
+                                         QRegularExpression::MultilineOption | QRegularExpression::CaseInsensitiveOption)))
         return Format::RezKonv;
     if (head.contains(QRegularExpression(QStringLiteral("^(MMMMM|-----).*Meal-?Master"), QRegularExpression::MultilineOption | QRegularExpression::CaseInsensitiveOption)))
         return Format::MealMaster;
@@ -311,7 +320,7 @@ Result parseMealMaster(const QString &text, const Options &opt)
     static const QRegularExpression start(QStringLiteral("^(MMMMM|-----).*Meal-?Master"), QRegularExpression::CaseInsensitiveOption);
     static const QRegularExpression divider(QStringLiteral("^(?:MMMMM|-----)-*\\s*([^-].*?)\\s*-*$"));
     static const QRegularExpression field(QStringLiteral("^\\s*(Title|Categories|Yield|Servings)\\s*:\\s*(.*)$"), QRegularExpression::CaseInsensitiveOption);
-    enum State { Outside, Header, Ingredients, Directions };
+    enum State { Outside, Header, Ingredients, Source, Directions };
     State st = Outside;
     RawRecipe raw;
     QList<RawRecipe::ColumnIngredient> right;   // rechte Spalte eines zweispaltigen Blocks (wird am Blockende angehängt)
@@ -357,6 +366,16 @@ Result parseMealMaster(const QString &text, const Options &opt)
         if (t.startsWith(QLatin1String("MMMMM")) || (t.startsWith(QLatin1String("-----")) && t.size() > 10)) {
             const auto d = divider.match(t);
             flushRight();
+            // RezKonv nach MealMaster: „MMMMM-----Quelle-----“ / „MMMMM-----Erfasst *RK* am … von-----“ sind keine Zutaten
+            static const QRegularExpression sourceHead(QStringLiteral("^(?:quelle|erfasst|source|posted|from)\\b"),
+                                                       QRegularExpression::CaseInsensitiveOption);
+            const QString label = d.hasMatch() ? d.captured(1).trimmed() : QString();
+            if (label.contains(sourceHead)) {
+                if (!label.startsWith(QLatin1String("Quelle"), Qt::CaseInsensitive) && !label.startsWith(QLatin1String("Source"), Qt::CaseInsensitive))
+                    raw.sourceLines << (label == label.toUpper() ? Umlauts::headingCase(label) : label);   // „Erfasst *RK* am 24.11.00 von“ + Name in der nächsten Zeile
+                st = Source;
+                continue;
+            }
             if (d.hasMatch() && !d.captured(1).trimmed().isEmpty()) {
                 RawRecipe::ColumnIngredient h;
                 h.heading = true;
@@ -365,6 +384,16 @@ Result parseMealMaster(const QString &text, const Options &opt)
                 raw.columns << h;
             }
             st = Ingredients;
+            continue;
+        }
+        if (st == Source) {
+            if (blank(line)) {   // Quellenblock endet mit einer Leerzeile – danach Zutaten bzw. Zubereitung
+                st = Ingredients;
+                continue;
+            }
+            QString src = t;
+            while (src.startsWith(QLatin1Char('-'))) src = src.mid(1).trimmed();
+            if (!src.isEmpty()) raw.sourceLines << src;
             continue;
         }
         if (st == Ingredients) {

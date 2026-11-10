@@ -21,6 +21,7 @@
 #include "ocr.h"
 #include "recipescan.h"
 #include "escl.h"
+#include "duplicates.h"
 
 #include <QGuiApplication>
 #include <QPainter>
@@ -33,6 +34,7 @@
 #include <QDir>
 #include <QTemporaryDir>
 #include <QTcpServer>
+#include <QElapsedTimer>
 #include <QTimer>
 #include <QEventLoop>
 #include <QTcpSocket>
@@ -90,6 +92,29 @@ int main(int argc, char **argv)
             << r.tags.join(QStringLiteral(", ")) << "\n";
         return 0;
     }
+    // coretest --dups <rezeptdatei>: Sammlung in eine Testdatenbank laden und Doubletten anzeigen
+    if (argc >= 3 && QString::fromLocal8Bit(argv[1]) == QLatin1String("--dups")) {
+        QTemporaryDir tmp;
+        RecipeDb &db = RecipeDb::instance();
+        db.create(tmp.filePath(QStringLiteral("d")), QStringLiteral("d"));
+        db.beginBatch();
+        for (Recipe r : Importers::importFile(QString::fromLocal8Bit(argv[2]), Importers::Format::Unknown).recipes) db.save(r);
+        db.endBatch();
+        QElapsedTimer t;
+        t.start();
+        for (auto st : { Duplicates::Strictness::TitleOnly, Duplicates::Strictness::Normal, Duplicates::Strictness::Generous }) {
+            const QList<Duplicates::Group> g = Duplicates::find(db.summaries(), {}, st);
+            out << "Stufe " << int(st) << ": " << g.size() << " Gruppen bei " << db.count() << " Rezepten (" << t.restart() << " ms)\n";
+            if (st == Duplicates::Strictness::TitleOnly) continue;
+            for (const Duplicates::Group &x : g) {
+                if (x.reasons == Duplicates::SameTitle) continue;
+                QStringList titles;
+                for (const QString &id : x.ids) titles << db.summary(id)->title;
+                out << "  [" << Duplicates::reasonText(x.reasons) << " " << qRound(x.score * 100) << "%] " << titles.join(QStringLiteral(" | ")) << "\n";
+            }
+        }
+        return 0;
+    }
     // coretest --odt <rezeptdatei> <ordner>: alle Rezepte als .odt (mit Testbild) schreiben
     if (argc >= 4 && QString::fromLocal8Bit(argv[1]) == QLatin1String("--odt")) {
         const auto res = Importers::importFile(QString::fromLocal8Bit(argv[2]), Importers::Format::Unknown);
@@ -119,6 +144,7 @@ int main(int argc, char **argv)
                        .arg(MealTypes::healthNotes(MealTypes::from(r)).join(QLatin1Char(','))) << "\n";
             for (const Ingredient &i : r.ingredients)
                 out << "  " << (i.heading ? QStringLiteral("== ") : QString()) << i.displayLine() << "   -> " << (i.food.isEmpty() ? QStringLiteral("??") : i.food) << "\n";
+            if (!r.source.isEmpty()) out << "  [Quelle] " << r.source << "\n";
             out << r.instructions << "\n\n";
         }
         for (const QString &w : res.warnings) out << "WARN " << w << "\n";
@@ -886,6 +912,95 @@ int main(int argc, char **argv)
             out << "  OCR: " << sr.title << ", " << qRound(sr.nutrition.perServing.kcal) << " kcal je Portion: " << s.text.ingredientLines.join(QStringLiteral(" | "))
                 << "\n";
         }
+    }
+
+    out << "\nMealMaster aus RezKonv (Kochkiste):\n";
+    {
+        const QString mm = QStringLiteral(
+            "*REZKONV* (iau) v0.9i - *DER* Rezeptkonverter\r\n\r\n"
+            "MMMMM----- *REZKONV* (iau) v0.9i nach Meal-Master\r\n\r\n"
+            "     Title: Leinsamenbrot #1\r\nCategories: Brot, Leinsamen\r\n     Yield: 1 Brot\r\n\r\n"
+            "    125 g  Leinsamen\r\n    500 g  Roggenmehl Type 1370;\r\n           -ersatzweise 997\r\n"
+            "  1 1/2 tb ;Salz\r\n    200 g  Kefir\r\n\r\n"
+            "MMMMM-----------SAUERTEIG (500 G)----------------\r\n     15 g  Hefe\r\n    200 g  Mehl\r\n\r\n"
+            "MMMMM-----------ERFASST *RK* AM 24.11.00 VON-----------\r\n           Petra Holzapfel\r\n\r\n"
+            "Den Leinsamen mit kochendem Wasser übergießen.\r\n\r\nMMMMM\r\n");
+        CHECK(Importers::detect(mm) == Importers::Format::MealMaster, "RezKonv-Ausgabe im MealMaster-Format erkannt");
+        const auto res = Importers::parseMealMaster(mm);
+        const Recipe r = res.recipes.value(0);
+        bool salt = false, kefir = false, holz = false;
+        for (const Ingredient &i : r.ingredients) {
+            if (i.name == QStringLiteral("Salz")) salt = true;
+            if (i.food == QStringLiteral("joghurt")) kefir = true;
+            if (i.name.contains(QStringLiteral("Holzapfel"))) holz = true;
+        }
+        CHECK(res.recipes.size() == 1 && r.title == QStringLiteral("Leinsamenbrot #1") && salt && kefir && !holz
+                  && r.source.contains(QStringLiteral("Petra Holzapfel")),
+              "Titel, „;Salz“, Kefir, Erfasser als Quelle: " + r.title + " / " + r.source);
+        out << "  " << r.title << " – " << r.ingredients.size() << " Zeilen, Quelle: " << r.source << "\n";
+    }
+
+    out << "\nDoubletten:\n";
+    {
+        QTemporaryDir tmpd;
+        RecipeDb &db = RecipeDb::instance();
+        CHECK(db.create(tmpd.filePath(QStringLiteral("dup")), QStringLiteral("Dup")), "Doubletten-Datenbank");
+        auto make = [&](const QString &title, const QString &ings, bool fav = false, bool image = false) {
+            Recipe r;
+            r.title = title;
+            r.servings = 4;
+            r.ingredients = IngredientParser::parseText(ings);
+            r.instructions = QStringLiteral("Alles verrühren und backen.");
+            r.favorite = fav;
+            if (image) r.image = QStringLiteral("iVBORw0KGgo=");
+            Nutrition::analyze(r);
+            db.save(r);
+            return r.id;
+        };
+        const QString cake = QStringLiteral("250 g Magerquark\n100 g Zucker\n3 Eier\n1 Zitrone\n200 g Mehl\n100 g Butter");
+        const QString k1 = make(QStringLiteral("Käsekuchen"), cake);
+        const QString k2 = make(QStringLiteral("KAESEKUCHEN!"), cake, true);
+        const QString k3 = make(QStringLiteral("Käsekuchen"), cake, false, true);
+        const QString a1 = make(QStringLiteral("Apfelkuchen vom Blech"), QStringLiteral("1 kg Äpfel\n300 g Mehl\n150 g Butter\n150 g Zucker\n2 Eier\n1 TL Zimt"));
+        const QString a2 = make(QStringLiteral("Omas Apfelkuchen vom Blech"), QStringLiteral("1 kg Äpfel\n300 g Mehl\n150 g Butter\n150 g Zucker\n2 Eier"));
+        const QString p1 = make(QStringLiteral("Pfannkuchen"), QStringLiteral("250 g Mehl\n500 ml Milch\n3 Eier\n1 Prise Salz\n2 EL Zucker\n2 EL Butter\n1 Päckchen Vanillezucker"));
+        const QString p2 = make(QStringLiteral("Eierkuchen nach Art des Hauses"), QStringLiteral("250 g Mehl\n500 ml Milch\n3 Eier\n1 Prise Salz\n2 EL Zucker\n2 EL Butter\n1 Päckchen Vanillezucker"));
+        make(QStringLiteral("Linsensuppe"), QStringLiteral("250 g Linsen\n1 Zwiebel\n2 Möhren\n1 l Gemüsebrühe"));
+        make(QStringLiteral("Linsensalat"), QStringLiteral("250 g Linsen\n1 Paprikaschote\n2 EL Essig\n3 EL Öl"));
+        CHECK(Duplicates::titleKey(QStringLiteral("Käsekuchen")) == Duplicates::titleKey(QStringLiteral("KAESEKUCHEN!")), "Titel vereinheitlicht");
+        QList<Duplicates::Group> g = Duplicates::find(db.summaries());
+        auto groupOf = [&](const QString &id) -> const Duplicates::Group * {
+            for (const Duplicates::Group &x : g)
+                if (x.ids.contains(id)) return &x;
+            return nullptr;
+        };
+        const Duplicates::Group *gk = groupOf(k1);
+        CHECK(gk && gk->ids.size() == 3 && gk->ids.contains(k2) && gk->ids.contains(k3) && (gk->reasons & Duplicates::SameTitle),
+              "drei Käsekuchen in einer Gruppe");
+        CHECK(gk && gk->ids.first() != k1, "vollständigstes Rezept (Favorit/Bild) zuerst");
+        const Duplicates::Group *ga = groupOf(a1);
+        CHECK(ga && ga->ids.contains(a2) && (ga->reasons & Duplicates::SimilarTitle), "„Omas Apfelkuchen vom Blech“ ähnlich");
+        const Duplicates::Group *gp = groupOf(p1);
+        CHECK(gp && gp->ids.contains(p2) && (gp->reasons & Duplicates::SameIngredients), "Pfannkuchen/Eierkuchen: gleiche Zutaten");
+        CHECK(g.size() == 3, "keine Fehltreffer (Linsensuppe/Linsensalat): " + QString::number(g.size()));
+        CHECK(Duplicates::find(db.summaries(), {}, Duplicates::Strictness::TitleOnly).size() == 1, "streng: nur gleiche Titel");
+        // als „keine Doubletten“ markieren
+        QSet<QString> ign{ Duplicates::pairKey(p1, p2) };
+        CHECK(Duplicates::saveIgnored(ign) && Duplicates::loadIgnored() == ign, "Ausnahmen speichern");
+        g = Duplicates::find(db.summaries(), Duplicates::loadIgnored());
+        CHECK(g.size() == 2, "markiertes Paar wird nicht mehr gemeldet");
+        // zusammenführen
+        Recipe keep, o1, o2;
+        db.load(k1, &keep);
+        db.load(k2, &o1);
+        db.load(k3, &o2);
+        keep.tags.clear();
+        o1.tags = { QStringLiteral("backen"), QStringLiteral("omas rezepte") };
+        const QStringList merged = Duplicates::mergeInto(keep, { o1, o2 });
+        CHECK(keep.favorite && !keep.image.isEmpty() && keep.hasTag(QStringLiteral("omas rezepte")) && merged.size() >= 3,
+              "Zusammenführen: Favorit, Bild, Tags übernommen");
+        out << "  Gruppen: " << g.size() << ", übernommen: " << merged.join(QStringLiteral("; ")) << "\n";
+        db.close();
     }
 
     out << "\nNetzwerkscanner (eSCL):\n";

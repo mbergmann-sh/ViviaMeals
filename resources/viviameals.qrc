@@ -6,12 +6,15 @@
         <file alias="ui/add.svg">icons/ui/add.svg</file>
         <file alias="ui/cart.svg">icons/ui/cart.svg</file>
         <file alias="ui/chart.svg">icons/ui/chart.svg</file>
+        <file alias="ui/check.svg">icons/ui/check.svg</file>
+        <file alias="ui/close.svg">icons/ui/close.svg</file>
         <file alias="ui/copy.svg">icons/ui/copy.svg</file>
         <file alias="ui/database.svg">icons/ui/database.svg</file>
         <file alias="ui/database-add.svg">icons/ui/database-add.svg</file>
         <file alias="ui/delete.svg">icons/ui/delete.svg</file>
         <file alias="ui/diary.svg">icons/ui/diary.svg</file>
         <file alias="ui/dice.svg">icons/ui/dice.svg</file>
+        <file alias="ui/duplicates.svg">icons/ui/duplicates.svg</file>
         <file alias="ui/edit.svg">icons/ui/edit.svg</file>
         <file alias="ui/eye.svg">icons/ui/eye.svg</file>
         <file alias="ui/fridge.svg">icons/ui/fridge.svg</file>

@@ -25,7 +25,8 @@ SOURCES += \
     $$PWD/src/screenfit.cpp \
     $$PWD/src/windowstate.cpp \
     $$PWD/src/scanner.cpp \
-    $$PWD/src/scandialog.cpp
+    $$PWD/src/scandialog.cpp \
+    $$PWD/src/duplicatesdialog.cpp
 
 HEADERS += \
     $$PWD/src/mainwindow.h \
@@ -50,7 +51,8 @@ HEADERS += \
     $$PWD/src/screenfit.h \
     $$PWD/src/windowstate.h \
     $$PWD/src/scanner.h \
-    $$PWD/src/scandialog.h
+    $$PWD/src/scandialog.h \
+    $$PWD/src/duplicatesdialog.h
 
 # Scannen unter Windows: WIA-Automatisierung über COM (nur ole32/oleaut32, keine weiteren Bibliotheken)
 win32 {

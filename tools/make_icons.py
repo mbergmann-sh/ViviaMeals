@@ -53,6 +53,9 @@ icons = {
  "zoom-in": f'<circle cx="10.5" cy="10.5" r="6.5" {S}/><path d="M15.5 15.5L21 21" {S}/><path d="M10.5 7.5v6M7.5 10.5h6" {A}/>',
  "zoom-out": f'<circle cx="10.5" cy="10.5" r="6.5" {S}/><path d="M15.5 15.5L21 21" {S}/><path d="M7.5 10.5h6" {A}/>',
  "zoom-fit": f'<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" {S}/><rect x="8" y="8" width="8" height="8" rx="1" {A}/>',
+ "duplicates": f'<path d="M9 3h8l3 3v11H9z" {S}/><path d="M17 3v3h3" {S}/><path d="M6 7H4v14h11v-2" {S}/><path d="M12 10.5h5M12 13.5h5" {A}/>',
+ "check": f'<path d="M4.5 12.5l4.5 4.5L19.5 6.5" {A}/>',
+ "close": f'<path d="M6 6l12 12M18 6L6 18" {S}/>',
  # Planung
  "fridge": f'<rect x="5" y="2.5" width="14" height="19" rx="2" {S}/><path d="M5 10h14" {S}/><path d="M8.5 5.5v2M8.5 13v3" {A}/>',
  "scale": f'<path d="M5 21h14a1 1 0 0 0 1-1.2l-2-12A1 1 0 0 0 17 7H7a1 1 0 0 0-1 .8l-2 12A1 1 0 0 0 5 21z" {S}/><circle cx="12" cy="4.5" r="2" {S}/><path d="M9.5 14.5a2.5 2.5 0 0 1 5 0" {A}/><path d="M12 14.5l1.5-2" {A}/>',

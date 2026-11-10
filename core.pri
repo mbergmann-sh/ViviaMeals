@@ -28,7 +28,8 @@ SOURCES += \
     $$PWD/src/deepl.cpp \
     $$PWD/src/ocr.cpp \
     $$PWD/src/recipescan.cpp \
-    $$PWD/src/escl.cpp
+    $$PWD/src/escl.cpp \
+    $$PWD/src/duplicates.cpp
 
 HEADERS += \
     $$PWD/src/qtcompat.h \
@@ -56,4 +57,5 @@ HEADERS += \
     $$PWD/src/deepl.h \
     $$PWD/src/ocr.h \
     $$PWD/src/recipescan.h \
-    $$PWD/src/escl.h
+    $$PWD/src/escl.h \
+    $$PWD/src/duplicates.h

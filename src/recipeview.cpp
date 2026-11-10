@@ -38,6 +38,11 @@ RecipeHtml::Style styleFromPalette(int imageWidth)
 }
 }
 
+RecipeHtml::Style RecipeView::paletteStyle(int imageWidth)
+{
+    return styleFromPalette(imageWidth);
+}
+
 RecipeView::RecipeView(QWidget *parent) : QWidget(parent)
 {
     auto *lay = new QVBoxLayout(this);

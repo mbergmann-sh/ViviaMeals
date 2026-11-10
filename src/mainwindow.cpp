@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "mainwindow.h"
 #include "scandialog.h"
+#include "duplicatesdialog.h"
 #include "assistantdialog.h"
 #include "editordialog.h"
 #include "exportdialogs.h"
@@ -323,6 +324,10 @@ void MainWindow::buildMenus()
 
     QMenu *extras = menuBar()->addMenu(tr("E&xtras"));
     a = extras->addAction(Icons::get(QStringLiteral("nutrition")), tr("&Nährwerttabelle …"), this, &MainWindow::openFoodTable);
+    a = extras->addAction(Icons::get(QStringLiteral("duplicates")), tr("&Doubletten suchen …"), this, &MainWindow::findDuplicates);
+    a->setObjectName(QStringLiteral("actDuplicates"));
+    a->setStatusTip(tr("Rezepte mit gleichem oder ähnlichem Titel bzw. gleichen Zutaten finden, vergleichen, zusammenführen und löschen"));
+    m_needDb << a;
     a = extras->addAction(Icons::get(QStringLiteral("refresh")), tr("Nährwerte aller Rezepte neu &berechnen"), this, &MainWindow::recalcAll);
     m_needDb << a;
     a = extras->addAction(Icons::get(QStringLiteral("tag")), tr("&Mahlzeit- und Nährwert-Tags für alle Rezepte ergänzen …"), this, &MainWindow::mealTagsAll);
@@ -941,6 +946,18 @@ void MainWindow::printRecipe()
         doc.print(p);
     });
     pd.exec();
+}
+
+void MainWindow::findDuplicates()
+{
+    if (!RecipeDb::instance().isOpen()) return;
+    DuplicatesDialog d(this);
+    d.exec();
+    if (d.changes() > 0) {
+        statusBar()->showMessage(tr("Doubletten bereinigt."), 5000);
+        if (!RecipeDb::instance().summary(currentId())) showRandom();
+        else showCurrent();
+    }
 }
 
 void MainWindow::recalcAll()

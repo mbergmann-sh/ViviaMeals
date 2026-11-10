@@ -41,6 +41,7 @@ public slots:
     void newDatabase();
     void openDatabaseDialog();
     void newRecipe();
+    void findDuplicates();
     void scanRecipe(bool fromFile);   // Rezept scannen bzw. aus Bild/Foto erkennen
     void saveNewRecipe(const Recipe &r, const QString &title);
     void editRecipe();

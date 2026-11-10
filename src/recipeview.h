@@ -7,6 +7,7 @@
 #pragma once
 
 #include "recipe.h"
+#include "recipehtml.h"
 
 #include <QWidget>
 
@@ -29,6 +30,7 @@ public:
     double servings() const;         // eingestellte Portionenzahl
     void fillDocument(QTextDocument *doc) const;   // für den Druck (helle Farben)
     void refresh();                  // nach Theme-Wechsel
+    static RecipeHtml::Style paletteStyle(int imageWidth);   // Farben passend zum aktuellen Theme
 
 signals:
     void editRequested();
