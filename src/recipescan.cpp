@@ -8,6 +8,7 @@
 #include <QSet>
 
 #include <algorithm>
+#include <climits>
 #include <cmath>
 #include <vector>
 
@@ -161,7 +162,7 @@ const Vocabulary &vocabulary()
             "dünn dünne dünnen hinzufügen zufügen fügen hüllen löst lösen auflösen schöpfen abschöpfen übrige übrigen täglich "
             "gefäß förmchen backförmchen höhe höchstens mürbe zähflüssig flüssig flüssigkeit trüb hitze herdplatte ofenhitze "
             "wärme warmhalten erwärmen aufwärmen vorwärmen bröseln semmelbrösel paniermehl öffnen geöffnet schütteln "
-            "füllen gefüllt stürzen überbacken überbrühen übrig rühre"));
+            "füllen gefüllt stürzen überbacken überbrühen übrig rühre flädle fladle kräuterflädle backröhre röstbrot"));
         return voc;
     }();
     return v;
@@ -257,6 +258,14 @@ QString fixLine(const QString &line)
     s.replace(el, QStringLiteral("\\1 EL"));
     static const QRegularExpression tl(QStringLiteral("([\\d½¼¾])\\s*T[lI1|](?=[\\s.]|$)"));
     s.replace(tl, QStringLiteral("\\1 TL"));
+    // „75g Mehl“, „6EL Sahne“, „1l Brühe“ → mit Leerzeichen (wie im Rezepteditor üblich)
+    static const QRegularExpression glued(QStringLiteral("^((?:ca\\.\\s*)?[\\d½¼¾][\\d,./½¼¾]*)(g|kg|ml|l|cl|dl|EL|TL)(?=\\s|$)"));
+    s.replace(glued, QStringLiteral("\\1 \\2"));
+    // „1 l“ wird oft als „11“ gelesen: vor Flüssigkeiten ist „11 Brühe“ bzw. „0,51 Milch“ fast sicher ein Liter-Wert
+    static const QRegularExpression liter(QStringLiteral(
+        "^([1-9]|\\d+,\\d)1\\s+(?=(?:\\p{L}+\\s)?\\p{L}*(?:brühe|bruhe|fond|milch|wasser|wein|saft|bier|sahne|öl\\b|essig))"),
+        QRegularExpression::CaseInsensitiveOption);
+    s.replace(liter, QStringLiteral("\\1 l "));
     // Temperaturen: 180 *C, 180 ºC, 180°C → 180 °C
     static const QRegularExpression deg(QStringLiteral("(\\d)\\s*[*º°]\\s*C\\b"));
     s.replace(deg, QStringLiteral("\\1 °C"));
@@ -324,6 +333,47 @@ const QRegularExpression &stepRe()
     return re;
 }
 
+// nur eine Mengenangabe („75 g“, „1“, „½ Bund“, „1 Handvoll“) – die Zutat steht in einer eigenen Spalte
+bool amountOnly(const QString &l)
+{
+    static const QRegularExpression re(QStringLiteral(
+        "^(?:ca\\.?\\s*)?[\\d½¼¾⅓⅔⅛][\\d.,/½¼¾\\s–-]*\\s*"
+        "(?:g|kg|mg|ml|l|cl|dl|EL|TL|Msp\\.?|Messerspitzen?|Prisen?|Bund|Handvoll|Stück|Stk\\.?|Pck\\.?|Päckchen|Dosen?|Becher|"
+        "Zehen?|Tassen?|Scheiben?|Gläser|Glas|Würfel|Blatt|Blätter|Zweige?|Stangen?|Kugeln?|Knollen?|Köpfe?|Kopf|Liter|Gramm|"
+        "cups?|tbsp|tsp|oz|lbs?|pinch)?\\.?$"), QRegularExpression::CaseInsensitiveOption);
+    return l.size() <= 16 && re.match(l.trimmed()).hasMatch();
+}
+
+// Nährwert- und Energieangaben („200 kcal / 837 kJ je Portion“, „Eiweiß 7,4 g · Fett 11,4 g …“)
+bool nutritionLine(const QString &l)
+{
+    static const QRegularExpression energy(QStringLiteral("\\b\\d+\\s*(?:kcal|kj|kalorien)\\b"), QRegularExpression::CaseInsensitiveOption);
+    if (l.contains(energy)) return true;
+    static const QRegularExpression nutr(QStringLiteral("eiweiß|eiweiss|protein|fett|kohlenhydrate|ballaststoffe|zucker|salz|broteinheit"),
+                                         QRegularExpression::CaseInsensitiveOption);
+    int n = 0;
+    auto it = nutr.globalMatch(l);
+    while (it.hasNext()) {
+        it.next();
+        ++n;
+    }
+    return n >= 2;
+}
+
+// Kategorien-/Tag-Zeile im Kopf: „Suppen · Einlage · Pfannkuchen · Vegetarisch“
+QStringList categoryLine(const QString &l)
+{
+    static const QRegularExpression sep(QStringLiteral("\\s+[·•|∙\\-–—:]\\s+"));
+    const QStringList parts = l.split(sep, Qt::SkipEmptyParts);
+    if (parts.size() < 3) return {};
+    static const QRegularExpression word(QStringLiteral("^\\p{L}[\\p{L}\\-]*(?:\\s\\p{L}+)?$"));
+    for (const QString &p : parts)
+        if (!word.match(p.trimmed()).hasMatch()) return {};
+    QStringList out;
+    for (const QString &p : parts) out << p.trimmed();
+    return out;
+}
+
 bool ingredientLike(const QString &l)
 {
     if (l.size() > 70) return false;
@@ -375,6 +425,7 @@ int minutesIn(const QString &l)
 // zwei Zutaten in einer Zeile (zweispaltige Liste): „200 g Mehl 100 g Zucker“
 QStringList splitColumns(const QString &l)
 {
+    if (!amountRe().match(l).hasMatch()) return { l };   // „Eiweiß 7,4 g · Fett …“ nicht zerlegen
     static const QRegularExpression re(QStringLiteral(
         "(?<=[\\p{L}).])\\s+(?=(?:\\d+(?:[.,/]\\d+)?|[½¼¾])\\s*(?:g|kg|ml|l|cl|dl|EL|TL|Msp\\.?|Pck\\.?|Prise|Prisen|Becher|Dose|Dosen|Bund|Stück|Stk\\.?|Zehe|Zehen|Tasse|Tassen|Scheiben?)\\b)"));
     QStringList parts;
@@ -404,14 +455,42 @@ bool startsLower(const QString &l)
 Parts split(const QList<Ocr::Line> &input)
 {
     Parts out;
-    struct L { QString text; int block, par, height; bool used = false; };
-    QList<L> lines;
+    struct L { QString text; int block, par, height; QRect box; bool used = false; };
+    QList<L> raw;
     for (const Ocr::Line &ol : input) {
         const QString t = fixLine(ol.text);
-        static const QRegularExpression letters(QStringLiteral("\\p{L}"));
-        if (t.isEmpty()) continue;
-        if (!t.contains(letters) && t.size() < 5) continue;   // Seitenzahlen, Striche
-        lines << L{ t, ol.block, ol.par, ol.height() };
+        if (!t.isEmpty()) raw << L{ t, ol.block, ol.par, ol.height(), ol.box };
+    }
+    // Mengen in eigener Spalte (rechtsbündig vor den Zutaten): Tesseract liefert „75 g“ und „Mehl“ oft als
+    // getrennte Zeilen bzw. Blöcke – über die Lage auf der Seite wieder zusammenfügen
+    for (int i = 0; i < raw.size(); ++i) {
+        if (raw[i].used || !amountOnly(raw[i].text) || raw[i].box.isEmpty()) continue;
+        const QRect a = raw[i].box;
+        int best = -1, bestGap = INT_MAX;
+        for (int j = 0; j < raw.size(); ++j) {
+            if (j == i || raw[j].used || raw[j].box.isEmpty() || amountOnly(raw[j].text)) continue;
+            const QRect b = raw[j].box;
+            const int overlap = qMin(a.bottom(), b.bottom()) - qMax(a.top(), b.top());
+            if (overlap * 2 < qMin(a.height(), b.height())) continue;          // nicht auf derselben Höhe
+            const int gap = b.left() - a.right();
+            if (gap < -a.height() / 2 || gap > 8 * qMax(a.height(), b.height())) continue;   // nicht rechts daneben
+            if (gap < bestGap) {
+                bestGap = gap;
+                best = j;
+            }
+        }
+        if (best < 0) continue;
+        // Zutat beginnt in derselben Zeile schon mit Text? Dann ist die Menge davor zu setzen
+        raw[i].text += QLatin1Char(' ') + raw[best].text;
+        raw[i].box = raw[i].box.united(raw[best].box);
+        raw[best].used = true;
+    }
+    QList<L> lines;
+    static const QRegularExpression letters(QStringLiteral("\\p{L}"));
+    for (const L &l : raw) {
+        if (l.used) continue;
+        if (!l.text.contains(letters) && l.text.size() < 5) continue;   // Seitenzahlen, Striche
+        lines << L{ l.text, l.block, l.par, l.height, l.box };
     }
     if (lines.isEmpty()) return out;
 
@@ -465,6 +544,32 @@ Parts split(const QList<Ocr::Line> &input)
         out.text.title = t.simplified();
     }
 
+    // ---- Abschnittsüberschriften in der Zutatenliste („Für den Teig“, „Kräuterflädle“): kurze Zeile ohne
+    // Menge vor Zeilen mit Mengen, erkennbar am Doppelpunkt, an größerer Schrift oder daran, dass sie links
+    // vor der (rechtsbündigen) Mengenspalte beginnt
+    for (int k = 0; k + 1 < lines.size(); ++k) {
+        L &h = lines[k];
+        if (h.used) continue;
+        QString t = h.text;
+        if (ingredientLike(t) || amountOnly(t) || ingHeaderRe().match(t).hasMatch() || dirHeaderRe().match(t).hasMatch()) continue;
+        if (t.size() > 40 || t.count(QLatin1Char(' ')) > 3 || t.endsWith(QLatin1Char('.')) || t.endsWith(QLatin1Char(','))) continue;
+        int minLeft = INT_MAX, nextHeight = 0, amounts = 0;
+        for (int n = k + 1; n < lines.size() && amounts < 12; ++n) {
+            if (lines.at(n).used) continue;
+            if (!amountRe().match(lines.at(n).text).hasMatch()) break;
+            ++amounts;
+            if (!nextHeight) nextHeight = lines.at(n).height;
+            if (!lines.at(n).box.isEmpty()) minLeft = qMin(minLeft, lines.at(n).box.left());
+        }
+        if (amounts == 0) continue;
+        const bool colon = t.endsWith(QLatin1Char(':'));
+        const bool bigger = nextHeight > 0 && h.height * 100 >= 112 * nextHeight;
+        const bool leftOf = !h.box.isEmpty() && minLeft != INT_MAX && h.box.left() < minLeft - h.height / 3;
+        if (!(colon || bigger || leftOf)) continue;
+        while (t.endsWith(QLatin1Char(':'))) t.chop(1);
+        h.text = QStringLiteral("== %1 ==").arg(t.trimmed());
+    }
+
     // ---- Absätze in Abschnitte teilen und zuordnen
     enum Mode { None, Ing, Dir };
     Mode mode = None;
@@ -484,6 +589,10 @@ Parts split(const QList<Ocr::Line> &input)
         if (!dir.isEmpty() && !dir.last().isEmpty()) dir << QString();
     };
     auto addIngredient = [&ing](QString t) {
+        if (t.startsWith(QLatin1String("== "))) {   // Abschnittsüberschrift
+            ing << t;
+            return;
+        }
         const auto b = bulletRe().match(t);
         if (b.hasMatch() && b.capturedLength() > 0) t = t.mid(b.capturedLength()).trimmed();
         if (t.isEmpty()) return;
@@ -519,6 +628,8 @@ Parts split(const QList<Ocr::Line> &input)
             }
             const int n = int(seg.size());
             Mode cls;
+            for (const QString &t : seg)
+                if (t.startsWith(QLatin1String("== "))) ++strong;
             if (strong * 2 >= n && longish * 2 < n + strong) cls = Ing;
             else if (mode == Ing && longish * 2 < n) cls = Ing;               // Zutaten ohne Menge („Salz“)
             else if (mode == Ing) cls = Dir;                                   // fehlende Überschrift „Zubereitung“
@@ -555,6 +666,32 @@ Parts split(const QList<Ocr::Line> &input)
                 endDirParagraph();
                 if (!m.captured(1).trimmed().isEmpty()) seg << m.captured(1).trimmed();
                 continue;
+            }
+            // Kopf- und Fußzeilen gedruckter Rezepte: Seitenzahl, wiederholter Titel
+            static const QRegularExpression pageNo(QStringLiteral("^(?:seite|page|s\\.)\\s*\\d+(?:\\s*(?:von|/|of)\\s*\\d+)?$"),
+                                                   QRegularExpression::CaseInsensitiveOption);
+            if (t.contains(pageNo)) {
+                flush();
+                continue;
+            }
+            if (!out.text.title.isEmpty() && foldWord(t.toLower()).simplified() == foldWord(out.text.title.toLower()).simplified()) {
+                flush();
+                continue;
+            }
+            // Nährwertangaben gehören nicht in die Zutaten
+            if (nutritionLine(t)) {
+                flush();
+                out.unassigned << t;
+                continue;
+            }
+            // Kategorien im Kopf („Suppen · Einlage · Vegetarisch“) → Tags
+            if (mode == None && ing.isEmpty()) {
+                const QStringList cats = categoryLine(t);
+                if (!cats.isEmpty()) {
+                    flush();
+                    out.text.categories << cats;
+                    continue;
+                }
             }
             if (metaRe().match(t).hasMatch()) {
                 flush();

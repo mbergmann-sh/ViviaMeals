@@ -3,8 +3,8 @@
 <!-- Installationssprache Deutsch (fest, unabhängig von der Windows-Sprache) -->
 <Installer>
     <Name>ViviaMeals</Name>
-    <Version>0.6.2</Version>
-    <Title>ViviaMeals 0.6.2</Title>
+    <Version>0.6.3</Version>
+    <Title>ViviaMeals 0.6.3</Title>
     <Publisher>Michael Bergmann</Publisher>
     <ProductUrl>https://github.com/mbergmann-sh</ProductUrl>
     <StartMenuDir>ViviaMeals</StartMenuDir>

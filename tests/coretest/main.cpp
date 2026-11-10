@@ -709,7 +709,12 @@ int main(int argc, char **argv)
         // Erkennungsfehler korrigieren
         CHECK(RecipeScan::fixLine(QStringLiteral("l/2 TL Salz")) == QStringLiteral("½ TL Salz"), "l/2 → ½");
         CHECK(RecipeScan::fixLine(QStringLiteral("1OO g Mehl")) == QStringLiteral("100 g Mehl"), "1OO → 100");
-        CHECK(RecipeScan::fixLine(QStringLiteral("1l Milch")) == QStringLiteral("1l Milch"), "1l bleibt");
+        CHECK(RecipeScan::fixLine(QStringLiteral("1l Milch")) == QStringLiteral("1 l Milch"), "1l → 1 l");
+        CHECK(RecipeScan::fixLine(QStringLiteral("75g Mehl")) == QStringLiteral("75 g Mehl") && RecipeScan::fixLine(QStringLiteral("6EL Sahne")) == QStringLiteral("6 EL Sahne"),
+              "Menge und Einheit trennen");
+        CHECK(RecipeScan::fixLine(QStringLiteral("11 Fleischbrühe vom Tafelspitz")) == QStringLiteral("1 l Fleischbrühe vom Tafelspitz")
+                  && RecipeScan::fixLine(QStringLiteral("11 Eier")) == QStringLiteral("11 Eier"),
+              "„11“ vor Flüssigkeit = 1 l");
         CHECK(RecipeScan::fixLine(QStringLiteral("2 El Öl")) == QStringLiteral("2 EL Öl"), "El → EL");
         CHECK(RecipeScan::fixLine(QStringLiteral("Va Bund Petersilie")) == QStringLiteral("½ Bund Petersilie"), "Va → ½");
         CHECK(RecipeScan::fixLine(QStringLiteral("bei 180 *C backen")) == QStringLiteral("bei 180 °C backen"), "°C");
@@ -758,6 +763,42 @@ int main(int argc, char **argv)
         CHECK(r.nutrition.perServing.kcal > 100 && r.prepMinutes == 35 && r.hasTag(QStringLiteral("vegan")), "Nährwerte und Tags beim Scan");
         out << "  " << r.title << ": " << r.servingsText() << ", " << qRound(r.nutrition.perServing.kcal) << " kcal je Portion, Tags "
             << r.tags.join(QStringLiteral(", ")) << "\n";
+
+        // Mengen in eigener Spalte (getrennte Tesseract-Blöcke), Abschnittsüberschrift links davor, Kopf mit
+        // Nährwerten und Kategorien, Fußzeile mit Seitenzahl und wiederholtem Titel
+        auto B = [](const QString &t, int block, int x, int y, int w, int h) {
+            Ocr::Line l;
+            l.text = t;
+            l.block = block;
+            l.par = 1;
+            l.box = QRect(x, y, w, h);
+            l.conf = 90;
+            return l;
+        };
+        QList<Ocr::Line> cols{
+            B(QStringLiteral("Fleischbrühe mit Kräuterflädle"), 1, 230, 250, 1000, 64),
+            B(QStringLiteral("200 kcal / 837 kJ je Portion"), 2, 230, 420, 500, 30),
+            B(QStringLiteral("Eiweiß 7,4 g - Fett 11,4 g - Kohlenhydrate 17 g"), 2, 230, 480, 900, 28),
+            B(QStringLiteral("Suppen - Einlage - Pfannkuchen - Vegetarisch"), 3, 230, 530, 700, 24),
+            B(QStringLiteral("Zutaten"), 4, 230, 650, 160, 40),
+            // linke Spalte: Überschrift und Mengen
+            B(QStringLiteral("Kräuterflädle"), 5, 230, 740, 200, 30),
+            B(QStringLiteral("75 g"), 5, 380, 800, 70, 30), B(QStringLiteral("1"), 5, 430, 852, 20, 30),
+            B(QStringLiteral("6 EL"), 5, 370, 904, 80, 30),
+            // rechte Spalte: Zutaten
+            B(QStringLiteral("Mehl"), 6, 480, 800, 80, 30), B(QStringLiteral("Ei, klein"), 6, 480, 852, 120, 30),
+            B(QStringLiteral("Sahne"), 6, 480, 904, 90, 30),
+            B(QStringLiteral("Zubereitung"), 7, 230, 1100, 220, 40),
+            B(QStringLiteral("Mehl, Ei und Sahne verrühren, ruhen lassen und dünne Pfannkuchen backen."), 8, 230, 1180, 1500, 28),
+            B(QStringLiteral("Fleischbrühe mit Krauterfladle"), 9, 230, 3300, 400, 24),
+            B(QStringLiteral("Seite 1 von 2"), 10, 2000, 3300, 160, 24),
+        };
+        const RecipeScan::Parts c = RecipeScan::split(cols);
+        CHECK(c.text.ingredientLines == QStringList({ QStringLiteral("== Kräuterflädle =="), QStringLiteral("75 g Mehl"), QStringLiteral("1 Ei, klein"),
+                                                      QStringLiteral("6 EL Sahne") }),
+              "Mengenspalte und Überschrift: " + c.text.ingredientLines.join(QStringLiteral(" | ")));
+        CHECK(c.text.directionLines.size() == 1, "Fußzeile nicht in der Zubereitung: " + c.text.directionLines.join(QStringLiteral(" | ")));
+        CHECK(c.text.categories.size() == 4 && c.unassigned.size() == 2, "Kategorien und Nährwerte im Kopf");
 
         // Ohne Überschriften: Zutatenblock und Anleitung aus der Form erkennen
         QList<Ocr::Line> plain{

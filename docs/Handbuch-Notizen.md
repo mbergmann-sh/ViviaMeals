@@ -1,6 +1,6 @@
 # ViviaMeals – Notizen für das Handbuch
 
-Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.6.2.
+Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.6.3.
 
 > **Name:** Das Programm heißt seit Version 0.6 **ViviaMeals** (vorher VitaMeals; die ganze Reihe heißt jetzt
 > Vivia – ViviaParms, ViviaBreathe). Alte Einstellungen, Profile, Tagebücher, eigene Lebensmittel und
@@ -366,6 +366,10 @@ vollständig auf dem eigenen Rechner), teilt ihn in Titel, Portionen, Zutaten un
   Mengenangaben am Zeilenanfang und der Schriftgröße des Titels. Typische Lesefehler werden
   verbessert (l/2 → ½, 1OO g → 100 g, El → EL, 180 *C → 180 °C, fehlende Umlaut-Punkte wie
   „Krauterquark“ → „Kräuterquark“). Handschrift erkennt Tesseract kaum.
+* Gedruckte Rezepte mit rechtsbündiger Mengenspalte (wie der ViviaMeals-Ausdruck): Tesseract liest Mengen
+  und Zutaten manchmal als getrennte Spalten; ViviaMeals fügt sie über die Lage auf der Seite wieder
+  zu „75 g Mehl“ zusammen und erkennt Abschnittsüberschriften. Nährwertzeilen, Kategorien (→ Tags),
+  Seitenzahlen und Fußzeilen werden aussortiert.
 
 ### Häufige Frage: „Es wurde kein Scanner gefunden“ (Windows)
 
