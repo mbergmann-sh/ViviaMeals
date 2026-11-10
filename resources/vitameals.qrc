@@ -10,6 +10,7 @@
         <file alias="ui/database.svg">icons/ui/database.svg</file>
         <file alias="ui/database-add.svg">icons/ui/database-add.svg</file>
         <file alias="ui/delete.svg">icons/ui/delete.svg</file>
+        <file alias="ui/diary.svg">icons/ui/diary.svg</file>
         <file alias="ui/dice.svg">icons/ui/dice.svg</file>
         <file alias="ui/edit.svg">icons/ui/edit.svg</file>
         <file alias="ui/eye.svg">icons/ui/eye.svg</file>

@@ -1,6 +1,6 @@
 # VitaMeals – Notizen für das Handbuch
 
-Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.4.1.
+Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.5.0.
 
 ---
 
@@ -273,3 +273,29 @@ werden diese Tags aus den berechneten Nährwerten bestimmt:
 * Ein Eintrag am oder nach dem Wiegetag erledigt die Wiegetag-Erinnerung; „Gewicht eintragen …“ in der
   Erinnerung öffnet diesen Dialog.
 * Ist noch keine Person angelegt, bietet VitaMeals an, den Assistenten Gewichtskontrolle zu öffnen.
+
+## Ernährungstagebuch (ab 0.5.0)
+
+*Planen → Ernährungstagebuch* (F9), Symbolleiste „Tagebuch“ oder Rechtsklick auf ein Rezept →
+„Ins Ernährungstagebuch eintragen …“.
+
+* **Je Person ein eigenes Tagebuch** – die Personen sind die im Assistenten Gewichtskontrolle
+  angelegten. Gibt es noch keine, bietet VitaMeals an, den Assistenten zu öffnen.
+* Oben: Person, Tag (◀ ▶, Kalender, „Heute“). Darunter **Ziel · gegessen · noch verfügbar**
+  (Restkalorien) mit Balken – orange, wenn das Ziel überschritten ist –, die Nährwerte des Tages
+  (Eiweiß, Fett, Kohlenhydrate mit Energieanteil, Zucker, Ballaststoffe, Salz) und unten die letzten
+  7 Tage mit Durchschnitt. Das Ziel ist die Zielzufuhr aus dem Assistenten.
+* **Aus Rezept …**: Rezept suchen (Name, Zutat, Tag), Datum und Uhrzeit, Mahlzeit (wird nach der
+  Uhrzeit vorgeschlagen und lässt sich frei ändern), **gegessene Menge** in Portionen oder Gramm.
+  Der Dialog zeigt sofort die Nährwerte und wie viele Kalorien danach noch übrig sind.
+* **Eigenes Rezept …**: öffnet den Rezepteditor (Titel, Portionen, Zutaten mit Mengen). Danach wie
+  oben Uhrzeit und Menge angeben. **„In die Rezeptdatenbank übernehmen“** speichert die Speise
+  zusätzlich als Rezept (mit Mahlzeit- und Nährwert-Tags); sonst bleibt sie nur im Tagebuch und kann
+  dort jederzeit über „Rezept bearbeiten …“ geändert werden.
+* **Aus Wochenplan**: trägt die für den Tag geplanten Mahlzeiten mit typischen Uhrzeiten ein
+  (Frühstück 7:30, Mittag 12:30, Zwischenmahlzeit 15:30, Abend 18:30) – danach anpassen.
+* **Bearbeiten** (auch Doppelklick), **Auf heute kopieren** (z. B. das tägliche Frühstück), **Löschen**.
+* Beim Eintragen werden Titel, Nährwerte je Portion und Portionsgewicht ins Tagebuch kopiert. Spätere
+  Änderungen am Rezept oder das Löschen der Datenbank verändern alte Einträge daher nicht.
+* Gespeichert wird in `%APPDATA%\mbergmann-sh\VitaMeals\tagebuch\<Person>.json`. Beim Löschen einer
+  Person im Assistenten wird ihr Tagebuch mit gelöscht.

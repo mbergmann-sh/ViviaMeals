@@ -23,6 +23,7 @@ SOURCES += \
     $$PWD/src/umlauts.cpp \
     $$PWD/src/mealtypes.cpp \
     $$PWD/src/coaching.cpp \
+    $$PWD/src/diary.cpp \
     $$PWD/src/odtexport.cpp \
     $$PWD/src/deepl.cpp
 
@@ -47,5 +48,6 @@ HEADERS += \
     $$PWD/src/umlauts.h \
     $$PWD/src/mealtypes.h \
     $$PWD/src/coaching.h \
+    $$PWD/src/diary.h \
     $$PWD/src/odtexport.h \
     $$PWD/src/deepl.h

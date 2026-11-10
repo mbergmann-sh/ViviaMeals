@@ -13,6 +13,7 @@
 #include "umlauts.h"
 #include "mealplanner.h"
 #include "coaching.h"
+#include "diary.h"
 #include "odtexport.h"
 #include "mealtypes.h"
 #include "deepl.h"
@@ -560,6 +561,54 @@ int main(int argc, char **argv)
         w.addWeight(QDate::currentDate(), 72.3);
         CHECK(w.weights.size() == 2 && w.weights.last().kg == 72.3 && w.weights.first().kg == 73.4 && !w.weighReminderDue(),
               "Gewicht eintragen: sortiert, gleicher Tag ersetzt, Erinnerung erledigt");
+    }
+
+
+    // ---------------------------------------------------------------- Ernährungstagebuch
+    out << "\nErnährungstagebuch:\n";
+    {
+        const auto res = Importers::importFile(QStringLiteral(":/samples/gesund.rk"), Importers::Format::Unknown);
+        CHECK(res.recipes.size() >= 2, "Rezepte für das Tagebuch");
+        const Recipe porridge = res.recipes.value(0);
+        const QString pid = QStringLiteral("test-%1").arg(QDateTime::currentMSecsSinceEpoch());
+        Diary::Book book(pid);
+        Diary::Entry e = Diary::Entry::fromRecipe(porridge, false);
+        e.when = QDateTime(QDate(2026, 11, 10), QTime(7, 45));
+        e.meal = Diary::mealForTime(e.when.time());
+        e.setPortions(1.5);
+        CHECK(std::fabs(e.eaten().kcal - porridge.nutrition.perServing.kcal * 1.5) < 0.01 && e.grams > 0, "Portionen → kcal und Gramm");
+        const double perGram = porridge.nutrition.perServing.kcal / e.servingGrams;
+        e.setGrams(200);
+        CHECK(std::fabs(e.eaten().kcal - perGram * 200) < 0.5 && e.byGrams, "Gramm → kcal");
+        CHECK(e.meal == QStringLiteral("Frühstück"), "Mahlzeit nach Uhrzeit");
+        book.add(e);
+        // eigenes Rezept
+        Recipe own;
+        own.title = QStringLiteral("Mein Salat");
+        own.servings = 2;
+        own.ingredients = IngredientParser::parseText(QStringLiteral("200 g Feldsalat\n2 EL Rapsöl\n100 g Feta"));
+        Nutrition::analyze(own);
+        Diary::Entry o = Diary::Entry::fromRecipe(own, true);
+        o.when = QDateTime(QDate(2026, 11, 10), QTime(12, 40));
+        o.meal = Diary::mealForTime(o.when.time());
+        book.add(o);
+        Diary::Entry other = o;
+        other.id.clear();
+        other.when = QDateTime(QDate(2026, 11, 9), QTime(19, 0));
+        book.add(other);
+        CHECK(book.save(), "Tagebuch speichern");
+        Diary::Book again(pid);
+        const QList<Diary::Entry> day = again.day(QDate(2026, 11, 10));
+        CHECK(day.size() == 2 && day[0].title == porridge.title && day[1].own && day[1].recipe().ingredients.size() == 3, "Tagebuch laden, eigenes Rezept erhalten");
+        const double total = again.dayTotal(QDate(2026, 11, 10)).kcal;
+        CHECK(std::fabs(total - (perGram * 200 + own.nutrition.perServing.kcal)) < 1, "Tagessumme");
+        out << "  10.11.: " << qRound(total) << " kcal (" << day[0].amountText() << " " << day[0].title << ", " << day[1].amountText() << " "
+            << day[1].title << ")\n";
+        CHECK(again.daysWithEntries().size() == 2, "Tage mit Einträgen");
+        again.remove(day[0].id);
+        CHECK(again.day(QDate(2026, 11, 10)).size() == 1, "Eintrag löschen");
+        Diary::Book::removeFor(pid);
+        CHECK(!QFile::exists(Diary::Book::fileFor(pid)), "Tagebuch einer gelöschten Person entfernt");
     }
 
     out << "\n" << (g_fail ? QStringLiteral("%1 Fehler").arg(g_fail) : QStringLiteral("Alle Prüfungen bestanden")) << "\n";

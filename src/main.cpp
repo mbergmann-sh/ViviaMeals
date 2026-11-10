@@ -19,6 +19,13 @@
 #include "settingsdialog.h"
 #include "imagecropdialog.h"
 #include "weighindialog.h"
+#include "diarydialog.h"
+#include "diary.h"
+#include "nutrition.h"
+#include "ingredientparser.h"
+#include <QDoubleSpinBox>
+#include <QLineEdit>
+#include <QListWidget>
 #include <QTabWidget>
 #include "mealplandialog.h"
 #include "profiles.h"
@@ -152,7 +159,54 @@ void createDemo(const QString &folder)
         p.weights << WeightEntry{ QDate::currentDate().addDays(-d), std::round(kg * 10) / 10.0, {} };
         kg -= 0.35 + QRandomGenerator::global()->bounded(30) / 100.0;
     }
-    pr.add(p);
+    const QString pid = pr.add(p);
+    // Ernährungstagebuch: heute Frühstück, Zwischenmahlzeit, Mittagessen; Vortage mit Tagessummen
+    {
+        Diary::Book book;
+        book.load(pid);
+        auto byTitle = [&](const QString &t) -> Recipe {
+            for (const RecipeSummary &s : db.summaries())
+                if (s.title.startsWith(t)) {
+                    Recipe r;
+                    db.load(s.id, &r);
+                    return r;
+                }
+            return Recipe();
+        };
+        struct D { int day; const char *title; int h, m; double portions; double grams; };
+        const D items[] = {
+            { 0, "Haferflocken-Porridge", 7, 20, 1, 0 },        { 0, "Apfel mit Mandeln", 10, 15, 1, 0 },
+            { 0, "Gemüse-Curry", 12, 45, 0.75, 0 },             { 1, "Vollkornbrot mit Kräuterquark", 7, 30, 1, 0 },
+            { 1, "Linsensuppe", 12, 30, 0, 450 },               { 1, "Magerquark mit Beeren", 15, 30, 1, 0 },
+            { 1, "Lauch-Käse-Suppe", 18, 45, 1.25, 0 },         { 2, "Rührei mit Spinat", 8, 0, 1, 0 },
+            { 2, "Käsespätzle", 13, 0, 1, 0 },                  { 2, "Gemüsesticks", 16, 0, 1, 0 },
+            { 2, "Chicken Vegetable Soup", 19, 0, 1.5, 0 },     { 3, "Bircher-Müsli", 7, 45, 1, 0 },
+            { 3, "Gemüse-Curry", 12, 30, 1, 0 },                { 3, "Knäckebrot", 18, 30, 2, 0 },
+        };
+        for (const D &it : items) {
+            const Recipe r = byTitle(QString::fromUtf8(it.title));
+            if (r.title.isEmpty()) continue;
+            Diary::Entry e = Diary::Entry::fromRecipe(r, false);
+            e.when = QDateTime(QDate::currentDate().addDays(-it.day), QTime(it.h, it.m));
+            e.meal = Diary::mealForTime(e.when.time());
+            if (it.grams > 0) e.setGrams(it.grams);
+            else e.setPortions(it.portions);
+            book.add(e);
+        }
+        // eigenes Rezept (im Editor erfasst)
+        Recipe own;
+        own.id = Recipe::newId();
+        own.title = QObject::tr("Belegtes Vollkornbrötchen");
+        own.servings = 1;
+        own.ingredients = IngredientParser::parseText(QObject::tr("1 Vollkornbrötchen\n20 g Frischkäse\n30 g Putenbrust\n50 g Tomate"));
+        Nutrition::analyze(own);
+        Diary::Entry o = Diary::Entry::fromRecipe(own, true);
+        o.when = QDateTime(QDate::currentDate().addDays(-3), QTime(10, 0));
+        o.meal = Diary::mealForTime(o.when.time());
+        o.note = QObject::tr("Bäckerei");
+        book.add(o);
+        book.save();
+    }
     Fridge::setStock({ QObject::tr("Eier"), QObject::tr("Milch"), QObject::tr("Kartoffeln"), QObject::tr("Zwiebeln"), QObject::tr("Möhren"),
                        QObject::tr("Linsen"), QObject::tr("Butter"), QObject::tr("Mehl"), QObject::tr("Äpfel"),
                        QObject::tr("Würstchen"), QObject::tr("Haferflocken"), QObject::tr("Joghurt"), QObject::tr("Quark") });
@@ -267,6 +321,21 @@ void takeScreenshots(MainWindow *w, const QString &dir)
                   after.x(), after.y(), res.width(), res.height());
         }
         shot(&d, dir, QStringLiteral("bild-zuschneiden"));
+        d.reject();
+    }
+    {
+        DiaryDialog d(w);
+        d.show();
+        shot(&d, dir, QStringLiteral("tagebuch"));
+        Diary::Entry e;
+        e.when = QDateTime(QDate::currentDate(), QTime(18, 30));
+        DiaryEntryDialog ed(DiaryEntryDialog::Mode::Recipe, e, 1100, 1700, w);
+        if (auto *f = ed.findChild<QLineEdit *>()) f->setText(QStringLiteral("suppe"));
+        if (auto *l = ed.findChild<QListWidget *>()) l->setCurrentRow(0);
+        if (auto *sb = ed.findChild<QDoubleSpinBox *>()) sb->setValue(1.5);
+        ed.show();
+        shot(&ed, dir, QStringLiteral("tagebuch-eintrag"));
+        ed.reject();
         d.reject();
     }
     {

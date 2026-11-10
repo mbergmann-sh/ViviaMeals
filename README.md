@@ -13,14 +13,16 @@ Technisch und optisch an [VitaParms](https://github.com/mbergmann-sh/VitaParms) 
 | Rezepteditor mit Nährwertanalyse | Englisches MealMaster-Rezept, umgerechnet | Dark-Theme (VS Code) |
 |---|---|---|
 | ![Editor](docs/images/editor.png) | ![Englisch](docs/images/hauptfenster-englisch.png) | ![Dark](docs/images/hauptfenster-dark.png) |
-| **Kühlschrank & Einkaufsliste** | **Assistent Gewichtskontrolle** | **Gewichtskontrolle** | *Planen → Gewichtskontrolle* (F8): Datum und Person wählen, Gewicht eintragen – es kommt in den Gewichtsverlauf (ein Eintrag desselben Tages wird ersetzt). Zeigt letzten Eintrag, Veränderung, BMI und Abstand zum Zielgewicht; erledigt die Wiegetag-Erinnerung |
+| **Kühlschrank & Einkaufsliste** | **Assistent Gewichtskontrolle** | **Ernährungstagebuch** | *Planen → Ernährungstagebuch* (F9, auch im Kontextmenü der Rezeptliste): für **jede Person ein eigenes Tagebuch**. Mahlzeiten mit Datum und **Uhrzeit** (änderbar), Mahlzeit (Frühstück … Spätmahlzeit, nach der Uhrzeit vorgeschlagen), **gegessener Menge** in Portionen oder Gramm und den daraus berechneten Nährwerten. Speisen **aus einem Rezept der Datenbank** (Suche nach Name, Zutat, Tag), als **eigenes Rezept** im Editor erfasst (auf Wunsch in die Rezeptdatenbank übernommen) oder **aus dem gespeicherten Wochenplan**. Anzeige von Ziel, gegessen und **verfügbaren Restkalorien** mit Balken, Tagesnährwerten und den letzten 7 Tagen; Einträge bearbeiten, löschen, „auf heute kopieren“. Gespeichert unter `<AppData>/tagebuch/<Person>.json`; Nährwerte werden beim Eintragen kopiert, das Tagebuch bleibt also auch nach Änderungen an Rezepten stimmig |
+| **Gewichtskontrolle** | *Planen → Gewichtskontrolle* (F8): Datum und Person wählen, Gewicht eintragen – es kommt in den Gewichtsverlauf (ein Eintrag desselben Tages wird ersetzt). Zeigt letzten Eintrag, Veränderung, BMI und Abstand zum Zielgewicht; erledigt die Wiegetag-Erinnerung |
 | **Wochenmenü-Plan** |
 | ![Kühlschrank](docs/images/kuehlschrank.png) | ![Assistent](docs/images/assistent.png) | ![Wochenplan](docs/images/wochenplan.png) |
 | **Suche** | **Import-Vorschau mit Doubletten** | **Kleiner Bildschirm (1024 × 640)** |
 | ![Suche](docs/images/suche.png) | ![Import](docs/images/import-vorschau.png) | ![Klein](docs/images/hauptfenster-klein.png) |
 | **Nährwerte aus CSV importieren** | **Import mit Umlaut-Korrektur** | **Einstellungen (DeepL)** |
 | ![Nährwert-Import](docs/images/naehrwerte-import.png) | ![Umlaute](docs/images/import-umlaute.png) | ![Einstellungen](docs/images/einstellungen.png) |
-| **Assistent: Tipps und Motivation** | **Rezeptbild zuschneiden** | **Gewichtskontrolle** |
+| **Assistent: Tipps und Motivation** | **Rezeptbild zuschneiden** | **Ernährungstagebuch** | *Planen → Ernährungstagebuch* (F9, auch im Kontextmenü der Rezeptliste): für **jede Person ein eigenes Tagebuch**. Mahlzeiten mit Datum und **Uhrzeit** (änderbar), Mahlzeit (Frühstück … Spätmahlzeit, nach der Uhrzeit vorgeschlagen), **gegessener Menge** in Portionen oder Gramm und den daraus berechneten Nährwerten. Speisen **aus einem Rezept der Datenbank** (Suche nach Name, Zutat, Tag), als **eigenes Rezept** im Editor erfasst (auf Wunsch in die Rezeptdatenbank übernommen) oder **aus dem gespeicherten Wochenplan**. Anzeige von Ziel, gegessen und **verfügbaren Restkalorien** mit Balken, Tagesnährwerten und den letzten 7 Tagen; Einträge bearbeiten, löschen, „auf heute kopieren“. Gespeichert unter `<AppData>/tagebuch/<Person>.json`; Nährwerte werden beim Eintragen kopiert, das Tagebuch bleibt also auch nach Änderungen an Rezepten stimmig |
+| **Gewichtskontrolle** |
 | ![Tipps](docs/images/assistent-tipps.png) | ![Zuschneiden](docs/images/bild-zuschneiden.png) | ![Gewichtskontrolle](docs/images/gewichtskontrolle.png) |
 
 ## Funktionen
@@ -42,6 +44,7 @@ Technisch und optisch an [VitaParms](https://github.com/mbergmann-sh/VitaParms) 
 | **Suche** | Rezeptnamen (auch Teilnamen), Zutaten, Tags (UND/ODER), höchstens kcal je Portion, Favoriten, mit Foto |
 | **Kühlschrank** | Bestandsliste und Grundvorrat pflegen → passende Rezepte mit „vorhanden x/y“ und fehlenden Zutaten, **Einkaufsliste** (nach Warengruppen, kopieren/drucken/speichern) |
 | **Assistent Gewichtskontrolle** | beliebig viele Personen mit Größe, Alter, Aktivität (PAL), Ziel (verlieren/halten/zunehmen), Zielgewicht, Tempo, Ernährungsform, ausgeschlossenen Zutaten und bevorzugten Themen; BMI, Grund- und Gesamtumsatz (Mifflin-St Jeor), Zielzufuhr mit Schutzgrenzen, Dauer bis zum Zielgewicht; **Gewichtsverlauf** mit Grafik; **Wiegetag** mit Erinnerung im Hauptfenster („Erledigt“ blendet sie bis zur nächsten Woche aus, ein Eintrag am Wiegetag ebenso); **Motivation** mit Fortschritt seit dem ersten Eintrag, kurze Erklärung zum Abnehmen/Halten/Zunehmen und Reiter **Tipps** („statt Butter lieber Tomatenmark …“, gute Gewohnheiten nach DGE „Gut essen und trinken“) |
+| **Ernährungstagebuch** | *Planen → Ernährungstagebuch* (F9, auch im Kontextmenü der Rezeptliste): für **jede Person ein eigenes Tagebuch**. Mahlzeiten mit Datum und **Uhrzeit** (änderbar), Mahlzeit (Frühstück … Spätmahlzeit, nach der Uhrzeit vorgeschlagen), **gegessener Menge** in Portionen oder Gramm und den daraus berechneten Nährwerten. Speisen **aus einem Rezept der Datenbank** (Suche nach Name, Zutat, Tag), als **eigenes Rezept** im Editor erfasst (auf Wunsch in die Rezeptdatenbank übernommen) oder **aus dem gespeicherten Wochenplan**. Anzeige von Ziel, gegessen und **verfügbaren Restkalorien** mit Balken, Tagesnährwerten und den letzten 7 Tagen; Einträge bearbeiten, löschen, „auf heute kopieren“. Gespeichert unter `<AppData>/tagebuch/<Person>.json`; Nährwerte werden beim Eintragen kopiert, das Tagebuch bleibt also auch nach Änderungen an Rezepten stimmig |
 | **Gewichtskontrolle** | *Planen → Gewichtskontrolle* (F8): Datum und Person wählen, Gewicht eintragen – es kommt in den Gewichtsverlauf (ein Eintrag desselben Tages wird ersetzt). Zeigt letzten Eintrag, Veränderung, BMI und Abstand zum Zielgewicht; erledigt die Wiegetag-Erinnerung |
 | **Wochenmenü-Plan** | Frühstück/Mittag/Abend (+ Zwischenmahlzeit) über 1–14 Tage passend zum Kalorienziel (Anteile 25/35/30/10 % bzw. 30/40/30 %). **Frühstück nur aus Frühstücksrezepten**, Zwischenmahlzeiten aus Snacks bzw. leichten Frühstücksrezepten, Mittag-/Abendessen aus Hauptgerichten; beim **Abnehmen** keine Desserts/Süßspeisen und Vorrang für leichte, eiweiß- und ballaststoffreiche Rezepte mit wenig Zucker. Portionen mit **Gramm** („1 ¼ Portionen (ca. 375 g)“), sinnvolle Höchstmengen je Mahlzeit, Tagessummen mit Eiweiß und Ballaststoffen, Wochendurchschnitt mit Hinweisen nach DGE-Richtwerten. Fehlen Frühstücks- oder Snack-Rezepte, weist der Plan darauf hin und bietet **zehn mitgelieferte gesunde Rezepte** an. Einzelne Mahlzeiten neu würfeln oder gezielt wählen; **Einkaufsliste** (Vorrat abziehbar), Druck, Speichern im Profil |
 | **Website-Export** | themenbasierte **HTML5/PHP-Website**: Startseite, Themenseiten (Tags), Rezeptseiten mit Foto und Nährwerten, Menü, responsives Layout; Suche serverseitig (`suche.php`, PHP 7.4+) und sofort im Browser (JavaScript) – Ordner nur noch hochladen |
@@ -95,6 +98,7 @@ src/
   umlauts.*           Umlaut-Korrektur für ASCII-Umschrift (ae/oe/ue/ss)
   mealtypes.*         Mahlzeit-Arten (Frühstück, Hauptgericht, Zwischenmahlzeit …), Portionsgewicht, Kennzahlen
   coaching.*          Motivation, Erklärungen und Tipps für den Assistenten
+  diary.*             Ernährungstagebuch je Person (Einträge, Tagessummen, Speicherung)
   odtexport.*         LibreOffice-Writer-Export (.odt, eigener ZIP-Schreiber)
   deepl.*             optionale Übersetzung mit der DeepL-API (eigener Schlüssel)
   foodtable.*         Nährwerttabelle (eingebaut + eigene + gelernte Zuordnungen), Namensabgleich
@@ -108,7 +112,7 @@ src/
   fridge.*            Bestand, Vorschläge, Einkaufslisten
   profiles.*          Personen, Gewichtsverlauf, Energiebedarf
   mealplanner.*       Wochenmenü-Plan
-  mainwindow.*, recipeview.*, editordialog.*, imagecropdialog.*, weighindialog.*, searchdialog.*, importdialogs.*, exportdialogs.*,
+  mainwindow.*, recipeview.*, editordialog.*, imagecropdialog.*, weighindialog.*, diarydialog.*, searchdialog.*, importdialogs.*, exportdialogs.*,
   fridgedialog.*, assistantdialog.*, profiledialog.*, weightchart.*, mealplandialog.*, fooddialog.*,
   settingsdialog.*, uiscale.*             Oberfläche
   themes.*, icons.*, screenfit.*, windowstate.*, qtcompat.h   aus VitaBreathe/VitaParms übernommen

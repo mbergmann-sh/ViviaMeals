@@ -142,7 +142,7 @@ AssistantDialog::AssistantDialog(QWidget *parent) : QDialog(parent)
     connect(m_del, &QPushButton::clicked, this, [this] {
         Profile *p = Profiles::instance().find(currentId());
         if (!p) return;
-        if (QMessageBox::question(this, windowTitle(), tr("Person „%1“ mit Gewichtsverlauf löschen?").arg(p->name)) != QMessageBox::Yes) return;
+        if (QMessageBox::question(this, windowTitle(), tr("Person „%1“ mit Gewichtsverlauf und Ernährungstagebuch löschen?").arg(p->name)) != QMessageBox::Yes) return;
         Profiles::instance().remove(p->id);
         reloadProfiles();
     });

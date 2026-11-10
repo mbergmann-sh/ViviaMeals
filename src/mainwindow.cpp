@@ -18,6 +18,7 @@
 #include "themes.h"
 #include "umlauts.h"
 #include "weighindialog.h"
+#include "diarydialog.h"
 #include "mealtypes.h"
 #include "odtexport.h"
 #include "deepl.h"
@@ -165,6 +166,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
         menu.addAction(Icons::get(QStringLiteral("edit")), tr("Bearbeiten …"), this, &MainWindow::editRecipe);
         menu.addAction(Icons::get(QStringLiteral("tex")), tr("Als LaTeX-Datei exportieren …"), this, &MainWindow::exportLatex);
         menu.addAction(Icons::get(QStringLiteral("odt")), tr("Als LibreOffice-Writer-Datei (.odt) exportieren …"), this, &MainWindow::exportOdt);
+        menu.addSeparator();
+        menu.addAction(Icons::get(QStringLiteral("diary")), tr("Ins Ernährungstagebuch eintragen …"), this, [this] { openDiary(currentId()); });
         menu.addAction(Icons::get(QStringLiteral("save")), tr("Als .vmr-Datei speichern …"), this, &MainWindow::exportVmr);
         menu.addAction(Icons::get(QStringLiteral("print")), tr("Drucken …"), this, &MainWindow::printRecipe);
         menu.addSeparator();
@@ -288,6 +291,11 @@ void MainWindow::buildMenus()
     a = plan->addAction(Icons::get(QStringLiteral("scale")), tr("&Assistent Gewichtskontrolle …"), this, &MainWindow::openAssistant);
     a->setShortcut(QKeySequence(Qt::Key_F6));
     a->setObjectName(QStringLiteral("actAssistant"));
+    a = plan->addAction(Icons::get(QStringLiteral("diary")), tr("&Ernährungstagebuch …"), this, [this] { openDiary(); });
+    a->setShortcut(QKeySequence(Qt::Key_F9));
+    a->setObjectName(QStringLiteral("actDiary"));
+    a->setStatusTip(tr("Gegessene Mahlzeiten je Person mit Uhrzeit, Menge und Kalorien erfassen – mit Restkalorien für den Tag"));
+    m_diaryAction = a;
     a = plan->addAction(Icons::get(QStringLiteral("chart")), tr("&Gewichtskontrolle …"), this, &MainWindow::openWeighIn);
     a->setShortcut(QKeySequence(Qt::Key_F8));
     a->setObjectName(QStringLiteral("actWeighIn"));
@@ -363,6 +371,7 @@ void MainWindow::buildToolBar()
     add("actFridge", tr("Kühlschrank"), true);
     add("actAssistant", tr("Assistent"), true);
     add("actPlan", tr("Wochenplan"), true);
+    add("actDiary", tr("Tagebuch"), true);
     tb->addSeparator();
     add("actRandom", tr("Zufall"), false);
     add("actPrint", tr("Drucken"), false);
@@ -1048,6 +1057,22 @@ void MainWindow::openAssistant()
     connect(&d, &AssistantDialog::planRequested, this, [this](const QString &id) { openMealPlan(id); });
     d.exec();
     updateReminder();
+}
+
+void MainWindow::openDiary(const QString &recipeId)
+{
+    if (Profiles::instance().all().isEmpty()) {
+        if (QMessageBox::question(this, tr("Ernährungstagebuch"),
+                                  tr("Das Ernährungstagebuch wird je Person geführt. Es ist noch keine Person angelegt – jetzt den "
+                                     "Assistenten Gewichtskontrolle öffnen und eine Person anlegen?"))
+            == QMessageBox::Yes)
+            openAssistant();
+        return;
+    }
+    DiaryDialog d(this);
+    if (!recipeId.isEmpty()) d.addRecipe(recipeId);
+    d.exec();
+    refreshList();   // eigene Rezepte können in die Datenbank übernommen worden sein
 }
 
 void MainWindow::openWeighIn()

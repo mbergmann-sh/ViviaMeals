@@ -55,6 +55,7 @@ icons = {
  "dice": f'<rect x="3.5" y="3.5" width="17" height="17" rx="3" {S}/><circle cx="8.5" cy="8.5" r="1.4" fill="#ACCENT"/><circle cx="15.5" cy="15.5" r="1.4" fill="#ACCENT"/><circle cx="12" cy="12" r="1.4" fill="#ACCENT"/><circle cx="15.5" cy="8.5" r="1.4" fill="#COLOR"/><circle cx="8.5" cy="15.5" r="1.4" fill="#COLOR"/>',
  "nutrition": f'<path d="M12 21c-5 0-8-3.5-8-8 0-4 3-7 6-7 1 0 1.5.4 2 .4s1-.4 2-.4c3 0 6 3 6 7 0 4.5-3 8-8 8z" {S}/><path d="M12 6.4c0-2 1-3.4 3-3.9" {A}/><path d="M8 13a4 4 0 0 1 4-4" {A}/>',
  "user": f'<circle cx="12" cy="8" r="4" {S}/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" {S}/>',
+ "diary": f'<path d="M5 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5z" {S}/><path d="M8 3v18" {S}/><path d="M11 8h5M11 11.5h5" {S}/><path d="M11.5 16.5c1-1.6 2.2-1.6 3 0" {A}/><circle cx="13" cy="15" r="0.1" {A}/>',
  "user-add": f'<circle cx="10" cy="8" r="4" {S}/><path d="M2 21c0-4.4 3.6-7 8-7 1.6 0 3 .3 4.2.9" {S}/><path d="M19 14v7M15.5 17.5h7" {A}/>',
  "users": f'<circle cx="9" cy="8" r="3.5" {S}/><path d="M2 20c0-3.9 3.1-6 7-6s7 2.1 7 6" {S}/><circle cx="17" cy="7" r="2.8" {S}/><path d="M17 12.5c2.9 0 5 1.8 5 5" {S}/>',
  "chart": f'<path d="M3 3v18h18" {S}/><path d="M6 16l4-5 3 3 6-7" {A}/>',

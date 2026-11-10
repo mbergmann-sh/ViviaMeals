@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "profiles.h"
+#include "diary.h"
 #include "recipe.h"
 
 #include <QCoreApplication>
@@ -269,6 +270,7 @@ void Profiles::update(const Profile &p)
 
 void Profiles::remove(const QString &id)
 {
+    Diary::Book::removeFor(id);   // Ernährungstagebuch der Person mit entfernen
     m_list.erase(std::remove_if(m_list.begin(), m_list.end(), [&](const Profile &p) { return p.id == id; }), m_list.end());
     save();
 }

@@ -57,6 +57,7 @@ public slots:
     void openAssistant();
     void updateReminder();
     void openWeighIn();
+    void openDiary(const QString &recipeId = QString());
     void openMealPlan(const QString &profileId = QString());
     void openFoodTable();
     void recalcAll();
@@ -84,6 +85,7 @@ private:
     QLabel *m_headName;
     QLabel *m_headInfo;
     QFrame *m_reminder;
+    QAction *m_diaryAction = nullptr;
     QLabel *m_reminderText;
     QLineEdit *m_filter;
     QComboBox *m_tagFilter;
