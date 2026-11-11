@@ -273,6 +273,7 @@ QString store(QWidget *parent, const QList<Recipe> &chosen, QStringList warnings
     QStringList savedIds;
     db.beginBatch();
     for (Recipe r : chosen) {
+        Importers::normalizeTexts(r);   // auch Rezeptpakete und .vmr: „200GradC“ → „200° C“
         const QStringList dups = db.duplicatesOf(r);
         if (!dups.isEmpty()) {
             DuplicateDialog::Choice c = def;

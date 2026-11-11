@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "recipescan.h"
+#include "units.h"
 #include "foodtable.h"
 
 #include <QColor>
@@ -266,9 +267,10 @@ QString fixLine(const QString &line)
         "^([1-9]|\\d+,\\d)1\\s+(?=(?:\\p{L}+\\s)?\\p{L}*(?:brühe|bruhe|fond|milch|wasser|wein|saft|bier|sahne|öl\\b|essig))"),
         QRegularExpression::CaseInsensitiveOption);
     s.replace(liter, QStringLiteral("\\1 l "));
-    // Temperaturen: 180 *C, 180 ºC, 180°C → 180 °C
-    static const QRegularExpression deg(QStringLiteral("(\\d)\\s*[*º°]\\s*C\\b"));
-    s.replace(deg, QStringLiteral("\\1 °C"));
+    // Temperaturen: 180 *C, 180 ºC, 180°C, 180 Grad C → 180° C
+    static const QRegularExpression deg(QStringLiteral("(\\d)\\s*\\*\\s*C\\b"));
+    s.replace(deg, QStringLiteral("\\1°C"));
+    s = Units::normalizeCelsius(s);
     return restoreUmlauts(s).trimmed();
 }
 

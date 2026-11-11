@@ -1,6 +1,6 @@
 # ViviaMeals – Notizen für das Handbuch
 
-Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.6.9.
+Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.6.10.
 
 > **Name:** Das Programm heißt seit Version 0.6 **ViviaMeals** (vorher VitaMeals; die ganze Reihe heißt jetzt
 > Vivia – ViviaParms, ViviaBreathe). Alte Einstellungen, Profile, Tagebücher, eigene Lebensmittel und
@@ -52,7 +52,7 @@ kann die Übersetzung durch **DeepL** einschalten.
   es nach: „3 der 25 Rezepte sind nicht deutschsprachig. Sollen sie mit DeepL ins Deutsche übersetzt
   werden? Dazu werden … Zeichen an DeepL gesendet.“
   * **Ja:** Titel, Zutaten, Zwischenüberschriften und Zubereitung werden übersetzt. Maße und
-    Temperaturen werden **vorher** umgerechnet (aus „350 °F“ wird „175 °C“, aus „2 cups flour“ „260 g Mehl“).
+    Temperaturen werden **vorher** umgerechnet (aus „350 °F“ wird „175° C“, aus „2 cups flour“ „260 g Mehl“).
   * **Nein:** wie ohne DeepL – Zutaten über das Glossar, Anleitung im Original.
 * In der Vorschau zeigt die Spalte **Sprache** z. B. „englisch → DeepL“, „englisch (Glossar)“ oder
   „französisch (nicht übersetzt)“.
@@ -364,7 +364,7 @@ vollständig auf dem eigenen Rechner), teilt ihn in Titel, Portionen, Zutaten un
 * Handyfotos: Seite flach hinlegen, gerade von oben, ohne Schatten und bei gutem Licht.
 * Die Aufteilung richtet sich nach Überschriften („Zutaten“, „Zubereitung“, „So wird’s gemacht“),
   Mengenangaben am Zeilenanfang und der Schriftgröße des Titels. Typische Lesefehler werden
-  verbessert (l/2 → ½, 1OO g → 100 g, El → EL, 180 *C → 180 °C, fehlende Umlaut-Punkte wie
+  verbessert (l/2 → ½, 1OO g → 100 g, El → EL, 180 *C → 180° C, fehlende Umlaut-Punkte wie
   „Krauterquark“ → „Kräuterquark“). Handschrift erkennt Tesseract kaum.
 * Gedruckte Rezepte mit rechtsbündiger Mengenspalte (wie der ViviaMeals-Ausdruck): Tesseract liest Mengen
   und Zutaten manchmal als getrennte Spalten; ViviaMeals fügt sie über die Lage auf der Seite wieder
@@ -538,3 +538,14 @@ Quellen gibt es das Hilfsprogramm *ViviaMealsCheat* unter `tools/viviamealscheat
   Übernehmen eines Rezeptpakets und bei der Umlaut-Korrektur,
 - der Berechnung des Wochenmenü-Plans (Rezepte prüfen, Tage zusammenstellen; Abbrechen behält den
   bisherigen Plan) und beim Würfeln eines anderen Rezepts.
+
+
+## Temperaturschreibweise (ab 0.6.10)
+
+Einheitlich „200° C“ (`Units::normalizeCelsius`, `Importers::normalizeTexts`):
+- **Import** (RezKonv, MealMaster, .vtm, Scan, Rezeptpakete und .vmr über `ImportFlow::store`, auch nach DeepL)
+  und **Editor** (Titel, Zutaten, Zubereitung – beim Öffnen angezeigt und beim Speichern übernommen).
+- Umgeschrieben werden „200GradC“, „200 Grad C“, „200 GRADC“, „200 Grad Celsius“, „200°C“, „200 °C“, „200ºC“,
+  auch in Bereichen („180-200GradC“ → „180-200° C“). „Grad“ ohne C („um 90 Grad drehen“) bleibt.
+- Umrechnungen aus Fahrenheit und die Scan-Korrektur („180 *C“) liefern ebenfalls „° C“.
+- Bereits gespeicherte Rezepte ändern sich, sobald sie im Editor geöffnet und gespeichert werden.

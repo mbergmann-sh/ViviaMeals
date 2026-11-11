@@ -440,7 +440,7 @@ int main(int argc, char **argv)
             CHECK(ing(5).name == QStringLiteral("Zitrone") && ing(5).food == QLatin1String("zitronensaft"), "Zitrone: Saft");
             CHECK(ing(6).unit == QLatin1String("Kugel") && ing(6).food == QLatin1String("speiseeis") && std::fabs(ing(6).grams - 200) < 1, "Kugel(n) Vanilleeis");
             CHECK(ing(7).food == QLatin1String("fisch_mager") && std::fabs(ing(7).grams - 500) < 1, "Zanderfilets à 125 g");
-            CHECK(r.instructions.contains(QStringLiteral("180 °C")) && r.instructions.contains(QStringLiteral("heißen Brühe"))
+            CHECK(r.instructions.contains(QStringLiteral("180° C")) && r.instructions.contains(QStringLiteral("heißen Brühe"))
                       && r.instructions.contains(QStringLiteral("Schüssel")) && r.instructions.contains(QStringLiteral("ablöschen"))
                       && !r.instructions.contains(QStringLiteral("O-Titel")),
                   "Anleitung korrigiert");
@@ -527,7 +527,7 @@ int main(int argc, char **argv)
             CHECK(r.ingredients.size() == 2 && r.ingredients[0].name == QStringLiteral("Mehl") && r.ingredients[0].unit == QLatin1String("g")
                       && r.ingredients[0].food == QLatin1String("weizenmehl") && r.ingredients[1].note == QStringLiteral("geschmolzen"),
                   "Zutaten übersetzt und zugeordnet");
-            CHECK(r.instructions.contains(QStringLiteral("175 °C")) || r.instructions.contains(QStringLiteral("180 °C")), "°F vor der Übersetzung umgerechnet");
+            CHECK(r.instructions.contains(QStringLiteral("175° C")) || r.instructions.contains(QStringLiteral("180° C")), "°F vor der Übersetzung umgerechnet");
             CHECK(RecipeHtml::languageNote(r).contains(QStringLiteral("Englischen")), "Hinweis „aus dem Englischen übersetzt“");
         }
         // deutsches Rezept geht nie an DeepL
@@ -784,7 +784,7 @@ int main(int argc, char **argv)
               "„11“ vor Flüssigkeit = 1 l");
         CHECK(RecipeScan::fixLine(QStringLiteral("2 El Öl")) == QStringLiteral("2 EL Öl"), "El → EL");
         CHECK(RecipeScan::fixLine(QStringLiteral("Va Bund Petersilie")) == QStringLiteral("½ Bund Petersilie"), "Va → ½");
-        CHECK(RecipeScan::fixLine(QStringLiteral("bei 180 *C backen")) == QStringLiteral("bei 180 °C backen"), "°C");
+        CHECK(RecipeScan::fixLine(QStringLiteral("bei 180 *C backen")) == QStringLiteral("bei 180° C backen"), "°C");
         CHECK(RecipeScan::fixLine(QStringLiteral("| ﬁnden")) == QStringLiteral("finden"), "Ligatur, Rahmen");
 
         // Aufteilung aus Zeilen (wie Tesseract sie liefert: Block, Absatz, Höhe)
@@ -1284,6 +1284,31 @@ int main(int argc, char **argv)
         ft.removeUserFood(QStringLiteral("u_buttaris_test"));
         ft.learn(QStringLiteral("Zauberpulver Xyz"), QString());
         out << "  Paket: " << zip.size() << " Bytes, " << files.size() << " Dateien\n";
+    }
+
+    // ---- Celsius-Schreibweise
+    out << "\nCelsius:\n";
+    {
+        const QList<QPair<QString, QString>> cases = {
+            { QStringLiteral("bei 200GradC backen"), QStringLiteral("bei 200° C backen") },
+            { QStringLiteral("200 Grad C"), QStringLiteral("200° C") },
+            { QStringLiteral("auf 180-200 GRADC."), QStringLiteral("auf 180-200° C.") },
+            { QStringLiteral("175 Grad Celsius (Umluft 160GradC)"), QStringLiteral("175° C (Umluft 160° C)") },
+            { QStringLiteral("200 °C, 220°C, 90ºC"), QStringLiteral("200° C, 220° C, 90° C") },
+            { QStringLiteral("200° C bleibt"), QStringLiteral("200° C bleibt") },
+            { QStringLiteral("um 90 Grad drehen, 3 Grad Celsiustemperatur"), QStringLiteral("um 90 Grad drehen, 3 Grad Celsiustemperatur") },
+            { QStringLiteral("2 Gradcakes"), QStringLiteral("2 Gradcakes") },
+        };
+        for (const auto &c : cases) {
+            const QString got = Units::normalizeCelsius(c.first);
+            CHECK(got == c.second, c.first + " → " + got);
+        }
+        CHECK(Units::convertTextMeasures(QStringLiteral("Bake at 350 F")) == QStringLiteral("Bake at 175° C"), "Fahrenheit → ° C");
+        const Importers::Result res = Importers::parseRezKonv(QStringLiteral(
+            "=========== REZKONV-Rezept - RezkonvSuite v1.4\n\n     Titel: Testauflauf\n Kategorien: Auflauf\n     Menge: 2 Portionen\n\n"
+            "      500 g  Kartoffeln\n\nIm Ofen bei 200GradC 30 Minuten backen.\n\n=====\n"));
+        CHECK(res.recipes.size() == 1 && res.recipes.first().instructions.contains(QStringLiteral("bei 200° C 30 Minuten")),
+              "RezKonv-Import: " + (res.recipes.isEmpty() ? QString() : res.recipes.first().instructions));
     }
 
     // ---- Open Food Facts

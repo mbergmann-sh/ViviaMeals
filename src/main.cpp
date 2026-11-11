@@ -266,7 +266,7 @@ QImage demoScanPage()
     p.setPen(QColor(25, 25, 25));
     p.setFont(font(32, false));
     y += 70;
-    const QStringList dir{ QStringLiteral("1. Den Backofen auf 200 °C vorheizen. Kartoffeln waschen und vierteln, Paprika,"),
+    const QStringList dir{ QStringLiteral("1. Den Backofen auf 200° C vorheizen. Kartoffeln waschen und vierteln, Paprika,"),
                            QStringLiteral("Zucchini und Zwiebeln in grobe Stücke schneiden."), QString(),
                            QStringLiteral("2. Gemüse mit Öl, Paprikapulver, Salz und Pfeffer mischen, auf einem Blech verteilen"),
                            QStringLiteral("und etwa 35 Minuten backen, dabei einmal wenden."), QString(),

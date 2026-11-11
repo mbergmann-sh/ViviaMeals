@@ -314,6 +314,16 @@ QStringList germanUnits()
              QStringLiteral("Kugel"), QStringLiteral("etwas"), QStringLiteral("wenig"), QStringLiteral("einige"), QStringLiteral("n. B.") };
 }
 
+QString normalizeCelsius(const QString &text)
+{
+    // Zahl, dann „Grad C“/„GradC“/„Grad Celsius“ oder Gradzeichen (°, º, ˚) mit C; „Grad“ allein bleibt unverändert
+    static const QRegularExpression re(QStringLiteral("(\\d)\\s*(?:Grad\\s*C(?:elsius)?|[°º˚]\\s*C(?:elsius)?)(?![A-Za-zÄÖÜäöüß])"),
+                                       QRegularExpression::CaseInsensitiveOption);
+    QString s = text;
+    s.replace(re, QStringLiteral("\\1° C"));
+    return s;
+}
+
 QString convertTextMeasures(const QString &text)
 {
     QString s = text;
@@ -330,7 +340,7 @@ QString convertTextMeasures(const QString &text)
         const double f = num.toDouble();
         if (f < 200 || f > 550) continue;
         const int c = int(std::round((f - 32) * 5.0 / 9.0 / 5.0) * 5);
-        out += s.mid(last, m.capturedStart() - last) + QStringLiteral("%1 °C").arg(c);
+        out += s.mid(last, m.capturedStart() - last) + QStringLiteral("%1° C").arg(c);
         last = m.capturedEnd();
     }
     out += s.mid(last);

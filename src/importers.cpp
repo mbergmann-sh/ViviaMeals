@@ -184,9 +184,6 @@ Recipe build(const RawRecipe &raw, const QString &format, const QString &lang, b
     }
     QString dir = joinDirections(raw.directionLines);
     if (!german) dir = Units::convertTextMeasures(dir);
-    // RezKonv-Schreibweise „bei 180GradC“ → „bei 180 °C“
-    static const QRegularExpression gradC(QStringLiteral("(\\d)\\s*Grad\\s*C\\b"));
-    dir.replace(gradC, QStringLiteral("\\1 °C"));
     r.instructions = dir;
     QStringList src;
     for (QString s : raw.sourceLines) {
@@ -205,6 +202,20 @@ Recipe build(const RawRecipe &raw, const QString &format, const QString &lang, b
     }
     return r;
 }
+
+} // namespace
+
+void normalizeTexts(Recipe &r)
+{
+    r.title = Units::normalizeCelsius(r.title);
+    r.instructions = Units::normalizeCelsius(r.instructions);
+    for (Ingredient &i : r.ingredients) {
+        i.name = Units::normalizeCelsius(i.name);
+        i.note = Units::normalizeCelsius(i.note);
+    }
+}
+
+namespace {
 
 Recipe finish(RawRecipe &raw, const Options &opt, const QString &format, Result *res)
 {
@@ -244,6 +255,7 @@ Recipe finish(RawRecipe &raw, const Options &opt, const QString &format, Result 
         Umlauts::fixRecipe(r);
         ++res->umlautsFixed;
     }
+    normalizeTexts(r);   // „200GradC“ → „200° C“ (auch nach DeepL)
     Nutrition::analyze(r);
     if (opt.autoTags) Nutrition::applyTagSuggestions(r);
     if (opt.mealTags && !Nutrition::isMenu(r)) MealTypes::applyTags(r);
@@ -569,6 +581,7 @@ Result parseVtm(const QByteArray &json, const Options &opt)
         r.language = po.translate ? QStringLiteral("en") : QStringLiteral("de");
         r.ingredients = IngredientParser::parseText(ing, po);
         if (po.translate) r.instructions = Units::convertTextMeasures(r.instructions);
+        normalizeTexts(r);
         Nutrition::analyze(r);
         if (opt.autoTags) Nutrition::applyTagSuggestions(r);
         res.recipes << r;

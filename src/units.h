@@ -35,7 +35,11 @@ double defaultPieceGrams(const QString &deUnit);
 // Alle deutschen Einheiten für Auswahllisten/Completer
 QStringList germanUnits();
 
-// Temperaturen und Maße in englischen Texten umrechnen: „350 °F“ → „175 °C“, „9x13 inch“ → „23 × 33 cm“
+// Temperaturen und Maße in englischen Texten umrechnen: „350 °F“ → „175° C“, „9x13 inch“ → „23 × 33 cm“
 QString convertTextMeasures(const QString &text);
+
+// Celsius-Angaben vereinheitlichen: „200GradC“, „200 Grad C“, „200 Grad Celsius“, „200°C“, „200 °C“, „200ºC“
+// → „200° C“ (auch in Bereichen wie „180-200GradC“)
+QString normalizeCelsius(const QString &text);
 
 } // namespace Units

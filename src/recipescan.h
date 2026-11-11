@@ -6,7 +6,7 @@
 // 2. Die Textzeilen aus der Texterkennung (Ocr::Line, mit Block, Absatz und Schrifthöhe) in Titel,
 //    Portionen, Zutaten und Zubereitung aufteilen: Überschriften („Zutaten“, „Zubereitung“, „So wird’s
 //    gemacht“, „Ingredients“ …), Zeilen mit Mengenangaben, Satzlänge und Schriftgröße.
-// 3. Typische Erkennungsfehler korrigieren (l/2 → ½, 1OO g → 100 g, El → EL, 180 *C → 180 °C,
+// 3. Typische Erkennungsfehler korrigieren (l/2 → ½, 1OO g → 100 g, El → EL, 180 *C → 180° C,
 //    Silbentrennung, Aufzählungszeichen).
 // Das Ergebnis geht über Importers::fromParts durch dieselbe Nachbearbeitung wie ein Dateiimport.
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)

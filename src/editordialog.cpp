@@ -152,7 +152,7 @@ EditorDialog::EditorDialog(const Recipe &r, QWidget *parent) : QDialog(parent), 
     split->setObjectName(QStringLiteral("editorSplit"));
     auto *ingBox = new QGroupBox(tr("&Zutaten (eine je Zeile)"));
     auto *il = new QVBoxLayout(ingBox);
-    m_ingredients = new QPlainTextEdit(r.ingredientsText());
+    m_ingredients = new QPlainTextEdit(Units::normalizeCelsius(r.ingredientsText()));
     m_ingredients->setPlaceholderText(tr("200 g Mehl\n2 Eier\n1 Prise Salz\n== Für die Füllung ==\n250 g Quark\n…\n\n"
                                          "Englische Maße (cups, oz, tbsp) werden umgerechnet."));
     m_ingredients->setLineWrapMode(QPlainTextEdit::NoWrap);
@@ -160,7 +160,7 @@ EditorDialog::EditorDialog(const Recipe &r, QWidget *parent) : QDialog(parent), 
     split->addWidget(ingBox);
     auto *insBox = new QGroupBox(tr("Zu&bereitung"));
     auto *inl = new QVBoxLayout(insBox);
-    m_instructions = new QPlainTextEdit(r.instructions);
+    m_instructions = new QPlainTextEdit(Units::normalizeCelsius(r.instructions));
     m_instructions->setPlaceholderText(tr("Arbeitsschritte – Absätze durch eine Leerzeile trennen."));
     inl->addWidget(m_instructions);
     split->addWidget(insBox);
@@ -302,8 +302,8 @@ QString EditorDialog::sourceOrDefault(const QString &source)
 void EditorDialog::showRecipe()
 {
     m_title->setText(m_recipe.title);
-    m_ingredients->setPlainText(m_recipe.ingredientsText());
-    m_instructions->setPlainText(m_recipe.instructions);
+    m_ingredients->setPlainText(Units::normalizeCelsius(m_recipe.ingredientsText()));
+    m_instructions->setPlainText(Units::normalizeCelsius(m_recipe.instructions));
     m_source->setText(sourceOrDefault(m_recipe.source));
     m_tags->setText(m_recipe.tags.join(QStringLiteral(", ")));
     if (!m_recipe.yieldUnit.isEmpty()) m_yield->setCurrentText(m_recipe.yieldUnit);
@@ -357,7 +357,7 @@ void EditorDialog::translateDeepL()
 
 void EditorDialog::collect()
 {
-    m_recipe.title = m_title->text().trimmed();
+    m_recipe.title = Units::normalizeCelsius(m_title->text().trimmed());
     m_recipe.servings = m_servings->value();
     const QString y = m_yield->currentText().trimmed();
     m_recipe.yieldUnit = (y == tr("Portionen") || y == tr("Portion")) ? QString() : y;
@@ -366,12 +366,12 @@ void EditorDialog::collect()
     for (const QString &t : m_tags->text().split(QLatin1Char(','), Qt::SkipEmptyParts)) m_recipe.addTag(t);
     m_recipe.source = m_source->text().trimmed();
     m_recipe.favorite = m_fav->isChecked();
-    m_recipe.instructions = m_instructions->toPlainText().trimmed();
+    m_recipe.instructions = Units::normalizeCelsius(m_instructions->toPlainText().trimmed());   // „200GradC“ → „200° C“
     // Zutaten neu zerlegen; Originalzeilen und manuelle Zuordnungen erhalten
     QHash<QString, QString> originals;
     for (const Ingredient &i : m_recipe.ingredients)
         if (!i.original.isEmpty()) originals.insert(i.displayLine(), i.original);
-    QList<Ingredient> list = IngredientParser::parseText(m_ingredients->toPlainText());
+    QList<Ingredient> list = IngredientParser::parseText(Units::normalizeCelsius(m_ingredients->toPlainText()));
     for (Ingredient &i : list) {
         auto it = m_manual.constFind(i.name.toLower());
         if (it != m_manual.constEnd()) {

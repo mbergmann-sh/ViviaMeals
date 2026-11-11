@@ -58,5 +58,7 @@ struct TextParts {
     QStringList sourceLines;
 };
 Result fromParts(const TextParts &parts, const QString &format, const Options &opt = {});
+// Schreibweisen vereinheitlichen (Celsius: „200GradC“, „200 °C“ → „200° C“) in Titel, Anleitung und Zutaten
+void normalizeTexts(Recipe &r);
 
 } // namespace Importers
