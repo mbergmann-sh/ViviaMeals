@@ -67,6 +67,10 @@
 #include <QSettings>
 #include <QStandardPaths>
 #include <QTimer>
+#include <QTemporaryDir>
+#include "sync.h"
+#include "syncdialog.h"
+#include "syncserver.h"
 #include <cmath>
 
 namespace {
@@ -620,6 +624,42 @@ void takeScreenshots(MainWindow *w, const QString &dir)
             for (const char *k : { "tex/bgImage", "tex/bgTarget", "tex/bgPlacement", "tex/bgWidth", "tex/bgLeft", "tex/bgBottom", "tex/author", "tex/heading" })
                 st.remove(QLatin1String(k));
         }
+    }
+    {
+        // Abgleich einrichten: eigene Website, Freigabe im LAN; Laden auf einem neuen Gerät
+        const QString folder = RecipeDb::instance().folder();
+        Sync::Connection c;
+        c.kind = Sync::Connection::Kind::Website;
+        c.url = QStringLiteral("https://www.meine-seite.de/viviameals/viviameals-sync.php");
+        c.token = Sync::newToken();
+        c.save(folder);
+        {
+            SyncSetupDialog d(folder, RecipeDb::instance().name(), nullptr, w);
+            d.show();
+            QApplication::processEvents();
+            shot(&d, dir, QStringLiteral("abgleich-website"));
+        }
+        Sync::Server server;
+        server.setPersistTokens(false);
+        QTemporaryDir store;
+        server.start(store.path(), RecipeDb::instance().name(), 0);
+        c.kind = Sync::Connection::Kind::Host;
+        c.save(folder);
+        {
+            SyncSetupDialog d(folder, RecipeDb::instance().name(), &server, w);
+            d.show();
+            QApplication::processEvents();
+            shot(&d, dir, QStringLiteral("abgleich-freigabe"));
+        }
+        {
+            SyncLoadDialog d(w);
+            d.show();
+            if (auto *r = d.findChildren<QRadioButton *>().value(1)) r->click();
+            QApplication::processEvents();
+            shot(&d, dir, QStringLiteral("abgleich-laden"));
+        }
+        server.stop();
+        QFile::remove(QDir(folder).filePath(QStringLiteral(".sync/verbindung.json")));
     }
     {
         BusyProgress prog(w, QObject::tr("Kalorien und Nährwerte neu berechnen"), 3127);

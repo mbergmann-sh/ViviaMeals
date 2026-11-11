@@ -1,6 +1,6 @@
 # ViviaMeals – Notizen für das Handbuch
 
-Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.7.7.
+Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.8.0.
 
 > **Name:** Das Programm heißt seit Version 0.6 **ViviaMeals** (vorher VitaMeals; die ganze Reihe heißt jetzt
 > Vivia – ViviaParms, ViviaBreathe). Alte Einstellungen, Profile, Tagebücher, eigene Lebensmittel und
@@ -687,3 +687,86 @@ Titelseite – zwischen Überschrift (Titel/Untertitel) und Autor:
 Das Bild wird mit demselben Zuschnitt/Drehen/Randentfernen wie auf dem Schmutztitel, aber ohne Zuschnitt aufs
 Seitenformat als `titelbild.png|jpg` neben das Master-Dokument gelegt. Liegt das Hintergrundbild selbst auf der
 Titelseite, entfällt die Option (das Bild ist dort schon Hintergrund).
+
+### Vorwort im Kochbuch (ab 0.8.0)
+
+Ein neues Master-Dokument bindet vor `\mainmatter` die Datei **`vorwort.tex`** ein. ViviaMeals legt sie
+beim ersten Mal mit einem Platzhaltertext an (scrbook: `\addchap{Vorwort}`; book: `\chapter*{Vorwort}` mit
+Eintrag ins Inhaltsverzeichnis und Kopfzeile) und überschreibt sie danach nie wieder – eigener Text bleibt
+also erhalten, auch wenn das Master-Dokument neu erzeugt wird.
+
+## Abgleich zwischen mehreren Geräten (ab 0.8.0)
+
+### Worum es geht (Textbaustein)
+
+Mit dem Abgleich bleibt eine Rezeptdatenbank auf mehreren Geräten gleich – etwa auf dem Rechner in der Küche
+und dem Laptop. Abgeglichen werden Rezepte, Profile mit Gewichtsverlauf und Wochenplänen, das
+Ernährungstagebuch, eigene Lebensmittel, Doubletten-Ausnahmen sowie die Standard-Quelle und die Liste der
+„Kein Lebensmittel“-Zutaten. Jedes Gerät behält eine vollständige Kopie und kann auch ohne Verbindung
+arbeiten; beim nächsten Abgleich werden nur die geänderten Dateien übertragen.
+
+Nicht abgeglichen werden Fenstergrößen, Darstellung, Scanner- und Tesseract-Einstellungen, der DeepL-Schlüssel,
+der Kühlschrank-Bestand und Sicherungskopien – sie gehören zum jeweiligen Gerät.
+
+### Zwei Wege
+
+**Eigene Website** (Datei → Abgleich → Abgleich einrichten → „die eigene Website“):
+1. „Neu“ erzeugt einen Zugangsschlüssel, „Sync-Skript speichern …“ legt `viviameals-sync.php` ab.
+2. Die Datei per FTP/SFTP in einen Ordner der Website laden (PHP 7.4 oder neuer, z. B. 8.3).
+3. Adresse eintragen (z. B. `https://www.meine-seite.de/viviameals/viviameals-sync.php`), „Verbindung prüfen“.
+4. OK – der erste Abgleich lädt die Datenbank hoch.
+5. Für weitere Geräte „Einladungscode kopieren“ (enthält Adresse und Schlüssel) und dort einfügen.
+
+Das Skript legt daneben den Ordner `vm-sync-daten` an und sperrt ihn mit `.htaccess` (Apache). Bei nginx muss
+der Ordner in der Serverkonfiguration gesperrt werden. Der Zugangsschlüssel steht nur als SHA-256-Prüfsumme im
+Skript. Die Daten selbst sind nicht verschlüsselt – deshalb möglichst https:// verwenden.
+
+**Lokales Netz** – ein Rechner gibt die Datenbank frei, die anderen gleichen mit ihm ab:
+1. Auf dem freigebenden Rechner: Abgleich einrichten → „Freigabe“ → OK. Angezeigt werden ein sechsstelliger
+   **Kopplungscode** und die Adresse (Port 47420, Suche über UDP-Port 47421).
+2. Auf dem anderen Gerät: Abgleich einrichten (bzw. „Aus dem Abgleich laden“) → „ein anderes Gerät im lokalen
+   Netz“ → die Freigabe erscheint in der Liste → Code eingeben → „Koppeln“ → OK.
+3. Jeder Code gilt für eine Kopplung; nach fünf Fehlversuchen wird ein neuer erzeugt. Die Kopplung bleibt
+   dauerhaft (Zugangsschlüssel), auch wenn sich die IP-Adresse ändert (die Freigabe wird dann neu gesucht).
+
+Die Freigabe ist nur aktiv, solange ViviaMeals auf diesem Rechner läuft. Gleicht ein anderes Gerät ab,
+übernimmt der freigebende Rechner die Änderungen nach wenigen Sekunden selbst; eigene Änderungen stellt er
+ebenso bereit. Unter Windows fragt die Firewall beim ersten Start der Freigabe nach – „Private Netzwerke“
+zulassen.
+
+Bewusst nicht vorgesehen: Cloud-Dienste und NAS-/Netzwerkordner.
+
+### Wann abgeglichen wird
+
+- automatisch beim Öffnen und Schließen der Datenbank (abschaltbar im Dialog; Vorgabe: an)
+- jederzeit über Datei → Abgleich → Jetzt abgleichen (**Strg+Umschalt+Y**) bzw. „Abgleich“ in der Werkzeugleiste
+- Statuszeile: Weg und Zeitpunkt des letzten Abgleichs („⇅ Website · abgeglichen um 14:32“)
+
+### Konflikte
+
+Wurde dasselbe Rezept seit dem letzten Abgleich auf zwei Geräten geändert, bleiben **beide Fassungen**: die
+eigene unter dem bisherigen Rezept, die andere als zweites Rezept „Titel (Konflikt: Gerät, Datum)“. ViviaMeals
+nennt die betroffenen Rezepte; die überzählige Fassung löscht man von Hand (die Löschung wird abgeglichen).
+
+Profile, Gewichtsverlauf, Tagebuch und eigene Lebensmittel werden **eintragsweise zusammengeführt**: Einträge
+beider Geräte bleiben erhalten; ist derselbe Eintrag (gleicher Tag, gleiche Kennung) auf beiden Geräten
+geändert, gilt die Fassung des Geräts, das gerade abgleicht.
+
+Gelöschte Rezepte werden auf den anderen Geräten ebenfalls gelöscht (Vermerk ein Jahr lang). Gleichen zwei
+Geräte genau gleichzeitig ab, wartet das zweite (Sperre bis 5 Minuten) – Meldung „Gerade gleicht … ab“.
+
+### Neue Installation
+
+Willkommensfenster → „Aus dem Abgleich laden …“ (oder Datei → Abgleich → Datenbank aus dem Abgleich laden):
+Weg wählen (Website: Einladungscode einfügen; LAN: Freigabe wählen und koppeln), Zielordner bestätigen →
+die Datenbank wird mit Profilen, Tagebuch und Lebensmitteln geholt, geöffnet und künftig automatisch
+abgeglichen.
+
+### Technik (für Interessierte)
+
+- Pro Datenbank `.sync/verbindung.json` (Weg, Schlüssel) und `.sync/zustand.json` (Prüfsummen des letzten Stands)
+- Sync-Speicher: `store.json`, `manifest.json` (Revision, je Datei SHA-256, Größe, Zeit, Gerät; Löschvermerke),
+  `files/db/…`, `files/app/…`
+- Drei-Wege-Vergleich lokal / Speicher / letzter Stand; Abschluss nur, wenn die Revision unverändert ist
+  (sonst wird neu verglichen)
+

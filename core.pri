@@ -31,7 +31,9 @@ SOURCES += \
     $$PWD/src/ocr.cpp \
     $$PWD/src/recipescan.cpp \
     $$PWD/src/escl.cpp \
-    $$PWD/src/duplicates.cpp
+    $$PWD/src/duplicates.cpp \
+    $$PWD/src/sync.cpp \
+    $$PWD/src/syncserver.cpp
 
 HEADERS += \
     $$PWD/src/qtcompat.h \
@@ -58,6 +60,8 @@ HEADERS += \
     $$PWD/src/odtexport.h \
     $$PWD/src/recipepackage.h \
     $$PWD/src/openfoodfacts.h \
+    $$PWD/src/sync.h \
+    $$PWD/src/syncserver.h \
     $$PWD/src/deepl.h \
     $$PWD/src/ocr.h \
     $$PWD/src/recipescan.h \

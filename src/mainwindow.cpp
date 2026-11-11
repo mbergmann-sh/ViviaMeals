@@ -31,6 +31,10 @@
 #include "mealtypes.h"
 #include "odtexport.h"
 #include "deepl.h"
+#include "sync.h"
+#include "syncdialog.h"
+#include "syncserver.h"
+#include "foodtable.h"
 
 #include <QAction>
 #include <QActionGroup>
@@ -157,6 +161,27 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
     m_statusDb = new QLabel;
     statusBar()->addPermanentWidget(m_statusDb);
+    m_statusSync = new QLabel;
+    statusBar()->addPermanentWidget(m_statusSync);
+    m_server = new Sync::Server(this);
+    m_hostSync = new QTimer(this);
+    m_hostSync->setSingleShot(true);
+    m_hostSync->setInterval(2500);
+    connect(m_hostSync, &QTimer::timeout, this, [this] {
+        // nicht mitten in einer Bearbeitung: später erneut versuchen
+        if (m_syncing || QApplication::activeModalWidget()) {
+            m_hostSync->start();
+            return;
+        }
+        syncNow(true);
+    });
+    connect(m_server, &Sync::Server::committed, this, [this](const QString &device) {
+        statusBar()->showMessage(tr("„%1“ hat abgeglichen – Änderungen werden übernommen …").arg(device), 4000);
+        m_hostSync->start();
+    });
+    connect(m_server, &Sync::Server::paired, this, [this](const QString &device) {
+        statusBar()->showMessage(tr("Gerät „%1“ gekoppelt.").arg(device), 6000);
+    });
 
     buildMenus();
     buildToolBar();
@@ -194,6 +219,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
         RecipeDb::instance().save(r);
     });
     connect(&RecipeDb::instance(), &RecipeDb::changed, this, [this] {
+        if (m_server->isRunning() && !m_syncing) m_hostSync->start();
         refreshTags();
         refreshList();
         refreshHeader();
@@ -306,6 +332,18 @@ void MainWindow::buildMenus()
     a->setStatusTip(tr("Rezeptsammlung als Paket für andere ViviaMeals-Anwender speichern – ohne Benutzer, Ziele, Tagebuch und Pläne"));
     a->setObjectName(QStringLiteral("actPackage"));
     m_needDb << a;
+    QMenu *syn = file->addMenu(Icons::get(QStringLiteral("sync")), tr("A&bgleich"));
+    a = syn->addAction(Icons::get(QStringLiteral("sync")), tr("&Jetzt abgleichen"), this, [this] { syncNow(false); });
+    a->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Y));
+    a->setObjectName(QStringLiteral("actSync"));
+    a->setStatusTip(tr("Rezepte, Profile, Tagebuch und eigene Lebensmittel mit den anderen Geräten abgleichen"));
+    m_syncNow = a;
+    a = syn->addAction(Icons::get(QStringLiteral("settings")), tr("Abgleich &einrichten …"), this, &MainWindow::setupSync);
+    a->setStatusTip(tr("Abgleich über die eigene Website oder das lokale Netz einrichten, Datenbank im lokalen Netz freigeben"));
+    m_needDb << a;
+    syn->addSeparator();
+    a = syn->addAction(Icons::get(QStringLiteral("cloud-down")), tr("Datenbank aus dem Abgleich &laden …"), this, &MainWindow::loadFromSync);
+    a->setStatusTip(tr("Eine auf anderen Geräten abgeglichene Datenbank auf dieses Gerät holen"));
     file->addSeparator();
     a = file->addAction(Icons::get(QStringLiteral("delete")), tr("Datenbank &leeren …"), this, &MainWindow::clearDatabase);
     a->setStatusTip(tr("Alle Rezepte der geöffneten Datenbank löschen (mit Sicherheitsabfrage und Sicherungskopie)"));
@@ -419,6 +457,7 @@ void MainWindow::buildToolBar()
     add("actPlan", tr("Wochenplan"), true);
     add("actDiary", tr("Tagebuch"), true);
     tb->addSeparator();
+    add("actSync", tr("Abgleich"), false);
     add("actRandom", tr("Zufall"), false);
     add("actPrint", tr("Drucken"), false);
 }
@@ -429,6 +468,7 @@ void MainWindow::updateActions()
     const bool rec = db && m_view->hasRecipe();
     for (QAction *a : m_needDb) a->setEnabled(db);
     for (QAction *a : m_needRecipe) a->setEnabled(rec);
+    if (m_syncNow) m_syncNow->setEnabled(db && Sync::Connection::load(RecipeDb::instance().folder()).valid());
     // LaTeX-Export nur mit vorhandener LaTeX-Installation (TeX Live, MiKTeX, MacTeX)
     if (m_texAction) {
         const LatexExport::Installation tex = LatexExport::findInstallation();
@@ -468,11 +508,22 @@ void MainWindow::updateRecentMenu()
 bool MainWindow::openDatabase(const QString &path, bool quiet)
 {
     QString err;
+    // beim Wechsel: die bisherige Datenbank noch abgleichen
+    const QString previous = RecipeDb::instance().isOpen() ? RecipeDb::instance().folder() : QString();
+    if (!m_syncing && !previous.isEmpty() && QFileInfo(previous) != QFileInfo(RecipeDb::isDatabaseFolder(path) ? path : QFileInfo(path).absolutePath())) {
+        const Sync::Connection c = Sync::Connection::load(previous);
+        if (c.valid() && c.autoSync && c.kind != Sync::Connection::Kind::Host) syncNow(true);
+    }
     if (!RecipeDb::instance().open(path, &err)) {
         if (!quiet) QMessageBox::warning(this, tr("Rezeptdatenbank öffnen"), err);
         return false;
     }
     rememberDatabase(RecipeDb::instance().folder());
+    updateSyncState();
+    if (!m_syncing) {
+        const Sync::Connection c = Sync::Connection::load(RecipeDb::instance().folder());
+        if (c.valid() && c.autoSync) QTimer::singleShot(0, this, [this] { syncNow(true); });
+    }
     m_filter->clear();
     if (QSettings().value(QStringLiteral("ui/randomStart"), true).toBool() || RecipeDb::instance().count() > 0) showRandom();
     if (RecipeDb::instance().count() == 0)
@@ -498,6 +549,8 @@ bool MainWindow::ensureDatabase()
     QPushButton *create = box.addButton(tr("Neue Datenbank anlegen …"), QMessageBox::AcceptRole);
     QPushButton *samples = box.addButton(tr("Mit Beispielrezepten anlegen …"), QMessageBox::AcceptRole);
     QPushButton *open = box.addButton(tr("Vorhandene öffnen …"), QMessageBox::AcceptRole);
+    QPushButton *fromSync = box.addButton(tr("Aus dem Abgleich laden …"), QMessageBox::AcceptRole);
+    fromSync->setToolTip(tr("Eine Datenbank, die auf einem anderen Gerät über die eigene Website oder das lokale Netz abgeglichen wird, hierher holen"));
     box.addButton(tr("Später"), QMessageBox::RejectRole);
     box.setDefaultButton(samples);
     box.exec();
@@ -515,6 +568,8 @@ bool MainWindow::ensureDatabase()
         }
     } else if (box.clickedButton() == open) {
         openDatabaseDialog();
+    } else if (box.clickedButton() == fromSync) {
+        loadFromSync();
     }
     return RecipeDb::instance().isOpen();
 }
@@ -1370,9 +1425,141 @@ void MainWindow::appearanceChanged()
 
 void MainWindow::closeEvent(QCloseEvent *e)
 {
+    if (!m_closing && RecipeDb::instance().isOpen()) {
+        m_closing = true;
+        const Sync::Connection c = Sync::Connection::load(RecipeDb::instance().folder());
+        if (c.valid() && c.autoSync && !m_syncing) syncNow(true);
+    }
+    m_server->stop();
     QSettings s;
     if (!isFullScreen() && !isMinimized()) s.setValue(QStringLiteral("ui/geometry"), saveGeometry());
     s.setValue(QStringLiteral("ui/state"), saveState());
     s.setValue(QStringLiteral("ui/split"), m_split->saveState());
     e->accept();
+}
+
+// ---------------------------------------------------------------- Abgleich
+
+void MainWindow::updateSyncState()
+{
+    const bool db = RecipeDb::instance().isOpen();
+    const Sync::Connection c = db ? Sync::Connection::load(RecipeDb::instance().folder()) : Sync::Connection();
+    if (c.kind == Sync::Connection::Kind::Host) {
+        const QString store = Sync::hostStoreDir(RecipeDb::instance().folder());
+        if (!m_server->isRunning()) {
+            QString err;
+            if (!m_server->start(store, RecipeDb::instance().name(), Sync::kLanPort, &err))
+                statusBar()->showMessage(tr("Freigabe im lokalen Netz nicht möglich: %1").arg(err), 10000);
+        }
+    } else if (m_server->isRunning()) {
+        m_server->stop();
+    }
+    if (!db || !c.valid()) {
+        m_statusSync->clear();
+        m_statusSync->setToolTip(QString());
+    } else {
+        QString way;
+        switch (c.kind) {
+        case Sync::Connection::Kind::Website: way = tr("Website"); break;
+        case Sync::Connection::Kind::Lan: way = tr("LAN: %1").arg(c.deviceLabel.isEmpty() ? c.url : c.deviceLabel); break;
+        case Sync::Connection::Kind::Host: way = m_server->isRunning() ? tr("im LAN freigegeben") : tr("Freigabe gestört"); break;
+        case Sync::Connection::Kind::None: break;
+        }
+        m_statusSync->setText(QStringLiteral("⇅ %1 · %2").arg(way, SyncUi::lastSyncText(RecipeDb::instance().folder())));
+        m_statusSync->setToolTip(c.kind == Sync::Connection::Kind::Website ? c.url : tr("Abgleich: Datei → Abgleich (Strg+Umschalt+Y)"));
+    }
+    updateActions();
+}
+
+bool MainWindow::syncNow(bool quiet)
+{
+    if (m_syncing || !RecipeDb::instance().isOpen()) return false;
+    const QString folder = RecipeDb::instance().folder();
+    const Sync::Connection c = Sync::Connection::load(folder);
+    if (!c.valid()) {
+        if (!quiet) setupSync();
+        return false;
+    }
+    m_syncing = true;
+    statusBar()->showMessage(tr("Abgleich läuft …"));
+    const Sync::Result r = SyncUi::run(this, c, folder, quiet);
+    applySyncResult(r, quiet);
+    m_syncing = false;
+    updateSyncState();
+    return r.ok;
+}
+
+void MainWindow::applySyncResult(const Sync::Result &r, bool quiet)
+{
+    if (r.appChanged) {
+        Profiles::instance().reload();
+        FoodTable::instance().reload();
+    }
+    if (r.dbChanged && !m_closing) {
+        const QString keep = currentId();
+        RecipeDb::instance().open(RecipeDb::instance().folder());
+        if (!keep.isEmpty()) selectRecipe(keep);
+    }
+    if (r.appChanged && !m_closing) updateReminder();
+    statusBar()->showMessage(r.summary(), r.ok ? 6000 : 15000);
+    if (m_closing) return;
+    if (!r.ok && !r.canceled && !quiet) {
+        QMessageBox::warning(this, tr("Abgleich"), r.summary());
+    } else if (r.ok && !quiet) {
+        QMessageBox::information(this, tr("Abgleich"),
+                                 r.conflicts.isEmpty() ? r.summary()
+                                                       : tr("%1<br><br>Auf zwei Geräten geändert – beide Fassungen wurden behalten:<br><b>%2</b>")
+                                                             .arg(r.summary().toHtmlEscaped(), r.conflicts.join(QStringLiteral("<br>")).toHtmlEscaped()));
+    } else if (r.ok && !r.conflicts.isEmpty()) {
+        QMessageBox::information(this, tr("Abgleich"),
+                                 tr("Diese Rezepte wurden auf zwei Geräten geändert. Beide Fassungen wurden behalten – bitte prüfen und "
+                                    "die überzählige löschen:<br><b>%1</b>")
+                                     .arg(r.conflicts.join(QStringLiteral("<br>")).toHtmlEscaped()));
+    }
+}
+
+void MainWindow::setupSync()
+{
+    if (!RecipeDb::instance().isOpen()) return;
+    const QString folder = RecipeDb::instance().folder();
+    const Sync::Connection before = Sync::Connection::load(folder);
+    SyncSetupDialog dlg(folder, RecipeDb::instance().name(), m_server, this);
+    if (dlg.exec() != QDialog::Accepted) return;
+    const Sync::Connection c = dlg.connection();
+    c.save(folder);
+    updateSyncState();
+    if (c.kind == Sync::Connection::Kind::None) {
+        statusBar()->showMessage(tr("Abgleich für diese Datenbank ausgeschaltet."), 5000);
+        return;
+    }
+    const bool changedWay = before.kind != c.kind || before.url != c.url || before.token != c.token;
+    if (syncNow(false) && c.kind == Sync::Connection::Kind::Host && m_server->isRunning() && changedWay) {
+        // Code gleich anzeigen, damit das nächste Gerät gekoppelt werden kann
+        QMessageBox::information(this, tr("Freigabe im lokalen Netz"),
+                                 tr("Die Datenbank ist jetzt im lokalen Netz freigegeben.<br><br>Kopplungscode für das andere Gerät: "
+                                    "<b style='font-size:18pt'>%1</b><br><br>Auf dem anderen Gerät: <b>Datei → Abgleich → Datenbank aus dem "
+                                    "Abgleich laden</b> (neue Installation) bzw. <b>Abgleich einrichten</b>, dann „Gerät im lokalen Netz“. "
+                                    "Einen neuen Code zeigt jederzeit <b>Abgleich einrichten</b>.")
+                                     .arg(m_server->pairingCode()));
+    }
+}
+
+void MainWindow::loadFromSync()
+{
+    SyncLoadDialog dlg(this);
+    if (dlg.exec() != QDialog::Accepted) return;
+    Profiles::instance().reload();
+    FoodTable::instance().reload();
+    m_syncing = true;   // gerade geladen: nicht gleich erneut abgleichen
+    const bool ok = openDatabase(dlg.folder());
+    m_syncing = false;
+    if (ok) {
+        updateSyncState();
+        QMessageBox::information(this, tr("Datenbank geladen"),
+                                 tr("Die Datenbank „%1“ mit %2 Rezepten ist jetzt auf diesem Gerät gespeichert:<br>%3<br><br>"
+                                    "Sie wird beim Öffnen und Schließen automatisch abgeglichen.")
+                                     .arg(RecipeDb::instance().name())
+                                     .arg(RecipeDb::instance().count())
+                                     .arg(QDir::toNativeSeparators(dlg.folder()).toHtmlEscaped()));
+    }
 }

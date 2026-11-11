@@ -20,6 +20,11 @@ class QListWidget;
 class QMenu;
 class QSplitter;
 class RecipeView;
+class QTimer;
+namespace Sync {
+class Server;
+struct Result;
+}
 
 class MainWindow : public QMainWindow
 {
@@ -74,6 +79,10 @@ public slots:
     void openSettings();
     void about();
     void appearanceChanged();   // nach Theme- oder Schriftwechsel
+    // Abgleich (Synchronisation) mit anderen Geräten
+    bool syncNow(bool quiet = false);
+    void setupSync();
+    void loadFromSync();
 
 protected:
     void closeEvent(QCloseEvent *e) override;
@@ -89,6 +98,8 @@ private:
     void updateRecentMenu();
     void rememberDatabase(const QString &folder);
     QString currentId() const;
+    void applySyncResult(const Sync::Result &r, bool quiet);
+    void updateSyncState();   // Freigabe starten/beenden, Menü und Statuszeile
 
     QLabel *m_headName;
     QLabel *m_headInfo;
@@ -101,6 +112,12 @@ private:
     RecipeView *m_view;
     QSplitter *m_split;
     QLabel *m_statusDb;
+    QLabel *m_statusSync = nullptr;
+    QAction *m_syncNow = nullptr;
+    Sync::Server *m_server = nullptr;
+    QTimer *m_hostSync = nullptr;   // Freigabe: nach Änderungen verzögert in den Sync-Speicher übernehmen
+    bool m_syncing = false;
+    bool m_closing = false;
     QMenu *m_recent;
     QList<QAction *> m_needRecipe;
     QAction *m_texAction = nullptr;

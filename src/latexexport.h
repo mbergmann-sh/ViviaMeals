@@ -85,6 +85,7 @@ QString indexEntry(const QString &term, const QString &sub = QString());
 QString masterDocument(const MasterOptions &m, const QStringList &inputs, const QString &halfTitleFile = QString(),
                        const QString &titleImageFile = QString());
 QString glossaryFile();
+QString prefaceFile(DocClass cls);   // vorwort.tex (\\addchap{Vorwort} …)
 // Hintergrundbild aufbereiten: weißen Rand abschneiden (trim), bei FillPage auf A4-Format zuschneiden
 QImage prepareBackground(const QImage &src, const MasterOptions &m);
 QImage trimWhite(const QImage &src, int threshold = 245);

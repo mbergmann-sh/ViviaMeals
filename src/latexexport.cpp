@@ -256,6 +256,15 @@ QString relativeInput(const QString &masterFile, const QString &recipeFile)
     return rel;
 }
 
+QString prefaceFile(DocClass cls)
+{
+    QString t = QStringLiteral("%% Vorwort zum Kochbuch – erzeugt von ViviaMeals, beliebig änderbar (wird nicht überschrieben).\n");
+    if (cls == DocClass::ScrBook) t += QStringLiteral("\\addchap{Vorwort}\n");
+    else t += QStringLiteral("\\chapter*{Vorwort}\n\\addcontentsline{toc}{chapter}{Vorwort}\n\\markboth{Vorwort}{Vorwort}\n");   // book kennt \\addchap nicht
+    t += QStringLiteral("Lorem Ipsu verum saudumm\n");
+    return t;
+}
+
 QString glossaryFile()
 {
     struct G { const char *key, *name, *desc; };
@@ -470,6 +479,8 @@ QString masterDocument(const MasterOptions &m, const QStringList &inputs, const 
         t += scr ? QStringLiteral("\\cleardoubleoddpage\n\\pagestyle{plain.scrheadings}\n\\tableofcontents\n\\cleardoubleoddpage\n\\pagestyle{scrheadings}\n")
                  : QStringLiteral("\\cleardoublepage\n\\pagestyle{plain}\n\\tableofcontents\n\\cleardoublepage\n\\pagestyle{kochbuch}\n");
     }
+    // Vorwort (eigene Datei, wird beim Neuerzeugen nicht überschrieben) – vor dem Hauptteil
+    t += QStringLiteral("\n%% ---- Vorwort (vorwort.tex)\n\\input{vorwort}\n");
     t += QStringLiteral("\n\\mainmatter\n\n%% ---- Rezepte\n");
     if (!m.firstChapter.trimmed().isEmpty()) t += QStringLiteral("\\chapter{%1}\n").arg(escape(m.firstChapter.trimmed()));
     for (const QString &in : inputs) t += QStringLiteral("\\input{%1}\n").arg(in);
@@ -572,6 +583,17 @@ bool writeMaster(const QString &file, const MasterOptions &m, const QStringList 
             titleImage = fi.absolutePath() + QStringLiteral("/titelbild") + (png ? QStringLiteral(".png") : QStringLiteral(".jpg"));
             if (!prepareBackground(src, ti).save(titleImage, png ? "PNG" : "JPG", png ? -1 : 92)) {
                 if (error) *error = tr("Das Titelbild kann nicht gespeichert werden.");
+                return false;
+            }
+        }
+    }
+    {
+        // Vorwort: Vorgabetext des Nutzers; eine vorhandene vorwort.tex bleibt unverändert
+        const QString v = fi.absolutePath() + QStringLiteral("/vorwort.tex");
+        if (!QFileInfo::exists(v)) {
+            QSaveFile vf(v);
+            if (!vf.open(QIODevice::WriteOnly) || vf.write(prefaceFile(m.docClass).toUtf8()) < 0 || !vf.commit()) {
+                if (error) *error = vf.errorString();
                 return false;
             }
         }

@@ -37,6 +37,9 @@
         <file alias="ui/recipe.svg">icons/ui/recipe.svg</file>
         <file alias="ui/recipe-add.svg">icons/ui/recipe-add.svg</file>
         <file alias="ui/refresh.svg">icons/ui/refresh.svg</file>
+        <file alias="ui/sync.svg">icons/ui/sync.svg</file>
+        <file alias="ui/network.svg">icons/ui/network.svg</file>
+        <file alias="ui/cloud-down.svg">icons/ui/cloud-down.svg</file>
         <file alias="ui/remove.svg">icons/ui/remove.svg</file>
         <file alias="ui/save.svg">icons/ui/save.svg</file>
         <file alias="ui/scale.svg">icons/ui/scale.svg</file>

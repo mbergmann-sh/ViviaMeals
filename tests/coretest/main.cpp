@@ -24,6 +24,8 @@
 #include "duplicates.h"
 #include "recipepackage.h"
 #include "openfoodfacts.h"
+#include "sync.h"
+#include "syncserver.h"
 
 #include <QGuiApplication>
 #include <QPainter>
@@ -41,6 +43,7 @@
 #include <QEventLoop>
 #include <QTcpSocket>
 #include <QProcess>
+#include <QThread>
 #include <QStandardPaths>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -1369,6 +1372,7 @@ int main(int argc, char **argv)
             o.imagePrefix = QStringLiteral("rezepte/");
             CHECK(LatexExport::exportRecipe(r, recipeFile, o), "Kapitel schreiben");
             QString err;
+            QFile::remove(dir + QStringLiteral("/vorwort.tex"));   // jede Klasse schreibt ihr eigenes Vorwort
             CHECK(LatexExport::writeMaster(master, m, {}, &err), "Master schreiben " + err);
             const QString in = LatexExport::relativeInput(master, recipeFile);
             CHECK(in == QLatin1String("rezepte/aepfel"), "relativer Pfad " + in);
@@ -1386,6 +1390,14 @@ int main(int argc, char **argv)
                           && mt.indexOf(QStringLiteral("titelseite-hintergrund")) > mt.indexOf(QStringLiteral("Titelseite")),
                       "frei positioniertes Bild auf der Titelseite");
             if (cls == 0) CHECK(mt.contains(QStringLiteral("\\chapter{Nachtisch}\n\\input{rezepte/aepfel}")), "Themen-Kapitel im neuen Master");
+            {
+                QFile vf(dir + QStringLiteral("/vorwort.tex"));
+                vf.open(QIODevice::ReadOnly);
+                const QString vt = QString::fromUtf8(vf.readAll());
+                CHECK(vt.contains(QStringLiteral("Lorem Ipsu verum saudumm")) && (cls ? vt.contains(QStringLiteral("\\chapter*{Vorwort}")) : vt.contains(QStringLiteral("\\addchap{Vorwort}")))
+                          && mt.indexOf(QStringLiteral("\\input{vorwort}")) < mt.indexOf(QStringLiteral("\\mainmatter")) && mt.indexOf(QStringLiteral("\\input{vorwort}")) > 0,
+                      "Vorwort vor \\mainmatter");
+            }
             if (cls == 0)
                 CHECK(mt.contains(QStringLiteral("\\vspace{20mm}\n\\setlength{\\vmTitelbildBreite}{80mm}")) && mt.contains(QStringLiteral("keepaspectratio]{titelbild}"))
                           && mt.contains(QStringLiteral("\\vspace{12.5mm}\n{\\large Micha B.")) && QFileInfo::exists(dir + QStringLiteral("/titelbild.png")),
@@ -1592,6 +1604,219 @@ int main(int argc, char **argv)
         CHECK(results.size() == 1 && lastPath.contains("search_terms=Nutella"), "Namenssuche über HTTP");
         qunsetenv("VIVIA_OFF_URL");
         out << "  " << got.name << " (" << got.brand << "), " << got.quantity << ": " << qRound(got.per100.kcal) << " kcal/100 g\n";
+    }
+
+    // ---------------------------------------------------------------- Synchronisation
+    {
+        out << "\n=== Synchronisation ===\n";
+        QTemporaryDir tmp;
+        const QString root = tmp.path();
+        auto mkRecipe = [&](const QString &db, const QString &id, const QString &title, const QString &instr) {
+            Recipe r;
+            r.id = id;
+            r.title = title;
+            r.servings = 2;
+            r.instructions = instr;
+            QDir().mkpath(db + QStringLiteral("/rezepte"));
+            QFile f(db + QStringLiteral("/rezepte/") + id + QStringLiteral(".vmr"));
+            f.open(QIODevice::WriteOnly);
+            f.write(QJsonDocument(r.toJson()).toJson());
+        };
+        auto readRecipe = [&](const QString &db, const QString &id) {
+            QFile f(db + QStringLiteral("/rezepte/") + id + QStringLiteral(".vmr"));
+            if (!f.open(QIODevice::ReadOnly)) return QJsonObject();
+            return QJsonDocument::fromJson(f.readAll()).object();
+        };
+        auto recipeCount = [&](const QString &db) { return QDir(db + QStringLiteral("/rezepte")).entryList({ QStringLiteral("*.vmr") }, QDir::Files).size(); };
+        auto writeJson = [&](const QString &file, const QJsonObject &o) {
+            QDir().mkpath(QFileInfo(file).absolutePath());
+            QFile f(file);
+            f.open(QIODevice::WriteOnly);
+            f.write(QJsonDocument(o).toJson());
+        };
+        auto readJsonF = [&](const QString &file) {
+            QFile f(file);
+            f.open(QIODevice::ReadOnly);
+            return QJsonDocument::fromJson(f.readAll()).object();
+        };
+        const QString dbA = root + "/A/db", appA = root + "/A/app", dbB = root + "/B/db", appB = root + "/B/app", store = root + "/store";
+        QDir().mkpath(dbB);
+        writeJson(dbA + "/viviameals.vmdb", QJsonObject{ { "format", "ViviaMeals-Database" }, { "name", "Familienküche" } });
+        const QString r1 = "11111111-1111-1111-1111-111111111111", r2 = "22222222-2222-2222-2222-222222222222", r3 = "33333333-3333-3333-3333-333333333333";
+        mkRecipe(dbA, r1, "Linsensuppe", "Kochen.");
+        mkRecipe(dbA, r2, "Apfelkuchen", "Backen.");
+        auto profile = [](const QString &date, double kg) {
+            return QJsonObject{ { "format", "ViviaMeals-Profiles" },
+                                { "profiles", QJsonArray{ QJsonObject{ { "id", "p1" }, { "name", "Micha" },
+                                                                       { "weights", QJsonArray{ QJsonObject{ { "date", date }, { "kg", kg } } } } } } } };
+        };
+        writeJson(appA + "/profile.json", profile("2026-11-01", 82.0));
+        writeJson(appA + "/tagebuch/p1.json", QJsonObject{ { "format", "ViviaMeals-Tagebuch" },
+                                                           { "entries", QJsonArray{ QJsonObject{ { "id", "e1" }, { "when", "2026-11-01T12:00:00" }, { "title", "Mittag" } } } } });
+        auto sync = [&](const QString &db, const QString &app, Sync::Transport *t = nullptr) {
+            std::unique_ptr<Sync::Transport> own;
+            if (!t) {
+                own.reset(new Sync::LocalTransport(store));
+                t = own.get();
+            }
+            Sync::Engine e(t, db, app);
+            const Sync::Result r = e.run();
+            out << "  " << QFileInfo(QFileInfo(db).absolutePath()).fileName() << ": " << r.summary() << "\n";
+            return r;
+        };
+        Sync::Result ra = sync(dbA, appA);
+        CHECK(ra.ok && ra.uploaded >= 6, "erster Abgleich lädt alles hoch: " + ra.summary());
+        CHECK(Sync::Store(store).info().initialized && Sync::Store(store).info().name == "Familienküche", "Sync-Speicher angelegt");
+        ra = sync(dbA, appA);
+        CHECK(ra.ok && ra.uploaded == 0 && ra.downloaded == 0, "zweiter Abgleich ohne Änderung");
+        Sync::Result rb = sync(dbB, appB);
+        CHECK(rb.ok && rb.dbChanged && rb.appChanged && recipeCount(dbB) == 2 && QFileInfo::exists(appB + "/tagebuch/p1.json")
+                  && QFileInfo::exists(dbB + "/viviameals.vmdb"),
+              "neues Gerät lädt die Datenbank vollständig");
+        // ändern, löschen, neu
+        mkRecipe(dbB, r1, "Linsensuppe", "Kochen, dann würzen.");
+        QFile::remove(dbB + "/rezepte/" + r2 + ".vmr");
+        mkRecipe(dbA, r3, "Pfannkuchen", "Braten.");
+        rb = sync(dbB, appB);
+        ra = sync(dbA, appA);
+        CHECK(ra.ok && readRecipe(dbA, r1).value("instructions").toString().contains("würzen") && !QFileInfo::exists(dbA + "/rezepte/" + r2 + ".vmr")
+                  && ra.deletedLocal == 1,
+              "Änderung und Löschung kommen an");
+        rb = sync(dbB, appB);
+        CHECK(rb.ok && QFileInfo::exists(dbB + "/rezepte/" + r3 + ".vmr"), "neues Rezept kommt an");
+        // Konflikt: beide ändern dasselbe Rezept
+        mkRecipe(dbA, r3, "Pfannkuchen", "Braten in Butter.");
+        mkRecipe(dbB, r3, "Pfannkuchen", "Braten in Öl.");
+        ra = sync(dbA, appA);
+        rb = sync(dbB, appB);
+        CHECK(rb.ok && rb.conflicts.size() == 1 && rb.conflicts.value(0).contains("Konflikt") && recipeCount(dbB) == 3, "Konflikt: beide Fassungen behalten");
+        CHECK(readRecipe(dbB, r3).value("instructions").toString().contains("Öl"), "eigene Fassung bleibt unter dem alten Rezept");
+        ra = sync(dbA, appA);
+        CHECK(ra.ok && recipeCount(dbA) == 3 && readRecipe(dbA, r3).value("instructions").toString().contains("Öl"), "Konfliktkopie auf allen Geräten");
+        // Zusammenführen: Gewicht auf beiden Geräten, Tagebuch
+        writeJson(appA + "/profile.json", [&] { QJsonObject p = profile("2026-11-01", 82.0); QJsonArray a = p["profiles"].toArray(); QJsonObject x = a[0].toObject();
+            QJsonArray w = x["weights"].toArray(); w.append(QJsonObject{ { "date", "2026-11-05" }, { "kg", 81.5 } }); x["weights"] = w; a[0] = x; p["profiles"] = a; return p; }());
+        writeJson(appB + "/profile.json", [&] { QJsonObject p = profile("2026-11-01", 82.0); QJsonArray a = p["profiles"].toArray(); QJsonObject x = a[0].toObject();
+            QJsonArray w = x["weights"].toArray(); w.append(QJsonObject{ { "date", "2026-11-08" }, { "kg", 81.0 } }); x["weights"] = w; a[0] = x;
+            a.append(QJsonObject{ { "id", "p2" }, { "name", "Gast" } }); p["profiles"] = a; return p; }());
+        ra = sync(dbA, appA);
+        rb = sync(dbB, appB);
+        ra = sync(dbA, appA);
+        const QJsonArray profs = readJsonF(appA + "/profile.json").value("profiles").toArray();
+        CHECK(rb.merged == 1 && profs.size() == 2 && profs[0].toObject().value("weights").toArray().size() == 3, "Profile/Gewichte zusammengeführt");
+        CHECK(readJsonF(appA + "/profile.json") == readJsonF(appB + "/profile.json"), "Profile auf beiden Geräten gleich");
+        // Sperre und veraltete Revision
+        Sync::Store st(store);
+        CHECK(st.lock("anderes|Laptop"), "Sperre setzen");
+        ra = sync(dbA, appA);
+        CHECK(!ra.ok && ra.error.contains("Laptop"), "gesperrter Speicher: " + ra.error);
+        st.unlock("anderes|Laptop");
+        bool conflict = false;
+        int rev = 0;
+        CHECK(!st.commit(st.manifest().revision - 1, QJsonObject(), &rev, &conflict) && conflict, "veraltete Revision wird abgelehnt");
+        CHECK(Sync::validPath("db/rezepte/x.vmr") && !Sync::validPath("db/../x") && !Sync::validPath("/etc/passwd") && !Sync::validPath("x/y"), "Pfadprüfung");
+        // LAN-Server (gleiches HTTP-Protokoll wie das PHP-Skript)
+        Sync::Server server;
+        server.setPersistTokens(false);
+        QString err;
+        const QString hostStore = root + "/hoststore";
+        CHECK(server.start(hostStore, "Familienküche", 0, &err), "LAN-Server startet: " + err);
+        const QString url = QStringLiteral("http://127.0.0.1:%1/").arg(server.port());
+        {
+            Sync::HttpTransport bad(url, "falsch");
+            Sync::StoreInfo i;
+            CHECK(!bad.info(&i) && bad.lastError().contains("verweigert"), "ohne Schlüssel kein Zugang: " + bad.lastError());
+        }
+        QString token;
+        CHECK(!Sync::HttpTransport::pair(url, "000000x", &token, &err), "falscher Kopplungscode");
+        CHECK(Sync::HttpTransport::pair(url, server.pairingCode(), &token, &err) && token.size() > 30, "Kopplung: " + err);
+        {
+            Sync::HttpTransport ht(url, token);
+            ra = sync(dbA, appA, &ht);
+            CHECK(ra.ok && ra.uploaded >= 6, "Hochladen über HTTP: " + ra.summary());
+        }
+        const QString dbC = root + "/C/db", appC = root + "/C/app";
+        QDir().mkpath(dbC);
+        Sync::Connection c;
+        c.kind = Sync::Connection::Kind::Lan;
+        c.url = url;
+        c.token = token;
+        QString invName;
+        const Sync::Connection back = Sync::Connection::fromInvitation(c.invitation("Familienküche"), &invName);
+        CHECK(back.url == url && back.token == token && invName == "Familienküche" && back.kind == Sync::Connection::Kind::Lan, "Einladungscode");
+        CHECK(c.save(dbC) && Sync::Connection::load(dbC).token == token, "Verbindung speichern");
+        {
+            std::unique_ptr<Sync::Transport> t(Sync::makeTransport(Sync::Connection::load(dbC), dbC));
+            Sync::Result rc = sync(dbC, appC, t.get());
+            CHECK(rc.ok && recipeCount(dbC) == 3 && readJsonF(appC + "/profile.json") == readJsonF(appA + "/profile.json"), "Laden über HTTP: " + rc.summary());
+            mkRecipe(dbC, r1, "Linsensuppe", "Kochen über das Netz.");
+            rc = sync(dbC, appC, t.get());
+            Sync::HttpTransport ht(url, token);
+            ra = sync(dbA, appA, &ht);
+            CHECK(ra.ok && readRecipe(dbA, r1).value("instructions").toString().contains("Netz"), "Änderung über HTTP");
+        }
+        const QList<Sync::Found> found = Sync::discover(600);
+        bool seen = false;
+        for (const auto &f : found) seen |= f.name == "Familienküche";
+        CHECK(seen, "Freigabe im lokalen Netz gefunden");
+        server.stop();
+        // PHP-Skript
+        const QString php = Sync::phpScript(Sync::sha256("geheim"));
+        CHECK(php.contains(Sync::sha256("geheim")) && !php.contains("@TOKEN@") && !php.contains("@HTACCESS@") && php.contains("hash_equals")
+                  && php.contains("Require all denied"),
+              "PHP-Skript");
+        const QString phpBin = QStandardPaths::findExecutable("php");
+        if (!phpBin.isEmpty()) {
+            QFile f(root + "/s.php");
+            f.open(QIODevice::WriteOnly);
+            f.write(php.toUtf8());
+            f.close();
+            QProcess p;
+            p.start(phpBin, { "-l", f.fileName() });
+            p.waitForFinished();
+            CHECK(p.exitCode() == 0, "php -l: " + QString::fromUtf8(p.readAllStandardOutput()));
+            // echtes PHP: eingebauter Webserver mit dem erzeugten Skript
+            QDir().mkpath(root + "/web");
+            QFile w(root + "/web/viviameals-sync.php");
+            w.open(QIODevice::WriteOnly);
+            w.write(php.toUtf8());
+            w.close();
+            QTcpServer probe;
+            probe.listen(QHostAddress::LocalHost, 0);
+            const quint16 phpPort = probe.serverPort();
+            probe.close();
+            QProcess web;
+            web.start(phpBin, { "-S", QStringLiteral("127.0.0.1:%1").arg(phpPort), "-t", root + "/web" });
+            web.waitForStarted();
+            QThread::msleep(700);
+            const QString purl = QStringLiteral("http://127.0.0.1:%1/viviameals-sync.php").arg(phpPort);
+            {
+                Sync::HttpTransport bad(purl, "falsch");
+                Sync::StoreInfo i;
+                CHECK(!bad.info(&i), "PHP: falscher Schlüssel abgelehnt");
+                Sync::HttpTransport ht(purl, "geheim");
+                ra = sync(dbA, appA, &ht);
+                CHECK(ra.ok && ra.uploaded >= 6, "PHP: Hochladen: " + ra.summary());
+                CHECK(QFileInfo::exists(root + "/web/vm-sync-daten/.htaccess"), "PHP: Datenordner gesperrt");
+                const QString dbD = root + "/D/db", appD = root + "/D/app";
+                QDir().mkpath(dbD);
+                Sync::HttpTransport hd(purl, "geheim");
+                Sync::Result rd = sync(dbD, appD, &hd);
+                CHECK(rd.ok && recipeCount(dbD) == 3 && readJsonF(appD + "/profile.json") == readJsonF(appA + "/profile.json"), "PHP: Laden: " + rd.summary());
+                mkRecipe(dbD, r2, "Apfelkuchen", "Neu gebacken.");
+                QFile::remove(dbD + "/rezepte/" + r3 + ".vmr");
+                rd = sync(dbD, appD, &hd);
+                ra = sync(dbA, appA, &ht);
+                CHECK(ra.ok && recipeCount(dbA) == 3 && QFileInfo::exists(dbA + "/rezepte/" + r2 + ".vmr") && !QFileInfo::exists(dbA + "/rezepte/" + r3 + ".vmr"),
+                      "PHP: neu und gelöscht kommen an");
+                Sync::Store(root + "/web/vm-sync-daten").lock("anderes|Tablet");
+                ra = sync(dbA, appA, &ht);
+                CHECK(!ra.ok && ra.error.contains("Tablet"), "PHP: Sperre: " + ra.error);
+            }
+            web.kill();
+            web.waitForFinished();
+        }
+        CHECK(Sync::newToken().size() == 43, "Zugangsschlüssel");
     }
 
     out << "\n" << (g_fail ? QStringLiteral("%1 Fehler").arg(g_fail) : QStringLiteral("Alle Prüfungen bestanden")) << "\n";
