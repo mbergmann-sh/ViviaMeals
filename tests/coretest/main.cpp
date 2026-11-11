@@ -1286,6 +1286,93 @@ int main(int argc, char **argv)
         out << "  Paket: " << zip.size() << " Bytes, " << files.size() << " Dateien\n";
     }
 
+    // ---- LaTeX: Kapitel, Master-Dokument, Eintragen, Stichwörter, Quelle
+    out << "\nLaTeX:\n";
+    {
+        Recipe r;
+        r.id = Recipe::newId();
+        r.title = QStringLiteral("Äpfel im Schlafrock");
+        r.servings = 4;
+        r.source = QStringLiteral("Gustav Knuth");
+        {
+            QImage photo(320, 240, QImage::Format_RGB32);
+            photo.fill(QColor(QStringLiteral("#1474BC")));
+            QByteArray b;
+            QBuffer buf(&b);
+            buf.open(QIODevice::WriteOnly);
+            photo.save(&buf, "PNG");
+            r.image = QString::fromLatin1(b.toBase64());
+        }
+        r.ingredients = IngredientParser::parseText(QStringLiteral("4 Äpfel\n1 Pck. Blätterteig\n50 g Rosinen \"Sultaninen\"\nSalz"));
+        r.instructions = QStringLiteral("Backofen auf 200° C vorheizen. Äpfel schälen & entkernen.\n\nIm Teig 25 Minuten backen – fertig!");
+        Nutrition::analyze(r);
+        LatexExport::Options o;
+        QString ch = LatexExport::toLatex(r, o);
+        CHECK(o.mode == LatexExport::Mode::Chapter && !ch.contains(QStringLiteral("\\documentclass")) && ch.contains(QStringLiteral("\\chapter{Äpfel im Schlafrock}")),
+              "Kapitel ist Vorgabe");
+        CHECK(!ch.contains(QStringLiteral("Gustav Knuth")), "Quelle standardmäßig unterdrückt");
+        CHECK(ch.contains(QStringLiteral("\\index{apfel im schlafrock@Äpfel im Schlafrock}")) && ch.contains(QStringLiteral("\\index{blatterteig@Blätterteig!apfel im schlafrock@Äpfel im Schlafrock}"))
+                  && !ch.contains(QStringLiteral("\\index{salz")),
+              "Stichwörter mit deutscher Sortierung");
+        CHECK(ch.contains(QStringLiteral("\\markright{Zutaten}")), "Abschnitt für die Kopfzeile");
+        o.source = true;
+        CHECK(LatexExport::toLatex(r, o).contains(QStringLiteral("Gustav Knuth")), "Quelle auf Wunsch");
+        CHECK(LatexExport::indexEntry(QStringLiteral("Mehl \"Typ 405\" | fein!")).contains(QStringLiteral("\"|")), "makeindex-Zeichen maskiert");
+        QTemporaryDir td;
+        if (qEnvironmentVariableIsSet("VIVIA_TEX_KEEP")) td.setAutoRemove(false);
+        const QString dir = td.path();
+        if (qEnvironmentVariableIsSet("VIVIA_TEX_KEEP")) out << "  LaTeX-Testordner: " << dir << "\n";
+        QDir().mkpath(dir + QStringLiteral("/rezepte"));
+        o.source = false;
+        for (int cls = 0; cls < 2; ++cls) {
+            LatexExport::MasterOptions m;
+            m.docClass = cls ? LatexExport::DocClass::Book : LatexExport::DocClass::ScrBook;
+            o.docClass = m.docClass;
+            m.title = QStringLiteral("Omas Küche");
+            m.subtitle = QStringLiteral("Süßes & Herzhaftes");
+            m.author = QStringLiteral("Micha B.");
+            QImage bg(400, 560, QImage::Format_RGB32);
+            bg.fill(QColor(QStringLiteral("#E0620D")));
+            bg.save(dir + QStringLiteral("/bg.png"));
+            m.halfTitleImage = dir + QStringLiteral("/bg.png");
+            const QString master = QStringLiteral("%1/kochbuch%2.tex").arg(dir).arg(cls);
+            const QString recipeFile = dir + QStringLiteral("/rezepte/aepfel.tex");
+            o.imagePrefix = QStringLiteral("rezepte/");
+            CHECK(LatexExport::exportRecipe(r, recipeFile, o), "Kapitel schreiben");
+            QString err;
+            CHECK(LatexExport::writeMaster(master, m, {}, &err), "Master schreiben " + err);
+            const QString in = LatexExport::relativeInput(master, recipeFile);
+            CHECK(in == QLatin1String("rezepte/aepfel"), "relativer Pfad " + in);
+            bool already = false;
+            CHECK(LatexExport::addToMaster(master, in, &err, &already) && !already, "eintragen " + err);
+            CHECK(LatexExport::addToMaster(master, in, &err, &already) && already, "nicht doppelt eintragen");
+            QFile mf(master);
+            mf.open(QIODevice::ReadOnly);
+            const QString mt = QString::fromUtf8(mf.readAll());
+            CHECK(mt.indexOf(QStringLiteral("\\input{rezepte/aepfel}")) < mt.indexOf(LatexExport::masterMarker()) && mt.count(QStringLiteral("\\input{rezepte/aepfel}")) == 1,
+                  "Eintrag vor der Marke");
+            CHECK(mt.contains(QStringLiteral("\\date{}")) && mt.contains(QStringLiteral("schmutztitel-hintergrund")) && mt.contains(QStringLiteral("\\printindex"))
+                      && mt.contains(QStringLiteral("\\input{glossar}")) && mt.contains(cls ? QStringLiteral("bindingoffset=12mm") : QStringLiteral("BCOR=12mm")),
+                  "Master-Inhalt");
+            // optional übersetzen (latexmk vorhanden und VIVIA_TEX_TEST gesetzt)
+            if (qEnvironmentVariableIsSet("VIVIA_TEX_TEST") && !QStandardPaths::findExecutable(QStringLiteral("latexmk")).isEmpty()) {
+                QStringList engines{ QStringLiteral("-pdf") };
+                if (qEnvironmentVariableIsSet("VIVIA_TEX_LUA")) engines << QStringLiteral("-lualatex");   // braucht OpenType-Latin-Modern
+                for (const QString &engine : engines) {
+                    QProcess p;
+                    p.setWorkingDirectory(dir);
+                    p.start(QStringLiteral("latexmk"), { engine, QStringLiteral("-interaction=nonstopmode"), QStringLiteral("-halt-on-error"), QFileInfo(master).fileName() });
+                    p.waitForFinished(240000);
+                    CHECK(p.exitCode() == 0, QStringLiteral("latexmk %1 %2").arg(engine, master) + QString::fromLocal8Bit(p.readAllStandardOutput().right(1500)));
+                    const QString pdf = QFileInfo(master).completeBaseName() + QStringLiteral(".pdf");
+                    if (cls == 0 && engine == QLatin1String("-pdf")) QFile::copy(QDir(dir).filePath(pdf), QStringLiteral("/tmp/kochbuch-test.pdf"));
+                    QProcess::execute(QStringLiteral("latexmk"), { QStringLiteral("-C"), QStringLiteral("-cd"), master });
+                }
+                out << "  " << QFileInfo(master).fileName() << " übersetzt (" << engines.join(QStringLiteral(", ")) << ")\n";
+            }
+        }
+    }
+
     // ---- Celsius-Schreibweise
     out << "\nCelsius:\n";
     {

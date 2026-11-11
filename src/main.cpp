@@ -12,6 +12,7 @@
 #include "fooddialog.h"
 #include "foodwizard.h"
 #include "busyprogress.h"
+#include "exportdialogs.h"
 #include "packagedialog.h"
 #include "fridge.h"
 #include "fridgedialog.h"
@@ -49,6 +50,7 @@
 #include <QBuffer>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QRadioButton>
 #include <QCommandLineParser>
 #include <QDir>
 #include <QFileInfo>
@@ -581,6 +583,22 @@ void takeScreenshots(MainWindow *w, const QString &dir)
         pd.show();
         shot(&pd, dir, QStringLiteral("paket-import"));
         pd.reject();
+    }
+    {
+        // LaTeX-Export: Vorgabe Kapitel, dann „Neues Master-Dokument“
+        QList<RecipeSummary> all = RecipeDb::instance().summaries();
+        Recipe r;
+        if (!all.isEmpty() && RecipeDb::instance().load(all.first().id, &r)) {
+            LatexExportDialog d(r, w);
+            d.show();
+            QApplication::processEvents();
+            shot(&d, dir, QStringLiteral("latex-export"));
+            const auto radios = d.findChildren<QRadioButton *>();
+            if (radios.size() >= 2) radios[1]->setChecked(true);
+            QApplication::processEvents();
+            shot(&d, dir, QStringLiteral("latex-kochbuch"));
+            d.reject();
+        }
     }
     {
         BusyProgress prog(w, QObject::tr("Kalorien und Nährwerte neu berechnen"), 3127);

@@ -1,6 +1,6 @@
 # ViviaMeals – Notizen für das Handbuch
 
-Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.6.10.
+Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.7.0.
 
 > **Name:** Das Programm heißt seit Version 0.6 **ViviaMeals** (vorher VitaMeals; die ganze Reihe heißt jetzt
 > Vivia – ViviaParms, ViviaBreathe). Alte Einstellungen, Profile, Tagebücher, eigene Lebensmittel und
@@ -549,3 +549,37 @@ Einheitlich „200° C“ (`Units::normalizeCelsius`, `Importers::normalizeTexts
   auch in Bereichen („180-200GradC“ → „180-200° C“). „Grad“ ohne C („um 90 Grad drehen“) bleibt.
 - Umrechnungen aus Fahrenheit und die Scan-Korrektur („180 *C“) liefern ebenfalls „° C“.
 - Bereits gespeicherte Rezepte ändern sich, sobald sie im Editor geöffnet und gespeichert werden.
+
+
+## LaTeX-Export und Kochbuch (ab 0.7.0)
+
+*Datei → Export → Als LaTeX-Datei exportieren …* (Rezept vorher auswählen)
+
+**Ausgabe**
+1. **Kapitel zum Einbinden in ein Master-Dokument** (Vorgabe). Mit „eintragen in“ wird `\input{rezepte/<datei>}`
+   ins gewählte Master-Dokument geschrieben – vor die Zeile `% ViviaMeals: weitere Rezepte hier`, sonst vor
+   `\backmatter`/`\printindex`/`\end{document}`. Steht das Rezept schon drin, wird nichts doppelt eingetragen.
+   Das Foto wird relativ zum Master-Dokument eingebunden. Vorschlag für die Rezeptdatei: Unterordner `rezepte`
+   neben dem Master-Dokument; Dateinamen nur mit ASCII-Zeichen (Äpfel → Aepfel).
+2. **Neues Master-Dokument (Kochbuch) erstellen** und das Rezept eintragen: Datei, Buchtitel, Untertitel, Autor
+   (Vorgabe: Standard-Quelle), „kein Datum auf dem Titelblatt“ (Vorgabe an), Schmutztitel-Bild (füllt die Seite),
+   Inhaltsverzeichnis, Glossar, Stichwortverzeichnis, Bindekorrektur (Vorgabe 12 mm für Ringbindung).
+   Danach merkt sich ViviaMeals das neue Master-Dokument – weitere Rezepte werden dort eingetragen.
+3. **Vollständiges Einzeldokument** (nur dieses Rezept, wie bisher).
+
+**Rezept-Optionen:** Foto, Nährwerttabelle, *Quelle angeben* (Vorgabe aus), Stichwörter (Titel und Zutaten
+außer Salz/Pfeffer/Wasser/Zucker, unter dem Rezept als Unterpunkt).
+
+**Das Master-Dokument** (`kochbuch.tex`, daneben `glossar.tex` und ggf. `schmutztitel-hintergrund.jpg`)
+- scrbook: `twoside, BCOR=<n>mm, DIV=12`, scrlayer-scrpage; book: geometry mit `bindingoffset`, fancyhdr
+- Kopfzeile außen: gerade Seiten Kapitel, ungerade Seiten Abschnitt (Zutaten/Zubereitung/Nährwerte), Linie
+  darunter; Fußzeile mittig mit Seitenzahl und Linie darüber – auch auf Kapitelanfängen; Titelseiten ohne
+  beides, Inhaltsverzeichnis nur mit Fußzeile
+- Umlaute: `iftex` → pdfLaTeX mit inputenc/T1/lmodern, LuaLaTeX/XeLaTeX mit fontspec; babel ngerman, csquotes
+- Tabellen: array (Spaltentypen L/R/C{Breite}), booktabs, tabularx, longtable, multirow, siunitx (locale=DE)
+- Grafiken: graphicx (`\graphicspath{{./}{bilder/}}`), float `[H]`, wrapfig, caption, subcaption,
+  `\rezeptbild[Breite]{datei}{Unterschrift}`, `\randbild{datei}{Unterschrift}`
+- Glossar: `\glossareintrag{Begriff}{Erklärung}` in `glossar.tex` (10 Küchenbegriffe als Start, Begriffe auch
+  im Stichwortverzeichnis); bewusst ohne glossaries-Paket – keine Zusatzprogramme nötig
+- Stichwortverzeichnis: imakeidx (makeindex läuft automatisch), zweispaltig, im Inhaltsverzeichnis
+- Übersetzen: `latexmk -pdf kochbuch.tex` (oder 3× pdflatex); geprüft mit TeX Live (pdfLaTeX, beide Klassen)
