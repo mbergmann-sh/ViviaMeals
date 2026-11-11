@@ -14,6 +14,13 @@
 #include <QFileDialog>
 #include <QFormLayout>
 #include <QHBoxLayout>
+#include <QIcon>
+#include <QPixmap>
+#include <QColorDialog>
+#include <QFrame>
+#include <QGuiApplication>
+#include <QScreen>
+#include <QScrollArea>
 #include <QLocale>
 #include <QSlider>
 #include <QPainter>
@@ -175,17 +182,102 @@ protected:
             }
         }
         // Titel (Schmutztitel bzw. Titelseite) andeuten
-        p.setPen(QColor(QStringLiteral("#1474BC")));
         QFont f = font();
         f.setBold(true);
         f.setPointSizeF(qMax(5.0, 7.0 * s / 0.5));
-        p.setFont(f);
         const bool title = m_opt.bgTarget == LatexExport::MasterOptions::BgTarget::TitlePage;
         const double y = title ? 297 * 0.30 : 297 * 0.38;
-        p.drawText(QRectF(page.left() + m_opt.bindingMm * s, page.top() + y * s - 10, (210 - m_opt.bindingMm) * s, 20), Qt::AlignCenter,
-                   m_opt.title.isEmpty() ? QStringLiteral("Titel") : m_opt.title);
+        auto text = [&](const QString &str, const QString &color, double yMm, const QFont &font) {
+            p.setFont(font);
+            const QRectF r(page.left() + m_opt.bindingMm * s, page.top() + yMm * s - 10, (210 - m_opt.bindingMm) * s, 20);
+            if (m_opt.titleShadow) {
+                p.setPen(QColor(m_opt.shadowColor));
+                p.drawText(r.translated(1, 1), Qt::AlignCenter, str);
+            }
+            p.setPen(QColor(color));
+            p.drawText(r, Qt::AlignCenter, str);
+        };
+        text(m_opt.title.isEmpty() ? QStringLiteral("Titel") : m_opt.title, m_opt.titleColor, y, f);
+        if (title && !m_opt.subtitle.isEmpty()) {
+            QFont sf = f;
+            sf.setBold(false);
+            sf.setPointSizeF(f.pointSizeF() * 0.7);
+            text(m_opt.subtitle, m_opt.subtitleColor, y + 12, sf);
+        }
         p.setPen(QColor(0, 0, 0, 80));
         p.drawRect(page);
+    }
+
+private:
+    QImage m_img;
+    LatexExport::MasterOptions m_opt;
+};
+
+// Vorschau der Titelseite: Titel, Untertitel, Bild mit den eingestellten Abständen, Autor (Maße in mm)
+class TitlePagePreview : public QWidget
+{
+public:
+    TitlePagePreview() { setFixedSize(150, 212); }
+    void set(const QImage &img, const LatexExport::MasterOptions &m)
+    {
+        m_img = img;
+        m_opt = m;
+        update();
+    }
+
+protected:
+    void paintEvent(QPaintEvent *) override
+    {
+        QPainter p(this);
+        p.setRenderHint(QPainter::SmoothPixmapTransform);
+        p.setRenderHint(QPainter::Antialiasing);
+        const double s = qMin((width() - 2) / 210.0, (height() - 2) / 297.0);
+        const QRectF page(1, 1, 210 * s, 297 * s);
+        p.fillRect(page, Qt::white);
+        // Satzspiegel ungefähr: innen Bindung + 25 mm, außen 25 mm, oben 30 mm, unten 30 mm
+        const double left = m_opt.bindingMm + 25, textW = 210 - left - 25, textH = 237;
+        double y = 30 + 0.10 * textH;
+        auto line = [&](const QString &str, const QString &color, double sizeMm, bool bold, bool shadow) {
+            QFont f = font();
+            f.setBold(bold);
+            f.setPixelSize(qMax(4, int(sizeMm * s)));
+            p.setFont(f);
+            const QRectF r(page.left() + left * s, page.top() + y * s, textW * s, sizeMm * 1.6 * s);
+            if (shadow && m_opt.titleShadow) {
+                p.setPen(QColor(m_opt.shadowColor));
+                p.drawText(r.translated(0.8, 0.8), Qt::AlignHCenter | Qt::AlignTop, str);
+            }
+            p.setPen(QColor(color));
+            p.drawText(r, Qt::AlignHCenter | Qt::AlignTop, str);
+            y += sizeMm * 1.6;
+        };
+        line(m_opt.title.isEmpty() ? QStringLiteral("Titel") : m_opt.title, m_opt.titleColor, 9, true, true);
+        if (!m_opt.subtitle.isEmpty()) {
+            y += 3;
+            line(m_opt.subtitle, m_opt.subtitleColor, 6, false, true);
+        }
+        if (!m_img.isNull()) {
+            y += m_opt.titleImageGapAboveMm;
+            double w = qMin(m_opt.titleImageWidthMm, textW);
+            double h = w * m_img.height() / qMax(1, m_img.width());
+            if (h > 0.45 * textH) {   // wie keepaspectratio mit height=0.45\textheight
+                h = 0.45 * textH;
+                w = h * m_img.width() / qMax(1, m_img.height());
+            }
+            const QRectF r(page.left() + (left + (textW - w) / 2) * s, page.top() + y * s, w * s, h * s);
+            p.drawImage(r, m_img);
+            y += h + m_opt.titleImageGapBelowMm;
+        } else {
+            y += 12;
+        }
+        if (!m_opt.author.isEmpty()) line(m_opt.author, QStringLiteral("#000000"), 5, false, false);
+        p.setPen(QColor(0, 0, 0, 80));
+        p.setBrush(Qt::NoBrush);
+        p.drawRect(page);
+        if (y > 297 - 25) {   // ragt über den unteren Rand
+            p.setPen(QPen(QColor(QStringLiteral("#c0392b")), 2, Qt::DashLine));
+            p.drawLine(QPointF(page.left(), page.top() + (297 - 30) * s), QPointF(page.right(), page.top() + (297 - 30) * s));
+        }
     }
 
 private:
@@ -198,7 +290,18 @@ LatexExportDialog::LatexExportDialog(const Recipe &r, QWidget *parent) : QDialog
     setWindowTitle(tr("Als LaTeX-Datei exportieren"));
     QSettings s;
     const QString docs = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
-    auto *lay = new QVBoxLayout(this);
+    // Alle Optionen in einem rollbaren Bereich – die Knöpfe bleiben auch auf kleinen Bildschirmen erreichbar
+    auto *outer = new QVBoxLayout(this);
+    auto *scroll = new QScrollArea;
+    m_scroll = scroll;
+    scroll->setWidgetResizable(true);
+    scroll->setFrameShape(QFrame::NoFrame);
+    scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    auto *content = new QWidget;
+    auto *lay = new QVBoxLayout(content);
+    lay->setContentsMargins(0, 0, 6, 0);
+    scroll->setWidget(content);
+    outer->addWidget(scroll, 1);
     auto *form = new QFormLayout;
     form->addRow(tr("Rezept:"), new QLabel(QStringLiteral("<b>%1</b>").arg(r.title.toHtmlEscaped())));
     m_class = new QComboBox;
@@ -256,8 +359,52 @@ LatexExportDialog::LatexExportDialog(const Recipe &r, QWidget *parent) : QDialog
     m_subtitle = new QLineEdit(s.value(QStringLiteral("tex/subtitle")).toString());
     m_subtitle->setPlaceholderText(tr("optional"));
     nf->addRow(tr("Untertitel:"), m_subtitle);
+    // Schriftfarben von Buchtitel und Untertitel (Vorgabe Schwarz), Schatten
+    auto colorButton = [this](const QString &text, const QString &color) {
+        auto *b = new QPushButton(text);
+        b->setProperty("color", color);
+        auto paint = [b] {
+            QPixmap pm(16, 16);
+            pm.fill(QColor(b->property("color").toString()));
+            b->setIcon(QIcon(pm));
+            b->setToolTip(tr("Schriftfarbe: %1 – klicken zum Ändern").arg(b->property("color").toString().toUpper()));
+        };
+        paint();
+        connect(b, &QPushButton::clicked, this, [this, b, paint] {
+            const QColor c = QColorDialog::getColor(QColor(b->property("color").toString()), this, tr("Schriftfarbe wählen"));
+            if (!c.isValid()) return;
+            b->setProperty("color", c.name());
+            paint();
+            updateBackground();
+        });
+        return b;
+    };
+    auto *colors = new QHBoxLayout;
+    m_titleColor = colorButton(tr("Titel"), s.value(QStringLiteral("tex/titleColor"), QStringLiteral("#000000")).toString());
+    m_subtitleColor = colorButton(tr("Untertitel"), s.value(QStringLiteral("tex/subtitleColor"), QStringLiteral("#000000")).toString());
+    m_titleShadow = new QCheckBox(tr("mit Schatten"));
+    m_titleShadow->setChecked(s.value(QStringLiteral("tex/titleShadow"), true).toBool());
+    m_titleShadow->setToolTip(tr("Buchtitel und Untertitel werfen einen grauen Schatten nach rechts unten"));
+    auto *resetColors = new QPushButton(tr("Schwarz"));
+    resetColors->setToolTip(tr("Beide Farben auf Schwarz zurücksetzen"));
+    colors->addWidget(m_titleColor);
+    colors->addWidget(m_subtitleColor);
+    colors->addWidget(resetColors);
+    colors->addWidget(m_titleShadow);
+    colors->addStretch(1);
+    connect(resetColors, &QPushButton::clicked, this, [this] {
+        for (QPushButton *b : { m_titleColor, m_subtitleColor }) {
+            b->setProperty("color", QStringLiteral("#000000"));
+            QPixmap pm(16, 16);
+            pm.fill(Qt::black);
+            b->setIcon(QIcon(pm));
+        }
+        updateBackground();
+    });
+    connect(m_titleShadow, &QCheckBox::toggled, this, &LatexExportDialog::updateBackground);
     m_author = new QLineEdit(s.value(QStringLiteral("tex/author"), s.value(QStringLiteral("editor/defaultSource"))).toString());
     nf->addRow(tr("Autor:"), m_author);
+    nf->addRow(tr("Schriftfarbe:"), colors);
     m_noDate = new QCheckBox(tr("kein Datum auf dem Titelblatt"));
     m_noDate->setChecked(s.value(QStringLiteral("tex/noDate"), true).toBool());
     nf->addRow(QString(), m_noDate);
@@ -340,6 +487,29 @@ LatexExportDialog::LatexExportDialog(const Recipe &r, QWidget *parent) : QDialog
     m_bgPreview->setToolTip(tr("Vorschau (A4, rechte Seite): grau = Bindekorrektur, rot gestrichelt = Bild ragt über die Seite"));
     bgl->addWidget(m_bgPreview, 0, Qt::AlignTop);
     nf->addRow(m_bgOptions);
+    // dasselbe Bild auch auf der Titelseite – zwischen Überschrift und Autor
+    m_titleImgBox = new QWidget;
+    auto *til = new QHBoxLayout(m_titleImgBox);
+    til->setContentsMargins(0, 0, 0, 0);
+    auto *tif = new QFormLayout;
+    m_titleImg = new QCheckBox(tr("Bild auch auf der Titelseite (zwischen Überschrift und Autor)"));
+    m_titleImg->setChecked(s.value(QStringLiteral("tex/titleImage"), true).toBool());
+    tif->addRow(m_titleImg);
+    m_tiWidth = mmBox(s.value(QStringLiteral("tex/titleImageWidth"), 100).toDouble(), 180);
+    m_tiWidth->setMinimum(10);
+    m_tiWidth->setToolTip(tr("Breite des Bildes auf der Titelseite – höchstens Satzspiegelbreite und 45 % der Satzspiegelhöhe"));
+    m_tiAbove = mmBox(s.value(QStringLiteral("tex/titleImageAbove"), 15).toDouble(), 150);
+    m_tiBelow = mmBox(s.value(QStringLiteral("tex/titleImageBelow"), 15).toDouble(), 150);
+    m_tiAbove->setToolTip(tr("Abstand zwischen Überschrift (Titel bzw. Untertitel) und Bild"));
+    m_tiBelow->setToolTip(tr("Abstand zwischen Bild und Autor"));
+    tif->addRow(tr("Breite:"), m_tiWidth);
+    tif->addRow(tr("Abstand zur Überschrift:"), m_tiAbove);
+    tif->addRow(tr("Abstand zum Autor:"), m_tiBelow);
+    til->addLayout(tif, 1);
+    m_titlePreview = new TitlePagePreview;
+    m_titlePreview->setToolTip(tr("Vorschau der Titelseite (rot gestrichelt: Inhalt reicht über den unteren Rand)"));
+    til->addWidget(m_titlePreview, 0, Qt::AlignTop);
+    nf->addRow(m_titleImgBox);
     auto *parts = new QHBoxLayout;
     m_toc = new QCheckBox(tr("Inhaltsverzeichnis"));
     m_glossary = new QCheckBox(tr("Glossar"));
@@ -427,7 +597,7 @@ LatexExportDialog::LatexExportDialog(const Recipe &r, QWidget *parent) : QDialog
 
     auto *bb = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     bb->button(QDialogButtonBox::Ok)->setText(tr("Exportieren"));
-    lay->addWidget(bb);
+    outer->addWidget(bb);
     connect(bb, &QDialogButtonBox::accepted, this, &LatexExportDialog::accept);
     connect(bb, &QDialogButtonBox::rejected, this, &QDialog::reject);
     connect(browse, &QPushButton::clicked, this, [this] {
@@ -450,7 +620,12 @@ LatexExportDialog::LatexExportDialog(const Recipe &r, QWidget *parent) : QDialog
     for (QCheckBox *c : { m_bgBinding, m_bgTrim }) connect(c, &QCheckBox::toggled, this, &LatexExportDialog::updateBackground);
     connect(m_bcor, QOverload<int>::of(&QSpinBox::valueChanged), this, &LatexExportDialog::updateBackground);
     connect(m_bookTitle, &QLineEdit::textChanged, this, &LatexExportDialog::updateBackground);
+    connect(m_subtitle, &QLineEdit::textChanged, this, &LatexExportDialog::updateBackground);
     connect(m_bgCropButton, &QPushButton::clicked, this, &LatexExportDialog::cropBackground);
+    connect(m_titleImg, &QCheckBox::toggled, this, &LatexExportDialog::updateBackground);
+    for (QDoubleSpinBox *b : { m_tiWidth, m_tiAbove, m_tiBelow })
+        connect(b, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &LatexExportDialog::updateBackground);
+    connect(m_author, &QLineEdit::textChanged, this, &LatexExportDialog::updateBackground);
     connect(m_bgImage, &QLineEdit::textEdited, this, [this] {
         m_bgCrop = QRectF();
         m_bgRotation = 0;
@@ -464,7 +639,12 @@ LatexExportDialog::LatexExportDialog(const Recipe &r, QWidget *parent) : QDialog
     for (QRadioButton *b : { m_modeChapter, m_modeNewMaster, m_modeStandalone }) connect(b, &QRadioButton::toggled, this, &LatexExportDialog::updateMode);
     connect(m_register, &QCheckBox::toggled, this, &LatexExportDialog::updateMode);
     updateMode();
-    resize(660, sizeHint().height());
+    // Vorgabegröße: so hoch wie nötig, höchstens 90 % der Bildschirmhöhe; danach merkt WindowState Größe und Position
+    lay->addStretch(1);
+    const QRect avail = (parent && parent->screen() ? parent->screen() : QGuiApplication::primaryScreen())->availableGeometry();
+    const int wanted = content->sizeHint().height() + bb->sizeHint().height() + 40;
+    resize(qMin(700, avail.width() - 40), qMin(wanted, int(avail.height() * 0.9)));
+    setMinimumSize(480, 320);
 }
 
 QString LatexExportDialog::pickFile(QLineEdit *edit, const QString &title, const QString &filter, bool save)
@@ -483,6 +663,9 @@ LatexExport::MasterOptions LatexExportDialog::masterOptions() const
     m.subtitle = m_subtitle->text().trimmed();
     m.author = m_author->text().trimmed();
     m.noDate = m_noDate->isChecked();
+    m.titleColor = m_titleColor->property("color").toString();
+    m.subtitleColor = m_subtitleColor->property("color").toString();
+    m.titleShadow = m_titleShadow->isChecked();
     m.halfTitleImage = QDir::fromNativeSeparators(m_bgImage->text().trimmed());
     m.bgTarget = LatexExport::MasterOptions::BgTarget(m_bgTarget->currentData().toInt());
     m.bgPlacement = LatexExport::MasterOptions::BgPlacement(m_bgPlacement->currentData().toInt());
@@ -492,6 +675,10 @@ LatexExport::MasterOptions LatexExportDialog::masterOptions() const
     m.bgShiftBinding = m_bgBinding->isChecked();
     m.bgTrim = m_bgTrim->isChecked();
     m.bgCrop = m_bgCrop;
+    m.titleImage = m_titleImg->isChecked();
+    m.titleImageWidthMm = m_tiWidth->value();
+    m.titleImageGapAboveMm = m_tiAbove->value();
+    m.titleImageGapBelowMm = m_tiBelow->value();
     m.bgRotation = m_bgRotation;
     m.toc = m_toc->isChecked();
     m.glossary = m_glossary->isChecked();
@@ -581,8 +768,17 @@ void LatexExportDialog::updateBackground()
     }
     m_bgMaxInfo->setVisible(!fill);
     m_bgPreview->set(img, mm);
+    // Titelseite: nur, wenn das Bild auf dem Schmutztitel liegt (sonst ist es schon Hintergrund der Titelseite)
+    const bool onHalf = m.bgTarget == LatexExport::MasterOptions::BgTarget::HalfTitle;
+    m_titleImgBox->setVisible(has && onHalf);
+    for (QWidget *wdg : { static_cast<QWidget *>(m_tiWidth), static_cast<QWidget *>(m_tiAbove), static_cast<QWidget *>(m_tiBelow) })
+        wdg->setEnabled(m_titleImg->isChecked());
+    if (has && onHalf) {
+        LatexExport::MasterOptions ti = m;
+        ti.bgPlacement = LatexExport::MasterOptions::BgPlacement::Free;
+        m_titlePreview->set(m_titleImg->isChecked() && !m_bgCache.isNull() ? LatexExport::prepareBackground(m_bgCache, ti) : QImage(), m);
+    }
     m_updatingBg = false;
-    if (isVisible()) adjustSize();
 }
 
 void LatexExportDialog::proposeFile()
@@ -596,6 +792,26 @@ void LatexExportDialog::proposeFile()
     m_file->setText(QDir::toNativeSeparators(dir + QLatin1Char('/') + m_base + QStringLiteral(".tex")));
 }
 
+// Wird der Inhalt höher (z. B. „Neues Master-Dokument“), das Fenster bis höchstens 90 % der Bildschirmhöhe
+// vergrößern – nie über den Bildschirm hinaus; der Rest bleibt rollbar
+void LatexExportDialog::growToFit()
+{
+    if (!isVisible() || isMaximized() || !m_scroll) return;
+    QWidget *content = m_scroll->widget();
+    content->adjustSize();
+    const int need = content->sizeHint().height() - m_scroll->viewport()->height();
+    if (need <= 0) return;
+    const QRect avail = screen() ? screen()->availableGeometry() : QGuiApplication::primaryScreen()->availableGeometry();
+    const int maxH = int(avail.height() * 0.9);
+    const int h = qMin(height() + need, maxH);
+    if (h <= height()) return;
+    QRect g = geometry();
+    g.setHeight(h);
+    if (g.bottom() > avail.bottom()) g.moveBottom(avail.bottom());
+    if (g.top() < avail.top()) g.moveTop(avail.top());
+    setGeometry(g);
+}
+
 void LatexExportDialog::updateMode()
 {
     proposeFile();
@@ -607,7 +823,7 @@ void LatexExportDialog::updateMode()
     const bool sectionRow = !m_modeStandalone->isChecked() && m_heading->currentData().toInt() == int(LatexExport::Heading::Section);
     m_chapterRow->setVisible(sectionRow);
     if (m_chapterLabel) m_chapterLabel->setVisible(sectionRow);
-    adjustSize();
+    growToFit();
 }
 
 void LatexExportDialog::accept()
@@ -695,6 +911,9 @@ void LatexExportDialog::accept()
         s.setValue(QStringLiteral("tex/subtitle"), m.subtitle);
         s.setValue(QStringLiteral("tex/author"), m.author);
         s.setValue(QStringLiteral("tex/noDate"), m.noDate);
+        s.setValue(QStringLiteral("tex/titleColor"), m.titleColor);
+        s.setValue(QStringLiteral("tex/subtitleColor"), m.subtitleColor);
+        s.setValue(QStringLiteral("tex/titleShadow"), m.titleShadow);
         s.setValue(QStringLiteral("tex/bgImage"), m.halfTitleImage);
         s.setValue(QStringLiteral("tex/bgTarget"), int(m.bgTarget));
         s.setValue(QStringLiteral("tex/bgPlacement"), int(m.bgPlacement));
@@ -704,6 +923,10 @@ void LatexExportDialog::accept()
         s.setValue(QStringLiteral("tex/bgBinding"), m.bgShiftBinding);
         s.setValue(QStringLiteral("tex/bgTrim"), m.bgTrim);
         s.setValue(QStringLiteral("tex/bgCrop"), m.bgCrop);
+        s.setValue(QStringLiteral("tex/titleImage"), m.titleImage);
+        s.setValue(QStringLiteral("tex/titleImageWidth"), m.titleImageWidthMm);
+        s.setValue(QStringLiteral("tex/titleImageAbove"), m.titleImageGapAboveMm);
+        s.setValue(QStringLiteral("tex/titleImageBelow"), m.titleImageGapBelowMm);
         s.setValue(QStringLiteral("tex/bgRotation"), m.bgRotation);
         s.setValue(QStringLiteral("tex/toc"), m.toc);
         s.setValue(QStringLiteral("tex/glossary"), m.glossary);

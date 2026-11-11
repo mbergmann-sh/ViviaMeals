@@ -600,7 +600,7 @@ void takeScreenshots(MainWindow *w, const QString &dir)
                 }
             }
             st.setValue(QStringLiteral("tex/bgImage"), bg);
-            st.setValue(QStringLiteral("tex/bgTarget"), 1);
+            st.setValue(QStringLiteral("tex/bgTarget"), 0);
             st.setValue(QStringLiteral("tex/bgPlacement"), 2);
             st.setValue(QStringLiteral("tex/bgWidth"), 139.9);
             st.setValue(QStringLiteral("tex/bgLeft"), 46.4);

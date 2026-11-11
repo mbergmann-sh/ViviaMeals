@@ -57,6 +57,16 @@ struct MasterOptions {
     bool bgTrim = true;         // gleichmäßigen weißen Rand des Bildes abschneiden
     QRectF bgCrop;              // Zuschnitt, relativ (0…1) zum gedrehten Bild; leer = ganzes Bild
     int bgRotation = 0;         // Drehung in Grad (Vielfache von 90)
+    // dasselbe Bild zusätzlich auf der Titelseite, zwischen Überschrift (Titel/Untertitel) und Autor
+    bool titleImage = true;
+    double titleImageWidthMm = 100;
+    double titleImageGapAboveMm = 15;   // Abstand zur Überschrift
+    double titleImageGapBelowMm = 15;   // Abstand zum Autor
+    bool titleImageActive() const { return titleImage && !halfTitleImage.isEmpty() && bgTarget == BgTarget::HalfTitle; }
+    QString titleColor = QStringLiteral("#000000");      // Schriftfarbe Buchtitel
+    QString subtitleColor = QStringLiteral("#000000");   // Schriftfarbe Untertitel
+    bool titleShadow = true;                             // Titel und Untertitel werfen Schatten
+    QString shadowColor = QStringLiteral("#8C8C8C");
     QString firstChapter;       // bei Rezepten als \\section: Themen-Kapitel für das erste Rezept
     bool toc = true;
     bool glossary = true;
@@ -72,7 +82,8 @@ QString escape(const QString &s);
 QString indexEntry(const QString &term, const QString &sub = QString());
 
 // Master-Dokument: inputs = Pfade (relativ zum Master, ohne .tex) der einzubindenden Rezepte
-QString masterDocument(const MasterOptions &m, const QStringList &inputs, const QString &halfTitleFile = QString());
+QString masterDocument(const MasterOptions &m, const QStringList &inputs, const QString &halfTitleFile = QString(),
+                       const QString &titleImageFile = QString());
 QString glossaryFile();
 // Hintergrundbild aufbereiten: weißen Rand abschneiden (trim), bei FillPage auf A4-Format zuschneiden
 QImage prepareBackground(const QImage &src, const MasterOptions &m);

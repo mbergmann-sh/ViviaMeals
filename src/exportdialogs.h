@@ -53,6 +53,12 @@ private:
     QWidget *m_newMasterBox;
     QLineEdit *m_newMasterFile, *m_bookTitle, *m_subtitle, *m_author, *m_bgImage;
     QCheckBox *m_noDate, *m_toc, *m_glossary, *m_index;
+    QPushButton *m_titleColor, *m_subtitleColor;
+    QCheckBox *m_titleShadow;
+    QWidget *m_titleImgBox;
+    QCheckBox *m_titleImg;
+    QDoubleSpinBox *m_tiWidth, *m_tiAbove, *m_tiBelow;
+    class TitlePagePreview *m_titlePreview;
     QComboBox *m_bgTarget, *m_bgPlacement;
     QDoubleSpinBox *m_bgWidth, *m_bgLeft, *m_bgBottom;
     QCheckBox *m_bgBinding, *m_bgTrim;
@@ -68,6 +74,8 @@ private:
     QWidget *m_chapterRow;
     QWidget *m_chapterLabel = nullptr;
     void fillChapters();
+    void growToFit();
+    class QScrollArea *m_scroll = nullptr;
     QWidget *m_bgOptions;
     class BackgroundPreview *m_bgPreview;
     void updateBackground();

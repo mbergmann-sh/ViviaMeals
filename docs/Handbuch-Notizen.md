@@ -1,6 +1,6 @@
 # ViviaMeals – Notizen für das Handbuch
 
-Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.7.2.
+Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.7.7.
 
 > **Name:** Das Programm heißt seit Version 0.6 **ViviaMeals** (vorher VitaMeals; die ganze Reihe heißt jetzt
 > Vivia – ViviaParms, ViviaBreathe). Alte Einstellungen, Profile, Tagebücher, eigene Lebensmittel und
@@ -553,7 +553,7 @@ Einheitlich „200° C“ (`Units::normalizeCelsius`, `Importers::normalizeTexts
 
 ## LaTeX-Export und Kochbuch (ab 0.7.0)
 
-*Datei → Export → Als LaTeX-Datei exportieren …* (Rezept vorher auswählen)
+*Datei → Export → Als LaTeX-Datei exportieren …* – Tastenkürzel **F2** (ab 0.7.3), auch Werkzeugleiste und Kontextmenü (Rezept vorher auswählen; nur aktiv mit LaTeX-Installation)
 
 **Ausgabe**
 1. **Kapitel zum Einbinden in ein Master-Dokument** (Vorgabe). Mit „eintragen in“ wird `\input{rezepte/<datei>}`
@@ -639,3 +639,51 @@ pdflatex, lualatex oder xelatex gefunden wird – im Suchpfad, unter `C:\texlive
 `%ProgramFiles%\MiKTeX\miktex\bin\x64`, `%LOCALAPPDATA%\Programs\MiKTeX\miktex\bin\x64`, `/Library/TeX/texbin`,
 `/usr/local/texlive/<Jahr>/bin/…` oder im Ordner aus `VIVIA_TEX_BIN`. Der Tooltip nennt die gefundene
 Distribution bzw. wo man TeX Live/MiKTeX bekommt; der Export-Dialog zeigt das gefundene Programm.
+
+
+### Fenstergröße des LaTeX-Export-Dialogs (ab 0.7.4)
+
+Alle Optionen liegen in einem rollbaren Bereich; „Exportieren“ und „Abbrechen“ stehen fest darunter und bleiben
+auch auf kleinen Bildschirmen erreichbar. Beim ersten Öffnen ist das Fenster höchstens 90 % der Bildschirmhöhe
+hoch; wird der Inhalt größer (z. B. „Neues Master-Dokument“), wächst es bis zu dieser Grenze mit, der Rest
+lässt sich rollen. Größe und Position merkt sich ViviaMeals – wie bei allen anderen Fenstern – für den nächsten
+Aufruf und Programmstart (Einstellungen dieses Geräts; ScreenFit passt sie an einen kleineren Bildschirm an).
+
+
+### \clearpage in Rezeptdateien (ab 0.7.5)
+
+Rezepte als eigenes Kapitel beginnen mit
+
+    \clearpage
+    % Empfohlen bei zweiseitigen Dokumenten (twoside), um sauber im Hauptteil zu starten
+
+(gibt offene Gleitobjekte aus; `\chapter` springt danach bei `open=right` auf die nächste rechte Seite).
+Rezepte als Abschnitt in einem Themen-Kapitel beginnen – wenn „auf neuer Seite“ gewählt ist – mit
+`\ifnum\value{section}>0 \clearpage\fi`: so steht das erste Rezept direkt unter der Kapitelüberschrift statt
+die Überschrift allein auf einer Seite stehen zu lassen.
+
+
+### Titelfarben und Schatten (ab 0.7.6)
+
+*Neues Master-Dokument → Schriftfarbe:* Knöpfe „Titel“ und „Untertitel“ öffnen die Farbauswahl (Vorgabe Schwarz,
+„Schwarz“ setzt beide zurück); „mit Schatten“ (Vorgabe an) lässt Buchtitel und Untertitel einen grauen Schatten
+nach rechts unten werfen – auf Schmutztitel und Titelseite. Die Vorschau zeigt Farben und Schatten.
+
+Im Master-Dokument: `\definecolor{vmTitel}`, `{vmUntertitel}`, `{vmSchatten}` und
+`\vmSchatten[Breite]{Farbe}{Text}` (zwei übereinandergelegte `\parbox`, die hintere um 0,06 em versetzt –
+funktioniert auch bei mehrzeiligen Titeln). Die Titelseite wird jetzt in beiden Klassen selbst gesetzt
+(`titlepage` statt `\maketitle`); `\title`/`\author` stehen weiter für die PDF-Eigenschaften (`\hypersetup`).
+
+
+### Schmutztitel-Bild auch auf der Titelseite (ab 0.7.7)
+
+Liegt das Hintergrundbild auf dem Schmutztitel, erscheint es auf Wunsch (Vorgabe an) zusätzlich auf der
+Titelseite – zwischen Überschrift (Titel/Untertitel) und Autor:
+- **Breite** (mm; höchstens Satzspiegelbreite, Höhe höchstens 45 % des Satzspiegels – Seitenverhältnis bleibt)
+- **Abstand zur Überschrift** und **Abstand zum Autor** (mm), einzeln einstellbar
+- zweite Vorschau: die Titelseite mit Titel, Untertitel, Bild und Autor (rot gestrichelt, wenn der Inhalt
+  über den unteren Rand reicht)
+
+Das Bild wird mit demselben Zuschnitt/Drehen/Randentfernen wie auf dem Schmutztitel, aber ohne Zuschnitt aufs
+Seitenformat als `titelbild.png|jpg` neben das Master-Dokument gelegt. Liegt das Hintergrundbild selbst auf der
+Titelseite, entfällt die Option (das Bild ist dort schon Hintergrund).

@@ -174,6 +174,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
         QMenu menu(this);
         menu.addAction(Icons::get(QStringLiteral("edit")), tr("Bearbeiten …"), this, &MainWindow::editRecipe);
         QAction *tex = menu.addAction(Icons::get(QStringLiteral("tex")), tr("Als LaTeX-Datei exportieren …"), this, &MainWindow::exportLatex);
+        tex->setShortcut(QKeySequence(Qt::Key_F2));   // nur Anzeige – ausgelöst wird F2 über das Menü „Export“
         tex->setEnabled(LatexExport::findInstallation().found());
         menu.addAction(Icons::get(QStringLiteral("odt")), tr("Als LibreOffice-Writer-Datei (.odt) exportieren …"), this, &MainWindow::exportOdt);
         menu.addSeparator();
@@ -287,6 +288,7 @@ void MainWindow::buildMenus()
     m_needDb << a;
     a = exp->addAction(Icons::get(QStringLiteral("tex")), tr("Als &LaTeX-Datei exportieren …"), this, &MainWindow::exportLatex);
     a->setObjectName(QStringLiteral("actTex"));
+    a->setShortcut(QKeySequence(Qt::Key_F2));
     m_needRecipe << a;
     m_texAction = a;
     // Erst beim Öffnen des Menüs erneut suchen – so wird eine nachträglich installierte TeX-Distribution erkannt

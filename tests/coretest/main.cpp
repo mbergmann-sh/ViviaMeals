@@ -1308,7 +1308,8 @@ int main(int argc, char **argv)
         Nutrition::analyze(r);
         LatexExport::Options o;
         QString ch = LatexExport::toLatex(r, o);
-        CHECK(o.mode == LatexExport::Mode::Chapter && !ch.contains(QStringLiteral("\\documentclass")) && ch.contains(QStringLiteral("\\chapter{Äpfel im Schlafrock}")),
+        CHECK(o.mode == LatexExport::Mode::Chapter && !ch.contains(QStringLiteral("\\documentclass")) && ch.contains(QStringLiteral("\\chapter{Äpfel im Schlafrock}"))
+                  && ch.indexOf(QStringLiteral("\\clearpage")) < ch.indexOf(QStringLiteral("\\chapter{")) && ch.indexOf(QStringLiteral("\\clearpage")) >= 0,
               "Kapitel ist Vorgabe");
         CHECK(!ch.contains(QStringLiteral("Gustav Knuth")), "Quelle standardmäßig unterdrückt");
         CHECK(ch.contains(QStringLiteral("\\index{apfel im schlafrock@Äpfel im Schlafrock}")) && ch.contains(QStringLiteral("\\index{blatterteig@Blätterteig!apfel im schlafrock@Äpfel im Schlafrock}"))
@@ -1336,6 +1337,8 @@ int main(int argc, char **argv)
             bg.save(dir + QStringLiteral("/bg.png"));
             m.halfTitleImage = dir + QStringLiteral("/bg.png");
             if (cls == 1) {
+                m.titleColor = QStringLiteral("#B22222");
+                m.subtitleColor = QStringLiteral("#1474BC");
                 // wie im Beispiel des Nutzers: Bild frei auf der Titelseite, 139,9 mm breit, links 46,4 mm, 60,5 mm hoch
                 m.bgTarget = LatexExport::MasterOptions::BgTarget::TitlePage;
                 m.bgPlacement = LatexExport::MasterOptions::BgPlacement::Free;
@@ -1358,6 +1361,9 @@ int main(int argc, char **argv)
             if (cls == 0) {
                 m.firstChapter = QStringLiteral("Nachtisch");
                 m.bgCrop = QRectF(0.1, 0.1, 0.8, 0.8);
+                m.titleImageWidthMm = 80;
+                m.titleImageGapAboveMm = 20;
+                m.titleImageGapBelowMm = 12.5;
             }
             const QString recipeFile = dir + QStringLiteral("/rezepte/aepfel.tex");
             o.imagePrefix = QStringLiteral("rezepte/");
@@ -1380,6 +1386,16 @@ int main(int argc, char **argv)
                           && mt.indexOf(QStringLiteral("titelseite-hintergrund")) > mt.indexOf(QStringLiteral("Titelseite")),
                       "frei positioniertes Bild auf der Titelseite");
             if (cls == 0) CHECK(mt.contains(QStringLiteral("\\chapter{Nachtisch}\n\\input{rezepte/aepfel}")), "Themen-Kapitel im neuen Master");
+            if (cls == 0)
+                CHECK(mt.contains(QStringLiteral("\\vspace{20mm}\n\\setlength{\\vmTitelbildBreite}{80mm}")) && mt.contains(QStringLiteral("keepaspectratio]{titelbild}"))
+                          && mt.contains(QStringLiteral("\\vspace{12.5mm}\n{\\large Micha B.")) && QFileInfo::exists(dir + QStringLiteral("/titelbild.png")),
+                      "Schmutztitelbild auch auf der Titelseite");
+            else
+                CHECK(!mt.contains(QStringLiteral("{titelbild}")), "kein zusätzliches Titelbild bei Hintergrund auf der Titelseite");
+            CHECK(mt.contains(cls ? QStringLiteral("\\definecolor{vmTitel}{HTML}{B22222}") : QStringLiteral("\\definecolor{vmTitel}{HTML}{000000}"))
+                      && mt.contains(QStringLiteral("\\vmSchatten{vmTitel}{Omas Küche}")) && mt.contains(QStringLiteral("\\vmSchatten{vmUntertitel}{Süßes \\& Herzhaftes}"))
+                      && mt.contains(QStringLiteral("\\color{vmSchatten}")),
+                  "Titelfarben und Schatten");
             CHECK(mt.contains(QStringLiteral("\\date{}")) && mt.contains(cls ? QStringLiteral("titelseite-hintergrund") : QStringLiteral("schmutztitel-hintergrund")) && mt.contains(QStringLiteral("\\printindex"))
                       && mt.contains(QStringLiteral("\\input{glossar}")) && mt.contains(cls ? QStringLiteral("bindingoffset=12mm") : QStringLiteral("BCOR=12mm")),
                   "Master-Inhalt");

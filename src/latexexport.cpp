@@ -121,8 +121,15 @@ QString toLatex(const Recipe &r, const Options &opt, const QString &imageFile)
                  .arg(scr ? QStringLiteral("scrbook") : QStringLiteral("book"));
     }
     const bool asSection = opt.heading == Heading::Section && !standalone;
-    // neue Seite – außer für das erste Rezept direkt nach der Kapitelüberschrift
-    if (asSection && opt.newPage) t += QStringLiteral("\\ifnum\\value{section}>0 \\clearpage\\fi\n");
+    if (!standalone && !asSection) {
+        // Vorschlag des Nutzers: bei zweiseitigen Dokumenten (twoside) offene Gleitobjekte ausgeben und sauber
+        // auf einer neuen Seite beginnen; \\chapter springt danach (open=right) auf die nächste rechte Seite
+        t += QStringLiteral("\\clearpage\n%% Empfohlen bei zweiseitigen Dokumenten (twoside), um sauber im Hauptteil zu starten\n");
+    }
+    // neue Seite – außer für das erste Rezept direkt nach der Kapitelüberschrift (sonst stünde sie allein auf einer Seite)
+    if (asSection && opt.newPage)
+        t += QStringLiteral("%% neue Seite (twoside) – nicht beim ersten Rezept direkt unter der Kapitelüberschrift\n"
+                            "\\ifnum\\value{section}>0 \\clearpage\\fi\n");
     t += QStringLiteral("\\%3{%1}\n\\label{rez:%2}\n").arg(escape(r.title), r.id.left(8), asSection ? QStringLiteral("section") : QStringLiteral("chapter"));
     // Unterüberschriften: bei \\chapter als Abschnitt in der Kopfzeile, bei \\section steht dort der Rezepttitel
     auto heading = [&](const QString &h) {
@@ -272,7 +279,7 @@ QString glossaryFile()
     return t;
 }
 
-QString masterDocument(const MasterOptions &m, const QStringList &inputs, const QString &halfTitleFile)
+QString masterDocument(const MasterOptions &m, const QStringList &inputs, const QString &halfTitleFile, const QString &titleImageFile)
 {
     const bool scr = m.docClass == DocClass::ScrBook;
     const QString bcor = QString::number(m.bindingMm, 'f', m.bindingMm == std::floor(m.bindingMm) ? 0 : 1);
@@ -334,6 +341,7 @@ QString masterDocument(const MasterOptions &m, const QStringList &inputs, const 
         "\n%% ---- Farben (wie ViviaMeals)\n"
         "\\usepackage[table]{xcolor}\n"
         "\\definecolor{vmblau}{HTML}{1474BC}\n\\definecolor{vmorange}{HTML}{E0620D}\n"
+        "@TITELFARBEN@"
         "\n%% ---- Professionelle Tabellen\n"
         "\\usepackage{array}       %% eigene Spaltentypen\n"
         "\\usepackage{booktabs}    %% \\toprule, \\midrule, \\bottomrule\n"
@@ -356,12 +364,32 @@ QString masterDocument(const MasterOptions &m, const QStringList &inputs, const 
         "\\newlength{\\vmBindekorrektur}\n"
         "\\setlength{\\vmBindekorrektur}{@BGSHIFT@}\n"
         "\\newcommand{\\BindungsHSpace}[1]{\\hspace*{\\dimexpr#1+\\vmBindekorrektur\\relax}}\n"
+        "\\newlength{\\vmTitelbildBreite}\n"
         "\\graphicspath{{./}{bilder/}}\n"
         "%% Bild mit Unterschrift genau an dieser Stelle:  \\rezeptbild[0.8]{datei}{Unterschrift}\n"
         "\\newcommand{\\rezeptbild}[3][0.8]{\\begin{figure}[H]\\centering\\includegraphics[width=#1\\linewidth]{#2}\\caption{#3}\\end{figure}}\n"
         "%% Bild rechts, vom Text umflossen:                \\randbild{datei}{Unterschrift}\n"
         "\\newcommand{\\randbild}[2]{\\begin{wrapfigure}{r}{0.4\\linewidth}\\centering\\includegraphics[width=\\linewidth]{#1}\\caption{#2}\\end{wrapfigure}}\n");
     t.replace(QStringLiteral("@BGSHIFT@"), bgShift);
+    {
+        // Titel- und Untertitelfarbe, Schatten: \vmSchatten[Breite]{Farbe}{Text} – auch mehrzeilig (zwei übereinander
+        // gelegte \parbox, die hintere um 0,06 em nach rechts unten versetzt)
+        auto hex = [](const QString &c, const char *fallback) {
+            QString h = c.trimmed();
+            if (h.startsWith(QLatin1Char('#'))) h = h.mid(1);
+            static const QRegularExpression ok(QStringLiteral("^[0-9A-Fa-f]{6}$"));
+            return ok.match(h).hasMatch() ? h.toUpper() : QString::fromLatin1(fallback);
+        };
+        QString c = QStringLiteral("%% Farben von Buchtitel und Untertitel, Schatten (in ViviaMeals einstellbar)\n"
+                                   "\\definecolor{vmTitel}{HTML}{%1}\n\\definecolor{vmUntertitel}{HTML}{%2}\n\\definecolor{vmSchatten}{HTML}{%3}\n")
+                        .arg(hex(m.titleColor, "000000"), hex(m.subtitleColor, "000000"), hex(m.shadowColor, "8C8C8C"));
+        if (m.titleShadow)
+            c += QStringLiteral("\\newcommand{\\vmSchatten}[3][\\linewidth]{\\leavevmode\\makebox[0pt][l]{\\raisebox{-0.06em}{\\hspace{0.06em}%\n"
+                                "  \\parbox[b]{#1}{\\centering\\color{vmSchatten}#3}}}\\parbox[b]{#1}{\\centering\\color{#2}#3}}\n");
+        else
+            c += QStringLiteral("\\newcommand{\\vmSchatten}[3][\\linewidth]{\\parbox[b]{#1}{\\centering\\color{#2}#3}}   %% ohne Schatten\n");
+        t.replace(QStringLiteral("@TITELFARBEN@"), c);
+    }
     if (m.glossary || m.index) t += QStringLiteral("\n%% ---- Verzeichnisse\n");
     if (m.index) t += QStringLiteral("\\usepackage{imakeidx}\n\\makeindex[title=Stichwortverzeichnis,intoc=true,columns=2]\n");
     t += QStringLiteral("\\usepackage[hidelinks,unicode,bookmarksnumbered]{hyperref}\n");
@@ -404,32 +432,39 @@ QString masterDocument(const MasterOptions &m, const QStringList &inputs, const 
             "\\makeatletter\n\\renewcommand*{\\cleardoublepage}{\\clearpage\\if@twoside\\ifodd\\c@page\\else\\hbox{}\\thispagestyle{empty}\\newpage"
             "\\if@twocolumn\\hbox{}\\newpage\\fi\\fi\\fi}\n\\makeatother\n");
     }
-    // Titelangaben
-    t += QStringLiteral("\n%% ---- Titelangaben\n\\title{%1}\n").arg(escape(m.title));
-    if (!m.subtitle.trimmed().isEmpty()) {
-        if (scr) t += QStringLiteral("\\subtitle{%1}\n").arg(escape(m.subtitle));
-        else t += QStringLiteral("%% Untertitel: siehe Titelseite unten\n");
-    }
-    t += QStringLiteral("\\author{%1}\n").arg(escape(m.author));
+    // Titelangaben (für die PDF-Eigenschaften; Titelseite wird unten selbst gesetzt)
+    t += QStringLiteral("\n%% ---- Titelangaben\n\\title{%1}\n\\author{%2}\n").arg(escape(m.title), escape(m.author));
     t += m.noDate ? QStringLiteral("\\date{}   %% kein Datum auf dem Titelblatt\n") : QStringLiteral("\\date{\\today}\n");
+    t += QStringLiteral("\\hypersetup{pdftitle={%1},pdfauthor={%2}}\n").arg(escape(m.title), escape(m.author));
     t += QStringLiteral("\n\\begin{document}\n\\frontmatter\n");
     // Schmutztitel mit Hintergrundbild
     t += QStringLiteral("\n%% ---- Schmutztitel\n\\begin{titlepage}\n\\thispagestyle{empty}\n");
     if (bgOnHalfTitle) t += bgCmd;
     t += QStringLiteral("\\vspace*{0.30\\textheight}\n\\begin{center}\n"
-                        "\\colorbox{white}{\\parbox{0.8\\textwidth}{\\centering\\vspace{1em}{\\Huge\\bfseries\\color{vmblau}%1\\par}\\vspace{1em}}}\n"
+                        "\\colorbox{white}{\\parbox{0.8\\textwidth}{\\centering\\vspace{1em}{\\Huge\\bfseries\\vmSchatten{vmTitel}{%1}\\par}\\vspace{1em}}}\n"
                         "\\end{center}\n\\end{titlepage}\n")
              .arg(escape(m.title));
-    // Titelseite
+    // Titelseite: Titel und Untertitel mit Schatten in den gewählten Farben
     t += QStringLiteral("\n%% ---- Titelseite\n");
     if (bgOnTitle) t += QStringLiteral("\\cleardoublepage\n") + bgCmd;
-    if (scr || m.subtitle.trimmed().isEmpty()) {
-        t += QStringLiteral("\\maketitle\n");
-    } else {
-        t += QStringLiteral("\\begin{titlepage}\n\\centering\n\\vspace*{0.25\\textheight}\n{\\Huge\\bfseries %1\\par}\n\\vspace{1em}\n{\\Large %2\\par}\n"
-                            "\\vspace{3em}\n{\\large %3\\par}\n%4\\end{titlepage}\n")
-                 .arg(escape(m.title), escape(m.subtitle), escape(m.author), m.noDate ? QString() : QStringLiteral("\\vspace{1em}\n{\\large\\today\\par}\n"));
+    const bool titleImg = !titleImageFile.isEmpty();
+    auto mm = [](double v) { return QString::number(v, 'f', v == std::floor(v) ? 0 : 1) + QStringLiteral("mm"); };
+    t += QStringLiteral("\\begin{titlepage}\n\\centering\n\\vspace*{%2\\textheight}\n{\\Huge\\bfseries\\vmSchatten{vmTitel}{%1}\\par}\n")
+             .arg(escape(m.title), titleImg ? QStringLiteral("0.10") : QStringLiteral("0.25"));
+    if (!m.subtitle.trimmed().isEmpty())
+        t += QStringLiteral("\\vspace{1em}\n{\\Large\\vmSchatten{vmUntertitel}{%1}\\par}\n").arg(escape(m.subtitle.trimmed()));
+    if (titleImg) {
+        // Bild des Schmutztitels: Abstand zur Überschrift, Breite (höchstens Satzspiegelbreite bzw. 45 % der Höhe), Abstand zum Autor
+        t += QStringLiteral("%% Titelbild: Abstand zur Überschrift %1, Breite %2, Abstand zum Autor %3 (in ViviaMeals einstellbar)\n"
+                            "\\vspace{%1}\n"
+                            "\\setlength{\\vmTitelbildBreite}{%2}\\ifdim\\vmTitelbildBreite>\\linewidth\\setlength{\\vmTitelbildBreite}{\\linewidth}\\fi\n"
+                            "\\includegraphics[width=\\vmTitelbildBreite,height=0.45\\textheight,keepaspectratio]{%4}\\par\n"
+                            "\\vspace{%3}\n")
+                 .arg(mm(m.titleImageGapAboveMm), mm(m.titleImageWidthMm), mm(m.titleImageGapBelowMm), QFileInfo(titleImageFile).completeBaseName());
     }
+    if (!m.author.trimmed().isEmpty()) t += QStringLiteral("%1{\\large %2\\par}\n").arg(titleImg ? QString() : QStringLiteral("\\vspace{3em}\n"), escape(m.author));
+    if (!m.noDate) t += QStringLiteral("\\vspace{1em}\n{\\large\\today\\par}\n");
+    t += QStringLiteral("\\end{titlepage}\n");
     if (m.toc) {
         t += QStringLiteral("\n%% ---- Inhaltsverzeichnis (ohne Kopfzeile)\n");
         t += scr ? QStringLiteral("\\cleardoubleoddpage\n\\pagestyle{plain.scrheadings}\n\\tableofcontents\n\\cleardoubleoddpage\n\\pagestyle{scrheadings}\n")
@@ -512,7 +547,7 @@ QImage prepareBackground(const QImage &src, const MasterOptions &m)
 bool writeMaster(const QString &file, const MasterOptions &m, const QStringList &inputs, QString *error)
 {
     const QFileInfo fi(file);
-    QString halfTitle;
+    QString halfTitle, titleImage;
     if (!m.halfTitleImage.isEmpty()) {
         const QImage src(m.halfTitleImage);
         if (src.isNull()) {
@@ -530,6 +565,16 @@ bool writeMaster(const QString &file, const MasterOptions &m, const QStringList 
             if (error) *error = tr("Das Hintergrundbild kann nicht gespeichert werden.");
             return false;
         }
+        if (m.titleImageActive()) {
+            // Titelseite: derselbe Ausschnitt, aber nicht auf das Seitenformat zugeschnitten
+            MasterOptions ti = m;
+            ti.bgPlacement = MasterOptions::BgPlacement::Free;
+            titleImage = fi.absolutePath() + QStringLiteral("/titelbild") + (png ? QStringLiteral(".png") : QStringLiteral(".jpg"));
+            if (!prepareBackground(src, ti).save(titleImage, png ? "PNG" : "JPG", png ? -1 : 92)) {
+                if (error) *error = tr("Das Titelbild kann nicht gespeichert werden.");
+                return false;
+            }
+        }
     }
     if (m.glossary) {
         const QString g = fi.absolutePath() + QStringLiteral("/glossar.tex");
@@ -546,7 +591,7 @@ bool writeMaster(const QString &file, const MasterOptions &m, const QStringList 
         if (error) *error = f.errorString();
         return false;
     }
-    f.write(masterDocument(m, inputs, halfTitle).toUtf8());
+    f.write(masterDocument(m, inputs, halfTitle, titleImage).toUtf8());
     if (!f.commit()) {
         if (error) *error = f.errorString();
         return false;

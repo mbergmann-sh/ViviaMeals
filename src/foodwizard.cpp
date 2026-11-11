@@ -60,6 +60,7 @@ public:
     OffSearchDialog(const QString &terms, QWidget *parent) : QDialog(parent)
     {
         setWindowTitle(QObject::tr("Open Food Facts – Suche nach „%1“").arg(terms));
+        setObjectName(QStringLiteral("OffSearchDialog"));   // Größe und Position merken (WindowState)
         auto *lay = new QVBoxLayout(this);
         m_status = new QLabel(QObject::tr("Suche läuft …"));
         lay->addWidget(m_status);
