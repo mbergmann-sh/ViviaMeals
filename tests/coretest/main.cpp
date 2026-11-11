@@ -566,7 +566,18 @@ int main(int argc, char **argv)
         QList<int> n = MealPlanner::slotCounts(o);
         out << "  Kandidaten ohne gesunde Vorschläge (Frühstück/warm/leicht/Zwischenmahlzeit): " << n[0] << "/" << n[1] << "/" << n[2] << "/" << n[3] << "\n";
         for (const QString &x : MealPlanner::notes(o)) out << "  Hinweis: " << x << "\n";
-        MealPlan plan = MealPlanner::create(o);
+        // Fortschritt: steigend bis zum Ende; Abbruch liefert einen leeren Plan
+        int lastDone = -1, calls = 0, lastTotal = 0;
+        bool monotone = true;
+        MealPlan plan = MealPlanner::create(o, [&](int done, int total, const QString &) {
+            if (done < lastDone) monotone = false;
+            lastDone = done;
+            lastTotal = total;
+            ++calls;
+            return true;
+        });
+        CHECK(calls >= 8 && monotone && lastDone == lastTotal && !plan.isEmpty(), "Wochenplan-Fortschritt " + QString::number(calls));
+        CHECK(MealPlanner::create(o, [](int done, int, const QString &) { return done < 300; }).isEmpty(), "Wochenplan abgebrochen");
         bool breakfastOk = true, noDessert = true;
         for (const auto &day : plan.days) {
             const RecipeSummary *b = db.summary(day.value(0).recipeId);

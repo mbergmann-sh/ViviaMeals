@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "mealplandialog.h"
+#include "busyprogress.h"
 #include "fridge.h"
 #include "icons.h"
 #include "recipedb.h"
@@ -180,7 +181,12 @@ void MealPlanDialog::create()
             Profiles::instance().save();
         }
     }
-    m_plan = MealPlanner::create(o);
+    {
+        BusyProgress prog(this, tr("Wochenplan wird berechnet"), 1000);
+        MealPlan plan = MealPlanner::create(o, prog.callback());
+        if (prog.canceled()) return;   // alten Plan behalten
+        m_plan = plan;
+    }
     m_plan.profileId = m_profile->currentData().toString();
     fillTable();
 }
@@ -253,7 +259,10 @@ void MealPlanDialog::cellMenu(const QPoint &pos)
     const int d = idx.row(), m = idx.column();
     QMenu menu(this);
     menu.addAction(Icons::get(QStringLiteral("dice")), tr("Anderes Rezept vorschlagen"), this, [this, d, m] {
-        MealPlanner::reroll(m_plan, d, m, options());
+        {
+            BusyProgress prog(this, tr("Anderes Rezept wird gesucht"), 100);
+            MealPlanner::reroll(m_plan, d, m, options(), prog.callback());
+        }
         fillTable();
     });
     menu.addAction(Icons::get(QStringLiteral("search")), tr("Rezept auswählen …"), this, [this, d, m] { chooseRecipe(d, m); });

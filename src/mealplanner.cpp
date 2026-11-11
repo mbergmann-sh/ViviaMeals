@@ -91,10 +91,20 @@ double healthPenalty(const MealTypes::Input &in, Profile::Goal goal, bool sweeti
     return 0;
 }
 
-QList<Candidate> candidates(const MealPlanner::Options &opt)
+QList<Candidate> candidates(const MealPlanner::Options &opt, const MealPlanner::Progress &progress = {}, int span = 0, bool *canceled = nullptr)
 {
     QList<Candidate> out;
-    for (const RecipeSummary &s : RecipeDb::instance().summaries()) {
+    const QList<RecipeSummary> &all = RecipeDb::instance().summaries();
+    const int total = int(all.size());
+    int i = 0;
+    for (const RecipeSummary &s : all) {
+        // Fortschritt: Rezepte prüfen = die ersten „span“ Schritte
+        if (progress && (i % 25 == 0) && !progress(span > 0 ? i * span / qMax(1, total) : i, span > 0 ? span + 100 : total,
+                                                   tr("Rezepte werden geprüft (%1 von %2) …").arg(i).arg(total))) {
+            if (canceled) *canceled = true;
+            return {};
+        }
+        ++i;
         if (!s.hasNutrition || s.coverage < 0.6 || s.perServing.kcal < 40) continue;
         if (!dietOk(s, opt.diet)) continue;
         bool excluded = false;
@@ -454,7 +464,7 @@ QString roleName(Role r)
     return {};
 }
 
-int candidateCount(const Options &opt) { return int(candidates(opt).size()); }
+int candidateCount(const Options &opt, const Progress &progress) { return int(candidates(opt, progress).size()); }
 
 QList<int> slotCounts(const Options &opt)
 {
@@ -491,8 +501,10 @@ QString portionText(const PlanEntry &e)
     return t;
 }
 
-MealPlan create(const Options &opt)
+MealPlan create(const Options &opt, const Progress &progress)
 {
+    // Fortschritt: 0–900 Rezepte prüfen, 900–1000 Tage zusammenstellen
+    constexpr int kScan = 900;
     MealPlan plan;
     plan.start = opt.start;
     const Layout lay = layout(opt);
@@ -502,7 +514,9 @@ MealPlan create(const Options &opt)
     plan.goal = int(opt.goal);
     plan.diet = int(opt.diet);
     plan.targetKcal = opt.targetKcal;
-    const QList<Candidate> cands = candidates(opt);
+    bool canceled = false;
+    const QList<Candidate> cands = candidates(opt, progress, kScan, &canceled);
+    if (canceled) return MealPlan();
     Context ctx;
     scaleQuotas(ctx, opt.days);
     ctx.lightFallback = lightCount(cands) < 3;
@@ -516,6 +530,8 @@ MealPlan create(const Options &opt)
             if (plan.roles[m] == r) order << m;
     QSet<QString> previous;
     for (int d = 0; d < opt.days; ++d) {
+        if (progress && !progress(kScan + 100 * d / qMax(1, opt.days), kScan + 100, tr("Tag %1 von %2 wird zusammengestellt …").arg(d + 1).arg(opt.days)))
+            return MealPlan();
         QList<PlanEntry> day;
         for (int m = 0; m < plan.meals.size(); ++m) day << PlanEntry{};
         ctx.usedDay.clear();
@@ -538,13 +554,16 @@ MealPlan create(const Options &opt)
         }
         plan.days << day;
     }
+    if (progress) progress(kScan + 100, kScan + 100, tr("Fertig"));
     return plan;
 }
 
-void reroll(MealPlan &plan, int day, int meal, const Options &opt)
+void reroll(MealPlan &plan, int day, int meal, const Options &opt, const Progress &progress)
 {
     if (day < 0 || day >= plan.days.size() || meal < 0 || meal >= plan.meals.size()) return;
-    const QList<Candidate> cands = candidates(opt);
+    bool canceled = false;
+    const QList<Candidate> cands = candidates(opt, progress, 0, &canceled);
+    if (canceled) return;
     const Role role = plan.roles.value(meal, Warm);
     Context ctx;
     scaleQuotas(ctx, int(plan.days.size()));

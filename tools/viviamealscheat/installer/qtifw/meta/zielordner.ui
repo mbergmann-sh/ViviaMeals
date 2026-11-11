@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ZielordnerSeite</class>
+ <widget class="QWidget" name="ZielordnerSeite">
+  <property name="windowTitle">
+   <string>ViviaMeals-Ordner</string>
+  </property>
+  <layout class="QVBoxLayout" name="layout">
+   <item>
+    <widget class="QLabel" name="erklaerung">
+     <property name="text">
+      <string>ViviaMealsCheat wird in den Ordner Ihrer ViviaMeals-Installation kopiert und benutzt dort deren Programmbibliotheken. Bitte den Ordner wählen, in dem ViviaMeals.exe liegt.</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="zeile">
+     <item>
+      <widget class="QLineEdit" name="ordner"/>
+     </item>
+     <item>
+      <widget class="QPushButton" name="durchsuchen">
+       <property name="text">
+        <string>Durchsuchen …</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="hinweis">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <spacer name="abstand">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

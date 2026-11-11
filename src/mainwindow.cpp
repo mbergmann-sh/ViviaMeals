@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "mainwindow.h"
+#include "busyprogress.h"
 #include "foodwizard.h"
 #include "importdialogs.h"
 #include "mealtypes.h"
@@ -992,23 +993,27 @@ void MainWindow::recalcAll()
     RecipeDb &db = RecipeDb::instance();
     QStringList ids;
     for (const RecipeSummary &s : db.summaries()) ids << s.id;
-    QProgressDialog prog(tr("Nährwerte werden neu berechnet …"), tr("Abbrechen"), 0, int(ids.size()), this);
-    prog.setWindowModality(Qt::WindowModal);
-    prog.setMinimumDuration(300);
+    BusyProgress prog(this, tr("Kalorien und Nährwerte neu berechnen"), int(ids.size()));
     db.beginBatch();
     int n = 0;
+    bool canceled = false;
     for (const QString &id : ids) {
-        prog.setValue(n++);
-        if (prog.wasCanceled()) break;
         Recipe r;
         if (!db.load(id, &r)) continue;
+        if (!prog.step(n, tr("Rezept %1 von %2: %3").arg(n + 1).arg(ids.size()).arg(r.title))) {
+            canceled = true;
+            break;
+        }
         Nutrition::analyze(r);
         MealTypes::applyNutrientTags(r);   // abgeleitete Tags passend zu den neuen Werten
         db.save(r);
+        ++n;
     }
     db.endBatch();
-    prog.setValue(int(ids.size()));
-    statusBar()->showMessage(tr("Nährwerte von %1 Rezepten neu berechnet.").arg(n), 5000);
+    prog.step(int(ids.size()));
+    statusBar()->showMessage(canceled ? tr("Neuberechnung abgebrochen – %1 von %2 Rezepten berechnet.").arg(n).arg(ids.size())
+                                      : tr("Nährwerte von %1 Rezepten neu berechnet.").arg(n),
+                             5000);
     showCurrent();
 }
 
@@ -1037,8 +1042,12 @@ void MainWindow::fixUmlautsAll()
                                   .arg(examples.join(QLatin1Char('\n'))))
         != QMessageBox::Yes)
         return;
+    BusyProgress prog(this, tr("Umlaute korrigieren und Nährwerte neu berechnen"), int(todo.size()), false);
+    int i = 0;
     db.beginBatch();
     for (Recipe &r : todo) {
+        ++i;
+        prog.step(i - 1, tr("Rezept %1 von %2: %3").arg(i).arg(todo.size()).arg(r.title));
         Nutrition::analyze(r);   // „Kaese“ → „Käse“ findet jetzt den Eintrag in der Nährwerttabelle
         Nutrition::applyTagSuggestions(r);
         db.save(r);
@@ -1226,11 +1235,17 @@ void MainWindow::importPackage(const QString &given)
     if (d.importFoods()) foods = RecipePackage::importFoods(c, &learned);
     // Nährwerte mit der eigenen Tabelle neu berechnen; manuelle Zuordnungen bleiben erhalten
     RecipeDb &db = RecipeDb::instance();
+    {
+    BusyProgress prog(this, tr("Kalorien und Nährwerte neu berechnen"), int(c.recipes.size()), false);
+    int i = 0;
     for (Recipe &r : c.recipes) {
+        ++i;
+        prog.step(i - 1, tr("Rezept %1 von %2: %3").arg(i).arg(c.recipes.size()).arg(r.title));
         Nutrition::analyze(r);
         if (QSettings().value(QStringLiteral("import/nutrientTags"), true).toBool()) MealTypes::applyNutrientTags(r);
         // gleiche ID, aber anderes Rezept (z. B. umbenannt): eigene ID vergeben statt überschreiben
         if (db.summary(r.id) && db.duplicatesOf(r).isEmpty()) r.id.clear();
+    }
     }
     QString title = tr("Rezeptpaket übernommen");
     if (foods > 0 || learned > 0) title = tr("Rezeptpaket übernommen (%1 Lebensmittel, %2 Zuordnungen)").arg(foods).arg(learned);
@@ -1253,19 +1268,17 @@ void MainWindow::missingFoods()
 {
     RecipeDb &db = RecipeDb::instance();
     if (!db.isOpen()) return;
-    QProgressDialog prog(tr("Zutaten werden geprüft …"), tr("Abbrechen"), 0, db.count(), this);
-    prog.setWindowModality(Qt::WindowModal);
-    prog.setMinimumDuration(400);
     QList<Recipe> list;
+    {
+    BusyProgress prog(this, tr("Zutaten werden geprüft"), db.count());
     int i = 0;
     for (const RecipeSummary &s : db.summaries()) {
-        prog.setValue(i++);
-        if (prog.wasCanceled()) return;
+        if (!prog.step(i++)) return;
         if (s.coverage >= 0.999) continue;
         Recipe r;
         if (db.load(s.id, &r)) list << r;
     }
-    prog.setValue(db.count());
+    }
     const auto missing = Nutrition::missingFoods(list, MissingFoodsDialog::ignoredNames());
     if (missing.isEmpty()) {
         QMessageBox::information(this, tr("Zutaten ohne Nährwerte"), tr("Alle Zutaten mit Mengenangabe haben einen Eintrag in der Nährwerttabelle."));

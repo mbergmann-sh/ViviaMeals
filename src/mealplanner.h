@@ -25,6 +25,8 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 
+#include <functional>
+
 #include "fridge.h"
 #include "profiles.h"
 
@@ -90,9 +92,11 @@ struct Layout {
 };
 Layout layout(const Options &opt);
 QString roleName(Role r);   // „warm“, „leicht“ …
-MealPlan create(const Options &opt);
+// Rückmeldung für längere Berechnungen: (erledigt, gesamt, Text) → false = abbrechen
+using Progress = std::function<bool(int done, int total, const QString &step)>;
+MealPlan create(const Options &opt, const Progress &progress = {});
 // eine einzelne Mahlzeit neu würfeln
-void reroll(MealPlan &plan, int day, int meal, const Options &opt);
+void reroll(MealPlan &plan, int day, int meal, const Options &opt, const Progress &progress = {});
 // gezielt ein Rezept einsetzen, Portionen passend zum Ziel
 void setRecipe(MealPlan &plan, int day, int meal, const QString &recipeId);
 // Einkaufsliste über den ganzen Plan; Bestand aus dem Kühlschrank abziehen, wenn gewünscht
@@ -100,7 +104,7 @@ QList<ShoppingItem> shoppingList(const MealPlan &plan, const QStringList &stock 
 QString toHtml(const MealPlan &plan, const QString &personName);
 // Tagesdurchschnitt der Nährwerte mit Hinweisen nach DGE-Richtwerten
 QString summary(const MealPlan &plan);
-int candidateCount(const Options &opt);
+int candidateCount(const Options &opt, const Progress &progress = {});
 // passende Rezepte je Rolle (Frühstück, warm, leicht, Zwischenmahlzeit)
 QList<int> slotCounts(const Options &opt);
 // Hinweise zum Plan (fehlende Frühstücksrezepte …)

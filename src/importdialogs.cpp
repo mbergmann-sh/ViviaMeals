@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "importdialogs.h"
+#include "busyprogress.h"
 #include "foodwizard.h"
 #include "mealtypes.h"
 #include "nutrition.h"
@@ -347,8 +348,12 @@ int offerMissingFoods(QWidget *parent, const QStringList &ids)
     // Nährwerte der betroffenen Rezepte neu berechnen
     const bool nutrientTags = QSettings().value(QStringLiteral("import/nutrientTags"), true).toBool();
     int updated = 0;
+    BusyProgress prog(parent, QObject::tr("Kalorien und Nährwerte neu berechnen"), int(list.size()), false);
+    int i = 0;
     db.beginBatch();
     for (Recipe r : list) {
+        ++i;
+        prog.step(i - 1, QObject::tr("Rezept %1 von %2: %3").arg(i).arg(list.size()).arg(r.title));
         const double before = r.nutrition.total.kcal;
         const int matchedBefore = r.nutrition.matched;
         Nutrition::analyze(r);

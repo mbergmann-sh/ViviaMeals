@@ -1,6 +1,6 @@
 # ViviaMeals – Notizen für das Handbuch
 
-Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.6.8.
+Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.6.9.
 
 > **Name:** Das Programm heißt seit Version 0.6 **ViviaMeals** (vorher VitaMeals; die ganze Reihe heißt jetzt
 > Vivia – ViviaParms, ViviaBreathe). Alte Einstellungen, Profile, Tagebücher, eigene Lebensmittel und
@@ -521,3 +521,20 @@ registriert die Endung):
 - eigene Lebensmittel des Pakets werden übernommen, **ohne** vorhandene Einträge oder Zuordnungen zu überschreiben;
   ihre Herkunft heißt „Rezeptpaket „…““ (in der Nährwerttabelle gesammelt entfernbar)
 - Nährwerte werden mit der eigenen Tabelle neu berechnet; danach folgt ggf. die Liste der Zutaten ohne Nährwerte.
+
+
+## Standard-Quelle und Fortschrittsanzeige (ab 0.6.9)
+
+**Standard-Quelle:** *Einstellungen → Allgemein → Rezepte → Standard-Quelle* (z. B. „Micha B.“). Hat ein Rezept
+im Editor noch keine Quelle (neue, gescannte oder importierte Rezepte ohne Quellenangabe), steht dieser Text im
+Feld „Quelle“ und wird beim Speichern übernommen. Er lässt sich überschreiben oder löschen (Löschknopf im Feld).
+Rezepte mit eigener Quelle bleiben unverändert. Leer = keine Vorgabe. (Für das nachträgliche Ändern vieler
+Quellen gibt es das Hilfsprogramm *ViviaMealsCheat* unter `tools/viviamealscheat`.)
+
+**Fortschrittsbalken:** erscheint sofort bei
+- *Extras → Nährwerte aller Rezepte neu berechnen* (zeigt „Rezept x von n: Titel“, Abbrechen möglich –
+  bereits berechnete Rezepte bleiben gespeichert),
+- der Neuberechnung nach dem Lebensmittel-Assistenten/„Zutaten ohne Nährwerte“, nach dem Import, beim
+  Übernehmen eines Rezeptpakets und bei der Umlaut-Korrektur,
+- der Berechnung des Wochenmenü-Plans (Rezepte prüfen, Tage zusammenstellen; Abbrechen behält den
+  bisherigen Plan) und beim Würfeln eines anderen Rezepts.

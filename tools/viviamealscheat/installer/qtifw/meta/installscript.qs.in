@@ -1,0 +1,96 @@
+// ViviaMealsCheat – Komponentenskript (Vorlage: make_installer.cmd ersetzt @QTMAJOR@)
+//
+// Seite „ViviaMeals-Ordner“ (Vorgabe C:\ViviaMeals): dort muss ViviaMeals.exe liegen. ViviaMealsCheat.exe
+// wird hineinkopiert und benutzt die Qt-DLLs von ViviaMeals. Die Verwaltungsdaten dieses Installers
+// (Deinstallationsprogramm) liegen in <ViviaMeals-Ordner>\ViviaMealsCheat – so bleibt die
+// Installation von ViviaMeals (eigenes Wartungsprogramm, components.xml) unberührt.
+// Deinstallation entfernt ViviaMealsCheat.exe, die Verknüpfung und den Unterordner.
+
+var kQtMajor = "@QTMAJOR@";
+
+function normDir(d)
+{
+    d = ("" + d).replace(/\\/g, "/").replace(/^\s+|\s+$/g, "");
+    while (d.length > 3 && d.charAt(d.length - 1) === "/")
+        d = d.substring(0, d.length - 1);
+    return d;
+}
+
+function nativeDir(d)
+{
+    return d.replace(/\//g, "\\");
+}
+
+function Component()
+{
+    component.loaded.connect(this, Component.prototype.onLoaded);
+}
+
+Component.prototype.onLoaded = function()
+{
+    if (!installer.isInstaller())
+        return;
+    if (!installer.addWizardPage(component, "ZielordnerSeite", QInstaller.TargetDirectory))
+        return;
+    var w = component.userInterface("ZielordnerSeite");
+    var start = installer.value("ViviaMealsDir");
+    if (start === "")
+        start = "C:/ViviaMeals";
+    w.ordner.text = nativeDir(start);
+    w.ordner.textChanged.connect(Component.prototype.check);
+    w.durchsuchen.clicked.connect(Component.prototype.browse);
+    Component.prototype.check();
+}
+
+Component.prototype.browse = function()
+{
+    var w = component.userInterface("ZielordnerSeite");
+    var d = QFileDialog.getExistingDirectory("Ordner von ViviaMeals wählen", w.ordner.text);
+    if (d !== "")
+        w.ordner.text = nativeDir(normDir(d));
+}
+
+Component.prototype.check = function()
+{
+    var w = component.userInterface("ZielordnerSeite");
+    var dir = normDir(w.ordner.text);
+    var ok = dir !== "" && installer.fileExists(dir + "/ViviaMeals.exe");
+    var text;
+    if (dir === "") {
+        text = "Bitte den Ordner von ViviaMeals angeben.";
+    } else if (!ok) {
+        text = "<span style=\"color:#c0392b\">In diesem Ordner gibt es keine ViviaMeals.exe. "
+             + "Bitte zuerst ViviaMeals installieren oder den richtigen Ordner wählen.</span>";
+    } else if (!installer.fileExists(dir + "/Qt" + kQtMajor + "Widgets.dll")) {
+        text = "<span style=\"color:#b85400\">ViviaMeals gefunden, aber ohne Qt" + kQtMajor + "Widgets.dll. "
+             + "ViviaMealsCheat wurde mit Qt " + kQtMajor + " gebaut und startet nur, wenn ViviaMeals mit "
+             + "derselben Qt-Version gebaut wurde.</span>";
+    } else {
+        text = "<span style=\"color:#2e7d32\">ViviaMeals gefunden.</span> ViviaMealsCheat.exe wird nach "
+             + nativeDir(dir) + " kopiert; das Deinstallationsprogramm liegt in "
+             + nativeDir(dir) + "\\ViviaMealsCheat.";
+    }
+    w.hinweis.text = text;
+    if (ok) {
+        installer.setValue("ViviaMealsDir", dir);
+        installer.setValue("TargetDir", dir + "/ViviaMealsCheat");
+    }
+    var page = gui.pageWidgetByObjectName("DynamicZielordnerSeite");
+    if (page)
+        page.complete = ok;
+}
+
+Component.prototype.createOperations = function()
+{
+    component.createOperations();   // Daten nach @TargetDir@ (= <ViviaMeals>\ViviaMealsCheat)
+    if (systemInfo.productType !== "windows")
+        return;
+    var vm = installer.value("ViviaMealsDir");
+    // Programm neben ViviaMeals.exe legen (Rückgängig bei der Deinstallation: Datei wird entfernt,
+    // eine eventuell vorhandene ältere Fassung wiederhergestellt)
+    component.addOperation("Copy", "@TargetDir@/ViviaMealsCheat.exe", vm + "/ViviaMealsCheat.exe");
+    component.addOperation("Delete", "@TargetDir@/ViviaMealsCheat.exe");
+    component.addOperation("CreateShortcut", vm + "/ViviaMealsCheat.exe", "@StartMenuDir@/ViviaMealsCheat.lnk",
+                           "workingDirectory=" + vm, "iconPath=" + vm + "/ViviaMealsCheat.exe", "iconId=0",
+                           "description=Quelle in allen Rezepten einer ViviaMeals-Datenbank ersetzen");
+}

@@ -5,6 +5,7 @@ SOURCES += \
     $$PWD/src/main.cpp \
     $$PWD/src/mainwindow.cpp \
     $$PWD/src/foodwizard.cpp \
+    $$PWD/src/busyprogress.cpp \
     $$PWD/src/packagedialog.cpp \
     $$PWD/src/recipeview.cpp \
     $$PWD/src/imagecropdialog.cpp \
@@ -33,6 +34,7 @@ SOURCES += \
 HEADERS += \
     $$PWD/src/mainwindow.h \
     $$PWD/src/foodwizard.h \
+    $$PWD/src/busyprogress.h \
     $$PWD/src/packagedialog.h \
     $$PWD/src/recipeview.h \
     $$PWD/src/imagecropdialog.h \

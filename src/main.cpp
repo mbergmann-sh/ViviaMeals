@@ -11,6 +11,7 @@
 #include "foodcsv.h"
 #include "fooddialog.h"
 #include "foodwizard.h"
+#include "busyprogress.h"
 #include "packagedialog.h"
 #include "fridge.h"
 #include "fridgedialog.h"
@@ -580,6 +581,12 @@ void takeScreenshots(MainWindow *w, const QString &dir)
         pd.show();
         shot(&pd, dir, QStringLiteral("paket-import"));
         pd.reject();
+    }
+    {
+        BusyProgress prog(w, QObject::tr("Kalorien und Nährwerte neu berechnen"), 3127);
+        prog.step(1412, QObject::tr("Rezept 1413 von 3127: Kartoffel-Lauch-Suppe"));
+        QApplication::processEvents();
+        if (QWidget *d = QApplication::activeModalWidget()) shot(d, dir, QStringLiteral("fortschritt"));
     }
     // Dark-Theme
     Themes::apply(Themes::vscodeId());

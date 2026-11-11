@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Vorlage: make_installer.cmd ersetzt @VERSION@ und @DATE@ -->
+<Package>
+    <DisplayName>ViviaMealsCheat</DisplayName>
+    <Description>Ersetzt die Angabe „Quelle“ in allen Rezepten einer ViviaMeals-Datenbank</Description>
+    <Version>@VERSION@</Version>
+    <ReleaseDate>@DATE@</ReleaseDate>
+    <Default>true</Default>
+    <ForcedInstallation>true</ForcedInstallation>
+    <Licenses>
+        <License name="Lizenz und Hinweis" file="license.txt"/>
+    </Licenses>
+    <UserInterfaces>
+        <UserInterface>zielordner.ui</UserInterface>
+    </UserInterfaces>
+    <Script>installscript.qs</Script>
+</Package>

@@ -41,7 +41,9 @@ private:
     void updateImage();
     void chooseImage();
     void assignFood(int row);
-    bool offerMissingFoods(bool ask);   // true = Nährwerttabelle geändert
+    bool offerMissingFoods(bool ask);
+    static QString defaultSource();                       // Einstellungen → Allgemein → Standard-Quelle
+    static QString sourceOrDefault(const QString &source);   // true = Nährwerttabelle geändert
     void collect();
     void showRecipe();     // m_recipe in die Eingabefelder übernehmen
     void fixUmlauts();

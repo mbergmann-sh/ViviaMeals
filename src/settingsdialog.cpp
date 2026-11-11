@@ -55,6 +55,16 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
     lf->addRow(tr("Schriftgröße:"), m_font);
     lay->addWidget(look);
 
+    auto *rg = new QGroupBox(tr("Rezepte"));
+    auto *rf = new QFormLayout(rg);
+    m_defaultSource = new QLineEdit(s.value(QStringLiteral("editor/defaultSource")).toString());
+    m_defaultSource->setPlaceholderText(tr("z. B. Ihr Name – leer lassen für keine Vorgabe"));
+    m_defaultSource->setClearButtonEnabled(true);
+    m_defaultSource->setToolTip(tr("Steht im Rezept-Editor im Feld „Quelle“, wenn ein Rezept noch keine Quelle hat "
+                                   "(neue und gescannte Rezepte). Der Text lässt sich dort jederzeit überschreiben."));
+    rf->addRow(tr("Standard-&Quelle:"), m_defaultSource);
+    lay->addWidget(rg);
+
     auto *imp = new QGroupBox(tr("Import"));
     auto *il = new QVBoxLayout(imp);
     m_translate = new QCheckBox(tr("Englische Rezepte ohne DeepL: Zutaten über das Glossar übersetzen, Maße und Temperaturen umrechnen"));
@@ -336,6 +346,7 @@ void SettingsDialog::reject()
 void SettingsDialog::accept()
 {
     QSettings s;
+    s.setValue(QStringLiteral("editor/defaultSource"), m_defaultSource->text().trimmed());
     s.setValue(QStringLiteral("import/translate"), m_translate->isChecked());
     s.setValue(QStringLiteral("import/autoTags"), m_autoTags->isChecked());
     s.setValue(QStringLiteral("import/fixUmlauts"), m_umlauts->isChecked());

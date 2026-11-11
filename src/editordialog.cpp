@@ -104,7 +104,11 @@ EditorDialog::EditorDialog(const Recipe &r, QWidget *parent) : QDialog(parent), 
                             "eiweißreich, kalorienarm, fettarm, hochkalorisch, vitaminreich, reduktionsdiät"));
     tl->addWidget(autoTags);
     form->addRow(tr("Tags:"), tl);
-    m_source = new QLineEdit(r.source);
+    m_source = new QLineEdit(sourceOrDefault(r.source));
+    m_source->setClearButtonEnabled(true);
+    if (!defaultSource().isEmpty())
+        m_source->setToolTip(tr("Ohne eigene Angabe steht hier die Standard-Quelle „%1“ (Einstellungen → Allgemein). "
+                                "Einfach überschreiben oder löschen.").arg(defaultSource()));
     form->addRow(tr("&Quelle:"), m_source);
     m_fav = new QCheckBox(tr("Favorit"));
     m_fav->setChecked(r.favorite);
@@ -285,12 +289,22 @@ void EditorDialog::chooseImage()
     updateImage();
 }
 
+QString EditorDialog::defaultSource()
+{
+    return QSettings().value(QStringLiteral("editor/defaultSource")).toString().trimmed();
+}
+
+QString EditorDialog::sourceOrDefault(const QString &source)
+{
+    return source.trimmed().isEmpty() ? defaultSource() : source;
+}
+
 void EditorDialog::showRecipe()
 {
     m_title->setText(m_recipe.title);
     m_ingredients->setPlainText(m_recipe.ingredientsText());
     m_instructions->setPlainText(m_recipe.instructions);
-    m_source->setText(m_recipe.source);
+    m_source->setText(sourceOrDefault(m_recipe.source));
     m_tags->setText(m_recipe.tags.join(QStringLiteral(", ")));
     if (!m_recipe.yieldUnit.isEmpty()) m_yield->setCurrentText(m_recipe.yieldUnit);
     analyze();
