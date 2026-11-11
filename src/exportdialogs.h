@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #pragma once
 
+#include "latexexport.h"
 #include "recipe.h"
 
 #include <QDialog>
@@ -11,6 +12,9 @@ class QComboBox;
 class QLineEdit;
 class QRadioButton;
 class QSpinBox;
+class QDoubleSpinBox;
+class QLabel;
+class QPushButton;
 
 class WebsiteExportDialog : public QDialog
 {
@@ -49,6 +53,27 @@ private:
     QWidget *m_newMasterBox;
     QLineEdit *m_newMasterFile, *m_bookTitle, *m_subtitle, *m_author, *m_bgImage;
     QCheckBox *m_noDate, *m_toc, *m_glossary, *m_index;
+    QComboBox *m_bgTarget, *m_bgPlacement;
+    QDoubleSpinBox *m_bgWidth, *m_bgLeft, *m_bgBottom;
+    QCheckBox *m_bgBinding, *m_bgTrim;
+    class QSlider *m_bgScale;
+    QLabel *m_bgMaxInfo;
+    QPushButton *m_bgCropButton;
+    QRectF m_bgCrop;
+    int m_bgRotation = 0;
+    bool m_updatingBg = false;
+    void cropBackground();
+    QComboBox *m_heading, *m_chapter;
+    QCheckBox *m_newPage;
+    QWidget *m_chapterRow;
+    QWidget *m_chapterLabel = nullptr;
+    void fillChapters();
+    QWidget *m_bgOptions;
+    class BackgroundPreview *m_bgPreview;
+    void updateBackground();
+    QString m_bgCachePath;
+    QImage m_bgCache;
+    LatexExport::MasterOptions masterOptions() const;
     QSpinBox *m_bcor;
     QCheckBox *m_image, *m_nutrition, *m_source, *m_indexEntries;
     QLineEdit *m_file;

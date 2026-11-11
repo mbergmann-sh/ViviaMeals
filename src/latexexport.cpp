@@ -11,6 +11,8 @@
 #include <QPainter>
 #include <QRegularExpression>
 #include <QSaveFile>
+#include <QStandardPaths>
+#include <QTransform>
 
 #include <cmath>
 
@@ -113,12 +115,19 @@ QString toLatex(const Recipe &r, const Options &opt, const QString &imageFile)
         if (scr) t += QStringLiteral("\\addtokomafont{disposition}{\\color{vmblau}}\n");
         t += QStringLiteral("\\begin{document}\n\n");
     } else {
-        t += QStringLiteral("%% Erzeugt von ViviaMeals – Kapitel zum Einbinden mit \\input{} in ein Master-Dokument der Klasse %1.\n"
+        t += QStringLiteral("%% Erzeugt von ViviaMeals – Rezept zum Einbinden mit \\input{} in ein Master-Dokument der Klasse %1.\n"
                             "%% Benötigt: graphicx, booktabs, tabularx, xcolor (Farben vmblau, vmorange), textcomp.\n"
                             "%% \\definecolor{vmblau}{HTML}{1474BC} \\definecolor{vmorange}{HTML}{E0620D}\n\n")
                  .arg(scr ? QStringLiteral("scrbook") : QStringLiteral("book"));
     }
-    t += QStringLiteral("\\chapter{%1}\n\\label{rez:%2}\n").arg(escape(r.title), r.id.left(8));
+    const bool asSection = opt.heading == Heading::Section && !standalone;
+    // neue Seite – außer für das erste Rezept direkt nach der Kapitelüberschrift
+    if (asSection && opt.newPage) t += QStringLiteral("\\ifnum\\value{section}>0 \\clearpage\\fi\n");
+    t += QStringLiteral("\\%3{%1}\n\\label{rez:%2}\n").arg(escape(r.title), r.id.left(8), asSection ? QStringLiteral("section") : QStringLiteral("chapter"));
+    // Unterüberschriften: bei \\chapter als Abschnitt in der Kopfzeile, bei \\section steht dort der Rezepttitel
+    auto heading = [&](const QString &h) {
+        return asSection ? QStringLiteral("\\subsection*{%1}\n").arg(h) : QStringLiteral("\\section*{%1}\\markright{%1}\n").arg(h);
+    };
     if (opt.indexEntries) {
         t += QStringLiteral("\\index{%1}\n").arg(indexEntry(r.title));
         QStringList seen;
@@ -157,7 +166,7 @@ QString toLatex(const Recipe &r, const Options &opt, const QString &imageFile)
                  .arg(path);
     }
     // Abschnitte ohne Nummer, aber als „Abschnitt“ in der Kopfzeile
-    t += QStringLiteral("\n\n\\section*{%1}\\markright{%1}\n").arg(tr("Zutaten"));
+    t += QStringLiteral("\n\n") + heading(tr("Zutaten"));
     t += QStringLiteral("\\begin{tabularx}{\\textwidth}{@{}r@{\\hspace{0.8em}}X@{}}\n");
     for (const Ingredient &i : r.ingredients) {
         if (i.heading) {
@@ -170,7 +179,7 @@ QString toLatex(const Recipe &r, const Options &opt, const QString &imageFile)
         if (!i.note.isEmpty()) name += QStringLiteral(" {\\color{gray}%1}").arg(escape(i.note));
         t += QStringLiteral("\\textbf{%1} & %2\\\\\n").arg(escape(amount).replace(QStringLiteral("\\textasciitilde{}"), QStringLiteral("~")), name);
     }
-    t += QStringLiteral("\\end{tabularx}\n\n\\section*{%1}\\markright{%1}\n").arg(tr("Zubereitung"));
+    t += QStringLiteral("\\end{tabularx}\n\n") + heading(tr("Zubereitung"));
     for (const QString &p : r.instructions.split(QStringLiteral("\n\n"), Qt::SkipEmptyParts))
         t += escape(p.trimmed()) + QStringLiteral("\n\n");
     if (opt.nutrition && r.nutrition.valid() && r.nutrition.matched > 0) {
@@ -180,7 +189,7 @@ QString toLatex(const Recipe &r, const Options &opt, const QString &imageFile)
             return QStringLiteral("%1 & %2~%5 & %3~%5 & %4\\\\\n")
                 .arg(label, Fmt::number(pv, dec), Fmt::number(tv, dec), ref > 0 ? Fmt::number(pv / ref * 100, 0) + QStringLiteral("\\,\\%") : QString(), unit);
         };
-        t += QStringLiteral("\\section*{%1}\\markright{%1}\n{\\small\n\\begin{tabular}{@{}lrrr@{}}\n\\toprule\n").arg(tr("Nährwerte"));
+        t += heading(tr("Nährwerte")) + QStringLiteral("{\\small\n\\begin{tabular}{@{}lrrr@{}}\n\\toprule\n");
         t += QStringLiteral("& %1 & %2 & %3\\\\\n\\midrule\n")
                  .arg(escape(r.yieldUnit.isEmpty() ? tr("je Portion") : tr("je %1").arg(r.yieldUnit)), tr("gesamt"), tr("RM*"));
         t += QStringLiteral("%1 & %2~kJ / %3~kcal & %4~kJ / %5~kcal & %6\\\\\n")
@@ -267,6 +276,34 @@ QString masterDocument(const MasterOptions &m, const QStringList &inputs, const 
 {
     const bool scr = m.docClass == DocClass::ScrBook;
     const QString bcor = QString::number(m.bindingMm, 'f', m.bindingMm == std::floor(m.bindingMm) ? 0 : 1);
+    const QString bgShift = m.bgShiftBinding ? bcor + QStringLiteral("mm") : QStringLiteral("0mm");
+    // Hintergrundbild als eso-pic-Befehl (wirkt auf die nächste ausgegebene Seite)
+    QString bgCmd;
+    if (!halfTitleFile.isEmpty()) {
+        auto mm = [](double v) { return QString::number(v, 'f', v == std::floor(v) ? 0 : 1) + QStringLiteral("mm"); };
+        const QString img = QFileInfo(halfTitleFile).completeBaseName();
+        switch (m.bgPlacement) {
+        case MasterOptions::BgPlacement::FillPage:
+            bgCmd = QStringLiteral("%% Hintergrundbild: ganze Seite (auf das Seitenformat zugeschnitten)\n"
+                                   "\\AddToShipoutPictureBG*{\\includegraphics[width=\\paperwidth,height=\\paperheight]{%1}}\n").arg(img);
+            break;
+        case MasterOptions::BgPlacement::Centered:
+            bgCmd = QStringLiteral("%% Hintergrundbild: %2 breit, waagerecht mittig im sichtbaren Bereich, %3 über der unteren Papierkante\n"
+                                   "\\AddToShipoutPictureBG*{%%\n\t\\AtPageLowerLeft{%%\n\t\t\\hspace*{\\vmBindekorrektur}%%\n"
+                                   "\t\t\\makebox[\\dimexpr\\paperwidth-\\vmBindekorrektur\\relax]{\\raisebox{%3}{\\includegraphics[width=%2]{%1}}}%%\n\t}%%\n}\n")
+                        .arg(img, mm(m.bgWidthMm), mm(m.bgBottomMm));
+            break;
+        case MasterOptions::BgPlacement::Free:
+            bgCmd = QStringLiteral("%% Hintergrundbild: %2 breit, links %4 ab Papierkante (bei Bindekorrektur automatisch verschoben),\n"
+                                   "%% %3 über der unteren Papierkante\n"
+                                   "\\AddToShipoutPictureBG*{%%\n\t\\AtPageLowerLeft{%%\n\t\t\\BindungsHSpace{%4}%%\n"
+                                   "\t\t\\raisebox{%3}{%%\n\t\t\t\\includegraphics[width=%2]{%1}%%\n\t\t}%%\n\t}%%\n}\n")
+                        .arg(img, mm(m.bgWidthMm), mm(m.bgBottomMm), mm(m.bgLeftMm));
+            break;
+        }
+    }
+    const bool bgOnHalfTitle = !bgCmd.isEmpty() && m.bgTarget == MasterOptions::BgTarget::HalfTitle;
+    const bool bgOnTitle = !bgCmd.isEmpty() && m.bgTarget == MasterOptions::BgTarget::TitlePage;
     QString t;
     t += QStringLiteral(
         "%% ===========================================================================\n"
@@ -280,7 +317,7 @@ QString masterDocument(const MasterOptions &m, const QStringList &inputs, const 
     // Klasse: zweiseitig, Bindekorrektur für die Ringbindung
     if (scr)
         t += QStringLiteral("\\documentclass[paper=a4,fontsize=11pt,twoside=true,BCOR=%1mm,DIV=12,parskip=half,headings=normal,\n"
-                            "  headinclude=true,footinclude=false,titlepage=true,open=right]{scrbook}\n").arg(bcor);
+                            "  headinclude=true,footinclude=false,titlepage=true,open=right,cleardoublepage=empty]{scrbook}\n").arg(bcor);
     else
         t += QStringLiteral("\\documentclass[a4paper,11pt,twoside,openright]{book}\n"
                             "\\usepackage[a4paper,twoside,bindingoffset=%1mm,inner=22mm,outer=22mm,top=28mm,bottom=30mm,headheight=14pt]{geometry}\n"
@@ -314,12 +351,17 @@ QString masterDocument(const MasterOptions &m, const QStringList &inputs, const 
         "\\usepackage{wrapfig}     %% vom Text umflossene Bilder\n"
         "\\usepackage[font=small,labelfont=bf,format=hang]{caption}\n"
         "\\usepackage{subcaption}  %% mehrere Bilder nebeneinander\n"
-        "\\usepackage{eso-pic}     %% Hintergrundbild (Schmutztitel)\n"
+        "\\usepackage{eso-pic}     %% Hintergrundbild (Schmutztitel/Titelseite)\n"
+        "%% Horizontaler Abstand ab der linken Papierkante, um die Bindekorrektur verschoben (rechte Seiten)\n"
+        "\\newlength{\\vmBindekorrektur}\n"
+        "\\setlength{\\vmBindekorrektur}{@BGSHIFT@}\n"
+        "\\newcommand{\\BindungsHSpace}[1]{\\hspace*{\\dimexpr#1+\\vmBindekorrektur\\relax}}\n"
         "\\graphicspath{{./}{bilder/}}\n"
         "%% Bild mit Unterschrift genau an dieser Stelle:  \\rezeptbild[0.8]{datei}{Unterschrift}\n"
         "\\newcommand{\\rezeptbild}[3][0.8]{\\begin{figure}[H]\\centering\\includegraphics[width=#1\\linewidth]{#2}\\caption{#3}\\end{figure}}\n"
         "%% Bild rechts, vom Text umflossen:                \\randbild{datei}{Unterschrift}\n"
         "\\newcommand{\\randbild}[2]{\\begin{wrapfigure}{r}{0.4\\linewidth}\\centering\\includegraphics[width=\\linewidth]{#1}\\caption{#2}\\end{wrapfigure}}\n");
+    t.replace(QStringLiteral("@BGSHIFT@"), bgShift);
     if (m.glossary || m.index) t += QStringLiteral("\n%% ---- Verzeichnisse\n");
     if (m.index) t += QStringLiteral("\\usepackage{imakeidx}\n\\makeindex[title=Stichwortverzeichnis,intoc=true,columns=2]\n");
     t += QStringLiteral("\\usepackage[hidelinks,unicode,bookmarksnumbered]{hyperref}\n");
@@ -342,15 +384,25 @@ QString masterDocument(const MasterOptions &m, const QStringList &inputs, const 
     } else {
         t += QStringLiteral(
             "\\usepackage{fancyhdr}\n"
-            "\\pagestyle{fancy}\n"
-            "\\fancyhf{}\n"
             "\\renewcommand{\\chaptermark}[1]{\\markboth{\\thechapter\\ #1}{}}\n"
-            "\\fancyhead[LE]{\\small\\leftmark}   %% gerade Seiten: Kapitel\n"
-            "\\fancyhead[RO]{\\small\\rightmark}  %% ungerade Seiten: Abschnitt\n"
-            "\\fancyfoot[C]{\\thepage}\n"
-            "\\renewcommand{\\headrulewidth}{0.4pt}\n"
-            "\\renewcommand{\\footrulewidth}{0.4pt}\n"
-            "\\fancypagestyle{plain}{\\fancyhf{}\\fancyfoot[C]{\\thepage}\\renewcommand{\\headrulewidth}{0pt}\\renewcommand{\\footrulewidth}{0.4pt}}\n");
+            "%% eigener Stil (vollständig, damit der Wechsel zu plain nichts verstellt)\n"
+            "\\fancypagestyle{kochbuch}{%\n"
+            "  \\fancyhf{}%\n"
+            "  \\fancyhead[LE]{\\small\\leftmark}%   gerade Seiten: Kapitel\n"
+            "  \\fancyhead[RO]{\\small\\rightmark}%  ungerade Seiten: Abschnitt\n"
+            "  \\fancyfoot[C]{\\thepage}%\n"
+            "  \\renewcommand{\\headrulewidth}{0.4pt}%\n"
+            "  \\renewcommand{\\footrulewidth}{0.4pt}}\n"
+            "%% Kapitelanfänge und Inhaltsverzeichnis: nur Fußzeile\n"
+            "\\fancypagestyle{plain}{%\n"
+            "  \\fancyhf{}%\n"
+            "  \\fancyfoot[C]{\\thepage}%\n"
+            "  \\renewcommand{\\headrulewidth}{0pt}%\n"
+            "  \\renewcommand{\\footrulewidth}{0.4pt}}\n"
+            "\\pagestyle{kochbuch}\n"
+            "%% Vakatseiten (leere linke Seiten vor einem neuen Kapitel) ganz ohne Kopf- und Fußzeile\n"
+            "\\makeatletter\n\\renewcommand*{\\cleardoublepage}{\\clearpage\\if@twoside\\ifodd\\c@page\\else\\hbox{}\\thispagestyle{empty}\\newpage"
+            "\\if@twocolumn\\hbox{}\\newpage\\fi\\fi\\fi}\n\\makeatother\n");
     }
     // Titelangaben
     t += QStringLiteral("\n%% ---- Titelangaben\n\\title{%1}\n").arg(escape(m.title));
@@ -362,16 +414,15 @@ QString masterDocument(const MasterOptions &m, const QStringList &inputs, const 
     t += m.noDate ? QStringLiteral("\\date{}   %% kein Datum auf dem Titelblatt\n") : QStringLiteral("\\date{\\today}\n");
     t += QStringLiteral("\n\\begin{document}\n\\frontmatter\n");
     // Schmutztitel mit Hintergrundbild
-    t += QStringLiteral("\n%% ---- Schmutztitel (mit Hintergrundbild)\n\\begin{titlepage}\n\\thispagestyle{empty}\n");
-    if (!halfTitleFile.isEmpty())
-        t += QStringLiteral("\\AddToShipoutPictureBG*{\\includegraphics[width=\\paperwidth,height=\\paperheight]{%1}}\n")
-                 .arg(QFileInfo(halfTitleFile).completeBaseName());
+    t += QStringLiteral("\n%% ---- Schmutztitel\n\\begin{titlepage}\n\\thispagestyle{empty}\n");
+    if (bgOnHalfTitle) t += bgCmd;
     t += QStringLiteral("\\vspace*{0.30\\textheight}\n\\begin{center}\n"
                         "\\colorbox{white}{\\parbox{0.8\\textwidth}{\\centering\\vspace{1em}{\\Huge\\bfseries\\color{vmblau}%1\\par}\\vspace{1em}}}\n"
                         "\\end{center}\n\\end{titlepage}\n")
              .arg(escape(m.title));
     // Titelseite
     t += QStringLiteral("\n%% ---- Titelseite\n");
+    if (bgOnTitle) t += QStringLiteral("\\cleardoublepage\n") + bgCmd;
     if (scr || m.subtitle.trimmed().isEmpty()) {
         t += QStringLiteral("\\maketitle\n");
     } else {
@@ -382,9 +433,10 @@ QString masterDocument(const MasterOptions &m, const QStringList &inputs, const 
     if (m.toc) {
         t += QStringLiteral("\n%% ---- Inhaltsverzeichnis (ohne Kopfzeile)\n");
         t += scr ? QStringLiteral("\\cleardoubleoddpage\n\\pagestyle{plain.scrheadings}\n\\tableofcontents\n\\cleardoubleoddpage\n\\pagestyle{scrheadings}\n")
-                 : QStringLiteral("\\cleardoublepage\n\\pagestyle{plain}\n\\tableofcontents\n\\cleardoublepage\n\\pagestyle{fancy}\n");
+                 : QStringLiteral("\\cleardoublepage\n\\pagestyle{plain}\n\\tableofcontents\n\\cleardoublepage\n\\pagestyle{kochbuch}\n");
     }
     t += QStringLiteral("\n\\mainmatter\n\n%% ---- Rezepte\n");
+    if (!m.firstChapter.trimmed().isEmpty()) t += QStringLiteral("\\chapter{%1}\n").arg(escape(m.firstChapter.trimmed()));
     for (const QString &in : inputs) t += QStringLiteral("\\input{%1}\n").arg(in);
     t += masterMarker() + QStringLiteral("\n\n\\backmatter\n");
     if (m.glossary)
@@ -396,26 +448,85 @@ QString masterDocument(const MasterOptions &m, const QStringList &inputs, const 
     return t;
 }
 
+QImage trimWhite(const QImage &src, int threshold)
+{
+    const QImage img = src.convertToFormat(QImage::Format_RGB32);
+    auto white = [&](int x, int y) {
+        const QRgb c = img.pixel(x, y);
+        return qRed(c) >= threshold && qGreen(c) >= threshold && qBlue(c) >= threshold;
+    };
+    auto rowWhite = [&](int y) {
+        for (int x = 0; x < img.width(); ++x)
+            if (!white(x, y)) return false;
+        return true;
+    };
+    auto colWhite = [&](int x, int y0, int y1) {
+        for (int y = y0; y <= y1; ++y)
+            if (!white(x, y)) return false;
+        return true;
+    };
+    int top = 0, bottom = img.height() - 1;
+    while (top < bottom && rowWhite(top)) ++top;
+    while (bottom > top && rowWhite(bottom)) --bottom;
+    int left = 0, right = img.width() - 1;
+    while (left < right && colWhite(left, top, bottom)) ++left;
+    while (right > left && colWhite(right, top, bottom)) --right;
+    if (right - left < 8 || bottom - top < 8) return img;   // ganz weiß: unverändert
+    return img.copy(left, top, right - left + 1, bottom - top + 1);
+}
+
+QImage prepareBackground(const QImage &src, const MasterOptions &m)
+{
+    QImage img = src;
+    if (img.hasAlphaChannel()) {
+        QImage flat(img.size(), QImage::Format_RGB32);
+        flat.fill(Qt::white);
+        QPainter p(&flat);
+        p.drawImage(0, 0, img);
+        p.end();
+        img = flat;
+    }
+    if (m.bgRotation % 360 != 0) img = img.transformed(QTransform().rotate(m.bgRotation));
+    if (!m.bgCrop.isEmpty()) {
+        const QRect r = QRectF(m.bgCrop.x() * img.width(), m.bgCrop.y() * img.height(), m.bgCrop.width() * img.width(), m.bgCrop.height() * img.height())
+                            .toRect()
+                            .intersected(img.rect());
+        if (r.width() > 4 && r.height() > 4) img = img.copy(r);
+    }
+    if (m.bgTrim) img = trimWhite(img);
+    if (m.bgPlacement == MasterOptions::BgPlacement::FillPage) {
+        // auf das Seitenverhältnis A4 (210 × 297) mittig zuschneiden, damit nichts verzerrt wird
+        const double target = 210.0 / 297.0;
+        const double ratio = double(img.width()) / qMax(1, img.height());
+        if (ratio > target) {
+            const int w = int(img.height() * target);
+            img = img.copy((img.width() - w) / 2, 0, w, img.height());
+        } else if (ratio < target) {
+            const int h = int(img.width() / target);
+            img = img.copy(0, (img.height() - h) / 2, img.width(), h);
+        }
+    }
+    return img;
+}
+
 bool writeMaster(const QString &file, const MasterOptions &m, const QStringList &inputs, QString *error)
 {
     const QFileInfo fi(file);
     QString halfTitle;
     if (!m.halfTitleImage.isEmpty()) {
-        QImage img(m.halfTitleImage);
-        if (img.isNull()) {
+        const QImage src(m.halfTitleImage);
+        if (src.isNull()) {
             if (error) *error = tr("Das Hintergrundbild „%1“ kann nicht gelesen werden.").arg(QDir::toNativeSeparators(m.halfTitleImage));
             return false;
         }
-        halfTitle = fi.absolutePath() + QStringLiteral("/schmutztitel-hintergrund.jpg");
-        if (img.hasAlphaChannel()) {
-            QImage flat(img.size(), QImage::Format_RGB32);
-            flat.fill(Qt::white);
-            QPainter p(&flat);
-            p.drawImage(0, 0, img);
-            p.end();
-            img = flat;
-        }
-        if (!img.save(halfTitle, "JPG", 92)) {
+        const QImage img = prepareBackground(src, m);
+        // Bildschirmfotos und Grafiken verlustfrei als PNG, Fotos als JPEG
+        const QString suf = QFileInfo(m.halfTitleImage).suffix().toLower();
+        const bool png = suf == QLatin1String("png") || suf == QLatin1String("bmp") || suf == QLatin1String("gif") || suf == QLatin1String("webp");
+        halfTitle = fi.absolutePath() + (m.bgTarget == MasterOptions::BgTarget::TitlePage ? QStringLiteral("/titelseite-hintergrund")
+                                                                                          : QStringLiteral("/schmutztitel-hintergrund"))
+                    + (png ? QStringLiteral(".png") : QStringLiteral(".jpg"));
+        if (!img.save(halfTitle, png ? "PNG" : "JPG", png ? -1 : 92)) {
             if (error) *error = tr("Das Hintergrundbild kann nicht gespeichert werden.");
             return false;
         }
@@ -443,15 +554,122 @@ bool writeMaster(const QString &file, const MasterOptions &m, const QStringList 
     return true;
 }
 
-bool addToMaster(const QString &masterFile, const QString &inputPath, QString *error, bool *already)
+namespace {
+
+// \chapter{…}-Text lesbar machen (nur die häufigen Maskierungen)
+QString unescapeTitle(QString t)
+{
+    t.replace(QStringLiteral("\\&"), QStringLiteral("&")).replace(QStringLiteral("\\%"), QStringLiteral("%"))
+        .replace(QStringLiteral("\\_"), QStringLiteral("_")).replace(QStringLiteral("\\#"), QStringLiteral("#"))
+        .replace(QStringLiteral("\\glqq{}"), QStringLiteral("„")).replace(QStringLiteral("\\grqq{}"), QStringLiteral("“"))
+        .replace(QStringLiteral("~"), QStringLiteral(" "));
+    return t.simplified();
+}
+
+const QRegularExpression &chapterLine()
+{
+    static const QRegularExpression re(QStringLiteral("^\\s*\\\\(?:chapter|addchap)\\*?(?:\\[[^\\]]*\\])?\\{(.*)\\}\\s*(?:%.*)?$"));
+    return re;
+}
+
+const QRegularExpression &boundaryLine()
+{
+    static const QRegularExpression re(QStringLiteral("^\\s*\\\\(?:chapter|addchap|part|backmatter|appendix|printindex|printglossary|end\\{document\\})"));
+    return re;
+}
+
+// Zeilen des Hauptteils: zwischen \mainmatter (falls vorhanden) und \backmatter/\end{document}
+void mainRange(const QStringList &lines, int *from, int *to)
+{
+    *from = 0;
+    *to = int(lines.size());
+    for (int i = 0; i < lines.size(); ++i) {
+        const QString l = lines[i].trimmed();
+        if (l.startsWith(QLatin1Char('%'))) continue;
+        if (l.startsWith(QLatin1String("\\mainmatter"))) *from = i + 1;
+        if (l.startsWith(QLatin1String("\\backmatter")) || l.startsWith(QLatin1String("\\end{document}"))) {
+            *to = i;
+            break;
+        }
+    }
+}
+
+} // namespace
+
+QStringList masterChapters(const QString &masterText)
+{
+    const QStringList lines = masterText.split(QLatin1Char('\n'));
+    int from = 0, to = 0;
+    mainRange(lines, &from, &to);
+    QStringList out;
+    for (int i = from; i < to; ++i) {
+        const auto m = chapterLine().match(lines[i]);
+        if (m.hasMatch()) {
+            const QString t = unescapeTitle(m.captured(1));
+            if (!t.isEmpty() && !out.contains(t)) out << t;
+        }
+    }
+    return out;
+}
+
+QStringList defaultChapters()
+{
+    return { tr("Frühstück"), tr("Vorspeisen"), tr("Suppen"), tr("Salate"), tr("Hauptgerichte"), tr("Beilagen"), tr("Snacks"),
+             tr("Süßspeisen"), tr("Nachtisch"), tr("Backen"), tr("Getränke"), tr("Grundrezepte") };
+}
+
+QString suggestChapter(const Recipe &r)
+{
+    QStringList tags;
+    for (const QString &t : r.tags) tags << t.toLower();
+    const QString title = r.title.toLower();
+    auto has = [&](std::initializer_list<const char *> words) {
+        for (const char *w : words) {
+            const QString k = QString::fromUtf8(w);
+            for (const QString &t : tags)
+                if (t.contains(k)) return true;
+        }
+        return false;
+    };
+    auto inTitle = [&](std::initializer_list<const char *> words) {
+        for (const char *w : words)
+            if (title.contains(QString::fromUtf8(w))) return true;
+        return false;
+    };
+    if (has({ "getränk", "cocktail", "bowle", "likör" })) return tr("Getränke");
+    if (has({ "frühstück", "brunch", "müsli" })) return tr("Frühstück");
+    if (has({ "suppe", "eintopf" }) || inTitle({ "suppe", "brühe", "eintopf" })) return tr("Suppen");
+    if (has({ "salat" }) || inTitle({ "salat" })) return tr("Salate");
+    if (has({ "vorspeise", "antipasti", "appetizer", "starter" })) return tr("Vorspeisen");
+    if (has({ "dessert", "nachtisch", "nachspeise", "eis", "parfait" })) return tr("Nachtisch");
+    if (has({ "süßspeise", "süßigkeit" })) return tr("Süßspeisen");
+    if (has({ "backen", "kuchen", "torte", "gebäck", "brot", "plätzchen", "kekse" })) return tr("Backen");
+    if (has({ "beilage" })) return tr("Beilagen");
+    if (has({ "snack", "zwischenmahlzeit", "fingerfood", "dip" })) return tr("Snacks");
+    if (has({ "grundrezept", "soße", "sauce", "marinade" })) return tr("Grundrezepte");
+    return tr("Hauptgerichte");
+}
+
+double maxBackgroundWidth(const MasterOptions &m, double heightPerWidth)
+{
+    const double shift = m.bgShiftBinding ? m.bindingMm : 0;
+    double w = 210;
+    if (m.bgPlacement == MasterOptions::BgPlacement::Free) w = 210 - shift - m.bgLeftMm;
+    else if (m.bgPlacement == MasterOptions::BgPlacement::Centered) w = 210 - shift;
+    if (heightPerWidth > 0) w = qMin(w, (297 - m.bgBottomMm) / heightPerWidth);
+    return qMax(10.0, std::floor(w * 10) / 10);
+}
+
+bool addToMaster(const QString &masterFile, const QString &inputPath, QString *error, bool *already, const QString &chapter, bool *chapterCreated)
 {
     if (already) *already = false;
+    if (chapterCreated) *chapterCreated = false;
     QFile f(masterFile);
     if (!f.open(QIODevice::ReadOnly)) {
         if (error) *error = f.errorString();
         return false;
     }
-    QString text = QString::fromUtf8(f.readAll());
+    const QString text = QString::fromUtf8(f.readAll());
     f.close();
     const QString line = QStringLiteral("\\input{%1}").arg(inputPath);
     // schon eingetragen (\input oder \include, mit oder ohne .tex)?
@@ -462,27 +680,118 @@ bool addToMaster(const QString &masterFile, const QString &inputPath, QString *e
         if (already) *already = true;
         return true;
     }
-    int pos = text.indexOf(masterMarker());
-    if (pos < 0) {
-        static const QRegularExpression back(QStringLiteral("^\\s*\\\\(?:backmatter|appendix|printindex|end\\{document\\})"), QRegularExpression::MultilineOption);
-        const auto m = back.match(text);
-        if (!m.hasMatch()) {
-            if (error) *error = tr("Im Master-Dokument fehlen \\end{document} und die Marke „%1“.").arg(masterMarker());
-            return false;
+    QStringList lines = text.split(QLatin1Char('\n'));
+    int from = 0, to = 0;
+    mainRange(lines, &from, &to);
+    // Stelle vor der Marke bzw. vor \backmatter/\end{document}
+    int tail = -1;
+    for (int i = from; i < lines.size(); ++i)
+        if (lines[i].trimmed() == masterMarker()) {
+            tail = i;
+            break;
         }
-        pos = int(m.capturedStart());
-        while (pos < text.size() && (text.at(pos) == QLatin1Char('\n') || text.at(pos) == QLatin1Char('\r'))) ++pos;
-    } else {
-        // an den Zeilenanfang der Marke
-        while (pos > 0 && text.at(pos - 1) != QLatin1Char('\n')) --pos;
+    if (tail < 0) {
+        for (int i = from; i < lines.size(); ++i) {
+            const QString l = lines[i].trimmed();
+            if (l.startsWith(QLatin1String("\\backmatter")) || l.startsWith(QLatin1String("\\appendix")) || l.startsWith(QLatin1String("\\printindex"))
+                || l.startsWith(QLatin1String("\\end{document}"))) {
+                tail = i;
+                break;
+            }
+        }
     }
-    text.insert(pos, line + QLatin1Char('\n'));
+    if (tail < 0) {
+        if (error) *error = tr("Im Master-Dokument fehlen \\end{document} und die Marke „%1“.").arg(masterMarker());
+        return false;
+    }
+    int insertAt = tail;
+    QStringList insert{ line };
+    const QString wanted = chapter.trimmed();
+    if (!wanted.isEmpty()) {
+        int chap = -1;
+        for (int i = from; i < to; ++i) {
+            const auto m = chapterLine().match(lines[i]);
+            if (m.hasMatch() && unescapeTitle(m.captured(1)).compare(wanted, Qt::CaseInsensitive) == 0) {
+                chap = i;
+                break;
+            }
+        }
+        if (chap >= 0) {
+            // Ende des Kapitels: nächste Kapitel-/Teil-Überschrift, die Marke oder das Ende des Hauptteils
+            int end = tail;
+            for (int i = chap + 1; i < tail; ++i)
+                if (boundaryLine().match(lines[i]).hasMatch()) {
+                    end = i;
+                    break;
+                }
+            // hinter die letzte nicht leere Zeile des Kapitels
+            insertAt = end;
+            while (insertAt - 1 > chap && lines[insertAt - 1].trimmed().isEmpty()) --insertAt;
+        } else {
+            insert = QStringList{ QString(), QStringLiteral("\\chapter{%1}").arg(escape(wanted)), line };
+            if (chapterCreated) *chapterCreated = true;
+        }
+    }
+    for (int k = int(insert.size()) - 1; k >= 0; --k) lines.insert(insertAt, insert[k]);
     QSaveFile out(masterFile);
-    if (!out.open(QIODevice::WriteOnly) || out.write(text.toUtf8()) < 0 || !out.commit()) {
+    if (!out.open(QIODevice::WriteOnly) || out.write(lines.join(QLatin1Char('\n')).toUtf8()) < 0 || !out.commit()) {
         if (error) *error = out.errorString();
         return false;
     }
     return true;
+}
+
+QStringList searchDirs()
+{
+    QStringList dirs;
+    const QString custom = qEnvironmentVariable("VIVIA_TEX_BIN");
+    if (!custom.isEmpty()) dirs << custom;
+#ifdef Q_OS_WIN
+    // TeX Live: C:\texlive\<Jahr>\bin\windows (ab 2023) bzw. win32/win64
+    for (const QString &root : { QStringLiteral("C:/texlive"), QDir::homePath() + QStringLiteral("/texlive") }) {
+        QDir d(root);
+        QStringList years = d.entryList({ QStringLiteral("20*") }, QDir::Dirs, QDir::Name | QDir::Reversed);
+        for (const QString &y : years)
+            for (const char *arch : { "windows", "win64", "win32" }) dirs << d.filePath(y + QStringLiteral("/bin/") + QLatin1String(arch));
+    }
+    // MiKTeX (für alle Benutzer bzw. nur für den aktuellen Benutzer)
+    const QString pf = qEnvironmentVariable("ProgramFiles", QStringLiteral("C:/Program Files"));
+    const QString local = qEnvironmentVariable("LOCALAPPDATA");
+    dirs << pf + QStringLiteral("/MiKTeX/miktex/bin/x64") << pf + QStringLiteral("/MiKTeX/miktex/bin");
+    if (!local.isEmpty()) dirs << local + QStringLiteral("/Programs/MiKTeX/miktex/bin/x64") << local + QStringLiteral("/Programs/MiKTeX/miktex/bin");
+#elif defined(Q_OS_MACOS)
+    dirs << QStringLiteral("/Library/TeX/texbin") << QStringLiteral("/usr/local/texlive/2025/bin/universal-darwin");
+#else
+    QDir tl(QStringLiteral("/usr/local/texlive"));
+    for (const QString &y : tl.entryList({ QStringLiteral("20*") }, QDir::Dirs, QDir::Name | QDir::Reversed))
+        dirs << tl.filePath(y + QStringLiteral("/bin/x86_64-linux")) << tl.filePath(y + QStringLiteral("/bin/aarch64-linux"));
+#endif
+    return dirs;
+}
+
+Installation findInstallation(bool refresh)
+{
+    static bool done = false;
+    static Installation cached;
+    if (done && !refresh) return cached;
+    done = true;
+    cached = Installation();
+    const QStringList extra = searchDirs();
+    for (const char *prog : { "pdflatex", "lualatex", "xelatex" }) {
+        QString found = QStandardPaths::findExecutable(QLatin1String(prog));
+        if (found.isEmpty()) found = QStandardPaths::findExecutable(QLatin1String(prog), extra);
+        if (found.isEmpty()) continue;
+        cached.program = QDir::toNativeSeparators(found);
+        const QString lower = QDir::fromNativeSeparators(found).toLower();
+        static const QRegularExpression year(QStringLiteral("texlive/(20\\d\\d)"));
+        const auto m = year.match(lower);
+        if (lower.contains(QLatin1String("miktex"))) cached.name = QStringLiteral("MiKTeX");
+        else if (m.hasMatch()) cached.name = QStringLiteral("TeX Live %1").arg(m.captured(1));
+        else if (lower.startsWith(QLatin1String("/library/tex"))) cached.name = QStringLiteral("MacTeX");
+        else cached.name = QStringLiteral("TeX Live");
+        break;
+    }
+    return cached;
 }
 
 } // namespace LatexExport

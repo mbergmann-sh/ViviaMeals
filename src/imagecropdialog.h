@@ -24,6 +24,7 @@ public:
     void setAspect(double aspect);   // Breite/Höhe, 0 = frei
     QRect selection() const;         // in Bildpunkten
     void selectAll();
+    void setSelection(const QRectF &r);   // Bildkoordinaten
     QSize sizeHint() const override { return { 720, 520 }; }
 
 signals:
@@ -55,8 +56,13 @@ class ImageCropDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit ImageCropDialog(const QImage &img, QWidget *parent = nullptr);
-    QImage result() const;   // zugeschnitten und verkleinert
+    enum class Purpose { RecipePhoto, PrintBackground };
+    explicit ImageCropDialog(const QImage &img, QWidget *parent = nullptr, Purpose purpose = Purpose::RecipePhoto);
+    QImage result() const;   // zugeschnitten und (beim Rezeptfoto) verkleinert
+    // Druckhintergrund: Zuschnitt relativ (0…1) zum gedrehten Bild und Drehung – angewendet aufs Original
+    QRectF normalizedSelection() const;
+    int rotation() const { return m_rotation; }
+    void setInitial(int rotation, const QRectF &normalized);
     static int maxWidth() { return 800; }
 
 private:
@@ -64,4 +70,6 @@ private:
     CropWidget *m_crop;
     QComboBox *m_aspect;
     QLabel *m_info;
+    Purpose m_purpose = Purpose::RecipePhoto;
+    int m_rotation = 0;
 };

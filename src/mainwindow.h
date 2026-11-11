@@ -103,6 +103,7 @@ private:
     QLabel *m_statusDb;
     QMenu *m_recent;
     QList<QAction *> m_needRecipe;
+    QAction *m_texAction = nullptr;
     QList<QAction *> m_needDb;
     QString m_pendingSelect;
 };

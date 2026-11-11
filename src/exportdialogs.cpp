@@ -2,6 +2,7 @@
 #include "exportdialogs.h"
 #include "icons.h"
 #include "latexexport.h"
+#include "imagecropdialog.h"
 #include "recipedb.h"
 #include "websiteexport.h"
 
@@ -13,6 +14,10 @@
 #include <QFileDialog>
 #include <QFormLayout>
 #include <QHBoxLayout>
+#include <QLocale>
+#include <QSlider>
+#include <QPainter>
+#include <QDoubleSpinBox>
 #include <QSpinBox>
 #include <QGroupBox>
 #include <QLabel>
@@ -119,6 +124,75 @@ void WebsiteExportDialog::accept()
 
 // ---------------------------------------------------------------- LaTeX
 
+// Vorschau einer A4-Seite mit Titel und Hintergrundbild (Maße in mm)
+class BackgroundPreview : public QWidget
+{
+public:
+    BackgroundPreview() { setMinimumSize(150, 212); setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed); }
+    QSize sizeHint() const override { return { 150, 212 }; }
+    void set(const QImage &img, const LatexExport::MasterOptions &m)
+    {
+        m_img = img;
+        m_opt = m;
+        update();
+    }
+
+protected:
+    void paintEvent(QPaintEvent *) override
+    {
+        QPainter p(this);
+        p.setRenderHint(QPainter::SmoothPixmapTransform);
+        const double s = qMin((width() - 2) / 210.0, (height() - 2) / 297.0);
+        const QRectF page(1, 1, 210 * s, 297 * s);
+        p.fillRect(page, Qt::white);
+        const double bcor = m_opt.bgShiftBinding ? m_opt.bindingMm : 0;
+        // Bindung links (rechte Seite): grau angedeutet
+        p.fillRect(QRectF(page.left(), page.top(), m_opt.bindingMm * s, page.height()), QColor(0, 0, 0, 25));
+        if (!m_img.isNull()) {
+            QRectF r;
+            const double ratio = double(m_img.height()) / qMax(1, m_img.width());
+            switch (m_opt.bgPlacement) {
+            case LatexExport::MasterOptions::BgPlacement::FillPage: r = page; break;
+            case LatexExport::MasterOptions::BgPlacement::Centered: {
+                const double w = m_opt.bgWidthMm, h = w * ratio;
+                const double x = bcor + (210 - bcor - w) / 2;
+                r = QRectF(page.left() + x * s, page.top() + (297 - m_opt.bgBottomMm - h) * s, w * s, h * s);
+                break;
+            }
+            case LatexExport::MasterOptions::BgPlacement::Free: {
+                const double w = m_opt.bgWidthMm, h = w * ratio;
+                r = QRectF(page.left() + (m_opt.bgLeftMm + bcor) * s, page.top() + (297 - m_opt.bgBottomMm - h) * s, w * s, h * s);
+                break;
+            }
+            }
+            p.save();
+            p.setClipRect(page);
+            p.drawImage(r, m_img);
+            p.restore();
+            if (!page.contains(r.adjusted(1, 1, -1, -1))) {
+                p.setPen(QPen(QColor(QStringLiteral("#c0392b")), 2, Qt::DashLine));
+                p.drawRect(r.intersected(page));
+            }
+        }
+        // Titel (Schmutztitel bzw. Titelseite) andeuten
+        p.setPen(QColor(QStringLiteral("#1474BC")));
+        QFont f = font();
+        f.setBold(true);
+        f.setPointSizeF(qMax(5.0, 7.0 * s / 0.5));
+        p.setFont(f);
+        const bool title = m_opt.bgTarget == LatexExport::MasterOptions::BgTarget::TitlePage;
+        const double y = title ? 297 * 0.30 : 297 * 0.38;
+        p.drawText(QRectF(page.left() + m_opt.bindingMm * s, page.top() + y * s - 10, (210 - m_opt.bindingMm) * s, 20), Qt::AlignCenter,
+                   m_opt.title.isEmpty() ? QStringLiteral("Titel") : m_opt.title);
+        p.setPen(QColor(0, 0, 0, 80));
+        p.drawRect(page);
+    }
+
+private:
+    QImage m_img;
+    LatexExport::MasterOptions m_opt;
+};
+
 LatexExportDialog::LatexExportDialog(const Recipe &r, QWidget *parent) : QDialog(parent), m_recipe(r)
 {
     setWindowTitle(tr("Als LaTeX-Datei exportieren"));
@@ -132,6 +206,11 @@ LatexExportDialog::LatexExportDialog(const Recipe &r, QWidget *parent) : QDialog
     m_class->addItem(QStringLiteral("book (LaTeX-Standard)"), int(LatexExport::DocClass::Book));
     m_class->setCurrentIndex(s.value(QStringLiteral("tex/class"), 0).toInt());
     form->addRow(tr("Dokumentklasse:"), m_class);
+    const LatexExport::Installation inst = LatexExport::findInstallation();
+    auto *instLabel = new QLabel(inst.found() ? QStringLiteral("<small>%1 – <tt>%2</tt></small>").arg(inst.name.toHtmlEscaped(), inst.program.toHtmlEscaped())
+                                              : QStringLiteral("<small><span style=\"color:#c0392b\">%1</span></small>").arg(tr("Keine LaTeX-Installation gefunden.")));
+    instLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    form->addRow(tr("LaTeX:"), instLabel);
     lay->addLayout(form);
 
     // ---- Ausgabeart
@@ -184,11 +263,83 @@ LatexExportDialog::LatexExportDialog(const Recipe &r, QWidget *parent) : QDialog
     nf->addRow(QString(), m_noDate);
     auto *bgr = new QHBoxLayout;
     m_bgImage = new QLineEdit(QDir::toNativeSeparators(s.value(QStringLiteral("tex/bgImage")).toString()));
-    m_bgImage->setPlaceholderText(tr("optional – Bild für den Schmutztitel (füllt die ganze Seite)"));
+    m_bgImage->setPlaceholderText(tr("optional – Bild für Schmutztitel oder Titelseite"));
+    m_bgImage->setClearButtonEnabled(true);
     auto *bgBrowse = new QPushButton(Icons::get(QStringLiteral("open")), QString());
+    m_bgCropButton = new QPushButton(Icons::get(QStringLiteral("image")), tr("Zuschneiden …"));
+    m_bgCropButton->setToolTip(tr("Ausschnitt des Bildes wählen und drehen – das Original bleibt unverändert"));
     bgr->addWidget(m_bgImage, 1);
     bgr->addWidget(bgBrowse);
-    nf->addRow(tr("Schmutztitel-Bild:"), bgr);
+    bgr->addWidget(m_bgCropButton);
+    nf->addRow(tr("Hintergrundbild:"), bgr);
+    {
+        const QRectF c = s.value(QStringLiteral("tex/bgCrop")).toRectF();
+        if (c.isValid()) m_bgCrop = c;
+        m_bgRotation = s.value(QStringLiteral("tex/bgRotation"), 0).toInt();
+    }
+    // Platzierung des Hintergrundbilds mit Vorschau
+    m_bgOptions = new QWidget;
+    auto *bgl = new QHBoxLayout(m_bgOptions);
+    bgl->setContentsMargins(0, 0, 0, 0);
+    auto *bgf = new QFormLayout;
+    m_bgTarget = new QComboBox;
+    m_bgTarget->addItem(tr("Schmutztitel"), int(LatexExport::MasterOptions::BgTarget::HalfTitle));
+    m_bgTarget->addItem(tr("Titelseite"), int(LatexExport::MasterOptions::BgTarget::TitlePage));
+    m_bgTarget->setCurrentIndex(qMax(0, m_bgTarget->findData(s.value(QStringLiteral("tex/bgTarget"), 0).toInt())));
+    bgf->addRow(tr("auf:"), m_bgTarget);
+    m_bgPlacement = new QComboBox;
+    m_bgPlacement->addItem(tr("ganze Seite (zugeschnitten)"), int(LatexExport::MasterOptions::BgPlacement::FillPage));
+    m_bgPlacement->addItem(tr("waagerecht mittig"), int(LatexExport::MasterOptions::BgPlacement::Centered));
+    m_bgPlacement->addItem(tr("frei positioniert"), int(LatexExport::MasterOptions::BgPlacement::Free));
+    m_bgPlacement->setCurrentIndex(qMax(0, m_bgPlacement->findData(s.value(QStringLiteral("tex/bgPlacement"), 0).toInt())));
+    bgf->addRow(tr("Platzierung:"), m_bgPlacement);
+    auto mmBox = [](double v, double max) {
+        auto *b = new QDoubleSpinBox;
+        b->setLocale(QLocale(QLocale::German));   // Dezimalkomma
+        b->setRange(0, max);
+        b->setDecimals(1);
+        b->setSingleStep(1);
+        b->setSuffix(QStringLiteral(" mm"));
+        b->setValue(v);
+        return b;
+    };
+    m_bgWidth = mmBox(s.value(QStringLiteral("tex/bgWidth"), 140).toDouble(), 297);
+    m_bgWidth->setMinimum(10);
+    m_bgLeft = mmBox(s.value(QStringLiteral("tex/bgLeft"), 45).toDouble(), 210);
+    m_bgBottom = mmBox(s.value(QStringLiteral("tex/bgBottom"), 60).toDouble(), 297);
+    m_bgLeft->setToolTip(tr("Abstand des linken Bildrands von der linken Papierkante"));
+    m_bgBottom->setToolTip(tr("Abstand des unteren Bildrands von der unteren Papierkante"));
+    auto *wr = new QHBoxLayout;
+    m_bgScale = new QSlider(Qt::Horizontal);
+    m_bgScale->setRange(100, 2100);   // 0,1 mm
+    m_bgScale->setToolTip(tr("Bild stufenlos skalieren – höchstens so breit, dass es auf die A4-Seite passt"));
+    auto *fit = new QPushButton(tr("max."));
+    fit->setToolTip(tr("Größtmögliche Breite, ohne über die Seite hinauszuragen"));
+    wr->addWidget(m_bgWidth);
+    wr->addWidget(m_bgScale, 1);
+    wr->addWidget(fit);
+    bgf->addRow(tr("Breite:"), wr);
+    m_bgMaxInfo = new QLabel;
+    bgf->addRow(QString(), m_bgMaxInfo);
+    connect(m_bgScale, &QSlider::valueChanged, this, [this](int v) {
+        if (!m_updatingBg) m_bgWidth->setValue(v / 10.0);
+    });
+    connect(fit, &QPushButton::clicked, this, [this] { m_bgWidth->setValue(m_bgWidth->maximum()); });
+    bgf->addRow(tr("links:"), m_bgLeft);
+    bgf->addRow(tr("unten:"), m_bgBottom);
+    m_bgBinding = new QCheckBox(tr("um die Bindekorrektur verschieben"));
+    m_bgBinding->setToolTip(tr("Bei Ring- oder Leimbindung rückt das Bild auf der rechten Seite um die Bindekorrektur nach rechts (\\BindungsHSpace)"));
+    m_bgBinding->setChecked(s.value(QStringLiteral("tex/bgBinding"), true).toBool());
+    m_bgTrim = new QCheckBox(tr("weißen Rand des Bildes abschneiden"));
+    m_bgTrim->setToolTip(tr("Z. B. bei Bildschirmfotos: nur der eigentliche Ausschnitt ohne umgebenden Weißraum"));
+    m_bgTrim->setChecked(s.value(QStringLiteral("tex/bgTrim"), true).toBool());
+    bgf->addRow(QString(), m_bgBinding);
+    bgf->addRow(QString(), m_bgTrim);
+    bgl->addLayout(bgf, 1);
+    m_bgPreview = new BackgroundPreview;
+    m_bgPreview->setToolTip(tr("Vorschau (A4, rechte Seite): grau = Bindekorrektur, rot gestrichelt = Bild ragt über die Seite"));
+    bgl->addWidget(m_bgPreview, 0, Qt::AlignTop);
+    nf->addRow(m_bgOptions);
     auto *parts = new QHBoxLayout;
     m_toc = new QCheckBox(tr("Inhaltsverzeichnis"));
     m_glossary = new QCheckBox(tr("Glossar"));
@@ -227,6 +378,27 @@ LatexExportDialog::LatexExportDialog(const Recipe &r, QWidget *parent) : QDialog
     m_source->setChecked(s.value(QStringLiteral("tex/source"), false).toBool());
     m_indexEntries = new QCheckBox(tr("Stichwörter für das Stichwortverzeichnis (Titel und Zutaten)"));
     m_indexEntries->setChecked(s.value(QStringLiteral("tex/indexEntries"), true).toBool());
+    auto *hf = new QFormLayout;
+    m_heading = new QComboBox;
+    m_heading->addItem(tr("eigenes Kapitel (\\chapter)"), int(LatexExport::Heading::Chapter));
+    m_heading->addItem(tr("Abschnitt in einem Themen-Kapitel (\\section)"), int(LatexExport::Heading::Section));
+    m_heading->setCurrentIndex(qMax(0, m_heading->findData(s.value(QStringLiteral("tex/heading"), 0).toInt())));
+    m_heading->setToolTip(tr("Als Abschnitt lassen sich Rezepte in Kapiteln wie „Vorspeisen“, „Hauptgerichte“, „Süßspeisen“ sammeln"));
+    hf->addRow(tr("Einbinden als:"), m_heading);
+    m_chapterRow = new QWidget;
+    auto *chl = new QHBoxLayout(m_chapterRow);
+    chl->setContentsMargins(0, 0, 0, 0);
+    m_chapter = new QComboBox;
+    m_chapter->setEditable(true);
+    m_chapter->setInsertPolicy(QComboBox::NoInsert);
+    m_chapter->setToolTip(tr("Kapitel des Master-Dokuments; ein neuer Name legt das Kapitel an"));
+    m_newPage = new QCheckBox(tr("auf neuer Seite"));
+    m_newPage->setChecked(s.value(QStringLiteral("tex/newPage"), true).toBool());
+    chl->addWidget(m_chapter, 1);
+    chl->addWidget(m_newPage);
+    hf->addRow(tr("Themen-Kapitel:"), m_chapterRow);
+    m_chapterLabel = hf->labelForField(m_chapterRow);
+    cl->addLayout(hf);
     for (QCheckBox *c : { m_image, m_nutrition, m_source, m_indexEntries }) cl->addWidget(c);
     lay->addWidget(cb);
 
@@ -268,8 +440,27 @@ LatexExportDialog::LatexExportDialog(const Recipe &r, QWidget *parent) : QDialog
     });
     connect(newBrowse, &QPushButton::clicked, this, [this] { pickFile(m_newMasterFile, tr("Neues Master-Dokument"), tr("LaTeX (*.tex)"), true); });
     connect(bgBrowse, &QPushButton::clicked, this, [this] {
-        pickFile(m_bgImage, tr("Hintergrundbild für den Schmutztitel"), tr("Bilder (*.png *.jpg *.jpeg *.bmp *.webp)"), false);
+        pickFile(m_bgImage, tr("Hintergrundbild für Schmutztitel oder Titelseite"), tr("Bilder (*.png *.jpg *.jpeg *.bmp *.webp)"), false);
     });
+    connect(m_bgImage, &QLineEdit::textChanged, this, &LatexExportDialog::updateBackground);
+    for (QComboBox *c : { m_bgTarget, m_bgPlacement })
+        connect(c, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LatexExportDialog::updateBackground);
+    for (QDoubleSpinBox *b : { m_bgWidth, m_bgLeft, m_bgBottom })
+        connect(b, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &LatexExportDialog::updateBackground);
+    for (QCheckBox *c : { m_bgBinding, m_bgTrim }) connect(c, &QCheckBox::toggled, this, &LatexExportDialog::updateBackground);
+    connect(m_bcor, QOverload<int>::of(&QSpinBox::valueChanged), this, &LatexExportDialog::updateBackground);
+    connect(m_bookTitle, &QLineEdit::textChanged, this, &LatexExportDialog::updateBackground);
+    connect(m_bgCropButton, &QPushButton::clicked, this, &LatexExportDialog::cropBackground);
+    connect(m_bgImage, &QLineEdit::textEdited, this, [this] {
+        m_bgCrop = QRectF();
+        m_bgRotation = 0;
+    });
+    connect(m_heading, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LatexExportDialog::updateMode);
+    connect(m_masterFile, &QLineEdit::editingFinished, this, &LatexExportDialog::fillChapters);
+    connect(m_register, &QCheckBox::toggled, this, &LatexExportDialog::fillChapters);
+    for (QRadioButton *b : { m_modeChapter, m_modeNewMaster }) connect(b, &QRadioButton::toggled, this, &LatexExportDialog::fillChapters);
+    fillChapters();
+    updateBackground();
     for (QRadioButton *b : { m_modeChapter, m_modeNewMaster, m_modeStandalone }) connect(b, &QRadioButton::toggled, this, &LatexExportDialog::updateMode);
     connect(m_register, &QCheckBox::toggled, this, &LatexExportDialog::updateMode);
     updateMode();
@@ -282,6 +473,116 @@ QString LatexExportDialog::pickFile(QLineEdit *edit, const QString &title, const
     const QString f = save ? QFileDialog::getSaveFileName(this, title, start, filter) : QFileDialog::getOpenFileName(this, title, start, filter);
     if (!f.isEmpty()) edit->setText(QDir::toNativeSeparators(f));
     return f;
+}
+
+LatexExport::MasterOptions LatexExportDialog::masterOptions() const
+{
+    LatexExport::MasterOptions m;
+    m.docClass = LatexExport::DocClass(m_class->currentData().toInt());
+    m.title = m_bookTitle->text().trimmed();
+    m.subtitle = m_subtitle->text().trimmed();
+    m.author = m_author->text().trimmed();
+    m.noDate = m_noDate->isChecked();
+    m.halfTitleImage = QDir::fromNativeSeparators(m_bgImage->text().trimmed());
+    m.bgTarget = LatexExport::MasterOptions::BgTarget(m_bgTarget->currentData().toInt());
+    m.bgPlacement = LatexExport::MasterOptions::BgPlacement(m_bgPlacement->currentData().toInt());
+    m.bgWidthMm = m_bgWidth->value();
+    m.bgLeftMm = m_bgLeft->value();
+    m.bgBottomMm = m_bgBottom->value();
+    m.bgShiftBinding = m_bgBinding->isChecked();
+    m.bgTrim = m_bgTrim->isChecked();
+    m.bgCrop = m_bgCrop;
+    m.bgRotation = m_bgRotation;
+    m.toc = m_toc->isChecked();
+    m.glossary = m_glossary->isChecked();
+    m.index = m_index->isChecked();
+    m.bindingMm = m_bcor->value();
+    return m;
+}
+
+void LatexExportDialog::cropBackground()
+{
+    const QString file = QDir::fromNativeSeparators(m_bgImage->text().trimmed());
+    QImage img(file);
+    if (img.isNull()) {
+        QMessageBox::information(this, windowTitle(), tr("Bitte zuerst ein Hintergrundbild wählen."));
+        return;
+    }
+    ImageCropDialog d(img, this, ImageCropDialog::Purpose::PrintBackground);
+    d.setInitial(m_bgRotation, m_bgCrop);
+    if (d.exec() != QDialog::Accepted) return;
+    m_bgCrop = d.normalizedSelection();
+    m_bgRotation = d.rotation();
+    updateBackground();
+}
+
+void LatexExportDialog::fillChapters()
+{
+    const QString current = m_chapter->currentText().trimmed();
+    QStringList names;
+    QString masterText;
+    if (m_modeChapter->isChecked() && m_register->isChecked()) {
+        QFile f(QDir::fromNativeSeparators(m_masterFile->text().trimmed()));
+        if (f.open(QIODevice::ReadOnly)) masterText = QString::fromUtf8(f.readAll());
+    }
+    const QStringList existing = LatexExport::masterChapters(masterText);
+    names << existing;
+    for (const QString &d : LatexExport::defaultChapters())
+        if (!names.contains(d, Qt::CaseInsensitive)) names << d;
+    m_chapter->clear();
+    m_chapter->addItems(names);
+    for (int i = 0; i < existing.size(); ++i) m_chapter->setItemData(i, tr("im Master-Dokument vorhanden"), Qt::ToolTipRole);
+    QString pick = current.isEmpty() ? LatexExport::suggestChapter(m_recipe) : current;
+    for (const QString &n : names)
+        if (n.compare(pick, Qt::CaseInsensitive) == 0) pick = n;
+    m_chapter->setCurrentText(pick);
+}
+
+void LatexExportDialog::updateBackground()
+{
+    if (m_updatingBg) return;
+    m_updatingBg = true;
+    const LatexExport::MasterOptions m = masterOptions();
+    const bool has = !m.halfTitleImage.isEmpty();
+    m_bgOptions->setVisible(has);
+    const bool fill = m.bgPlacement == LatexExport::MasterOptions::BgPlacement::FillPage;
+    const bool free = m.bgPlacement == LatexExport::MasterOptions::BgPlacement::Free;
+    m_bgWidth->setEnabled(!fill);
+    m_bgBottom->setEnabled(!fill);
+    m_bgLeft->setEnabled(free);
+    m_bgBinding->setEnabled(!fill);
+    QImage img;
+    if (has) {
+        if (m.halfTitleImage != m_bgCachePath) {
+            m_bgCachePath = m.halfTitleImage;
+            m_bgCache = QImage(m.halfTitleImage);
+            if (!m_bgCache.isNull() && m_bgCache.width() > 800) m_bgCache = m_bgCache.scaledToWidth(800, Qt::SmoothTransformation);
+        }
+        if (!m_bgCache.isNull()) img = LatexExport::prepareBackground(m_bgCache, m);
+    }
+    m_bgScale->setEnabled(!fill);
+    m_bgCropButton->setEnabled(has);
+    m_bgCropButton->setText(m_bgCrop.isEmpty() && m_bgRotation == 0 ? tr("Zuschneiden …") : tr("Zuschnitt ändern …"));
+    // Breite so begrenzen, dass das Bild nicht über die A4-Seite hinausragt
+    LatexExport::MasterOptions mm = m;
+    if (!fill && !img.isNull()) {
+        const double maxW = LatexExport::maxBackgroundWidth(mm, double(img.height()) / qMax(1, img.width()));
+        m_bgWidth->setMaximum(maxW);
+        m_bgScale->setRange(100, qMax(101, int(maxW * 10)));
+        m_bgScale->setValue(int(m_bgWidth->value() * 10));
+        m_bgMaxInfo->setText(tr("<small>höchstens %1 mm breit · Bild %2 × %3 mm</small>")
+                                 .arg(QLocale(QLocale::German).toString(maxW, 'f', 1))
+                                 .arg(QLocale(QLocale::German).toString(m_bgWidth->value(), 'f', 1))
+                                 .arg(QLocale(QLocale::German).toString(m_bgWidth->value() * img.height() / qMax(1, img.width()), 'f', 1)));
+        m_bgLeft->setMaximum(qMax(0.0, 210 - (m.bgShiftBinding ? m.bindingMm : 0) - 10));
+        mm = masterOptions();   // nach der Begrenzung
+    } else {
+        m_bgMaxInfo->clear();
+    }
+    m_bgMaxInfo->setVisible(!fill);
+    m_bgPreview->set(img, mm);
+    m_updatingBg = false;
+    if (isVisible()) adjustSize();
 }
 
 void LatexExportDialog::proposeFile()
@@ -302,6 +603,10 @@ void LatexExportDialog::updateMode()
     m_masterFile->setEnabled(m_register->isChecked());
     m_newMasterBox->setVisible(m_modeNewMaster->isChecked());
     m_indexEntries->setEnabled(!m_modeStandalone->isChecked());
+    m_heading->setEnabled(!m_modeStandalone->isChecked());
+    const bool sectionRow = !m_modeStandalone->isChecked() && m_heading->currentData().toInt() == int(LatexExport::Heading::Section);
+    m_chapterRow->setVisible(sectionRow);
+    if (m_chapterLabel) m_chapterLabel->setVisible(sectionRow);
     adjustSize();
 }
 
@@ -317,6 +622,14 @@ void LatexExportDialog::accept()
     opt.nutrition = m_nutrition->isChecked();
     opt.source = m_source->isChecked();
     opt.indexEntries = m_indexEntries->isChecked() && !m_modeStandalone->isChecked();
+    opt.heading = LatexExport::Heading(m_heading->currentData().toInt());
+    opt.newPage = m_newPage->isChecked();
+    const bool asSection = opt.heading == LatexExport::Heading::Section && !m_modeStandalone->isChecked();
+    const QString chapter = asSection ? m_chapter->currentText().trimmed() : QString();
+    if (asSection && chapter.isEmpty()) {
+        QMessageBox::information(this, windowTitle(), tr("Bitte ein Themen-Kapitel angeben (z. B. „Hauptgerichte“)."));
+        return;
+    }
 
     // Master-Dokument bestimmen
     QString master;
@@ -358,6 +671,8 @@ void LatexExportDialog::accept()
     s.setValue(QStringLiteral("tex/nutrition"), opt.nutrition);
     s.setValue(QStringLiteral("tex/source"), opt.source);
     s.setValue(QStringLiteral("tex/indexEntries"), m_indexEntries->isChecked());
+    s.setValue(QStringLiteral("tex/heading"), int(opt.heading));
+    s.setValue(QStringLiteral("tex/newPage"), opt.newPage);
     s.setValue(QStringLiteral("tex/dir"), QFileInfo(file).absolutePath());
     QString err;
     if (!LatexExport::exportRecipe(m_recipe, file, opt, &err)) {
@@ -366,17 +681,8 @@ void LatexExportDialog::accept()
     }
     QString msg = tr("Gespeichert: %1").arg(QDir::toNativeSeparators(file));
     if (m_modeNewMaster->isChecked()) {
-        LatexExport::MasterOptions m;
-        m.docClass = opt.docClass;
-        m.title = m_bookTitle->text().trimmed();
-        m.subtitle = m_subtitle->text().trimmed();
-        m.author = m_author->text().trimmed();
-        m.noDate = m_noDate->isChecked();
-        m.halfTitleImage = QDir::fromNativeSeparators(m_bgImage->text().trimmed());
-        m.toc = m_toc->isChecked();
-        m.glossary = m_glossary->isChecked();
-        m.index = m_index->isChecked();
-        m.bindingMm = m_bcor->value();
+        LatexExport::MasterOptions m = masterOptions();
+        m.firstChapter = chapter;
         if (!LatexExport::writeMaster(master, m, { inputPath }, &err)) {
             QMessageBox::warning(this, windowTitle(), tr("Master-Dokument konnte nicht geschrieben werden: %1").arg(err));
             return;
@@ -390,6 +696,15 @@ void LatexExportDialog::accept()
         s.setValue(QStringLiteral("tex/author"), m.author);
         s.setValue(QStringLiteral("tex/noDate"), m.noDate);
         s.setValue(QStringLiteral("tex/bgImage"), m.halfTitleImage);
+        s.setValue(QStringLiteral("tex/bgTarget"), int(m.bgTarget));
+        s.setValue(QStringLiteral("tex/bgPlacement"), int(m.bgPlacement));
+        s.setValue(QStringLiteral("tex/bgWidth"), m.bgWidthMm);
+        s.setValue(QStringLiteral("tex/bgLeft"), m.bgLeftMm);
+        s.setValue(QStringLiteral("tex/bgBottom"), m.bgBottomMm);
+        s.setValue(QStringLiteral("tex/bgBinding"), m.bgShiftBinding);
+        s.setValue(QStringLiteral("tex/bgTrim"), m.bgTrim);
+        s.setValue(QStringLiteral("tex/bgCrop"), m.bgCrop);
+        s.setValue(QStringLiteral("tex/bgRotation"), m.bgRotation);
         s.setValue(QStringLiteral("tex/toc"), m.toc);
         s.setValue(QStringLiteral("tex/glossary"), m.glossary);
         s.setValue(QStringLiteral("tex/index"), m.index);
@@ -398,14 +713,17 @@ void LatexExportDialog::accept()
                                          "Master-Dokument eingetragen.")
                                           .arg(QDir::toNativeSeparators(master), QFileInfo(master).fileName());
     } else if (!master.isEmpty()) {
-        bool already = false;
-        if (!LatexExport::addToMaster(master, inputPath, &err, &already)) {
+        bool already = false, created = false;
+        if (!LatexExport::addToMaster(master, inputPath, &err, &already, chapter, &created)) {
             QMessageBox::warning(this, windowTitle(), tr("Das Rezept wurde gespeichert, aber nicht ins Master-Dokument eingetragen:\n%1").arg(err));
             return;
         }
         s.setValue(QStringLiteral("tex/master"), master);
         msg += QStringLiteral("\n") + (already ? tr("Im Master-Dokument war es bereits eingetragen.")
-                                               : tr("Eingetragen in %1 als \\input{%2}.").arg(QDir::toNativeSeparators(master), inputPath));
+                                               : tr("Eingetragen in %1 als \\input{%2}%3.")
+                                                     .arg(QDir::toNativeSeparators(master), inputPath,
+                                                          chapter.isEmpty() ? QString()
+                                                                            : (created ? tr(" im neuen Kapitel „%1“") : tr(" im Kapitel „%1“")).arg(chapter)));
     }
     QMessageBox::information(this, windowTitle(), msg);
     QDialog::accept();

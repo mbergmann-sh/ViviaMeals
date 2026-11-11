@@ -30,6 +30,15 @@ void CropWidget::setImage(const QImage &img)
     selectAll();
 }
 
+void CropWidget::setSelection(const QRectF &r)
+{
+    if (m_img.isNull() || r.isEmpty()) return;
+    m_sel = r;
+    clampSel();
+    update();
+    emit selectionChanged();
+}
+
 void CropWidget::selectAll()
 {
     if (m_img.isNull()) return;
@@ -223,13 +232,17 @@ void CropWidget::resizeEvent(QResizeEvent *)
 
 // ---------------------------------------------------------------- Dialog
 
-ImageCropDialog::ImageCropDialog(const QImage &img, QWidget *parent) : QDialog(parent)
+ImageCropDialog::ImageCropDialog(const QImage &img, QWidget *parent, Purpose purpose) : QDialog(parent), m_purpose(purpose)
 {
-    setWindowTitle(tr("Rezeptbild zuschneiden"));
+    const bool print = purpose == Purpose::PrintBackground;
+    setWindowTitle(print ? tr("Hintergrundbild zuschneiden") : tr("Rezeptbild zuschneiden"));
     auto *lay = new QVBoxLayout(this);
-    auto *hint = new QLabel(tr("Ausschnitt mit der Maus verschieben, an den Ecken die Größe ändern oder außerhalb neu aufziehen. "
-                               "Gespeichert wird nur der Ausschnitt (PNG, höchstens %1 Pixel breit).")
-                                .arg(maxWidth()));
+    auto *hint = new QLabel(print ? tr("Ausschnitt mit der Maus verschieben, an den Ecken die Größe ändern oder außerhalb neu aufziehen. "
+                                       "Das Originalbild bleibt unverändert; der Ausschnitt wird beim Erstellen des Master-Dokuments "
+                                       "in voller Auflösung übernommen.")
+                                  : tr("Ausschnitt mit der Maus verschieben, an den Ecken die Größe ändern oder außerhalb neu aufziehen. "
+                                       "Gespeichert wird nur der Ausschnitt (PNG, höchstens %1 Pixel breit).")
+                                        .arg(maxWidth()));
     hint->setWordWrap(true);
     lay->addWidget(hint);
     m_crop = new CropWidget;
@@ -243,8 +256,13 @@ ImageCropDialog::ImageCropDialog(const QImage &img, QWidget *parent) : QDialog(p
     m_aspect->addItem(tr("1 : 1 (quadratisch)"), 1.0);
     m_aspect->addItem(tr("3 : 4 (Hochformat)"), 0.75);
     m_aspect->addItem(tr("frei"), 0.0);
+    if (print) {
+        m_aspect->addItem(tr("DIN A4 hoch (210 : 297)"), 210.0 / 297.0);
+        m_aspect->addItem(tr("DIN A4 quer (297 : 210)"), 297.0 / 210.0);
+    }
     QSettings s;
-    m_aspect->setCurrentIndex(qBound(0, s.value(QStringLiteral("editor/cropAspect"), 0).toInt(), m_aspect->count() - 1));
+    const QString aspectKey = print ? QStringLiteral("tex/cropAspect") : QStringLiteral("editor/cropAspect");
+    m_aspect->setCurrentIndex(qBound(0, s.value(aspectKey, print ? 5 : 0).toInt(), m_aspect->count() - 1));
     bar->addWidget(m_aspect);
     auto *left = new QPushButton(tr("⟲ Drehen"));
     auto *right = new QPushButton(tr("Drehen ⟳"));
@@ -259,8 +277,8 @@ ImageCropDialog::ImageCropDialog(const QImage &img, QWidget *parent) : QDialog(p
     auto *bb = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     bb->button(QDialogButtonBox::Ok)->setText(tr("Zuschneiden"));
     lay->addWidget(bb);
-    connect(bb, &QDialogButtonBox::accepted, this, [this] {
-        QSettings().setValue(QStringLiteral("editor/cropAspect"), m_aspect->currentIndex());
+    connect(bb, &QDialogButtonBox::accepted, this, [this, aspectKey] {
+        QSettings().setValue(aspectKey, m_aspect->currentIndex());
         accept();
     });
     connect(bb, &QDialogButtonBox::rejected, this, &QDialog::reject);
@@ -269,6 +287,7 @@ ImageCropDialog::ImageCropDialog(const QImage &img, QWidget *parent) : QDialog(p
     m_crop->setImage(img.convertToFormat(QImage::Format_RGB32));
     connect(m_aspect, qOverload<int>(&QComboBox::currentIndexChanged), this, [this] { m_crop->setAspect(m_aspect->currentData().toDouble()); });
     auto rotate = [this](int deg) {
+        m_rotation = ((m_rotation + deg) % 360 + 360) % 360;
         m_crop->setImage(m_crop->image().transformed(QTransform().rotate(deg)));
     };
     connect(left, &QPushButton::clicked, this, [rotate] { rotate(-90); });
@@ -279,9 +298,35 @@ ImageCropDialog::ImageCropDialog(const QImage &img, QWidget *parent) : QDialog(p
     resize(820, 680);
 }
 
+QRectF ImageCropDialog::normalizedSelection() const
+{
+    const QRect r = m_crop->selection();
+    const QSize sz = m_crop->image().size();
+    if (sz.isEmpty() || r.isEmpty()) return {};
+    if (r.size() == sz) return {};   // ganzes Bild = kein Zuschnitt
+    return QRectF(double(r.x()) / sz.width(), double(r.y()) / sz.height(), double(r.width()) / sz.width(), double(r.height()) / sz.height());
+}
+
+void ImageCropDialog::setInitial(int rotation, const QRectF &normalized)
+{
+    rotation = ((rotation % 360) + 360) % 360;
+    if (rotation != 0) {
+        m_rotation = rotation;
+        m_crop->setImage(m_crop->image().transformed(QTransform().rotate(rotation)));
+    }
+    const QSize sz = m_crop->image().size();
+    if (!normalized.isEmpty())
+        m_crop->setSelection(QRectF(normalized.x() * sz.width(), normalized.y() * sz.height(), normalized.width() * sz.width(),
+                                    normalized.height() * sz.height()));
+}
+
 void ImageCropDialog::updateInfo()
 {
     const QRect r = m_crop->selection();
+    if (m_purpose == Purpose::PrintBackground) {
+        m_info->setText(tr("%1 × %2 Pixel").arg(r.width()).arg(r.height()));
+        return;
+    }
     const QSize out = r.width() > maxWidth() ? QSize(maxWidth(), qRound(double(r.height()) * maxWidth() / r.width())) : r.size();
     m_info->setText(tr("%1 × %2 Pixel").arg(out.width()).arg(out.height()));
 }
@@ -289,6 +334,7 @@ void ImageCropDialog::updateInfo()
 QImage ImageCropDialog::result() const
 {
     QImage img = m_crop->image().copy(m_crop->selection());
+    if (m_purpose == Purpose::PrintBackground) return img;
     if (img.width() > maxWidth()) img = img.scaledToWidth(maxWidth(), Qt::SmoothTransformation);
     if (img.height() > 1200) img = img.scaledToHeight(1200, Qt::SmoothTransformation);
     return img;

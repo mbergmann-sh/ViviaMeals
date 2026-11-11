@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "mainwindow.h"
+#include "latexexport.h"
 #include "busyprogress.h"
 #include "foodwizard.h"
 #include "importdialogs.h"
@@ -172,7 +173,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
         if (!m_list->itemAt(pos)) return;
         QMenu menu(this);
         menu.addAction(Icons::get(QStringLiteral("edit")), tr("Bearbeiten …"), this, &MainWindow::editRecipe);
-        menu.addAction(Icons::get(QStringLiteral("tex")), tr("Als LaTeX-Datei exportieren …"), this, &MainWindow::exportLatex);
+        QAction *tex = menu.addAction(Icons::get(QStringLiteral("tex")), tr("Als LaTeX-Datei exportieren …"), this, &MainWindow::exportLatex);
+        tex->setEnabled(LatexExport::findInstallation().found());
         menu.addAction(Icons::get(QStringLiteral("odt")), tr("Als LibreOffice-Writer-Datei (.odt) exportieren …"), this, &MainWindow::exportOdt);
         menu.addSeparator();
         menu.addAction(Icons::get(QStringLiteral("diary")), tr("Ins Ernährungstagebuch eintragen …"), this, [this] { openDiary(currentId()); });
@@ -286,6 +288,12 @@ void MainWindow::buildMenus()
     a = exp->addAction(Icons::get(QStringLiteral("tex")), tr("Als &LaTeX-Datei exportieren …"), this, &MainWindow::exportLatex);
     a->setObjectName(QStringLiteral("actTex"));
     m_needRecipe << a;
+    m_texAction = a;
+    // Erst beim Öffnen des Menüs erneut suchen – so wird eine nachträglich installierte TeX-Distribution erkannt
+    connect(exp, &QMenu::aboutToShow, this, [this] {
+        LatexExport::findInstallation(true);
+        updateActions();
+    });
     a = exp->addAction(Icons::get(QStringLiteral("odt")), tr("Als Libre&Office-Writer-Datei (.odt) exportieren …"), this, &MainWindow::exportOdt);
     a->setObjectName(QStringLiteral("actOdt"));
     m_needRecipe << a;
@@ -419,6 +427,15 @@ void MainWindow::updateActions()
     const bool rec = db && m_view->hasRecipe();
     for (QAction *a : m_needDb) a->setEnabled(db);
     for (QAction *a : m_needRecipe) a->setEnabled(rec);
+    // LaTeX-Export nur mit vorhandener LaTeX-Installation (TeX Live, MiKTeX, MacTeX)
+    if (m_texAction) {
+        const LatexExport::Installation tex = LatexExport::findInstallation();
+        m_texAction->setEnabled(rec && tex.found());
+        const QString tip = tex.found() ? tr("Rezept als LaTeX-Datei exportieren (%1: %2)").arg(tex.name, tex.program)
+                                        : tr("Keine LaTeX-Installation gefunden – bitte TeX Live (tug.org/texlive) oder MiKTeX (miktex.org) installieren.");
+        m_texAction->setToolTip(tip);
+        m_texAction->setStatusTip(tip);
+    }
 }
 
 // ---------------------------------------------------------------- Datenbank

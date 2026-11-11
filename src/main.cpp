@@ -589,6 +589,24 @@ void takeScreenshots(MainWindow *w, const QString &dir)
         QList<RecipeSummary> all = RecipeDb::instance().summaries();
         Recipe r;
         if (!all.isEmpty() && RecipeDb::instance().load(all.first().id, &r)) {
+            // Beispiel-Hintergrundbild (Rezeptfoto) frei positioniert auf der Titelseite
+            QSettings st;
+            const QString bg = QDir(dir).filePath(QStringLiteral("_hintergrund.png"));
+            for (const RecipeSummary &x : all) {
+                Recipe pr;
+                if (RecipeDb::instance().load(x.id, &pr) && !pr.image.isEmpty()) {
+                    QImage::fromData(QByteArray::fromBase64(pr.image.toLatin1())).save(bg);
+                    break;
+                }
+            }
+            st.setValue(QStringLiteral("tex/bgImage"), bg);
+            st.setValue(QStringLiteral("tex/bgTarget"), 1);
+            st.setValue(QStringLiteral("tex/bgPlacement"), 2);
+            st.setValue(QStringLiteral("tex/bgWidth"), 139.9);
+            st.setValue(QStringLiteral("tex/bgLeft"), 46.4);
+            st.setValue(QStringLiteral("tex/bgBottom"), 60.5);
+            st.setValue(QStringLiteral("tex/author"), QStringLiteral("Micha B."));
+            st.setValue(QStringLiteral("tex/heading"), 1);
             LatexExportDialog d(r, w);
             d.show();
             QApplication::processEvents();
@@ -598,6 +616,9 @@ void takeScreenshots(MainWindow *w, const QString &dir)
             QApplication::processEvents();
             shot(&d, dir, QStringLiteral("latex-kochbuch"));
             d.reject();
+            QFile::remove(bg);
+            for (const char *k : { "tex/bgImage", "tex/bgTarget", "tex/bgPlacement", "tex/bgWidth", "tex/bgLeft", "tex/bgBottom", "tex/author", "tex/heading" })
+                st.remove(QLatin1String(k));
         }
     }
     {

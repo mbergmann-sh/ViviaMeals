@@ -1335,7 +1335,30 @@ int main(int argc, char **argv)
             bg.fill(QColor(QStringLiteral("#E0620D")));
             bg.save(dir + QStringLiteral("/bg.png"));
             m.halfTitleImage = dir + QStringLiteral("/bg.png");
+            if (cls == 1) {
+                // wie im Beispiel des Nutzers: Bild frei auf der Titelseite, 139,9 mm breit, links 46,4 mm, 60,5 mm hoch
+                m.bgTarget = LatexExport::MasterOptions::BgTarget::TitlePage;
+                m.bgPlacement = LatexExport::MasterOptions::BgPlacement::Free;
+                m.bgWidthMm = 139.9;
+                m.bgLeftMm = 46.4;
+                m.bgBottomMm = 60.5;
+                QImage shot(500, 300, QImage::Format_RGB32);
+                shot.fill(Qt::white);
+                QPainter pt(&shot);
+                pt.fillRect(40, 30, 400, 200, QColor(QStringLiteral("#1474BC")));
+                pt.end();
+                shot.save(dir + QStringLiteral("/shot.png"));
+                m.halfTitleImage = dir + QStringLiteral("/shot.png");
+                const QImage trimmed = LatexExport::trimWhite(shot);
+                CHECK(trimmed.size() == QSize(400, 200), "weißen Rand abschneiden");
+            }
             const QString master = QStringLiteral("%1/kochbuch%2.tex").arg(dir).arg(cls);
+            // scrbook: Rezept als \section im Themen-Kapitel „Nachtisch“, Hintergrundbild zugeschnitten
+            o.heading = cls == 0 ? LatexExport::Heading::Section : LatexExport::Heading::Chapter;
+            if (cls == 0) {
+                m.firstChapter = QStringLiteral("Nachtisch");
+                m.bgCrop = QRectF(0.1, 0.1, 0.8, 0.8);
+            }
             const QString recipeFile = dir + QStringLiteral("/rezepte/aepfel.tex");
             o.imagePrefix = QStringLiteral("rezepte/");
             CHECK(LatexExport::exportRecipe(r, recipeFile, o), "Kapitel schreiben");
@@ -1351,7 +1374,13 @@ int main(int argc, char **argv)
             const QString mt = QString::fromUtf8(mf.readAll());
             CHECK(mt.indexOf(QStringLiteral("\\input{rezepte/aepfel}")) < mt.indexOf(LatexExport::masterMarker()) && mt.count(QStringLiteral("\\input{rezepte/aepfel}")) == 1,
                   "Eintrag vor der Marke");
-            CHECK(mt.contains(QStringLiteral("\\date{}")) && mt.contains(QStringLiteral("schmutztitel-hintergrund")) && mt.contains(QStringLiteral("\\printindex"))
+            if (cls == 1)
+                CHECK(mt.contains(QStringLiteral("\\BindungsHSpace{46.4mm}")) && mt.contains(QStringLiteral("\\raisebox{60.5mm}"))
+                          && mt.contains(QStringLiteral("width=139.9mm]{titelseite-hintergrund}")) && mt.contains(QStringLiteral("\\setlength{\\vmBindekorrektur}{12mm}"))
+                          && mt.indexOf(QStringLiteral("titelseite-hintergrund")) > mt.indexOf(QStringLiteral("Titelseite")),
+                      "frei positioniertes Bild auf der Titelseite");
+            if (cls == 0) CHECK(mt.contains(QStringLiteral("\\chapter{Nachtisch}\n\\input{rezepte/aepfel}")), "Themen-Kapitel im neuen Master");
+            CHECK(mt.contains(QStringLiteral("\\date{}")) && mt.contains(cls ? QStringLiteral("titelseite-hintergrund") : QStringLiteral("schmutztitel-hintergrund")) && mt.contains(QStringLiteral("\\printindex"))
                       && mt.contains(QStringLiteral("\\input{glossar}")) && mt.contains(cls ? QStringLiteral("bindingoffset=12mm") : QStringLiteral("BCOR=12mm")),
                   "Master-Inhalt");
             // optional übersetzen (latexmk vorhanden und VIVIA_TEX_TEST gesetzt)
@@ -1365,12 +1394,72 @@ int main(int argc, char **argv)
                     p.waitForFinished(240000);
                     CHECK(p.exitCode() == 0, QStringLiteral("latexmk %1 %2").arg(engine, master) + QString::fromLocal8Bit(p.readAllStandardOutput().right(1500)));
                     const QString pdf = QFileInfo(master).completeBaseName() + QStringLiteral(".pdf");
-                    if (cls == 0 && engine == QLatin1String("-pdf")) QFile::copy(QDir(dir).filePath(pdf), QStringLiteral("/tmp/kochbuch-test.pdf"));
+                    if (engine == QLatin1String("-pdf")) {
+                        QFile::remove(QStringLiteral("/tmp/kochbuch-test%1.pdf").arg(cls));
+                        QFile::copy(QDir(dir).filePath(pdf), QStringLiteral("/tmp/kochbuch-test%1.pdf").arg(cls));
+                    }
                     QProcess::execute(QStringLiteral("latexmk"), { QStringLiteral("-C"), QStringLiteral("-cd"), master });
                 }
                 out << "  " << QFileInfo(master).fileName() << " übersetzt (" << engines.join(QStringLiteral(", ")) << ")\n";
             }
         }
+    }
+
+    // ---- LaTeX: Rezepte als \section in Themen-Kapiteln, Hintergrundbild-Zuschnitt
+    out << "\nLaTeX-Themenkapitel:\n";
+    {
+        QTemporaryDir td;
+        const QString master = td.filePath(QStringLiteral("buch.tex"));
+        LatexExport::MasterOptions m;
+        m.title = QStringLiteral("Test");
+        m.firstChapter = QStringLiteral("Suppen & Eintöpfe");
+        QString err;
+        CHECK(LatexExport::writeMaster(master, m, { QStringLiteral("rezepte/linsensuppe") }, &err), "Master " + err);
+        bool already = false, created = false;
+        CHECK(LatexExport::addToMaster(master, QStringLiteral("rezepte/gulasch"), &err, &already, QStringLiteral("Hauptgerichte"), &created) && created,
+              "neues Themen-Kapitel");
+        CHECK(LatexExport::addToMaster(master, QStringLiteral("rezepte/erbsensuppe"), &err, &already, QStringLiteral("suppen & eintöpfe"), &created) && !created,
+              "vorhandenes Kapitel (Groß/klein egal)");
+        CHECK(LatexExport::addToMaster(master, QStringLiteral("rezepte/rouladen"), &err, &already, QStringLiteral("Hauptgerichte"), &created) && !created,
+              "zweites Rezept im Kapitel");
+        QFile f(master);
+        f.open(QIODevice::ReadOnly);
+        const QString t = QString::fromUtf8(f.readAll());
+        const int suppen = t.indexOf(QStringLiteral("\\chapter{Suppen \\& Eintöpfe}")), linsen = t.indexOf(QStringLiteral("rezepte/linsensuppe")),
+                  erbsen = t.indexOf(QStringLiteral("rezepte/erbsensuppe")), haupt = t.indexOf(QStringLiteral("\\chapter{Hauptgerichte}")),
+                  gulasch = t.indexOf(QStringLiteral("rezepte/gulasch")), rouladen = t.indexOf(QStringLiteral("rezepte/rouladen")),
+                  marker = t.indexOf(LatexExport::masterMarker());
+        CHECK(suppen >= 0 && suppen < linsen && linsen < erbsen && erbsen < haupt && haupt < gulasch && gulasch < rouladen && rouladen < marker,
+              "Reihenfolge im Master");
+        CHECK(LatexExport::masterChapters(t) == QStringList({ QStringLiteral("Suppen & Eintöpfe"), QStringLiteral("Hauptgerichte") }), "Kapitel lesen");
+        Recipe r;
+        r.title = QStringLiteral("Kartoffelsuppe");
+        r.tags = { QStringLiteral("vegetarisch") };
+        CHECK(LatexExport::suggestChapter(r) == QStringLiteral("Suppen"), "Kapitelvorschlag Suppe");
+        r.title = QStringLiteral("Mousse au Chocolat");
+        r.tags = { QStringLiteral("desserts") };
+        CHECK(LatexExport::suggestChapter(r) == QStringLiteral("Nachtisch"), "Kapitelvorschlag Nachtisch");
+        LatexExport::Options o;
+        o.heading = LatexExport::Heading::Section;
+        const QString sec = LatexExport::toLatex(r, o);
+        CHECK(sec.contains(QStringLiteral("\\ifnum\\value{section}>0 \\clearpage\\fi\n\\section{Mousse au Chocolat}")) && sec.contains(QStringLiteral("\\subsection*{Zubereitung}"))
+                  && !sec.contains(QStringLiteral("\\chapter")) && !sec.contains(QStringLiteral("\\markright")),
+              "Rezept als \\section");
+        // Hintergrundbild: drehen, zuschneiden, Breite begrenzen
+        QImage img(400, 200, QImage::Format_RGB32);
+        img.fill(Qt::red);
+        LatexExport::MasterOptions bm;
+        bm.bgPlacement = LatexExport::MasterOptions::BgPlacement::Free;
+        bm.bgTrim = false;
+        bm.bgRotation = 90;
+        bm.bgCrop = QRectF(0, 0.5, 1, 0.5);
+        const QImage pb = LatexExport::prepareBackground(img, bm);
+        CHECK(pb.size() == QSize(200, 200), "drehen und zuschneiden " + QString::number(pb.width()) + "x" + QString::number(pb.height()));
+        bm.bgLeftMm = 40;
+        bm.bindingMm = 12;
+        CHECK(std::fabs(LatexExport::maxBackgroundWidth(bm, 0.5) - 158) < 0.01, "maximale Breite (frei)");
+        bm.bgBottomMm = 250;   // nur noch 47 mm Höhe frei
+        CHECK(std::fabs(LatexExport::maxBackgroundWidth(bm, 1.0) - 47) < 0.01, "maximale Breite durch Höhe begrenzt");
     }
 
     // ---- Celsius-Schreibweise

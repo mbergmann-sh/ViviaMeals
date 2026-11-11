@@ -17,10 +17,14 @@
 
 #include "recipe.h"
 
+#include <QImage>
+#include <QRectF>
+
 namespace LatexExport {
 
 enum class DocClass { Book, ScrBook };
 enum class Mode { Chapter, Standalone };
+enum class Heading { Chapter, Section };   // Rezept als \\chapter oder als \\section in einem Themen-Kapitel
 
 struct Options {
     DocClass docClass = DocClass::ScrBook;
@@ -31,6 +35,8 @@ struct Options {
     bool source = false;        // Quelle ausgeben (Vorgabe: nein)
     bool indexEntries = true;   // Stichwörter (\index) für Titel und Zutaten
     QString imagePrefix;        // Pfad des Fotos relativ zum Master-Dokument (leer = neben der Rezeptdatei)
+    Heading heading = Heading::Chapter;
+    bool newPage = true;        // bei \\section: jedes Rezept auf einer neuen Seite
 };
 
 struct MasterOptions {
@@ -39,7 +45,19 @@ struct MasterOptions {
     QString subtitle;
     QString author;
     bool noDate = true;         // kein Datum auf dem Titelblatt
-    QString halfTitleImage;     // Hintergrundbild des Schmutztitels (Datei; leer = ohne)
+    QString halfTitleImage;     // Hintergrundbild (Datei; leer = ohne)
+    enum class BgTarget { HalfTitle, TitlePage };
+    enum class BgPlacement { FillPage, Centered, Free };
+    BgTarget bgTarget = BgTarget::HalfTitle;      // Schmutztitel oder Titelseite
+    BgPlacement bgPlacement = BgPlacement::FillPage;
+    double bgWidthMm = 140;     // Breite des Bildes (Centered, Free)
+    double bgLeftMm = 45;       // Abstand von der linken Papierkante (Free)
+    double bgBottomMm = 60;     // Abstand von der unteren Papierkante (Centered, Free)
+    bool bgShiftBinding = true; // um die Bindekorrektur nach rechts verschieben (\BindungsHSpace)
+    bool bgTrim = true;         // gleichmäßigen weißen Rand des Bildes abschneiden
+    QRectF bgCrop;              // Zuschnitt, relativ (0…1) zum gedrehten Bild; leer = ganzes Bild
+    int bgRotation = 0;         // Drehung in Grad (Vielfache von 90)
+    QString firstChapter;       // bei Rezepten als \\section: Themen-Kapitel für das erste Rezept
     bool toc = true;
     bool glossary = true;
     bool index = true;
@@ -56,12 +74,33 @@ QString indexEntry(const QString &term, const QString &sub = QString());
 // Master-Dokument: inputs = Pfade (relativ zum Master, ohne .tex) der einzubindenden Rezepte
 QString masterDocument(const MasterOptions &m, const QStringList &inputs, const QString &halfTitleFile = QString());
 QString glossaryFile();
+// Hintergrundbild aufbereiten: weißen Rand abschneiden (trim), bei FillPage auf A4-Format zuschneiden
+QImage prepareBackground(const QImage &src, const MasterOptions &m);
+QImage trimWhite(const QImage &src, int threshold = 245);
 // schreibt das Master-Dokument, glossar.tex und das Schmutztitelbild daneben (vorhandenes glossar.tex bleibt)
 bool writeMaster(const QString &file, const MasterOptions &m, const QStringList &inputs, QString *error = nullptr);
 // \input-Pfad einer Rezeptdatei relativ zum Master-Dokument (Schrägstriche, ohne .tex)
 QString relativeInput(const QString &masterFile, const QString &recipeFile);
 // trägt \input{path} in ein bestehendes Master-Dokument ein; already = war schon eingetragen
-bool addToMaster(const QString &masterFile, const QString &inputPath, QString *error = nullptr, bool *already = nullptr);
-QString masterMarker();   // „% ViviaMeals: weitere Rezepte hier“
+// chapter: Themen-Kapitel (\\chapter{…}) – wird angelegt, wenn es noch fehlt; leer = vor die Marke
+bool addToMaster(const QString &masterFile, const QString &inputPath, QString *error = nullptr, bool *already = nullptr,
+                 const QString &chapter = QString(), bool *chapterCreated = nullptr);
+// Kapitelüberschriften (\\chapter, \\addchap) im Hauptteil eines Master-Dokuments, lesbar (ohne LaTeX-Maskierung)
+QStringList masterChapters(const QString &masterText);
+QStringList defaultChapters();                 // Vorspeisen, Suppen, Salate, Hauptgerichte …
+QString suggestChapter(const Recipe &r);       // passendes Themen-Kapitel aus Tags und Titel
+// Hintergrundbild: maximale Breite in mm, damit es nicht über die A4-Seite hinausragt
+double maxBackgroundWidth(const MasterOptions &m, double heightPerWidth);
+QString masterMarker();
+
+// Vorhandene LaTeX-Installation (TeX Live, MiKTeX, MacTeX) suchen: pdflatex/lualatex/xelatex im Suchpfad
+// und an den üblichen Installationsorten. Ergebnis wird zwischengespeichert; refresh = neu suchen.
+struct Installation {
+    QString program;   // gefundenes Programm (z. B. …/pdflatex.exe), leer = keine Installation
+    QString name;      // „TeX Live 2025“, „MiKTeX“, „MacTeX“ …
+    bool found() const { return !program.isEmpty(); }
+};
+Installation findInstallation(bool refresh = false);
+QStringList searchDirs();   // zusätzliche Suchorte außerhalb des Suchpfads   // „% ViviaMeals: weitere Rezepte hier“
 
 } // namespace LatexExport

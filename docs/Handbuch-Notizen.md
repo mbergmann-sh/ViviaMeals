@@ -1,6 +1,6 @@
 # ViviaMeals – Notizen für das Handbuch
 
-Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.7.0.
+Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.7.2.
 
 > **Name:** Das Programm heißt seit Version 0.6 **ViviaMeals** (vorher VitaMeals; die ganze Reihe heißt jetzt
 > Vivia – ViviaParms, ViviaBreathe). Alte Einstellungen, Profile, Tagebücher, eigene Lebensmittel und
@@ -583,3 +583,59 @@ außer Salz/Pfeffer/Wasser/Zucker, unter dem Rezept als Unterpunkt).
   im Stichwortverzeichnis); bewusst ohne glossaries-Paket – keine Zusatzprogramme nötig
 - Stichwortverzeichnis: imakeidx (makeindex läuft automatisch), zweispaltig, im Inhaltsverzeichnis
 - Übersetzen: `latexmk -pdf kochbuch.tex` (oder 3× pdflatex); geprüft mit TeX Live (pdfLaTeX, beide Klassen)
+
+
+### Hintergrundbild positionieren (ab 0.7.1)
+
+Im Bereich „Neues Master-Dokument“ nach Wahl eines Hintergrundbilds:
+- **auf:** Schmutztitel oder Titelseite
+- **Platzierung:** *ganze Seite* (Bild wird mittig auf A4-Format zugeschnitten, nicht verzerrt),
+  *waagerecht mittig* (Breite und Abstand unten; zentriert im sichtbaren Bereich neben der Bindung) oder
+  *frei positioniert* (Breite, Abstand links ab Papierkante, Abstand unten ab Papierkante – in mm)
+- **um die Bindekorrektur verschieben:** auf rechten Seiten rückt das Bild um die Bindekorrektur nach rechts
+- **weißen Rand abschneiden:** z. B. bei Bildschirmfotos nur der eigentliche Ausschnitt
+- Vorschau rechts (A4, rechte Seite; grau = Bindung, rot gestrichelt = Bild ragt über die Seite)
+
+Erzeugt wird (Beispiel „frei“):
+
+    \AddToShipoutPictureBG*{%
+        \AtPageLowerLeft{%
+            \BindungsHSpace{46.4mm}%    % bei Bindekorrektur automatisch verschoben
+            \raisebox{60.5mm}{%
+                \includegraphics[width=139.9mm]{titelseite-hintergrund}%
+            }%
+        }%
+    }
+
+mit `\newcommand{\BindungsHSpace}[1]{\hspace*{\dimexpr#1+\vmBindekorrektur\relax}}` in der Präambel
+(`\vmBindekorrektur` = Bindekorrektur bzw. 0 mm). Das Bild liegt als `titelseite-hintergrund.png` bzw.
+`schmutztitel-hintergrund.jpg` neben dem Master-Dokument (PNG bleibt PNG, Fotos werden JPEG).
+
+Außerdem behoben: book-Klasse – nach dem Inhaltsverzeichnis fehlte die Kopfzeile (fancyhdr: Stil „plain“
+überschrieb die Einstellungen; jetzt eigener Stil „kochbuch“); leere linke Seiten (Vakatseiten) sind in
+beiden Klassen ganz ohne Kopf- und Fußzeile.
+
+
+### Themen-Kapitel, Zuschnitt, LaTeX-Installation (ab 0.7.2)
+
+**Rezept einbinden als** (Bereich „Rezept“):
+- *eigenes Kapitel (\chapter)* – wie bisher; Kopfzeile: Kapitel | Abschnitt (Zutaten …)
+- *Abschnitt in einem Themen-Kapitel (\section)* – **Themen-Kapitel** auswählen oder eintippen. Die Liste
+  enthält die Kapitel des gewählten Master-Dokuments und Standardkapitel (Frühstück, Vorspeisen, Suppen,
+  Salate, Hauptgerichte, Beilagen, Snacks, Süßspeisen, Nachtisch, Backen, Getränke, Grundrezepte);
+  vorgeschlagen wird ein passendes aus Tags und Titel. Beim Eintragen landet `\input` am Ende dieses Kapitels;
+  fehlt das Kapitel, wird `\chapter{…}` vor der Marke angelegt. Unterüberschriften werden `\subsection*`,
+  die Kopfzeile zeigt Themen-Kapitel | Rezept. „auf neuer Seite“: `\ifnum\value{section}>0 \clearpage\fi`
+  – das erste Rezept steht direkt unter der Kapitelüberschrift.
+
+**Hintergrundbild zuschneiden und skalieren:** „Zuschneiden …“ öffnet den Zuschnitt-Dialog (frei, 4:3 …,
+DIN A4 hoch/quer, drehen). Gespeichert werden nur Ausschnitt und Drehung; beim Erstellen wird das Original
+in voller Auflösung zugeschnitten. Die Breite lässt sich über Feld oder Schieberegler stufenlos einstellen;
+die größte erlaubte Breite (Knopf „max.“) ergibt sich aus Seitenbreite, Abstand links, Bindekorrektur und
+– über das Seitenverhältnis – aus der Höhe bis zum oberen Seitenrand.
+
+**LaTeX-Installation:** *Als LaTeX-Datei exportieren* (Menü, Werkzeugleiste, Kontextmenü) ist nur aktiv, wenn
+pdflatex, lualatex oder xelatex gefunden wird – im Suchpfad, unter `C:\texlive\<Jahr>\bin\windows|win64|win32`,
+`%ProgramFiles%\MiKTeX\miktex\bin\x64`, `%LOCALAPPDATA%\Programs\MiKTeX\miktex\bin\x64`, `/Library/TeX/texbin`,
+`/usr/local/texlive/<Jahr>/bin/…` oder im Ordner aus `VIVIA_TEX_BIN`. Der Tooltip nennt die gefundene
+Distribution bzw. wo man TeX Live/MiKTeX bekommt; der Export-Dialog zeigt das gefundene Programm.
