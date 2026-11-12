@@ -628,6 +628,16 @@ void takeScreenshots(MainWindow *w, const QString &dir)
         }
     }
     {
+        // Über ViviaMeals (modal: per Timer fotografieren und schließen)
+        QTimer::singleShot(400, [&] {
+            if (QWidget *m = QApplication::activeModalWidget()) {
+                shot(m, dir, QStringLiteral("ueber"));
+                m->close();
+            }
+        });
+        QMetaObject::invokeMethod(w, "about");
+    }
+    {
         // Menüassistent: Rahmen, Vorlieben, Menü, Abschluss; Rezeptwahl für einen Gang; gespeicherte Menüs
         MenuWizard wz(w);
         wz.show();

@@ -66,6 +66,7 @@
 #include <QPrinter>
 #include <QProgressDialog>
 #include <QPushButton>
+#include <QScreen>
 #include <QSettings>
 #include <QSplitter>
 #include <QStandardPaths>
@@ -1404,7 +1405,19 @@ void MainWindow::about()
 {
     QMessageBox box(this);
     box.setWindowTitle(tr("Über ViviaMeals"));
-    box.setIconPixmap(Icons::app().pixmap(72, 72));
+    // Bild links: höchstens 210 Pixel breit, auf kleinen Bildschirmen höchstens 45 % der Bildschirmhöhe; scharf auch bei HiDPI
+    QPixmap koch(QStringLiteral(":/images/about-koch.jpg"));
+    if (koch.isNull()) {
+        box.setIconPixmap(Icons::app().pixmap(72, 72));
+    } else {
+        const QScreen *scr = screen();
+        const int maxH = scr ? int(scr->availableGeometry().height() * 0.45) : 300;
+        const int w = qMax(120, qMin(210, maxH * koch.width() / koch.height()));
+        const qreal dpr = devicePixelRatioF();
+        koch = koch.scaledToWidth(qRound(w * dpr), Qt::SmoothTransformation);
+        koch.setDevicePixelRatio(dpr);
+        box.setIconPixmap(koch);
+    }
     box.setText(tr("<h2>ViviaMeals %1</h2><p>Rezeptverwaltung mit Nährwertanalyse, Kühlschrank-Vorschlägen, Wochenplänen "
                    "und Assistenten für die Gewichtskontrolle.</p>")
                     .arg(QApplication::applicationVersion()));

@@ -6,6 +6,9 @@
     <qresource prefix="/doc">
         <file alias="LICENSE">../LICENSE</file>
     </qresource>
+    <qresource prefix="/images">
+        <file alias="about-koch.jpg">images/about-koch.jpg</file>
+    </qresource>
     <qresource prefix="/samples">
         <file alias="beispiele.rk">samples/beispiele.rk</file>
         <file alias="beispiele.mmf">samples/beispiele.mmf</file>
