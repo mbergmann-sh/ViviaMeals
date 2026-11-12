@@ -66,7 +66,8 @@ const char *kFonts =
     "<style:font-face style:name=\"Liberation Serif\" svg:font-family=\"'Liberation Serif'\" style:font-family-generic=\"roman\" style:font-pitch=\"variable\"/>"
     "</office:font-face-decls>";
 
-QString stylesXml(const QString &footerLeft)
+QString stylesXml(const QString &footerLeft, const QString &extraStyles = QString(), const QString &extraLayouts = QString(),
+                  const QString &extraMasters = QString())
 {
     const QString accent = QStringLiteral("#0f67ab");
     QString s = QStringLiteral("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<office:document-styles") + QString::fromLatin1(kNamespaces) + QStringLiteral(">");
@@ -117,8 +118,8 @@ QString stylesXml(const QString &footerLeft)
              "<style:style style:name=\"Graphics\" style:family=\"graphic\">"
              "<style:graphic-properties text:anchor-type=\"paragraph\" svg:x=\"0cm\" svg:y=\"0cm\" style:wrap=\"dynamic\" style:vertical-pos=\"top\""
              " style:vertical-rel=\"paragraph\" style:horizontal-pos=\"center\" style:horizontal-rel=\"paragraph\"/></style:style>"
-             "</office:styles>")
-             .arg(accent);
+             "%2</office:styles>")
+             .arg(accent, extraStyles);
     s += QStringLiteral(
         "<office:automatic-styles>"
         "<style:page-layout style:name=\"pm1\">"
@@ -126,12 +127,12 @@ QString stylesXml(const QString &footerLeft)
         " fo:margin-top=\"2cm\" fo:margin-bottom=\"1.5cm\" fo:margin-left=\"2cm\" fo:margin-right=\"2cm\"/>"
         "<style:footer-style><style:header-footer-properties fo:min-height=\"0.6cm\" fo:margin-top=\"0.5cm\"/></style:footer-style>"
         "</style:page-layout>"
-        "</office:automatic-styles>");
+        "%1</office:automatic-styles>").arg(extraLayouts);
     s += QStringLiteral("<office:master-styles><style:master-page style:name=\"Standard\" style:page-layout-name=\"pm1\"><style:footer>"
                         "<text:p text:style-name=\"Footer\">%1<text:tab/>%2 <text:page-number text:select-page=\"current\">1</text:page-number>"
                         " %3 <text:page-count>1</text:page-count></text:p>"
-                        "</style:footer></style:master-page></office:master-styles></office:document-styles>")
-             .arg(esc(footerLeft), tr("Seite"), tr("von"));
+                        "</style:footer></style:master-page>%4</office:master-styles></office:document-styles>")
+             .arg(esc(footerLeft), tr("Seite"), tr("von"), extraMasters);
     return s;
 }
 
@@ -215,7 +216,7 @@ QByteArray Zip::finish()
 
 // ---------------------------------------------------------------- Dokument
 
-QByteArray toOdt(const Recipe &r, const Options &opt)
+Part recipeBody(const Recipe &r, const Options &opt, int index, const QString &headingStyle, const QString &kicker)
 {
     const double servings = opt.servings > 0 ? opt.servings : r.servings;
     const double factor = r.servings > 0 ? servings / r.servings : 1.0;
@@ -229,7 +230,7 @@ QByteArray toOdt(const Recipe &r, const Options &opt)
         QImage q;
         if (q.loadFromData(img) && q.width() > 0) {
             const bool png = img.startsWith("\x89PNG");
-            imgName = png ? QStringLiteral("Pictures/rezeptbild.png") : QStringLiteral("Pictures/rezeptbild.jpg");
+            imgName = QStringLiteral("Pictures/rezeptbild%1.%2").arg(index > 0 ? QString::number(index) : QString(), png ? QStringLiteral("png") : QStringLiteral("jpg"));
             imgMime = png ? QStringLiteral("image/png") : QStringLiteral("image/jpeg");
             imgW = opt.imageWidthCm;
             imgH = imgW * q.height() / q.width();
@@ -239,14 +240,16 @@ QByteArray toOdt(const Recipe &r, const Options &opt)
     }
 
     QString b;   // office:text
-    b += QStringLiteral("<text:h text:style-name=\"Heading_20_1\" text:outline-level=\"1\">%1</text:h>").arg(esc(r.title));
+    if (!kicker.isEmpty()) b += QStringLiteral("<text:p text:style-name=\"%1\">%2</text:p>").arg(headingStyle, esc(kicker));
+    b += QStringLiteral("<text:h text:style-name=\"%2\" text:outline-level=\"1\">%1</text:h>")
+             .arg(esc(r.title), kicker.isEmpty() ? headingStyle : QStringLiteral("Heading_20_1"));
     // Portionen + Energie; das Bild hängt an diesem Absatz (rechts, Text fließt links vorbei)
     QString frame;
     if (!img.isEmpty())
-        frame = QStringLiteral("<draw:frame draw:style-name=\"fr1\" draw:name=\"Rezeptbild\" text:anchor-type=\"paragraph\" svg:width=\"%1cm\" svg:height=\"%2cm\" draw:z-index=\"0\">"
+        frame = QStringLiteral("<draw:frame draw:style-name=\"fr1\" draw:name=\"Rezeptbild%5\" text:anchor-type=\"paragraph\" svg:width=\"%1cm\" svg:height=\"%2cm\" draw:z-index=\"0\">"
                                "<draw:image xlink:href=\"%3\" xlink:type=\"simple\" xlink:show=\"embed\" xlink:actuate=\"onLoad\"/>"
                                "<svg:title>%4</svg:title></draw:frame>")
-                    .arg(QString::number(imgW, 'f', 2), QString::number(imgH, 'f', 2), imgName, esc(r.title));
+                    .arg(QString::number(imgW, 'f', 2), QString::number(imgH, 'f', 2), imgName, esc(r.title), QString::number(index));
     QString servingsText = Fmt::amount(servings, QString()) + QLatin1Char(' ')
                            + (r.yieldUnit.isEmpty() ? (servings == 1 ? tr("Portion") : tr("Portionen")) : r.yieldUnit);
     const double grams = MealTypes::servingGrams(r);
@@ -321,7 +324,7 @@ QByteArray toOdt(const Recipe &r, const Options &opt)
                 .arg(head ? QStringLiteral("TC_head") : QStringLiteral("TC"), num ? QStringLiteral("VM_Zahl") : QStringLiteral("Table_20_Contents"), text);
         };
         const QString perHead = r.yieldUnit.isEmpty() ? tr("je Portion") : tr("je %1").arg(r.yieldUnit);
-        b += QStringLiteral("<table:table table:name=\"Naehrwerte\" table:style-name=\"Tab\">"
+        b += QStringLiteral("<table:table table:name=\"Naehrwerte%1\" table:style-name=\"Tab\">").arg(index + 1) + QStringLiteral(""
                             "<table:table-column table:style-name=\"Tab.A\"/><table:table-column table:style-name=\"Tab.B\" table:number-columns-repeated=\"3\"/>");
         b += QStringLiteral("<table:table-header-rows><table:table-row>") + cell(QStringLiteral("<text:span text:style-name=\"T_bold\">%1</text:span>").arg(tr("Nährwerte")), false, true)
              + cell(QStringLiteral("<text:span text:style-name=\"T_bold\">%1</text:span>").arg(esc(perHead)), true, true)
@@ -346,10 +349,17 @@ QByteArray toOdt(const Recipe &r, const Options &opt)
     if (!r.source.isEmpty())
         b += QStringLiteral("<text:p text:style-name=\"VM_Klein\">%1 %2</text:p>").arg(tr("Quelle:"), esc(r.source));
 
-    QString content = QStringLiteral("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<office:document-content") + QString::fromLatin1(kNamespaces) + QStringLiteral(">");
-    content += QString::fromLatin1(kFonts);
-    content += QStringLiteral(
-        "<office:automatic-styles>"
+    Part part;
+    part.xml = b;
+    part.image = img;
+    part.imageName = imgName;
+    part.imageMime = imgMime;
+    return part;
+}
+
+QString recipeAutoStyles()
+{
+    return QStringLiteral(
         "<style:style style:name=\"fr1\" style:family=\"graphic\" style:parent-style-name=\"Graphics\">"
         "<style:graphic-properties style:wrap=\"left\" style:number-wrapped-paragraphs=\"no-limit\" style:wrap-contour=\"false\""
         " fo:margin-left=\"0.4cm\" fo:margin-right=\"0cm\" fo:margin-top=\"0cm\" fo:margin-bottom=\"0.3cm\""
@@ -364,31 +374,52 @@ QByteArray toOdt(const Recipe &r, const Options &opt)
         "<style:style style:name=\"Tab.B\" style:family=\"table-column\"><style:table-column-properties style:column-width=\"2.2cm\"/></style:style>"
         "<style:style style:name=\"TC\" style:family=\"table-cell\"><style:table-cell-properties fo:padding=\"0.06cm\" fo:border-bottom=\"0.5pt solid #b0b0b0\" fo:border-top=\"none\" fo:border-left=\"none\" fo:border-right=\"none\"/></style:style>"
         "<style:style style:name=\"TC_head\" style:family=\"table-cell\"><style:table-cell-properties fo:padding=\"0.06cm\" fo:background-color=\"#e8f0f8\" fo:border-bottom=\"0.75pt solid #0f67ab\" fo:border-top=\"none\" fo:border-left=\"none\" fo:border-right=\"none\"/></style:style>"
-        "</office:automatic-styles>");
-    content += QStringLiteral("<office:body><office:text>") + b + QStringLiteral("</office:text></office:body></office:document-content>");
+        );
+}
+
+QByteArray package(const QString &title, const QString &body, const QList<Part> &parts, const QString &extraAutoStyles, const QString &styles)
+{
+    QString content = QStringLiteral("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<office:document-content") + QString::fromLatin1(kNamespaces) + QStringLiteral(">");
+    content += QString::fromLatin1(kFonts);
+    content += QStringLiteral("<office:automatic-styles>") + recipeAutoStyles() + extraAutoStyles + QStringLiteral("</office:automatic-styles>");
+    content += QStringLiteral("<office:body><office:text>") + body + QStringLiteral("</office:text></office:body></office:document-content>");
 
     const QString now = QDateTime::currentDateTime().toString(Qt::ISODate);
     const QString meta = QStringLiteral("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<office:document-meta") + QString::fromLatin1(kNamespaces)
                          + QStringLiteral("><office:meta><meta:generator>ViviaMeals/%1</meta:generator><dc:title>%2</dc:title>"
                                           "<dc:language>de-DE</dc:language><meta:creation-date>%3</meta:creation-date></office:meta></office:document-meta>")
-                               .arg(esc(QCoreApplication::applicationVersion()), esc(r.title), now);
+                               .arg(esc(QCoreApplication::applicationVersion()), esc(title), now);
     QString manifest = QStringLiteral("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                       "<manifest:manifest xmlns:manifest=\"urn:oasis:names:tc:opendocument:xmlns:manifest:1.0\" manifest:version=\"1.2\">"
                                       "<manifest:file-entry manifest:full-path=\"/\" manifest:version=\"1.2\" manifest:media-type=\"application/vnd.oasis.opendocument.text\"/>"
                                       "<manifest:file-entry manifest:full-path=\"content.xml\" manifest:media-type=\"text/xml\"/>"
                                       "<manifest:file-entry manifest:full-path=\"styles.xml\" manifest:media-type=\"text/xml\"/>"
                                       "<manifest:file-entry manifest:full-path=\"meta.xml\" manifest:media-type=\"text/xml\"/>");
-    if (!img.isEmpty()) manifest += QStringLiteral("<manifest:file-entry manifest:full-path=\"%1\" manifest:media-type=\"%2\"/>").arg(imgName, imgMime);
+    for (const Part &p : parts)
+        if (!p.image.isEmpty())
+            manifest += QStringLiteral("<manifest:file-entry manifest:full-path=\"%1\" manifest:media-type=\"%2\"/>").arg(p.imageName, p.imageMime);
     manifest += QStringLiteral("</manifest:manifest>");
 
     Zip zip;
     zip.add(QStringLiteral("mimetype"), QByteArrayLiteral("application/vnd.oasis.opendocument.text"), false);   // erste Datei, unkomprimiert
     zip.add(QStringLiteral("content.xml"), content.toUtf8());
-    zip.add(QStringLiteral("styles.xml"), stylesXml(r.title).toUtf8());
+    zip.add(QStringLiteral("styles.xml"), styles.toUtf8());
     zip.add(QStringLiteral("meta.xml"), meta.toUtf8());
-    if (!img.isEmpty()) zip.add(imgName, img, false);
+    for (const Part &p : parts)
+        if (!p.image.isEmpty()) zip.add(p.imageName, p.image, false);
     zip.add(QStringLiteral("META-INF/manifest.xml"), manifest.toUtf8());
     return zip.finish();
+}
+
+QString styles(const QString &footerLeft, const QString &extraStyles, const QString &extraLayouts, const QString &extraMasters)
+{
+    return stylesXml(footerLeft, extraStyles, extraLayouts, extraMasters);
+}
+
+QByteArray toOdt(const Recipe &r, const Options &opt)
+{
+    const Part p = recipeBody(r, opt, 0);
+    return package(r.title, p.xml, { p }, QString(), stylesXml(r.title));
 }
 
 bool write(const Recipe &r, const QString &file, const Options &opt, QString *error)

@@ -70,6 +70,8 @@
 #include <QTemporaryDir>
 #include "sync.h"
 #include "syncdialog.h"
+#include "menudialog.h"
+#include "menu.h"
 #include "syncserver.h"
 #include <cmath>
 
@@ -141,7 +143,7 @@ void createDemo(const QString &folder)
     db.create(folder, QObject::tr("Demo-Rezepte"));
     db.beginBatch();
     for (const QString &f : { QStringLiteral(":/samples/beispiele.rk"), QStringLiteral(":/samples/beispiele.mmf"), QStringLiteral(":/samples/umlaute.rk"),
-                            QStringLiteral(":/samples/gesund.rk") }) {
+                            QStringLiteral(":/samples/gesund.rk"), QStringLiteral(":/samples/festlich.rk") }) {
         const Importers::Result res = Importers::importFile(f, Importers::Format::Unknown);
         for (Recipe r : res.recipes) {
             r.image = demoImage(r);
@@ -624,6 +626,44 @@ void takeScreenshots(MainWindow *w, const QString &dir)
             for (const char *k : { "tex/bgImage", "tex/bgTarget", "tex/bgPlacement", "tex/bgWidth", "tex/bgLeft", "tex/bgBottom", "tex/author", "tex/heading" })
                 st.remove(QLatin1String(k));
         }
+    }
+    {
+        // Menüassistent: Rahmen, Vorlieben, Menü, Abschluss; Rezeptwahl für einen Gang; gespeicherte Menüs
+        MenuWizard wz(w);
+        wz.show();
+        if (auto *r = wz.findChildren<QRadioButton *>().value(2)) r->click();   // 5 Gänge
+        if (auto *t = wz.findChildren<QLineEdit *>().value(0)) t->setText(QObject::tr("Festtagsmenü"));
+        if (auto *o = wz.findChildren<QLineEdit *>().value(1)) o->setText(QObject::tr("Weihnachten im Familienkreis"));
+        QApplication::processEvents();
+        shot(&wz, dir, QStringLiteral("menue-1-rahmen"));
+        wz.next();
+        QApplication::processEvents();
+        shot(&wz, dir, QStringLiteral("menue-2-vorlieben"));
+        wz.next();
+        wz.proposeNow(11);
+        wz.selectCourse(3);
+        QApplication::processEvents();
+        shot(&wz, dir, QStringLiteral("menue-3-menue"));
+        {
+            Menu::Composer comp(RecipeDb::instance().summaries(), wz.menu().prefs, 11);
+            MenuCandidateDialog cd(comp, wz.menu().items, 4, &wz);
+            cd.show();
+            QApplication::processEvents();
+            shot(&cd, dir, QStringLiteral("menue-gang-waehlen"));
+        }
+        wz.next();
+        QApplication::processEvents();
+        shot(&wz, dir, QStringLiteral("menue-4-export"));
+        Menu::MenuData saved = wz.menu();
+        saved.date = QDate(2026, 12, 24);
+        Menu::saveMenu(RecipeDb::instance().folder(), saved);
+        {
+            MenuListDialog ld(w);
+            ld.show();
+            QApplication::processEvents();
+            shot(&ld, dir, QStringLiteral("menue-gespeichert"));
+        }
+        wz.hide();
     }
     {
         // Abgleich einrichten: eigene Website, Freigabe im LAN; Laden auf einem neuen Gerät

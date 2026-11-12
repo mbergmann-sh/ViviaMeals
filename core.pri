@@ -33,6 +33,8 @@ SOURCES += \
     $$PWD/src/escl.cpp \
     $$PWD/src/duplicates.cpp \
     $$PWD/src/sync.cpp \
+    $$PWD/src/menu.cpp \
+    $$PWD/src/menuexport.cpp \
     $$PWD/src/syncserver.cpp
 
 HEADERS += \
@@ -61,6 +63,8 @@ HEADERS += \
     $$PWD/src/recipepackage.h \
     $$PWD/src/openfoodfacts.h \
     $$PWD/src/sync.h \
+    $$PWD/src/menu.h \
+    $$PWD/src/menuexport.h \
     $$PWD/src/syncserver.h \
     $$PWD/src/deepl.h \
     $$PWD/src/ocr.h \

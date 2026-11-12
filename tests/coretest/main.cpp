@@ -25,6 +25,8 @@
 #include "recipepackage.h"
 #include "openfoodfacts.h"
 #include "sync.h"
+#include "menu.h"
+#include "menuexport.h"
 #include "syncserver.h"
 
 #include <QGuiApplication>
@@ -1604,6 +1606,124 @@ int main(int argc, char **argv)
         CHECK(results.size() == 1 && lastPath.contains("search_terms=Nutella"), "Namenssuche über HTTP");
         qunsetenv("VIVIA_OFF_URL");
         out << "  " << got.name << " (" << got.brand << "), " << got.quantity << ": " << qRound(got.per100.kcal) << " kcal/100 g\n";
+    }
+
+    // ---------------------------------------------------------------- Menüassistent
+    {
+        out << "\n=== Menüassistent ===\n";
+        QTemporaryDir tmpM;
+        RecipeDb &db = RecipeDb::instance();
+        CHECK(db.create(tmpM.filePath("menu"), "Menüs"), "Menü-Datenbank");
+        for (const QString &f : { QStringLiteral(":/samples/beispiele.rk"), QStringLiteral(":/samples/beispiele.mmf"), QStringLiteral(":/samples/gesund.rk"),
+                                  QStringLiteral(":/samples/festlich.rk") })
+            for (Recipe r : Importers::importFile(f, Importers::Format::Unknown).recipes) db.save(r);
+        auto titleOf = [&](const QString &id) { const RecipeSummary *s = db.summary(id); return s ? s->title : QString("–"); };
+        for (int courses : { 3, 4, 5 }) {
+            Menu::Prefs p;
+            p.courses = courses;
+            p.character = Menu::Prefs::Character::Festive;
+            Menu::Composer comp(db.summaries(), p, 42);
+            const QList<Menu::Item> items = comp.propose();
+            out << "  " << courses << " Gänge:";
+            bool ok = items.size() == courses;
+            for (const auto &it : items) {
+                out << " [" << Menu::courseName(it.course) << ": " << titleOf(it.recipeId) << "]";
+                ok &= !it.recipeId.isEmpty();
+            }
+            out << "\n";
+            for (const QString &n : comp.notes(items)) out << "    " << n << "\n";
+            CHECK(ok, QString("%1-Gänge-Menü vollständig").arg(courses));
+            if (courses == 5) {
+                CHECK(titleOf(items[1].recipeId).contains("suppe", Qt::CaseInsensitive) || titleOf(items[1].recipeId).contains("brühe", Qt::CaseInsensitive) || titleOf(items[1].recipeId).contains("soup", Qt::CaseInsensitive),
+                      "Suppe an zweiter Stelle");
+                const RecipeSummary *d = db.summary(items.last().recipeId);
+                CHECK(d && (d->tags.contains("desserts") || d->tags.contains("süßspeise")), "Dessert am Schluss");
+                // Hauptzutat nicht doppelt
+                QStringList t;
+                for (const auto &it : items) t << titleOf(it.recipeId);
+                CHECK(!(t.filter("Lachs").size() > 1), "kein doppelter Lachs");
+                // Gang ersetzen
+                const QString alt = comp.alternative(items, 3);
+                CHECK(!alt.isEmpty() && alt != items[3].recipeId, "anderer Vorschlag für den Hauptgang: " + titleOf(alt));
+                const auto cands = comp.candidates(items, 4, 50);
+                CHECK(!cands.isEmpty() && cands.first().score >= cands.last().score, QString("Kandidaten fürs Dessert: %1").arg(cands.size()));
+            }
+        }
+        {
+            Menu::Prefs p;
+            p.courses = 4;
+            p.diet = Menu::Prefs::Diet::Vegetarian;
+            p.dessert = Menu::Prefs::Dessert::Chocolate;
+            Menu::Composer comp(db.summaries(), p, 7);
+            const auto items = comp.propose();
+            bool veg = true;
+            for (const auto &it : items) {
+                const RecipeSummary *s = db.summary(it.recipeId);
+                if (s && (s->tags.contains("fleischgerichte") || s->tags.contains("fisch"))) veg = false;
+                out << "  vegetarisch: " << Menu::courseName(it.course) << ": " << titleOf(it.recipeId) << " – " << it.description << "\n";
+            }
+            CHECK(veg, "vegetarisches Menü ohne Fleisch und Fisch");
+            CHECK(titleOf(items.last().recipeId).contains("Chocolat"), "Schokoladen-Dessert gewünscht");
+        }
+        {
+            Menu::Prefs p;
+            p.main = Menu::Prefs::Main::Fish;
+            p.exclude = QStringList{ "ziegenkäse" };
+            Menu::Composer comp(db.summaries(), p, 3);
+            const auto items = comp.propose();
+            const QString main = titleOf(items[1].recipeId);
+            CHECK(main.contains("Zander") || main.contains("Lachs") || main.contains("Thunfisch"), "Fisch als Hauptgang: " + main);
+            CHECK(!titleOf(items[0].recipeId).contains("Ziegenkäse"), "ausgeschlossene Zutat");
+        }
+        // Speichern, Laden, Export
+        Menu::Prefs p;
+        p.courses = 5;
+        Menu::Composer comp(db.summaries(), p, 11);
+        Menu::MenuData m;
+        m.title = "Festtagsmenü";
+        m.occasion = "Weihnachten im Familienkreis";
+        m.date = QDate(2026, 12, 24);
+        m.persons = 6;
+        m.prefs = p;
+        m.items = comp.propose();
+        QList<Recipe> recipes;
+        for (auto &it : m.items) {
+            Recipe r;
+            db.load(it.recipeId, &r);
+            it.description = Menu::describe(r);
+            recipes << r;
+        }
+        CHECK(Menu::saveMenu(db.folder(), m) && Menu::savedMenus(db.folder()).size() == 1, "Menü speichern");
+        const Menu::MenuData back = Menu::savedMenus(db.folder()).value(0);
+        CHECK(back.title == m.title && back.items.size() == 5 && back.items[2].recipeId == m.items[2].recipeId && back.date == m.date && back.persons == 6
+                  && back.prefs.courses == 5,
+              "Menü laden");
+        const Recipe sc = Menu::scaled(recipes[3], 6);
+        CHECK(qFuzzyCompare(sc.servings, 6.0) && (recipes[3].ingredients.isEmpty() || sc.ingredients[0].amount >= recipes[3].ingredients[0].amount),
+              "Umrechnen auf 6 Personen");
+        CHECK(MenuExport::dateText(m.date) == "Donnerstag, 24. Dezember 2026", "Datum: " + MenuExport::dateText(m.date));
+        MenuExport::Options eo;
+        const QString tex = MenuExport::toLatex(m, recipes, eo);
+        CHECK(tex.contains("\\vmRahmen") && tex.contains("Festtagsmenü") && tex.contains("Zwischengang") && tex.count("\\section{") == 5, "LaTeX-Menü");
+        const QString dirM = tmpM.filePath("export");
+        QDir().mkpath(dirM);
+        CHECK(MenuExport::writeOdt(dirM + "/menue.odt", m, recipes, eo), "Writer-Menü schreiben");
+        CHECK(MenuExport::writeLatex(dirM + "/" + MenuExport::defaultFileName(m, "tex"), m, recipes, eo), "LaTeX-Menü schreiben: " + MenuExport::defaultFileName(m, "tex"));
+        if (qEnvironmentVariableIsSet("VIVIA_TEX_TEST")) {
+            for (auto cls : { LatexExport::DocClass::ScrBook, LatexExport::DocClass::Book }) {
+                eo.docClass = cls;
+                MenuExport::writeLatex(dirM + "/festtagsmenue.tex", m, recipes, eo);
+                QProcess pr;
+                pr.setWorkingDirectory(dirM);
+                pr.start("latexmk", { "-pdf", "-interaction=nonstopmode", "-halt-on-error", "festtagsmenue.tex" });
+                pr.waitForFinished(180000);
+                CHECK(pr.exitCode() == 0 && QFileInfo::exists(dirM + "/festtagsmenue.pdf"), "Menü übersetzt (" + QString(cls == LatexExport::DocClass::Book ? "book" : "scrbook") + ")");
+                if (qEnvironmentVariableIsSet("VIVIA_TEX_KEEP")) QFile::copy(dirM + "/festtagsmenue.pdf", QString("/tmp/menue-%1.pdf").arg(cls == LatexExport::DocClass::Book ? "book" : "scrbook"));
+                QProcess::execute("latexmk", { "-C", "-cd", dirM + "/festtagsmenue.tex" });
+            }
+            if (qEnvironmentVariableIsSet("VIVIA_TEX_KEEP")) QFile::copy(dirM + "/menue.odt", "/tmp/menue.odt");
+        }
+        db.close();
     }
 
     // ---------------------------------------------------------------- Synchronisation

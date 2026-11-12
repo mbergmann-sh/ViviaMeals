@@ -1,6 +1,6 @@
 # ViviaMeals – Notizen für das Handbuch
 
-Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.8.0.
+Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.9.0.
 
 > **Name:** Das Programm heißt seit Version 0.6 **ViviaMeals** (vorher VitaMeals; die ganze Reihe heißt jetzt
 > Vivia – ViviaParms, ViviaBreathe). Alte Einstellungen, Profile, Tagebücher, eigene Lebensmittel und
@@ -769,4 +769,65 @@ abgeglichen.
   `files/db/…`, `files/app/…`
 - Drei-Wege-Vergleich lokal / Speicher / letzter Stand; Abschluss nur, wenn die Revision unverändert ist
   (sonst wird neu verglichen)
+
+## Menüassistent (ab 0.9.0)
+
+### Worum es geht (Textbaustein)
+
+Der Menüassistent stellt aus Ihren Rezepten ein Menü mit drei, vier oder fünf Gängen zusammen – etwa für
+Weihnachten, einen Geburtstag oder ein Essen mit Gästen. Er fragt nach Ihren Vorlieben, schlägt eine
+stimmige Menüfolge vor und erstellt daraus eine Menükarte mit Schmuckrahmen; auf den Folgeseiten stehen die
+Rezepte, auf Wunsch gleich für die richtige Personenzahl umgerechnet.
+
+Aufruf: *Datei → Export → Menüassistent …* (Strg+Umschalt+M) oder „Menü“ in der Werkzeugleiste.
+
+### Die vier Schritte
+
+1. **Rahmen:** Titel (z. B. „Festtagsmenü“), Anlass, Datum (optional), Personenzahl und die Anzahl der Gänge:
+   - 3 Gänge: Vorspeise · Hauptgang · Dessert
+   - 4 Gänge: Vorspeise · Suppe · Hauptgang · Dessert
+   - 5 Gänge: Vorspeise · Suppe · Zwischengang · Hauptgang · Dessert
+2. **Vorlieben:** Ernährungsform, Charakter (leicht / ausgewogen / festlich-üppig – mit Richtwert in kcal je
+   Person), Vorspeise, Hauptgang, Dessert, Thema/Küche, Zutaten, die nicht vorkommen sollen, Favoriten bzw.
+   Rezepte mit Foto bevorzugen. Darunter steht, wie viele Rezepte je Gang passen; sind es zu wenige, lassen
+   sich 16 festliche Beispielrezepte übernehmen.
+3. **Ihr Menü:** der Vorschlag mit Hinweisen (✓ abwechslungsreich, ✓ verbindendes Thema, ⚠ Sahne in zwei
+   Gängen …). Einen Gang anklicken zeigt das Rezept rechts.
+   - **Anderer Vorschlag:** nächstbestes passendes Rezept für diesen Gang
+   - **Rezept wählen …:** alle passenden Rezepte nach Eignung (Sterne) mit Hinweisen; „alle Rezepte zeigen“
+     erlaubt auch ungewöhnliche Wahl
+   - **Kurzbeschreibung:** Doppelklick ändert den Text der Menükarte; „Beschreibung neu“ erzeugt ihn wieder
+     aus den Zutaten („mit Lachs, Dill und Gurke“)
+   - **Ganzes Menü neu vorschlagen**
+4. **Speichern und exportieren:** Rezepte auf den Folgeseiten, Bilder, Nährwerte, Mengen auf die
+   Personenzahl umrechnen; LaTeX-Klasse scrbook oder book. „Speichern und schließen“ legt das Menü in der
+   Datenbank ab; beim Schließen ohne Speichern fragt der Assistent nach.
+
+Gespeicherte Menüs: *Datei → Export → Gespeicherte Menüs …* – öffnen (der Assistent beginnt dann bei
+„Ihr Menü“), neu anlegen, löschen. Menüs werden mit der Datenbank abgeglichen.
+
+### Wie der Assistent auswählt
+
+- **Eignung je Gang** aus Tags („Vorspeisen“, „Suppen“, „Zwischengang“, „Desserts“ …), Titel (Carpaccio,
+  Tatar, Cremesuppe, Sorbet, Risotto …), Mahlzeit-Art und Energie. Frühstücksgerichte, Kuchen/Kekse als
+  Dessert und Grundrezepte werden zurückgestellt. Tipp: Rezepte gezielt mit „Vorspeisen“, „Suppen“,
+  „Zwischengang“ oder „Desserts“ taggen.
+- **Harmonie:** keine Hauptzutat (Rind, Schwein, Geflügel, Lamm/Wild, Fisch, Meeresfrüchte) und keine
+  Sättigungsbeilage (Nudeln, Reis, Kartoffeln, Brot) doppelt; nicht dieselben auffälligen Zutaten in mehreren
+  Gängen; Sahne möglichst nur in einem Gang; nach einem kräftigen Hauptgang ein leichtes, fruchtiges Dessert;
+  gemeinsame Themen-Tags verbinden.
+- **Energie:** Richtwert je Person (leicht etwa 850, ausgewogen 1 200, festlich 1 600 kcal bei drei Gängen,
+  je weiterem Gang etwa 12 % mehr), verteilt auf die Gänge (Vorspeise ~15 %, Suppe ~12 %, Zwischengang ~18 %,
+  Hauptgang ~38 %, Dessert ~17 %). Richtwerte, kein Medizinprodukt.
+
+### Menükarte
+
+- **Deckblatt:** Menütitel, Anlass, Datum und Personenzahl; je Gang nur Gangname, Rezepttitel und
+  Kurzbeschreibung; Ornamente zwischen den Gängen; **Schmuckrahmen** in Goldbraun.
+  - LaTeX: doppelter Rahmen mit Rauten (TikZ); sind die Pakete **pgfornament** installiert (TeX Live
+    „full“, MiKTeX lädt es bei Bedarf), verzierte Ecken; bei vielen Gängen wird der Inhalt passend verkleinert.
+    Übersetzen: `latexmk -pdf <datei>.tex`.
+  - Writer: doppelte Seitenumrandung, Ornamente in den Ecken und zwischen den Gängen; die Absatzvorlagen
+    („Menütitel“, „Gang“, „Gang-Titel“, „Gang-Beschreibung“, „Ornament“) lassen sich in LibreOffice anpassen.
+- **Folgeseiten:** je Gang ein Rezept auf neuer Seite, mit dem Gang als kleiner Überschrift.
 

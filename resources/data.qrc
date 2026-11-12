@@ -11,5 +11,6 @@
         <file alias="beispiele.mmf">samples/beispiele.mmf</file>
         <file alias="umlaute.rk">samples/umlaute.rk</file>
         <file alias="gesund.rk">samples/gesund.rk</file>
+        <file alias="festlich.rk">samples/festlich.rk</file>
     </qresource>
 </RCC>

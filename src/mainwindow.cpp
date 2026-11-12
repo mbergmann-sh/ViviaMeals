@@ -31,6 +31,7 @@
 #include "mealtypes.h"
 #include "odtexport.h"
 #include "deepl.h"
+#include "menudialog.h"
 #include "sync.h"
 #include "syncdialog.h"
 #include "syncserver.h"
@@ -328,6 +329,21 @@ void MainWindow::buildMenus()
     a = exp->addAction(Icons::get(QStringLiteral("save")), tr("Als ViviaMeals-Rezept (.&vmr) speichern …"), this, &MainWindow::exportVmr);
     m_needRecipe << a;
     exp->addSeparator();
+    a = exp->addAction(Icons::get(QStringLiteral("menu-card")), tr("&Menüassistent …"), this, [this] {
+        MenuWizard w(this);
+        w.exec();
+    });
+    a->setObjectName(QStringLiteral("actMenu"));
+    a->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_M));
+    a->setStatusTip(tr("Ein Menü mit 3, 4 oder 5 Gängen nach Ihren Vorlieben zusammenstellen, speichern und als Menükarte mit Rezepten exportieren"));
+    m_needDb << a;
+    a = exp->addAction(Icons::get(QStringLiteral("menu-card")), tr("Gespeicherte Me&nüs …"), this, [this] {
+        MenuListDialog d(this);
+        d.exec();
+    });
+    a->setStatusTip(tr("Gespeicherte Menüs öffnen, ändern, erneut exportieren oder löschen"));
+    m_needDb << a;
+    exp->addSeparator();
     a = exp->addAction(Icons::get(QStringLiteral("database")), tr("Rezept&datenbank weitergeben (.vmpack) …"), this, &MainWindow::exportPackage);
     a->setStatusTip(tr("Rezeptsammlung als Paket für andere ViviaMeals-Anwender speichern – ohne Benutzer, Ziele, Tagebuch und Pläne"));
     a->setObjectName(QStringLiteral("actPackage"));
@@ -457,6 +473,7 @@ void MainWindow::buildToolBar()
     add("actPlan", tr("Wochenplan"), true);
     add("actDiary", tr("Tagebuch"), true);
     tb->addSeparator();
+    add("actMenu", tr("Menü"), false);
     add("actSync", tr("Abgleich"), false);
     add("actRandom", tr("Zufall"), false);
     add("actPrint", tr("Drucken"), false);
@@ -559,7 +576,7 @@ bool MainWindow::ensureDatabase()
         if (RecipeDb::instance().isOpen() && box.clickedButton() == samples) {
             // Beispielrezepte aus den Ressourcen importieren (ohne Rückfragen)
             RecipeDb::instance().beginBatch();
-            for (const QString &f : { QStringLiteral(":/samples/beispiele.rk"), QStringLiteral(":/samples/beispiele.mmf") }) {
+            for (const QString &f : { QStringLiteral(":/samples/beispiele.rk"), QStringLiteral(":/samples/beispiele.mmf"), QStringLiteral(":/samples/festlich.rk") }) {
                 const Importers::Result res = Importers::importFile(f, Importers::Format::Unknown);
                 for (Recipe r : res.recipes) RecipeDb::instance().save(r);
             }

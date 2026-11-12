@@ -21,6 +21,20 @@ struct Options {
 };
 
 QByteArray toOdt(const Recipe &r, const Options &opt = {});
+
+// Bausteine für Dokumente mit mehreren Rezepten (Menü-Export)
+struct Part {
+    QString xml;               // Inhalt (office:text)
+    QByteArray image;          // eingebettetes Rezeptbild (leer = ohne)
+    QString imageName, imageMime;
+};
+// index: fortlaufende Nummer (eindeutige Bildnamen); headingStyle: Absatzvorlage der Titelzeile (z. B. mit Seitenumbruch);
+// kicker: kleine Zeile über dem Titel (z. B. „Vorspeise“) – sie erhält dann headingStyle
+Part recipeBody(const Recipe &r, const Options &opt, int index, const QString &headingStyle = QStringLiteral("Heading_20_1"),
+                const QString &kicker = QString());
+QString styles(const QString &footerLeft, const QString &extraStyles = QString(), const QString &extraLayouts = QString(),
+               const QString &extraMasters = QString());
+QByteArray package(const QString &title, const QString &body, const QList<Part> &parts, const QString &extraAutoStyles, const QString &styles);
 bool write(const Recipe &r, const QString &file, const Options &opt = {}, QString *error = nullptr);
 QString defaultFileName(const Recipe &r);
 

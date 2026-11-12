@@ -23,6 +23,7 @@ SOURCES += \
     $$PWD/src/fooddialog.cpp \
     $$PWD/src/settingsdialog.cpp \
     $$PWD/src/syncdialog.cpp \
+    $$PWD/src/menudialog.cpp \
     $$PWD/src/uiscale.cpp \
     $$PWD/src/themes.cpp \
     $$PWD/src/icons.cpp \
@@ -53,6 +54,7 @@ HEADERS += \
     $$PWD/src/fooddialog.h \
     $$PWD/src/settingsdialog.h \
     $$PWD/src/syncdialog.h \
+    $$PWD/src/menudialog.h \
     $$PWD/src/uiscale.h \
     $$PWD/src/themes.h \
     $$PWD/src/icons.h \

@@ -587,6 +587,11 @@ QMap<QString, QString> Engine::localHashes()
         const QString p = QStringLiteral("db/rezepte/") + QFileInfo(it.next()).fileName();
         if (validPath(p)) paths << p;
     }
+    QDirIterator mt(QDir(m_db).filePath(QStringLiteral("menues")), { QStringLiteral("*.vmmenu") }, QDir::Files);   // gespeicherte Menüs
+    while (mt.hasNext()) {
+        const QString p = QStringLiteral("db/menues/") + QFileInfo(mt.next()).fileName();
+        if (validPath(p)) paths << p;
+    }
     addIf(QStringLiteral("app/profile.json"));
     addIf(QStringLiteral("app/lebensmittel_eigene.json"));
     QDirIterator dt(QDir(m_app).filePath(QStringLiteral("tagebuch")), { QStringLiteral("*.json") }, QDir::Files);
