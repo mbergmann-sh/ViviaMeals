@@ -36,8 +36,17 @@ quint32 crc32(const QByteArray &data)
     return c ^ 0xFFFFFFFFu;
 }
 
-quint16 get16(const QByteArray &d, qsizetype p) { return qFromLittleEndian<quint16>(reinterpret_cast<const uchar *>(d.constData() + p)); }
-quint32 get32(const QByteArray &d, qsizetype p) { return qFromLittleEndian<quint32>(reinterpret_cast<const uchar *>(d.constData() + p)); }
+// Little-Endian lesen, Byte für Byte mit Bereichsprüfung (außerhalb der Daten: 0)
+quint16 get16(const QByteArray &d, qsizetype p)
+{
+    if (p < 0 || p + 2 > d.size()) return 0;
+    return quint16(quint8(d.at(p)) | (quint8(d.at(p + 1)) << 8));
+}
+quint32 get32(const QByteArray &d, qsizetype p)
+{
+    if (p < 0 || p + 4 > d.size()) return 0;
+    return quint32(quint8(d.at(p))) | (quint32(quint8(d.at(p + 1))) << 8) | (quint32(quint8(d.at(p + 2))) << 16) | (quint32(quint8(d.at(p + 3))) << 24);
+}
 
 QString tr(const char *s) { return QCoreApplication::translate("RecipePackage", s); }
 

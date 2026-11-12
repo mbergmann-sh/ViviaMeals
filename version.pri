@@ -1,3 +1,3 @@
 # Versionsnummer von ViviaMeals (wird auch in die Installer-Dateien übernommen)
-VERSION = 0.9.0
+VERSION = 0.9.1
 VM_RELEASE_DATE = 2026-11-10

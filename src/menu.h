@@ -35,7 +35,7 @@ struct Prefs {
     enum class Diet { All, Vegetarian, Vegan } diet = Diet::All;
     enum class Character { Light, Balanced, Festive } character = Character::Balanced;
     enum class Starter { Any, Salad, Cold, Warm, Fish } starter = Starter::Any;
-    enum class Main { Any, Beef, Pork, Poultry, LambGame, Fish, Vegetarian } main = Main::Any;
+    enum class Main { Any, Beef, Pork, Poultry, LambGame, Fish, Vegetarian } mainCourse = Main::Any;   // nicht „main“: unter Windows ist main ein Makro (qMain)
     enum class Dessert { Any, Fruity, Chocolate, Creamy, Frozen, Pastry } dessert = Dessert::Any;
     QString theme;             // bevorzugter Tag (z. B. „italienisch“), leer = egal
     QStringList exclude;       // Zutaten, die nicht vorkommen sollen (Teilwörter, klein)

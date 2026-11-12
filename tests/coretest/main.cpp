@@ -1667,12 +1667,12 @@ int main(int argc, char **argv)
         }
         {
             Menu::Prefs p;
-            p.main = Menu::Prefs::Main::Fish;
+            p.mainCourse = Menu::Prefs::Main::Fish;
             p.exclude = QStringList{ "ziegenkäse" };
             Menu::Composer comp(db.summaries(), p, 3);
             const auto items = comp.propose();
-            const QString main = titleOf(items[1].recipeId);
-            CHECK(main.contains("Zander") || main.contains("Lachs") || main.contains("Thunfisch"), "Fisch als Hauptgang: " + main);
+            const QString mainTitle = titleOf(items[1].recipeId);
+            CHECK(mainTitle.contains("Zander") || mainTitle.contains("Lachs") || mainTitle.contains("Thunfisch"), "Fisch als Hauptgang: " + mainTitle);
             CHECK(!titleOf(items[0].recipeId).contains("Ziegenkäse"), "ausgeschlossene Zutat");
         }
         // Speichern, Laden, Export

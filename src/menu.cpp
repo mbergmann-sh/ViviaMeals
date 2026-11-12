@@ -108,7 +108,7 @@ QJsonObject Prefs::toJson() const
                         { QStringLiteral("diet"), int(diet) },
                         { QStringLiteral("character"), int(character) },
                         { QStringLiteral("starter"), int(starter) },
-                        { QStringLiteral("main"), int(main) },
+                        { QStringLiteral("main"), int(mainCourse) },
                         { QStringLiteral("dessert"), int(dessert) },
                         { QStringLiteral("theme"), theme },
                         { QStringLiteral("exclude"), QJsonArray::fromStringList(exclude) },
@@ -123,7 +123,7 @@ Prefs Prefs::fromJson(const QJsonObject &o)
     p.diet = Diet(qBound(0, o.value(QStringLiteral("diet")).toInt(), 2));
     p.character = Character(qBound(0, o.value(QStringLiteral("character")).toInt(1), 2));
     p.starter = Starter(qBound(0, o.value(QStringLiteral("starter")).toInt(), 4));
-    p.main = Main(qBound(0, o.value(QStringLiteral("main")).toInt(), 6));
+    p.mainCourse = Main(qBound(0, o.value(QStringLiteral("main")).toInt(), 6));
     p.dessert = Dessert(qBound(0, o.value(QStringLiteral("dessert")).toInt(), 5));
     p.theme = o.value(QStringLiteral("theme")).toString();
     for (const auto &v : o.value(QStringLiteral("exclude")).toArray()) p.exclude << v.toString();
@@ -507,7 +507,7 @@ double Composer::fit(const RecipeSummary &s, Course c) const
         if (in.salad && in.kcal < 450) f *= 0.4;
         if (in.soup) f *= 0.3;
         if (in.tags.contains(QStringLiteral("zwischengang")) || in.tags.contains(QStringLiteral("vorspeisen"))) f *= 0.3;   // als kleiner Gang gedacht
-        switch (m_prefs.main) {
+        switch (m_prefs.mainCourse) {
         case Prefs::Main::Beef: f *= in.protein == tr("Rind") ? 2.5 : 0.12; break;
         case Prefs::Main::Pork: f *= in.protein == tr("Schwein") ? 2.5 : 0.12; break;
         case Prefs::Main::Poultry: f *= in.protein == tr("Geflügel") ? 2.5 : 0.12; break;

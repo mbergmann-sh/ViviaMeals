@@ -196,7 +196,7 @@ QWizardPage *MenuWizard::prefsPage()
     m_starter = combo({ tr("egal"), tr("Salat"), tr("kalt (Carpaccio, Tatar, Antipasti …)"), tr("warm"), tr("Fisch oder Meeresfrüchte") }, int(pr.starter));
     f->addRow(tr("&Vorspeise:"), m_starter);
     m_main = combo({ tr("egal"), tr("Rind oder Kalb"), tr("Schwein"), tr("Geflügel"), tr("Lamm oder Wild"), tr("Fisch oder Meeresfrüchte"), tr("vegetarisch") },
-                   int(pr.main));
+                   int(pr.mainCourse));
     f->addRow(tr("&Hauptgang:"), m_main);
     m_dessert = combo({ tr("egal"), tr("fruchtig"), tr("mit Schokolade"), tr("cremig (Mousse, Panna cotta, Creme …)"), tr("Eis, Parfait oder Sorbet"),
                        tr("Gebäck, Kuchen, Strudel") },
@@ -389,7 +389,7 @@ Menu::Prefs MenuWizard::prefsFromUi() const
     p.diet = Menu::Prefs::Diet(m_diet->currentIndex());
     p.character = Menu::Prefs::Character(m_character->currentIndex());
     p.starter = Menu::Prefs::Starter(m_starter->currentIndex());
-    p.main = Menu::Prefs::Main(m_main->currentIndex());
+    p.mainCourse = Menu::Prefs::Main(m_main->currentIndex());
     p.dessert = Menu::Prefs::Dessert(m_dessert->currentIndex());
     p.theme = m_theme->currentData().toString();
     for (const QString &x : m_exclude->text().split(QLatin1Char(','), Qt::SkipEmptyParts))
