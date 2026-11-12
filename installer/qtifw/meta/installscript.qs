@@ -23,6 +23,9 @@ Component.prototype.createOperations = function()
     component.addOperation("CreateShortcut", exe, "@StartMenuDir@/ViviaMeals - Demo.lnk", "--demo",
         "workingDirectory=@TargetDir@", "iconPath=" + exe, "iconId=0",
         "description=Demo mit Beispielrezepten (berührt die eigenen Daten nicht)");
+    component.addOperation("CreateShortcut", "@TargetDir@/handbuch/ViviaMeals-Handbuch.chm",
+        "@StartMenuDir@/ViviaMeals - Handbuch.lnk", "workingDirectory=@TargetDir@/handbuch",
+        "description=Handbuch zu ViviaMeals (auch mit F1 im Programm)");
     component.addOperation("CreateShortcut", "@TargetDir@/ViviaMeals-Wartung.exe",
         "@StartMenuDir@/ViviaMeals aktualisieren oder entfernen.lnk",
         "workingDirectory=@TargetDir@", "description=ViviaMeals aktualisieren oder deinstallieren");

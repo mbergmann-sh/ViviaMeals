@@ -36,6 +36,12 @@ Außerdem in `installer\Output`:
 Nicht bei jedem Release-Build erzeugen: `qmake CONFIG+=vm_no_installer` (dann nur von Hand wie oben).
 Alles wie von windeployqt vorgesehen bereitstellen (Software-OpenGL, D3D-Compiler): `qmake CONFIG+=vm_full_deploy`.
 
+## Handbuch
+
+`make_installer.cmd` legt `docs\handbuch\ViviaMeals-Handbuch.chm`, das PDF und den Ordner `html` nach
+`handbuch\` in den Installer (Startmenü: „ViviaMeals – Handbuch“; im Programm F1). Fehlt die CHM-Datei, steht eine
+Warnung im Protokoll – erzeugen mit `python tools\make_handbuch.py` (siehe Kopf des Skripts).
+
 ## Eigenschaften des Installers
 
 * Zielordner Vorgabe **`C:\ViviaMeals`** (änderbar); Lizenz (PolyForm Noncommercial 1.0.0) und Haftungshinweis

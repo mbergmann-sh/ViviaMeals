@@ -29,6 +29,26 @@ include(desktop.pri)
 
 RESOURCES += resources/viviameals.qrc resources/data.qrc
 
+# Handbuch (F1): wird im Quellbaum gefunden, solange das Programm aus dem Build-Ordner läuft;
+# erzeugt mit tools/make_handbuch.py (docs/handbuch: html/, .pdf, .chm). Siehe src/manual.cpp.
+# (nur ohne Leerzeichen im Pfad – qmake trennt DEFINES an Leerzeichen; sonst greifen die übrigen Suchorte)
+equals(PWD, $$replace(PWD, " ", "")): DEFINES += VIVIAMEALS_SOURCE_DIR=\\\"$$PWD\\\"
+VM_HANDBUCH = $$PWD/docs/handbuch
+unix:!macx {
+    # make install: Programm nach <PREFIX>/bin, Handbuch nach <PREFIX>/share/viviameals/handbuch
+    isEmpty(PREFIX): PREFIX = /usr/local
+    target.path = $$PREFIX/bin
+    handbuch.path = $$PREFIX/share/viviameals/handbuch
+    handbuch.files = $$VM_HANDBUCH/html $$VM_HANDBUCH/ViviaMeals-Handbuch.pdf
+    INSTALLS += target handbuch
+}
+macx {
+    # im App-Bundle unter Contents/Resources/handbuch
+    vm_handbuch.files = $$VM_HANDBUCH/html $$VM_HANDBUCH/ViviaMeals-Handbuch.pdf
+    vm_handbuch.path = Contents/Resources/handbuch
+    QMAKE_BUNDLE_DATA += vm_handbuch
+}
+
 win32: RC_ICONS = resources/icons/app/viviameals.ico
 macx:  ICON     = resources/icons/app/viviameals.icns
 
@@ -55,6 +75,6 @@ for(t, VM_TEMPLATES) {
 # Windows: DLLs bereitstellen und Qt-Installer-Framework-Installer (C:\ViviaMeals)
 win32: include(installer/windows_deploy.pri)
 
-OTHER_FILES += installer/README.md installer/windows_deploy.pri \
+OTHER_FILES += tools/make_handbuch.py installer/README.md installer/windows_deploy.pri \
     installer/qtifw/config/config.xml.in installer/qtifw/config/controlscript.qs \
     installer/qtifw/meta/package.xml.in installer/qtifw/meta/installscript.qs installer/qtifw/meta/license.txt

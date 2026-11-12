@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Willkommen bei ViviaMeals – ViviaMeals – Handbuch</title><link rel="stylesheet" href="handbuch.css"></head>
+<body class="web">
+<header class="top"><span class="version">Version 0.9.3</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
+<div class="wrap"><nav class="side"><input id="suche" class="such" type="search" placeholder="Im Handbuch suchen …"><ol>
+<li><a href="index.html">Start und Inhalt</a></li>
+<li class="aktiv"><a href="willkommen.html">Willkommen bei ViviaMeals</a>
+<ol><li><a href="#funktionen">Was ViviaMeals kann</a></li><li><a href="#installation">Installation</a></li><li><a href="#erster-start">Der erste Start</a></li><li><a href="#ueber-handbuch">Über dieses Handbuch</a></li></ol>
+</li>
+<li><a href="hauptfenster.html">Das Hauptfenster</a>
+</li>
+<li><a href="rezepte.html">Rezepte anlegen und bearbeiten</a>
+</li>
+<li><a href="import.html">Rezepte importieren</a>
+</li>
+<li><a href="scannen.html">Rezepte scannen</a>
+</li>
+<li><a href="naehrwerte.html">Nährwerte</a>
+</li>
+<li><a href="planen.html">Planen und Gewichtskontrolle</a>
+</li>
+<li><a href="menue.html">Der Menüassistent</a>
+</li>
+<li><a href="export.html">Exportieren</a>
+</li>
+<li><a href="abgleich.html">Abgleich zwischen Geräten</a>
+</li>
+<li><a href="extras.html">Extras und Einstellungen</a>
+</li>
+<li><a href="anhang.html">Anhang</a>
+</li>
+</ol></nav><main>
+<h1 id="willkommen">Willkommen bei ViviaMeals</h1>
+<p>ViviaMeals ist eine Rezeptverwaltung für den eigenen Rechner. Sie sammelt Ihre Rezepte in einer übersichtlichen Datenbank, rechnet englische Maße in deutsche Küchenmaße um, ermittelt aus den Zutaten automatisch Kalorien und Nährwerte und hilft bei der Planung: Was koche ich mit dem, was im Kühlschrank liegt? Wie sieht eine Woche aus, die zu meinem Kalorienziel passt? Welches Menü passt für Gäste?</p>
+<figure>
+<img src="bilder/hauptfenster.png" alt="Das Hauptfenster von ViviaMeals mit Rezeptliste und Rezeptansicht" />
+<figcaption aria-hidden="true">Das Hauptfenster von ViviaMeals mit Rezeptliste und Rezeptansicht</figcaption>
+</figure>
+<h2 id="funktionen">Was ViviaMeals kann</h2>
+<ul>
+<li><strong>Rezepte verwalten</strong> – anlegen, bearbeiten, mit Foto, Tags und Quelle versehen, suchen, drucken (<a href="rezepte.html#rezepte">Rezepte anlegen und bearbeiten</a>).</li>
+<li><strong>Rezepte übernehmen</strong> – Sammlungen im RezKonv- und MealMaster-Format importieren, englische Rezepte umrechnen und übersetzen, gedruckte Rezepte einscannen (<a href="import.html#import">Rezepte importieren</a>, <a href="scannen.html#scannen">Rezepte scannen</a>).</li>
+<li><strong>Nährwerte</strong> – Energie (kcal und kJ), Fett, Kohlenhydrate, Zucker, Ballaststoffe, Eiweiß und Salz je Rezept und Portion, mit eigener Nährwerttabelle (<a href="naehrwerte.html#naehrwerte">Nährwerte</a>).</li>
+<li><strong>Planen</strong> – Kühlschrank-Vorschläge mit Einkaufsliste, Assistent für Gewichtsverlust und Gewichtszunahme, Wochenmenü-Plan, Ernährungstagebuch (<a href="planen.html#planen">Planen und Gewichtskontrolle</a>).</li>
+<li><strong>Menüs</strong> – Menüs mit drei bis fünf Gängen zusammenstellen und als Menükarte drucken (<a href="menue.html#menue">Der Menüassistent</a>).</li>
+<li><strong>Exportieren</strong> – als Website zum Hochladen, als LaTeX-Kochbuch, als LibreOffice-Writer-Dokument oder als Rezeptpaket zum Weitergeben (<a href="export.html#export">Exportieren</a>).</li>
+<li><strong>Abgleichen</strong> – dieselbe Datenbank auf mehreren Geräten über die eigene Website oder das lokale Netz (<a href="abgleich.html#abgleich">Abgleich zwischen Geräten</a>).</li>
+</ul>
+<blockquote>
+<p><strong>Kein Medizinprodukt.</strong> ViviaMeals ist eine persönliche Rezept- und Ernährungsverwaltung. Nährwerte, Energiebedarf und Wochenpläne sind Schätzwerte aus allgemeinen Tabellen und Formeln. Sie ersetzen keine ärztliche oder Ernährungsberatung. Wer abnehmen oder zunehmen möchte und gesundheitliche Beschwerden hat, sollte das vorher mit Arzt oder Ärztin besprechen.</p>
+</blockquote>
+<h2 id="installation">Installation</h2>
+<h3 id="installation-windows">Windows</h3>
+<ol type="1">
+<li><code>ViviaMeals-&lt;Version&gt;-Setup.exe</code> starten.</li>
+<li>Lizenz und Hinweis „kein Medizinprodukt“ annehmen.</li>
+<li>Zielordner bestätigen (Vorgabe <code>C:\ViviaMeals</code>).</li>
+<li>Am Ende „ViviaMeals starten“ angekreuzt lassen.</li>
+</ol>
+<p>Der Installer legt im Startmenü <strong>ViviaMeals</strong>, <strong>ViviaMeals – Demo</strong>, <strong>ViviaMeals – Handbuch</strong> und <strong>ViviaMeals aktualisieren oder entfernen</strong> an, dazu eine Verknüpfung auf dem Desktop. Rezeptdateien (<code>.vmr</code>), Datenbanken (<code>viviameals.vmdb</code>) und Rezeptpakete (<code>.vmpack</code>) öffnen sich danach per Doppelklick in ViviaMeals.</p>
+<p><strong>Aktualisieren:</strong> einfach den neueren Installer starten. Er entfernt nach Rückfrage die alte Fassung und installiert die neue in denselben Ordner. Ihre Rezepte, Profile, Tagebücher und Einstellungen bleiben dabei erhalten – sie liegen nicht im Programmordner.</p>
+<h3 id="installation-linux">Linux und macOS</h3>
+<p>ViviaMeals wird aus dem Quelltext gebaut (Qt 6.4 oder neuer bzw. Qt 5.15):</p>
+<pre><code>qmake6 ViviaMeals.pro
+make
+sudo make install        # optional: Programm und Handbuch nach /usr/local</code></pre>
+<p>Für die Texterkennung beim Scannen braucht es zusätzlich Tesseract (siehe <a href="scannen.html#scannen-voraussetzungen">Was man zum Scannen braucht</a>).</p>
+<h2 id="erster-start">Der erste Start</h2>
+<p>Beim ersten Start gibt es noch keine Rezeptdatenbank. ViviaMeals begrüßt Sie mit einem Fenster und bietet an:</p>
+<ul>
+<li><strong>Neue Datenbank anlegen</strong> – einen leeren Ordner wählen und einen Namen vergeben, z. B. „Meine Rezepte“.</li>
+<li><strong>Mit Beispielrezepten anlegen</strong> – wie oben, aber gleich mit einigen Dutzend Beispielrezepten zum Ausprobieren.</li>
+<li><strong>Vorhandene öffnen</strong> – eine schon bestehende ViviaMeals-Datenbank öffnen (z. B. von einer Sicherung).</li>
+<li><strong>Aus dem Abgleich laden</strong> – eine Datenbank, die auf einem anderen Gerät schon abgeglichen wird, auf dieses Gerät holen (<a href="abgleich.html#abgleich-neues-geraet">Neue Installation einrichten</a>).</li>
+</ul>
+<p>Bei jedem weiteren Start öffnet ViviaMeals die zuletzt benutzte Datenbank und zeigt ein zufällig ausgewähltes Rezept – vielleicht eine Anregung für heute.</p>
+<blockquote>
+<p><strong>Tipp:</strong> Die <strong>Demo</strong> (Startmenü „ViviaMeals – Demo“ bzw. <code>ViviaMeals --demo</code>) startet mit Beispielrezepten, Fotos und einem Beispielprofil in einem eigenen, vorübergehenden Bereich. Ihre eigenen Daten werden dabei nicht berührt – ideal, um alles gefahrlos auszuprobieren.</p>
+</blockquote>
+<h2 id="ueber-handbuch">Über dieses Handbuch</h2>
+<p>Menübefehle sind <em>kursiv</em> gesetzt, mit Pfeilen für Untermenüs: <em>Datei → Export → Menüassistent …</em>. Schaltflächen und Feldnamen stehen <strong>fett</strong>. Tastenkürzel werden wie <strong>Strg+Umschalt+M</strong> geschrieben; unter macOS entspricht <strong>Strg</strong> der Befehlstaste ⌘.</p>
+<p>Das Handbuch öffnen Sie in ViviaMeals jederzeit mit <strong>F1</strong> oder <em>Hilfe → Handbuch</em>. Es liegt in drei Formen vor: als Windows-Hilfedatei (<code>.chm</code>), als Webseiten (HTML) und als PDF zum Drucken.</p>
+<nav class="pager"><span><a href="index.html">← Start und Inhalt</a></span><span class="weiter"><a href="hauptfenster.html">Das Hauptfenster →</a></span></nav></main></div>
+<footer>ViviaMeals 0.9.3 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
+</body></html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Rezepte scannen – ViviaMeals – Handbuch</title><link rel="stylesheet" href="handbuch.css"></head>
+<body class="web">
+<header class="top"><span class="version">Version 0.9.3</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
+<div class="wrap"><nav class="side"><input id="suche" class="such" type="search" placeholder="Im Handbuch suchen …"><ol>
+<li><a href="index.html">Start und Inhalt</a></li>
+<li><a href="willkommen.html">Willkommen bei ViviaMeals</a>
+</li>
+<li><a href="hauptfenster.html">Das Hauptfenster</a>
+</li>
+<li><a href="rezepte.html">Rezepte anlegen und bearbeiten</a>
+</li>
+<li><a href="import.html">Rezepte importieren</a>
+</li>
+<li class="aktiv"><a href="scannen.html">Rezepte scannen</a>
+<ol><li><a href="#scannen-voraussetzungen">Was man braucht</a></li><li><a href="#scannen-ablauf">Ablauf</a></li><li><a href="#scannen-tipps">Tipps für gute Ergebnisse</a></li><li><a href="#scanner-fehlt">„Es wurde kein Scanner gefunden“ (Windows)</a></li></ol>
+</li>
+<li><a href="naehrwerte.html">Nährwerte</a>
+</li>
+<li><a href="planen.html">Planen und Gewichtskontrolle</a>
+</li>
+<li><a href="menue.html">Der Menüassistent</a>
+</li>
+<li><a href="export.html">Exportieren</a>
+</li>
+<li><a href="abgleich.html">Abgleich zwischen Geräten</a>
+</li>
+<li><a href="extras.html">Extras und Einstellungen</a>
+</li>
+<li><a href="anhang.html">Anhang</a>
+</li>
+</ol></nav><main>
+<h1 id="scannen">Rezepte scannen</h1>
+<p>Rezepte aus Kochbüchern, Zeitschriften oder von Karteikarten lassen sich einscannen oder mit dem Handy fotografieren. ViviaMeals liest den Text mit dem freien Programm <strong>Tesseract</strong> – vollständig auf dem eigenen Rechner –, teilt ihn in Titel, Portionen, Zutaten und Zubereitung auf und öffnet das Ergebnis im Rezepteditor.</p>
+<figure>
+<img src="bilder/scannen.png" alt="Rezept scannen: links die Seite, rechts der erkannte Text" />
+<figcaption aria-hidden="true">Rezept scannen: links die Seite, rechts der erkannte Text</figcaption>
+</figure>
+<h2 id="scannen-voraussetzungen">Was man braucht</h2>
+<p><strong>Tesseract mit deutschen Sprachdaten:</strong></p>
+<ul>
+<li><strong>Windows:</strong> Installer der UB Mannheim (<a href="https://github.com/UB-Mannheim/tesseract/wiki" class="uri">https://github.com/UB-Mannheim/tesseract/wiki</a>), bei „Additional language data“ <strong>German</strong> ankreuzen. Manche ViviaMeals-Installer bringen Tesseract schon mit.</li>
+<li><strong>Linux:</strong> <code>sudo apt install tesseract-ocr tesseract-ocr-deu</code> (Fedora: <code>tesseract tesseract-langpack-deu</code>).</li>
+<li><strong>macOS:</strong> <code>brew install tesseract tesseract-lang</code>.</li>
+</ul>
+<p><em>Extras → Einstellungen → Scannen → Prüfen</em> zeigt, ob Tesseract gefunden wurde und welche Sprachen installiert sind.</p>
+<p><strong>Zum Scannen</strong> (sonst einfach ein Bild oder Foto öffnen):</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>System</th>
+<th>Möglichkeit</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Windows</td>
+<td>der Scandialog von Windows (WIA) – jeder Scanner mit WIA-Treiber funktioniert</td>
+</tr>
+<tr class="even">
+<td>Linux</td>
+<td><strong>XSane</strong> (<code>sudo apt install xsane</code>); ohne Oberfläche <code>scanimage</code></td>
+</tr>
+<tr class="odd">
+<td>macOS</td>
+<td>„Digitale Bilder“ oder Vorschau – Bild speichern und mit „Bild öffnen …“ laden</td>
+</tr>
+<tr class="even">
+<td>überall</td>
+<td><strong>Netzwerkscanner (eSCL/AirScan)</strong>, Programm des Herstellers mit überwachtem Ordner oder ein eigener Befehl</td>
+</tr>
+</tbody>
+</table>
+<figure>
+<img src="bilder/einstellungen-scannen.png" alt="Einstellungen für das Scannen" />
+<figcaption aria-hidden="true">Einstellungen für das Scannen</figcaption>
+</figure>
+<h3 id="escl">Netzwerkscanner (eSCL)</h3>
+<p>Die meisten WLAN-Multifunktionsgeräte (Epson, HP, Canon, Brother …) verstehen das offene Protokoll <strong>eSCL</strong> (auch AirScan oder Mopria genannt). Unter <em>Extras → Einstellungen → Scannen</em> „Netzwerkscanner“ wählen, die <strong>IP-Adresse</strong> des Geräts eintragen und <strong>Verbindung prüfen</strong>. Ein Treiber ist nicht nötig. Die IP-Adresse steht im Netzwerkstatus-Ausdruck des Druckers oder in der Geräteliste des Routers.</p>
+<blockquote>
+<p><strong>Tipp:</strong> Geben Sie dem Drucker im Router immer dieselbe IP-Adresse, damit die Einstellung dauerhaft passt.</p>
+</blockquote>
+<h3 id="scan-ordner">Programm des Herstellers</h3>
+<p>Mit Programmen wie Epson ScanSmart, HP Smart oder Canon IJ Scan Utility wählen Sie „Überwachter Ordner“: den Ordner, in dem das Programm die Scans ablegt, und optional das Programm selbst. <strong>Scannen …</strong> startet es; jedes neue Bild im Ordner übernimmt ViviaMeals automatisch.</p>
+<h2 id="scannen-ablauf">Ablauf</h2>
+<ol type="1">
+<li><em>Datei → Import → Rezept scannen …</em> (Strg+Umschalt+S) – oder <em>Rezept aus Bild oder Foto erkennen …</em>.</li>
+<li>Seite scannen bzw. Bild öffnen. <strong>Fotos auf der Seite</strong> werden orange markiert und beim Lesen ausgelassen. Eine falsche Markierung entfernt ein Klick; ein nicht erkanntes Foto ziehen Sie mit der Maus auf. Danach <strong>Text erkennen</strong>.</li>
+<li>Das größte Foto wird als <strong>Rezeptbild</strong> vorgeschlagen. „Aus der Seite zuschneiden …“ wählt einen anderen Ausschnitt, „Kein Rezeptbild“ verwirft es.</li>
+<li>Rechts Titel, Portionen, Zutaten und Zubereitung prüfen. Was nicht zugeordnet werden konnte, steht im Reiter „Nicht zugeordnet“, der vollständige Text unter „Erkannter Text“.</li>
+<li><strong>Mehrseitige Rezepte:</strong> weitere Seiten scannen oder öffnen – sie werden angehängt.</li>
+<li><strong>Im Editor öffnen:</strong> Der Editor zeigt den Scan rechts als Vorlage (zoombar mit Strg+Mausrad). Nach <strong>Speichern</strong> steht das Rezept in der Datenbank; der Scan selbst wird nicht gespeichert.</li>
+</ol>
+<figure>
+<img src="bilder/scannen-editor.png" alt="Das gescannte Rezept im Editor, rechts die Vorlage" />
+<figcaption aria-hidden="true">Das gescannte Rezept im Editor, rechts die Vorlage</figcaption>
+</figure>
+<h2 id="scannen-tipps">Tipps für gute Ergebnisse</h2>
+<ul>
+<li>Mit <strong>300 dpi</strong> scannen; in Farbe nur, wenn das Foto mit übernommen werden soll.</li>
+<li>Handyfotos: Seite flach hinlegen, gerade von oben, ohne Schatten und bei gutem Licht.</li>
+<li>Typische Lesefehler verbessert ViviaMeals selbst: „l/2“ → ½, „1OO g“ → 100 g, „El“ → EL, „180 *C“ → 180° C, „Krauterquark“ → „Kräuterquark“.</li>
+<li>Handschrift erkennt Tesseract kaum.</li>
+<li>Zwei Rezepte auf einer Seite werden als eines erkannt – überzählige Zeilen im Editor löschen oder die Seite für das zweite Rezept erneut öffnen.</li>
+</ul>
+<h2 id="scanner-fehlt">„Es wurde kein Scanner gefunden“ (Windows)</h2>
+<p>Der Windows-Scandialog zeigt nur Scanner, die Windows selbst eingerichtet hat. WLAN-Drucker, die nur mit dem Herstellerprogramm scannen, fehlen dort oft. Abhilfe:</p>
+<ol type="1">
+<li>In ViviaMeals „Netzwerkscanner (eSCL)“ mit der IP-Adresse des Druckers wählen (empfohlen).</li>
+<li>„Überwachter Ordner“ mit dem Programm des Herstellers wählen.</li>
+<li>Den Drucker unter <em>Windows-Einstellungen → Bluetooth &amp; Geräte → Drucker &amp; Scanner</em> als Scanner hinzufügen. Erscheint er in der App „Windows-Scan“, findet ihn auch ViviaMeals.</li>
+</ol>
+<nav class="pager"><span><a href="import.html">← Rezepte importieren</a></span><span class="weiter"><a href="naehrwerte.html">Nährwerte →</a></span></nav></main></div>
+<footer>ViviaMeals 0.9.3 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
+</body></html>

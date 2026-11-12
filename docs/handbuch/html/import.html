@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Rezepte importieren – ViviaMeals – Handbuch</title><link rel="stylesheet" href="handbuch.css"></head>
+<body class="web">
+<header class="top"><span class="version">Version 0.9.3</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
+<div class="wrap"><nav class="side"><input id="suche" class="such" type="search" placeholder="Im Handbuch suchen …"><ol>
+<li><a href="index.html">Start und Inhalt</a></li>
+<li><a href="willkommen.html">Willkommen bei ViviaMeals</a>
+</li>
+<li><a href="hauptfenster.html">Das Hauptfenster</a>
+</li>
+<li><a href="rezepte.html">Rezepte anlegen und bearbeiten</a>
+</li>
+<li class="aktiv"><a href="import.html">Rezepte importieren</a>
+<ol><li><a href="#import-ablauf">Ablauf</a></li><li><a href="#import-aufbereitung">Was beim Import passiert</a></li><li><a href="#englisch">Englische Rezepte</a></li><li><a href="#deepl">Übersetzen mit DeepL</a></li><li><a href="#umlaute">Umlaut-Korrektur</a></li><li><a href="#import-weitere">Weitere Formate</a></li></ol>
+</li>
+<li><a href="scannen.html">Rezepte scannen</a>
+</li>
+<li><a href="naehrwerte.html">Nährwerte</a>
+</li>
+<li><a href="planen.html">Planen und Gewichtskontrolle</a>
+</li>
+<li><a href="menue.html">Der Menüassistent</a>
+</li>
+<li><a href="export.html">Exportieren</a>
+</li>
+<li><a href="abgleich.html">Abgleich zwischen Geräten</a>
+</li>
+<li><a href="extras.html">Extras und Einstellungen</a>
+</li>
+<li><a href="anhang.html">Anhang</a>
+</li>
+</ol></nav><main>
+<h1 id="import">Rezepte importieren</h1>
+<p>ViviaMeals übernimmt Rezepte aus den verbreiteten Austauschformaten <strong>RezKonv</strong> und <strong>MealMaster</strong> – einzelne Rezepte ebenso wie Sammlungen mit Tausenden Rezepten. Dabei werden die Texte gleich aufbereitet: Zeichensatz erkennen, englische Maße umrechnen, fehlende Umlaute ergänzen, Nährwerte und Tags berechnen.</p>
+<h2 id="import-ablauf">Ablauf</h2>
+<ol type="1">
+<li><p><em>Datei → Import → RezKonv-Rezepte importieren …</em> bzw. <em>MealMaster-Rezepte importieren …</em> wählen.</p></li>
+<li><p>Eine oder mehrere Dateien auswählen (RezKonv: <code>.rk</code>, <code>.rkv</code>, <code>.txt</code>; MealMaster: <code>.mmf</code>, <code>.mm</code>, <code>.mxp</code>, <code>.txt</code>).</p></li>
+<li><p>Die <strong>Vorschau</strong> zeigt alle gefundenen Rezepte mit Portionen, kcal je Portion, Sprache und Status.</p>
+<figure>
+<img src="bilder/import-vorschau.png" alt="Import-Vorschau mit erkannten Doubletten" />
+<figcaption aria-hidden="true">Import-Vorschau mit erkannten Doubletten</figcaption>
+</figure>
+<ul>
+<li>Mit den Häkchen wählen Sie aus, welche Rezepte übernommen werden. <strong>Alle</strong>, <strong>Keine</strong> und <strong>Nur neue</strong> helfen bei großen Sammlungen.</li>
+<li>Die Spalte <strong>Status</strong> meldet „neu“ oder „Doublette“, wenn ein gleiches Rezept schon in der Datenbank steht.</li>
+<li>Hinweise über der Liste nennen z. B., in wie vielen Rezepten Umlaute ergänzt wurden.</li>
+</ul></li>
+<li><p><strong>Importieren</strong> übernimmt die gewählten Rezepte. Bei jeder Doublette fragt ViviaMeals nach: <strong>Überspringen</strong>, <strong>Ersetzen</strong> oder <strong>Beide behalten</strong> – mit „Für alle weiteren Doubletten dieses Imports übernehmen“ nur einmal.</p></li>
+<li><p>Zum Schluss nennt ViviaMeals, wie viele Rezepte neu aufgenommen, ersetzt und übersprungen wurden. Haben Zutaten keine Nährwerte, bietet es an, sie anzulegen oder zuzuordnen (<a href="naehrwerte.html#zutaten-ohne-naehrwerte">Zutaten ohne Nährwerte</a>).</p></li>
+</ol>
+<p>Rezeptdateien lassen sich auch per Doppelklick oder über die Kommandozeile übernehmen (siehe <a href="anhang.html#kommandozeile">Kommandozeile</a>).</p>
+<h2 id="import-aufbereitung">Was beim Import passiert</h2>
+<ul>
+<li><strong>Zeichensatz:</strong> UTF-8, Windows-1252 und der alte DOS-Zeichensatz CP850 werden erkannt – Umlaute erscheinen richtig, auch bei Dateien aus den 1990er-Jahren.</li>
+<li><strong>RezKonv-Besonderheiten:</strong> gekürzte Titel (über „O-Titel“), „Prise/n“, „Kugel(n)“, „Zitrone: Saft“, „à 125 g“, Abschnitte und Fortsetzungszeilen.</li>
+<li><strong>MealMaster:</strong> zweispaltige Zutatenlisten, Abschnitte und Quellenangaben. Von RezKonv erzeugte MealMaster-Dateien (z. B. aus Kochkiste-Archiven) werden erkannt; ihre Angaben „Quelle“ und „Erfasst … von“ landen in der Quelle statt in den Zutaten.</li>
+<li><strong>Temperaturen</strong> werden einheitlich geschrieben: aus „200GradC“, „200 Grad C“ oder „200°C“ wird „200° C“, auch in Bereichen („180-200° C“).</li>
+<li><strong>Menüfolgen</strong> (nur Gerichtnamen ohne Mengen) werden als Menü angezeigt und nicht als Rezept berechnet.</li>
+<li><strong>Tags</strong> für Ernährung, Mahlzeit und Nährwerte werden ergänzt, wenn das in den Einstellungen eingeschaltet ist (Vorgabe).</li>
+</ul>
+<h2 id="englisch">Englische Rezepte</h2>
+<p>Englischsprachige Rezepte werden auch ohne Internetverbindung verständlich:</p>
+<ul>
+<li><strong>Maße:</strong> cups → ml bzw. g (über die Dichte der Zutat), oz und lb → g, fl oz, pint, quart → ml, tbsp/tsp → EL/TL, „1 stick butter“ → 113 g, „1 (16 oz) can“ → 454 g.</li>
+<li><strong>Zutaten:</strong> über ein eingebautes Wörterbuch übersetzt – „chopped walnuts“ wird zu „Walnüsse, gehackt“.</li>
+<li><strong>Temperaturen und Längen</strong> in der Anleitung: °F → °C, Zoll → cm.</li>
+</ul>
+<p>Ohne DeepL bleibt die Zubereitung selbst englisch; die Ansicht weist darauf hin.</p>
+<figure>
+<img src="bilder/hauptfenster-englisch.png" alt="Ein englisches MealMaster-Rezept, umgerechnet" />
+<figcaption aria-hidden="true">Ein englisches MealMaster-Rezept, umgerechnet</figcaption>
+</figure>
+<h2 id="deepl">Übersetzen mit DeepL</h2>
+<p>Wer fremdsprachige Rezepte vollständig auf Deutsch haben möchte – Titel, Zutaten und Zubereitung – oder Rezepte auf Französisch, Italienisch, Spanisch oder Niederländisch importiert, kann den Übersetzungsdienst <strong>DeepL</strong> einschalten.</p>
+<ul>
+<li>Nur <strong>fremdsprachige</strong> Rezepte werden übersetzt; deutsche Rezepte werden nie an DeepL gesendet.</li>
+<li>Die Übersetzung ist freiwillig und ab Werk ausgeschaltet.</li>
+<li>Sie benötigen einen <strong>eigenen DeepL-Schlüssel</strong>. Der Tarif <strong>DeepL API Free</strong> ist kostenlos und erlaubt 500.000 Zeichen im Monat – genug für etwa 200 bis 400 Rezepte.</li>
+</ul>
+<h3 id="deepl-einrichten">Einrichten</h3>
+<ol type="1">
+<li>Auf <a href="https://www.deepl.com/pro-api" class="uri">https://www.deepl.com/pro-api</a> den Tarif <strong>DeepL API Free</strong> wählen und ein Konto anlegen. (DeepL erfasst zum Schutz vor Missbrauch Zahlungsdaten; der Free-Tarif kostet trotzdem nichts.)</li>
+<li>Im DeepL-Konto unter <strong>API Keys</strong> den Schlüssel kopieren. Er hat die Form <code>xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx:fx</code>.</li>
+<li>In ViviaMeals <em>Extras → Einstellungen → Import und Übersetzung</em> öffnen.</li>
+<li>Im Abschnitt <strong>Übersetzung fremdsprachiger Rezepte (DeepL)</strong> das Häkchen setzen und den Schlüssel einfügen.</li>
+<li><strong>Verbindung testen</strong> – angezeigt werden Tarif und Verbrauch des laufenden Monats.</li>
+</ol>
+<figure>
+<img src="bilder/einstellungen.png" alt="Einstellungen mit der DeepL-Übersetzung" />
+<figcaption aria-hidden="true">Einstellungen mit der DeepL-Übersetzung</figcaption>
+</figure>
+<h3 id="deepl-nutzen">Beim Import und danach</h3>
+<ul>
+<li>Nach dem Einlesen prüft ViviaMeals die Sprache jedes Rezepts und fragt nach, ob die fremdsprachigen übersetzt werden sollen – mit der Zahl der Zeichen, die an DeepL gehen. Maße und Temperaturen werden vorher umgerechnet.</li>
+<li>Die Spalte <strong>Sprache</strong> der Vorschau zeigt z. B. „englisch → DeepL“ oder „englisch (Glossar)“.</li>
+<li>Einzelne vorhandene Rezepte übersetzt <strong>Mit DeepL übersetzen</strong> im Editor, alle auf einmal <em>Extras → Fremdsprachige Rezepte mit DeepL übersetzen …</em>.</li>
+<li>Klappt die Übersetzung nicht (falscher Schlüssel, Kontingent erschöpft, keine Verbindung), wird das Rezept trotzdem importiert – mit dem eingebauten Wörterbuch.</li>
+</ul>
+<blockquote>
+<p><strong>Datenschutz:</strong> Bei eingeschalteter Übersetzung sendet ViviaMeals Titel, Zutaten und Zubereitung fremdsprachiger Rezepte verschlüsselt an die DeepL SE in Köln. Deutsche Rezepte, Fotos, Profile und alle übrigen Daten verlassen den Rechner nicht. Beim kostenlosen Tarif behält sich DeepL vor, Texte zeitweise zu speichern und zur Verbesserung zu verwenden. Persönliches gehört daher nicht in Rezepte, die übersetzt werden sollen.</p>
+</blockquote>
+<h2 id="umlaute">Umlaut-Korrektur</h2>
+<p>Viele ältere Rezeptsammlungen sind ohne Umlaute geschrieben: „Kaese“, „Gemuesebruehe“, „heiss“. ViviaMeals erkennt solche Rezepte beim Import und schreibt sie richtig – dadurch findet auch die Nährwerttabelle die Zutaten wieder.</p>
+<figure>
+<img src="bilder/import-umlaute.png" alt="Import mit Umlaut-Korrektur" />
+<figcaption aria-hidden="true">Import mit Umlaut-Korrektur</figcaption>
+</figure>
+<ul>
+<li><strong>ae, oe, ue</strong> werden zu <strong>ä, ö, ü</strong> – außer, wo das falsch wäre: nach einem Selbstlaut (Feuer, Sauerbraten), nach „q“ (Quelle) und in bekannten Wörtern wie aktuell, Baguette, Fondue, Michael, Aloe.</li>
+<li><strong>ss</strong> wird nur in bekannten Wortstämmen zu <strong>ß</strong>: heiß, weiß, groß, gießen, Soße, süß, Grieß … Wasser, Schüssel, Nuss und muss bleiben, wie sie sind.</li>
+<li>Großgeschriebene Zwischenüberschriften („FUER DEN TEIG“) werden zu „Für den Teig“.</li>
+<li>Rezepte, die schon echte Umlaute enthalten, bleiben unangetastet.</li>
+</ul>
+<p>Die Korrektur ist in den Einstellungen abschaltbar. Für bereits vorhandene Rezepte gibt es <em>Extras → Umlaute in allen Rezepten korrigieren …</em> (mit Beispielen und Rückfrage) und im Editor die Schaltfläche <strong>Umlaute korrigieren</strong>. Ein seltener Fehlgriff, etwa bei einem Eigennamen, lässt sich im Editor von Hand zurücknehmen.</p>
+<h2 id="import-weitere">Weitere Formate</h2>
+<ul>
+<li><em>Datei → Import → ViviaMeals-Rezept (.vmr) importieren …</em> – einzelne Rezeptdateien, z. B. per E-Mail erhalten oder aus einer Sicherungskopie.</li>
+<li><em>Datei → Import → Rezeptpaket (.vmpack) übernehmen …</em> – ganze Sammlungen von anderen ViviaMeals-Nutzern (<a href="export.html#rezeptpaket">Rezeptpakete</a>).</li>
+<li><em>Datei → Import → Alte ViviaMeals-Liste (.vtm) importieren …</em> – Listen aus der ersten Fassung des Programms.</li>
+<li><em>Datei → Import → Rezept scannen …</em> – gedruckte Rezepte (<a href="scannen.html#scannen">Rezepte scannen</a>).</li>
+</ul>
+<nav class="pager"><span><a href="rezepte.html">← Rezepte anlegen und bearbeiten</a></span><span class="weiter"><a href="scannen.html">Rezepte scannen →</a></span></nav></main></div>
+<footer>ViviaMeals 0.9.3 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
+</body></html>

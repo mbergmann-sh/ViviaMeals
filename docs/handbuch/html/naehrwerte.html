@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Nährwerte – ViviaMeals – Handbuch</title><link rel="stylesheet" href="handbuch.css"></head>
+<body class="web">
+<header class="top"><span class="version">Version 0.9.3</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
+<div class="wrap"><nav class="side"><input id="suche" class="such" type="search" placeholder="Im Handbuch suchen …"><ol>
+<li><a href="index.html">Start und Inhalt</a></li>
+<li><a href="willkommen.html">Willkommen bei ViviaMeals</a>
+</li>
+<li><a href="hauptfenster.html">Das Hauptfenster</a>
+</li>
+<li><a href="rezepte.html">Rezepte anlegen und bearbeiten</a>
+</li>
+<li><a href="import.html">Rezepte importieren</a>
+</li>
+<li><a href="scannen.html">Rezepte scannen</a>
+</li>
+<li class="aktiv"><a href="naehrwerte.html">Nährwerte</a>
+<ol><li><a href="#naehrwerte-rechnen">Wie ViviaMeals rechnet</a></li><li><a href="#naehrwerttabelle">Die Nährwerttabelle</a></li><li><a href="#eigene-lebensmittel">Eigene Lebensmittel anlegen</a></li><li><a href="#zutaten-ohne-naehrwerte">Zutaten ohne Nährwerte</a></li><li><a href="#naehrwerte-csv">Nährwerte importieren und exportieren</a></li><li><a href="#naehrwert-tags">Mahlzeit- und Nährwert-Tags</a></li><li><a href="#neu-berechnen">Alles neu berechnen</a></li></ol>
+</li>
+<li><a href="planen.html">Planen und Gewichtskontrolle</a>
+</li>
+<li><a href="menue.html">Der Menüassistent</a>
+</li>
+<li><a href="export.html">Exportieren</a>
+</li>
+<li><a href="abgleich.html">Abgleich zwischen Geräten</a>
+</li>
+<li><a href="extras.html">Extras und Einstellungen</a>
+</li>
+<li><a href="anhang.html">Anhang</a>
+</li>
+</ol></nav><main>
+<h1 id="naehrwerte">Nährwerte</h1>
+<h2 id="naehrwerte-rechnen">Wie ViviaMeals rechnet</h2>
+<p>Für jede Zutat sucht ViviaMeals das passende Lebensmittel in seiner Nährwerttabelle und rechnet die Menge in Gramm um:</p>
+<ul>
+<li><strong>Gewicht</strong> direkt (g, kg, oz, lb),</li>
+<li><strong>Volumen</strong> über die Dichte des Lebensmittels (ml, l, EL, TL, Tasse, cup),</li>
+<li><strong>Stück, Zehe, Dose, Packung</strong> über typische Stückgewichte,</li>
+<li><strong>Angaben in Klammern</strong> wie „1 Süßkartoffel (ca. 400 g)“ vor allem anderen.</li>
+</ul>
+<p>Daraus entstehen Energie (kcal <strong>und</strong> kJ), Fett, gesättigte Fettsäuren, Kohlenhydrate, Zucker, Ballaststoffe, Eiweiß und Salz – für das ganze Rezept, je Portion und in Prozent der <strong>Referenzmenge</strong> für einen durchschnittlichen Erwachsenen (8.400 kJ / 2.000 kcal nach der Lebensmittel-Informationsverordnung). Das Ergebnis wird im Rezept gespeichert.</p>
+<blockquote>
+<p>Die Werte sind Richtwerte aus allgemeinen Tabellen. Sorte, Reife, Marke und Zubereitung können sie deutlich verändern. Rezepte, bei denen weniger als 80 % der Zutaten Nährwerte haben, erhalten keine Nährwert-Tags.</p>
+</blockquote>
+<h2 id="naehrwerttabelle">Die Nährwerttabelle</h2>
+<p>Eingebaut sind rund 220 Lebensmittelgruppen mit Werten je 100 g, Dichte, Stückgewichten und vielen deutschen und englischen Namen. Namen werden unabhängig von Umlauten und Akzenten verglichen („Gemuesebruehe“ = „Gemüsebrühe“, „Gruyere“ = „Gruyère“); zusammengesetzte Wörter wie „Zanderfilets“ oder „Hasenrücken“ werden erkannt.</p>
+<p><em>Extras → Nährwerttabelle …</em> zeigt alle Lebensmittel. Hier können Sie eigene Lebensmittel anlegen, eingebaute Werte überschreiben und Werte importieren oder exportieren.</p>
+<h2 id="eigene-lebensmittel">Eigene Lebensmittel anlegen</h2>
+<p>Fertigprodukte und Markenartikel („Fix für Spaghetti Bolognese“, eine bestimmte Bratensoße) stehen in keiner allgemeinen Tabelle. Mit dem Lebensmittel-Assistenten übertragen Sie die Angaben von der Verpackung.</p>
+<p><strong>Aufruf:</strong> <em>Extras → Eigenes Lebensmittel anlegen …</em>, im Editor <strong>Fehlende Lebensmittel anlegen …</strong> – oder automatisch nach einem Import bzw. beim Speichern eines neuen Rezepts, wenn Zutaten ohne Nährwerte übrig bleiben (in den Einstellungen abschaltbar).</p>
+<figure>
+<img src="bilder/lebensmittel-openfoodfacts.png" alt="Der Lebensmittel-Assistent mit Daten aus Open Food Facts" />
+<figcaption aria-hidden="true">Der Lebensmittel-Assistent mit Daten aus Open Food Facts</figcaption>
+</figure>
+<ol type="1">
+<li><strong>Bezeichnung:</strong> Name, Marke (optional), Kategorie und weitere Namen, unter denen die Zutat in Rezepten vorkommt.
+<ul>
+<li><strong>Open Food Facts:</strong> Barcode (EAN-13, EAN-8, UPC) eintippen und <strong>Abrufen</strong> – ein USB-Barcode-Scanner tippt die Ziffern selbst. Oder <strong>Nach Namen suchen …</strong>. Übernommen werden Name, Marke, Kategorie, Nährwerte und Packungsinhalt. Gesendet wird nur der Barcode bzw. Suchbegriff.</li>
+<li>Heißt die Zutat nur anders als ein vorhandenes Lebensmittel („Pflanzenfett“ → Margarine), besser <strong>Doch ein vorhandenes Lebensmittel zuordnen …</strong> wählen.</li>
+</ul></li>
+<li><strong>Nährwerte:</strong> Angaben je 100 g, je 100 ml oder je Portion; Energie in kcal <strong>oder</strong> kJ; Natrium statt Salz ankreuzbar. Eine Prüfung warnt bei unmöglichen Werten (Zucker größer als Kohlenhydrate) und wenn die Energie nicht zu den Nährstoffen passt – meist wurden dann kJ als kcal eingetragen.</li>
+<li><strong>Menge und Packung:</strong> Dichte (für EL, TL und ml), Packungsinhalt mit Einheit (Pck., Becher, Dose, Würfel …) und Stückgewicht. So wird aus „1 Pck. Fix für Bolognese“ richtig 40 g.</li>
+<li><strong>Übersicht:</strong> Werte je 100 g und je Packung; „Zutat … künftig immer diesem Lebensmittel zuordnen“.</li>
+</ol>
+<figure>
+<img src="bilder/lebensmittel-assistent-uebersicht.png" alt="Übersicht des Lebensmittel-Assistenten" />
+<figcaption aria-hidden="true">Übersicht des Lebensmittel-Assistenten</figcaption>
+</figure>
+<h2 id="zutaten-ohne-naehrwerte">Zutaten ohne Nährwerte</h2>
+<p><em>Extras → Zutaten ohne Nährwerte …</em> listet alle Zutaten der Datenbank, für die kein Lebensmittel gefunden wurde – mit Häufigkeit und einer Beispielzeile.</p>
+<figure>
+<img src="bilder/lebensmittel-fehlend.png" alt="Zutaten ohne Nährwerte" />
+<figcaption aria-hidden="true">Zutaten ohne Nährwerte</figcaption>
+</figure>
+<ul>
+<li><strong>Anlegen</strong> (oder Doppelklick) öffnet den Lebensmittel-Assistenten.</li>
+<li><strong>Zuordnen</strong> verknüpft die Zutat mit einem vorhandenen Lebensmittel.</li>
+<li><strong>Kein Lebensmittel</strong> blendet Einträge wie „Backpapier“ oder „Alufolie“ dauerhaft aus.</li>
+</ul>
+<p>Danach werden die Nährwerte der betroffenen Rezepte neu berechnet.</p>
+<h2 id="naehrwerte-csv">Nährwerte importieren und exportieren</h2>
+<p><em>Extras → Nährwerttabelle → Importieren / Exportieren</em> übernimmt viele Werte auf einmal:</p>
+<ul>
+<li>eigene Tabellen aus Excel oder LibreOffice Calc und die mitgelieferte <strong>CSV-Vorlage</strong>,</li>
+<li>Exporte von <strong>Open Food Facts</strong>,</li>
+<li>den entpackten CSV-Ordner von <strong>USDA FoodData Central</strong> (gemeinfrei).</li>
+</ul>
+<p>Trennzeichen, Zeichensatz, Dezimalkomma, „&lt;0,1“ sowie kJ und Natrium werden erkannt bzw. umgerechnet; die Spalten ordnet ViviaMeals anhand der Überschriften zu (änderbar, mit Vorschau). Jeder Import erhält eine Herkunft und lässt sich später gesammelt wieder entfernen.</p>
+<figure>
+<img src="bilder/naehrwerte-import.png" alt="Nährwerte aus einer CSV-Datei importieren" />
+<figcaption aria-hidden="true">Nährwerte aus einer CSV-Datei importieren</figcaption>
+</figure>
+<h2 id="naehrwert-tags">Mahlzeit- und Nährwert-Tags</h2>
+<p>ViviaMeals vergibt beim Import, im Editor über <strong>Ergänzen</strong> und für alle Rezepte über <em>Extras → Mahlzeit- und Nährwert-Tags für alle Rezepte ergänzen …</em> Tags, die der Wochenplan und die Suche nutzen.</p>
+<p><strong>Mahlzeit-Tags</strong> – aus Kategorien, Titel, Zutaten und Nährwerten geschätzt: frühstück, hauptgerichte, leichte mahlzeit, zwischenmahlzeit, desserts, süßspeise, backen.</p>
+<p><strong>Nährwert-Tags</strong> – aus den berechneten Werten:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Tag</th>
+<th>Bedingung</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>eiweißreich</td>
+<td>mind. 20 % der Energie aus Eiweiß und mind. 15 g Eiweiß je Portion</td>
+</tr>
+<tr class="even">
+<td>fettarm</td>
+<td>höchstens 3 g Fett je 100 g</td>
+</tr>
+<tr class="odd">
+<td>kalorienarm</td>
+<td>höchstens 80 kcal je 100 g und höchstens 400 kcal je Portion</td>
+</tr>
+<tr class="even">
+<td>hochkalorisch</td>
+<td>mind. 250 kcal je 100 g oder mind. 800 kcal je Portion</td>
+</tr>
+<tr class="odd">
+<td>vitaminreich</td>
+<td>mind. 200 g Gemüse, Obst und Kräuter je Portion oder mind. die Hälfte des Portionsgewichts</td>
+</tr>
+<tr class="even">
+<td>reduktionsdiät</td>
+<td>höchstens 600 kcal je Portion und 150 kcal je 100 g, höchstens 35 % Energie aus Fett und 20 % aus Zucker, mind. 15 % aus Eiweiß, kein Dessert</td>
+</tr>
+</tbody>
+</table>
+<p>„eiweißreich“ und „fettarm“ folgen den Grenzwerten der EU-Verordnung über nährwertbezogene Angaben; „vitaminreich“ ist ein Näherungswert, denn die Tabelle enthält keine Vitamine. Tags werden nur ergänzt, nie entfernt – mit einer Ausnahme: Nährwert-Tags, die nach einer Änderung der Zutaten nicht mehr zutreffen, entfallen beim Neuberechnen.</p>
+<h2 id="neu-berechnen">Alles neu berechnen</h2>
+<p><em>Extras → Nährwerte aller Rezepte neu berechnen</em> wendet die aktuelle Nährwerttabelle auf alle Rezepte an – etwa nachdem Sie eigene Lebensmittel angelegt haben. Ein Fortschrittsbalken zeigt den Stand; beim Abbrechen bleiben die schon berechneten Rezepte gespeichert.</p>
+<figure>
+<img src="bilder/fortschritt.png" alt="Fortschrittsanzeige bei der Neuberechnung" />
+<figcaption aria-hidden="true">Fortschrittsanzeige bei der Neuberechnung</figcaption>
+</figure>
+<nav class="pager"><span><a href="scannen.html">← Rezepte scannen</a></span><span class="weiter"><a href="planen.html">Planen und Gewichtskontrolle →</a></span></nav></main></div>
+<footer>ViviaMeals 0.9.3 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
+</body></html>

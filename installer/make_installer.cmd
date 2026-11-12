@@ -102,6 +102,17 @@ for /d /r "%STAGE%" %%d in (debug release .moc .obj .rcc .ui) do if exist "%%d" 
 copy /y "%INST%\..\LICENSE" "%STAGE%\LICENSE.txt" >nul
 if errorlevel 1 goto fail
 copy /y "%INST%\..\README.md" "%STAGE%\README.md" >nul
+rem ---- 3a. Handbuch (CHM fuer F1, dazu PDF und HTML) - erzeugt mit tools\make_handbuch.py
+set "HB=%INST%\..\docs\handbuch"
+if exist "%HB%\ViviaMeals-Handbuch.chm" (
+    if not exist "%STAGE%\handbuch" mkdir "%STAGE%\handbuch"
+    copy /y "%HB%\ViviaMeals-Handbuch.chm" "%STAGE%\handbuch\" >nul
+    if exist "%HB%\ViviaMeals-Handbuch.pdf" copy /y "%HB%\ViviaMeals-Handbuch.pdf" "%STAGE%\handbuch\" >nul
+    if exist "%HB%\html\index.html" xcopy "%HB%\html" "%STAGE%\handbuch\html\" /e /i /q /y >nul
+    call :log "Handbuch beigelegt: handbuch\ViviaMeals-Handbuch.chm"
+) else (
+    call :log "warning: Handbuch fehlt (docs\handbuch\ViviaMeals-Handbuch.chm) - F1 zeigt dann nichts an. Erzeugen: python tools\make_handbuch.py"
+)
 
 rem ---- 3b. optional: Tesseract (Texterkennung) mitliefern
 if not defined VIVIA_TESSERACT_DIR goto notess

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Abgleich zwischen Geräten – ViviaMeals – Handbuch</title><link rel="stylesheet" href="handbuch.css"></head>
+<body class="web">
+<header class="top"><span class="version">Version 0.9.3</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
+<div class="wrap"><nav class="side"><input id="suche" class="such" type="search" placeholder="Im Handbuch suchen …"><ol>
+<li><a href="index.html">Start und Inhalt</a></li>
+<li><a href="willkommen.html">Willkommen bei ViviaMeals</a>
+</li>
+<li><a href="hauptfenster.html">Das Hauptfenster</a>
+</li>
+<li><a href="rezepte.html">Rezepte anlegen und bearbeiten</a>
+</li>
+<li><a href="import.html">Rezepte importieren</a>
+</li>
+<li><a href="scannen.html">Rezepte scannen</a>
+</li>
+<li><a href="naehrwerte.html">Nährwerte</a>
+</li>
+<li><a href="planen.html">Planen und Gewichtskontrolle</a>
+</li>
+<li><a href="menue.html">Der Menüassistent</a>
+</li>
+<li><a href="export.html">Exportieren</a>
+</li>
+<li class="aktiv"><a href="abgleich.html">Abgleich zwischen Geräten</a>
+<ol><li><a href="#abgleich-wege">Zwei Wege</a></li><li><a href="#abgleich-wann">Wann abgeglichen wird</a></li><li><a href="#abgleich-konflikte">Konflikte</a></li><li><a href="#abgleich-neues-geraet">Ein neues Gerät einrichten</a></li></ol>
+</li>
+<li><a href="extras.html">Extras und Einstellungen</a>
+</li>
+<li><a href="anhang.html">Anhang</a>
+</li>
+</ol></nav><main>
+<h1 id="abgleich">Abgleich zwischen Geräten</h1>
+<p>Mit dem Abgleich bleibt eine Rezeptdatenbank auf mehreren Geräten gleich – etwa auf dem Rechner in der Küche und dem Laptop. Abgeglichen werden Rezepte, gespeicherte Menüs, Profile mit Gewichtsverlauf und Wochenplänen, das Ernährungstagebuch, eigene Lebensmittel, Doubletten-Ausnahmen sowie die Standard-Quelle und die Liste der „Kein Lebensmittel“-Zutaten.</p>
+<p>Jedes Gerät behält eine vollständige Kopie und kann auch ohne Verbindung arbeiten; beim nächsten Abgleich werden nur die geänderten Dateien übertragen. Nicht abgeglichen werden Dinge, die zum jeweiligen Gerät gehören: Fenstergrößen, Darstellung, Scanner- und Tesseract-Einstellungen, der DeepL-Schlüssel, der Kühlschrank-Bestand und Sicherungskopien.</p>
+<p>Alle Befehle stehen unter <em>Datei → Abgleich</em>.</p>
+<h2 id="abgleich-wege">Zwei Wege</h2>
+<h3 id="abgleich-website">Über die eigene Website</h3>
+<p>Sie brauchen Webspace mit PHP (Version 7.4 oder neuer, z. B. 8.3) – bei den meisten Hostern selbstverständlich.</p>
+<figure>
+<img src="bilder/abgleich-website.png" alt="Abgleich über die eigene Website einrichten" />
+<figcaption aria-hidden="true">Abgleich über die eigene Website einrichten</figcaption>
+</figure>
+<ol type="1">
+<li><em>Datei → Abgleich → Abgleich einrichten …</em> öffnen und „die eigene Website“ wählen.</li>
+<li><strong>Neu</strong> erzeugt einen zufälligen <strong>Zugangsschlüssel</strong>.</li>
+<li><strong>Sync-Skript speichern …</strong> legt die Datei <code>viviameals-sync.php</code> in einem Ordner Ihrer Wahl ab.</li>
+<li>Diese Datei per FTP oder SFTP in einen Ordner Ihrer Website hochladen, z. B. <code>/viviameals/</code>.</li>
+<li>Die Adresse eintragen, z. B. <code>https://www.meine-seite.de/viviameals/viviameals-sync.php</code>, und <strong>Verbindung prüfen</strong>.</li>
+<li><strong>OK</strong> – der erste Abgleich lädt die Datenbank hoch.</li>
+<li>Für jedes weitere Gerät <strong>Einladungscode kopieren</strong> und den Code dort einfügen (er enthält Adresse und Schlüssel – bitte nur an eigene Geräte weitergeben).</li>
+</ol>
+<p>Das Skript legt neben sich den Ordner <code>vm-sync-daten</code> an und sperrt ihn mit einer <code>.htaccess</code>-Datei gegen Zugriffe von außen. Der Zugangsschlüssel steht nur als Prüfsumme im Skript. Wird ein neuer Schlüssel erzeugt, muss das Skript erneut gespeichert und hochgeladen werden.</p>
+<blockquote>
+<p><strong>Wichtig:</strong> Die Daten selbst werden nicht verschlüsselt gespeichert. Verwenden Sie deshalb möglichst eine Adresse mit <strong>https://</strong>. Läuft Ihr Webserver mit nginx statt Apache, wirkt die <code>.htaccess</code>-Sperre nicht – sperren Sie den Ordner <code>vm-sync-daten</code> dann in der Serverkonfiguration.</p>
+</blockquote>
+<h3 id="abgleich-lan">Über das lokale Netz</h3>
+<p>Ein Rechner gibt die Datenbank frei, die anderen gleichen mit ihm ab. Ein Webserver ist nicht nötig.</p>
+<figure>
+<img src="bilder/abgleich-freigabe.png" alt="Freigabe im lokalen Netz mit Kopplungscode" />
+<figcaption aria-hidden="true">Freigabe im lokalen Netz mit Kopplungscode</figcaption>
+</figure>
+<ol type="1">
+<li>Auf dem freigebenden Rechner: <em>Abgleich einrichten …</em> → „Freigabe: dieser Rechner stellt die Datenbank im lokalen Netz bereit“ → <strong>OK</strong>. Angezeigt werden ein sechsstelliger <strong>Kopplungscode</strong> und die Adresse.</li>
+<li>Auf dem anderen Gerät: <em>Abgleich einrichten …</em> (bzw. <em>Datenbank aus dem Abgleich laden …</em>) → „ein anderes Gerät im lokalen Netz“. Die Freigabe erscheint in der Liste; den Code eingeben und <strong>Koppeln</strong>, dann <strong>OK</strong>.</li>
+<li>Jeder Code gilt für eine Kopplung; nach fünf Fehlversuchen entsteht ein neuer. Die Kopplung bleibt dauerhaft bestehen – auch wenn sich die IP-Adresse des freigebenden Rechners ändert, findet ViviaMeals ihn wieder.</li>
+</ol>
+<p>Die Freigabe ist aktiv, solange ViviaMeals auf diesem Rechner läuft. Gleicht ein anderes Gerät ab, übernimmt der freigebende Rechner die Änderungen nach wenigen Sekunden selbst.</p>
+<blockquote>
+<p><strong>Firewall:</strong> Beim ersten Start der Freigabe fragt die Windows-Firewall nach – „Private Netzwerke“ zulassen. ViviaMeals nutzt TCP-Port 47420 und für die Suche UDP-Port 47421.</p>
+</blockquote>
+<p>Bewusst nicht vorgesehen sind Cloud-Dienste und Netzwerk- bzw. NAS-Ordner: dort können gleichzeitige Änderungen Daten zerstören.</p>
+<h2 id="abgleich-wann">Wann abgeglichen wird</h2>
+<ul>
+<li><strong>automatisch</strong> beim Öffnen und Schließen der Datenbank (im Dialog abschaltbar; Vorgabe: an),</li>
+<li>jederzeit mit <em>Datei → Abgleich → Jetzt abgleichen</em> (<strong>Strg+Umschalt+Y</strong>) oder „Abgleich“ in der Werkzeugleiste.</li>
+</ul>
+<p>Die Statuszeile zeigt Weg und Zeitpunkt des letzten Abgleichs, z. B. „⇅ Website · abgeglichen um 14:32“. Nach dem Abgleich meldet ViviaMeals kurz, was geholt, gesendet, gelöscht oder zusammengeführt wurde.</p>
+<h2 id="abgleich-konflikte">Konflikte</h2>
+<p>Wurde dasselbe Rezept seit dem letzten Abgleich auf zwei Geräten geändert, bleiben <strong>beide Fassungen</strong> erhalten: die eigene unter dem bisherigen Rezept, die andere als zweites Rezept „Titel (Konflikt: Gerät, Datum)“. ViviaMeals nennt die betroffenen Rezepte; die überzählige Fassung löschen Sie von Hand – die Löschung wird ebenfalls abgeglichen.</p>
+<p>Profile, Gewichtsverlauf, Tagebuch und eigene Lebensmittel werden <strong>eintragsweise zusammengeführt</strong>: Einträge beider Geräte bleiben erhalten.</p>
+<p>Gelöschte Rezepte werden auf den anderen Geräten ebenfalls gelöscht. Gleichen zwei Geräte genau gleichzeitig ab, wartet das zweite („Gerade gleicht … ab – bitte in einer Minute erneut versuchen“).</p>
+<h2 id="abgleich-neues-geraet">Ein neues Gerät einrichten</h2>
+<p>Ein frisch installiertes ViviaMeals holt eine schon abgeglichene Datenbank vollständig auf das Gerät:</p>
+<figure>
+<img src="bilder/abgleich-laden.png" alt="Datenbank aus dem Abgleich laden" />
+<figcaption aria-hidden="true">Datenbank aus dem Abgleich laden</figcaption>
+</figure>
+<ol type="1">
+<li>Im Willkommensfenster <strong>Aus dem Abgleich laden …</strong> wählen – oder später <em>Datei → Abgleich → Datenbank aus dem Abgleich laden …</em>.</li>
+<li>Weg wählen: eigene Website (Einladungscode einfügen) oder Gerät im lokalen Netz (Freigabe wählen und koppeln).</li>
+<li>Speicherort und Ordnername bestätigen und <strong>Laden</strong>.</li>
+</ol>
+<p>Die Datenbank wird mit Profilen, Tagebuch und Lebensmitteln geholt, geöffnet und künftig automatisch abgeglichen.</p>
+<nav class="pager"><span><a href="export.html">← Exportieren</a></span><span class="weiter"><a href="extras.html">Extras und Einstellungen →</a></span></nav></main></div>
+<footer>ViviaMeals 0.9.3 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
+</body></html>

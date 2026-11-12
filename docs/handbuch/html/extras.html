@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Extras und Einstellungen – ViviaMeals – Handbuch</title><link rel="stylesheet" href="handbuch.css"></head>
+<body class="web">
+<header class="top"><span class="version">Version 0.9.3</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
+<div class="wrap"><nav class="side"><input id="suche" class="such" type="search" placeholder="Im Handbuch suchen …"><ol>
+<li><a href="index.html">Start und Inhalt</a></li>
+<li><a href="willkommen.html">Willkommen bei ViviaMeals</a>
+</li>
+<li><a href="hauptfenster.html">Das Hauptfenster</a>
+</li>
+<li><a href="rezepte.html">Rezepte anlegen und bearbeiten</a>
+</li>
+<li><a href="import.html">Rezepte importieren</a>
+</li>
+<li><a href="scannen.html">Rezepte scannen</a>
+</li>
+<li><a href="naehrwerte.html">Nährwerte</a>
+</li>
+<li><a href="planen.html">Planen und Gewichtskontrolle</a>
+</li>
+<li><a href="menue.html">Der Menüassistent</a>
+</li>
+<li><a href="export.html">Exportieren</a>
+</li>
+<li><a href="abgleich.html">Abgleich zwischen Geräten</a>
+</li>
+<li class="aktiv"><a href="extras.html">Extras und Einstellungen</a>
+<ol><li><a href="#doubletten">Doubletten suchen</a></li><li><a href="#sammelaktionen">Alle Rezepte auf einmal bearbeiten</a></li><li><a href="#datenbank-leeren">Datenbank leeren</a></li><li><a href="#einstellungen">Einstellungen</a></li><li><a href="#viviamealscheat">ViviaMealsCheat</a></li></ol>
+</li>
+<li><a href="anhang.html">Anhang</a>
+</li>
+</ol></nav><main>
+<h1 id="extras">Extras und Einstellungen</h1>
+<h2 id="doubletten">Doubletten suchen</h2>
+<p><em>Extras → Doubletten suchen …</em> findet mehrfach vorhandene Rezepte – typisch nach dem Import mehrerer Sammlungen.</p>
+<figure>
+<img src="bilder/doubletten.png" alt="Doubletten suchen und zusammenführen" />
+<figcaption aria-hidden="true">Doubletten suchen und zusammenführen</figcaption>
+</figure>
+<p><strong>Als Doublette gilt:</strong></p>
+<ul>
+<li>ein <strong>gleicher Titel</strong> – Groß- und Kleinschreibung, Satzzeichen und Umlaut-Schreibweise spielen keine Rolle („Käsekuchen“ = „KAESEKUCHEN!“);</li>
+<li>ein <strong>ähnlicher Titel</strong> (Tippfehler, Zusätze wie „Omas …“) <strong>und</strong> weitgehend gleiche Zutaten;</li>
+<li><strong>gleiche Zutaten</strong> (mindestens fünf) unter anderem Namen, z. B. „Pfannkuchen“ und „Eierkuchen“.</li>
+</ul>
+<p>Die <strong>Suchstufe</strong> bestimmt, wie streng verglichen wird: „nur gleiche Titel“ (sicher), „empfohlen“ oder „großzügig“ (findet mehr, auch Fehltreffer).</p>
+<p>Links stehen die Gruppen, darunter die Rezepte mit Portionen, kcal, Zutatenzahl, Bild, Favorit und Änderungsdatum. Das Häkchen markiert das vollständigste Rezept als Vorschlag zum Behalten. Rechts werden zwei Rezepte nebeneinander verglichen.</p>
+<ul>
+<li><strong>Bearbeiten</strong> und <strong>Löschen</strong> (mehrere mit Strg oder Umschalt auswählbar).</li>
+<li><strong>Dieses behalten, übrige zusammenführen:</strong> Das gewählte Rezept bleibt; fehlendes Bild, Quelle, Zubereitungszeit, alle Tags und die Favoriten-Markierung der übrigen werden übernommen, dann werden die übrigen gelöscht. Eine Rückfrage zeigt vorher genau, was geschieht.</li>
+<li><strong>Keine Doublette(n):</strong> Gruppe bzw. Rezept wird künftig nicht mehr gemeldet.</li>
+</ul>
+<h2 id="sammelaktionen">Alle Rezepte auf einmal bearbeiten</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Befehl</th>
+<th>Wirkung</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>Extras → Nährwerte aller Rezepte neu berechnen</em></td>
+<td>aktuelle Nährwerttabelle auf alle Rezepte anwenden</td>
+</tr>
+<tr class="even">
+<td><em>Extras → Mahlzeit- und Nährwert-Tags für alle Rezepte ergänzen …</em></td>
+<td>Tags nachholen, mit Vorschau der Anzahl</td>
+</tr>
+<tr class="odd">
+<td><em>Extras → Umlaute in allen Rezepten korrigieren …</em></td>
+<td>„Kaesespaetzle“ → „Käsespätzle“, mit Beispielen und Rückfrage</td>
+</tr>
+<tr class="even">
+<td><em>Extras → Fremdsprachige Rezepte mit DeepL übersetzen …</em></td>
+<td>nennt Anzahl und Zeichenmenge und fragt vor dem Senden</td>
+</tr>
+</tbody>
+</table>
+<p>Alle Sammelaktionen zeigen einen Fortschrittsbalken und lassen sich abbrechen.</p>
+<h2 id="datenbank-leeren">Datenbank leeren</h2>
+<p><em>Datei → Datenbank leeren …</em> löscht <strong>alle</strong> Rezepte der geöffneten Datenbank. Zur Sicherheit müssen Sie den Namen der Datenbank eintippen, erst dann wird <strong>Alle Rezepte löschen</strong> aktiv. Vorher legt ViviaMeals auf Wunsch (Vorgabe) eine <strong>Sicherungskopie</strong> im Unterordner <code>sicherung-JJJJ-MM-TT-hhmmss</code> an. Wiederherstellen lassen sich die Rezepte über <em>Datei → Import → ViviaMeals-Rezept (.vmr) importieren …</em>.</p>
+<blockquote>
+<p>Ist der <a href="abgleich.html#abgleich">Abgleich</a> eingerichtet, werden die Rezepte beim nächsten Abgleich auch auf den anderen Geräten gelöscht.</p>
+</blockquote>
+<h2 id="einstellungen">Einstellungen</h2>
+<p><em>Extras → Einstellungen …</em> (Strg+, bzw. ⌘+, unter macOS) hat drei Reiter.</p>
+<figure>
+<img src="bilder/einstellungen.png" alt="Die Einstellungen" />
+<figcaption aria-hidden="true">Die Einstellungen</figcaption>
+</figure>
+<p><strong>Allgemein</strong></p>
+<ul>
+<li><strong>Darstellung:</strong> Theme und Schriftgröße (automatisch oder 85–140 %).</li>
+<li><strong>Rezepte:</strong> <strong>Standard-Quelle</strong> für Rezepte ohne Quellenangabe (<a href="rezepte.html#quelle">Quelle und Standard-Quelle</a>).</li>
+<li><strong>Programmstart:</strong> zufälliges Rezept anzeigen; Hinweis „kein Medizinprodukt“ anzeigen.</li>
+</ul>
+<p><strong>Import und Übersetzung</strong></p>
+<ul>
+<li>Englische Rezepte ohne DeepL umrechnen und übersetzen.</li>
+<li>Deutsche Rezepte ohne Umlaute korrigieren.</li>
+<li>Tags vegan/vegetarisch/fleischgerichte/fisch, Mahlzeit-Tags und Nährwert-Tags ergänzen.</li>
+<li>Für Zutaten ohne Nährwerte den Lebensmittel-Assistenten anbieten.</li>
+<li><strong>Übersetzung fremdsprachiger Rezepte (DeepL):</strong> einschalten, API-Schlüssel, <strong>Verbindung testen</strong> (<a href="import.html#deepl">Übersetzen mit DeepL</a>).</li>
+</ul>
+<p><strong>Scannen</strong></p>
+<ul>
+<li><strong>Scanner:</strong> Windows-Scandialog, Scanprogramm, Netzwerkscanner (IP-Adresse), überwachter Ordner oder eigener Befehl; in Farbe scannen.</li>
+<li><strong>Texterkennung (Tesseract):</strong> Programm (automatisch suchen oder wählen), Sprachen, <strong>Prüfen</strong> (<a href="scannen.html#scannen-voraussetzungen">Rezepte scannen</a>).</li>
+</ul>
+<h2 id="viviamealscheat">ViviaMealsCheat</h2>
+<p>Das kleine Hilfsprogramm <strong>ViviaMealsCheat</strong> (eigener Installer, wird neben ViviaMeals installiert) ersetzt die Quelle vieler Rezepte auf einmal – entweder nur bestimmte Texte oder alle Quellen durch einen eigenen Text (Vorgabe „Micha B.“). Es zeigt vorher eine Vorschau, fragt vor dem Ändern nach und legt eine Sicherung an. Bitte ViviaMeals vorher schließen.</p>
+<nav class="pager"><span><a href="abgleich.html">← Abgleich zwischen Geräten</a></span><span class="weiter"><a href="anhang.html">Anhang →</a></span></nav></main></div>
+<footer>ViviaMeals 0.9.3 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
+</body></html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Anhang – ViviaMeals – Handbuch</title><link rel="stylesheet" href="handbuch.css"></head>
+<body class="web">
+<header class="top"><span class="version">Version 0.9.3</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
+<div class="wrap"><nav class="side"><input id="suche" class="such" type="search" placeholder="Im Handbuch suchen …"><ol>
+<li><a href="index.html">Start und Inhalt</a></li>
+<li><a href="willkommen.html">Willkommen bei ViviaMeals</a>
+</li>
+<li><a href="hauptfenster.html">Das Hauptfenster</a>
+</li>
+<li><a href="rezepte.html">Rezepte anlegen und bearbeiten</a>
+</li>
+<li><a href="import.html">Rezepte importieren</a>
+</li>
+<li><a href="scannen.html">Rezepte scannen</a>
+</li>
+<li><a href="naehrwerte.html">Nährwerte</a>
+</li>
+<li><a href="planen.html">Planen und Gewichtskontrolle</a>
+</li>
+<li><a href="menue.html">Der Menüassistent</a>
+</li>
+<li><a href="export.html">Exportieren</a>
+</li>
+<li><a href="abgleich.html">Abgleich zwischen Geräten</a>
+</li>
+<li><a href="extras.html">Extras und Einstellungen</a>
+</li>
+<li class="aktiv"><a href="anhang.html">Anhang</a>
+<ol><li><a href="#tastenkuerzel">Tastenkürzel</a></li><li><a href="#dateien">Dateien und Speicherorte</a></li><li><a href="#kommandozeile">Kommandozeile und Doppelklick</a></li><li><a href="#faq">Häufige Fragen</a></li><li><a href="#datenschutz">Datenschutz</a></li><li><a href="#lizenz">Lizenz</a></li></ol>
+</li>
+</ol></nav><main>
+<h1 id="anhang">Anhang</h1>
+<h2 id="tastenkuerzel">Tastenkürzel</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Taste</th>
+<th>Befehl</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>F1</strong></td>
+<td>Handbuch öffnen</td>
+</tr>
+<tr class="even">
+<td><strong>F2</strong></td>
+<td>Als LaTeX-Datei exportieren</td>
+</tr>
+<tr class="odd">
+<td><strong>F5</strong></td>
+<td>Kühlschrank – was koche ich heute?</td>
+</tr>
+<tr class="even">
+<td><strong>F6</strong></td>
+<td>Assistent Gewichtskontrolle</td>
+</tr>
+<tr class="odd">
+<td><strong>F7</strong></td>
+<td>Wochenmenü-Plan</td>
+</tr>
+<tr class="even">
+<td><strong>F8</strong></td>
+<td>Gewicht eintragen</td>
+</tr>
+<tr class="odd">
+<td><strong>F9</strong></td>
+<td>Ernährungstagebuch</td>
+</tr>
+<tr class="even">
+<td><strong>Strg+N</strong></td>
+<td>Neues Rezept</td>
+</tr>
+<tr class="odd">
+<td><strong>Strg+E</strong></td>
+<td>Rezept bearbeiten</td>
+</tr>
+<tr class="even">
+<td><strong>Entf</strong></td>
+<td>Rezept löschen (in der Rezeptliste)</td>
+</tr>
+<tr class="odd">
+<td><strong>Strg+O</strong></td>
+<td>Rezeptdatenbank öffnen</td>
+</tr>
+<tr class="even">
+<td><strong>Strg+F</strong></td>
+<td>Suchen</td>
+</tr>
+<tr class="odd">
+<td><strong>Strg+P</strong></td>
+<td>Drucken</td>
+</tr>
+<tr class="even">
+<td><strong>Strg+R</strong></td>
+<td>Zufälliges Rezept</td>
+</tr>
+<tr class="odd">
+<td><strong>Strg+Umschalt+S</strong></td>
+<td>Rezept scannen</td>
+</tr>
+<tr class="even">
+<td><strong>Strg+Umschalt+M</strong></td>
+<td>Menüassistent</td>
+</tr>
+<tr class="odd">
+<td><strong>Strg+Umschalt+Y</strong></td>
+<td>Jetzt abgleichen</td>
+</tr>
+<tr class="even">
+<td><strong>Strg+,</strong></td>
+<td>Einstellungen</td>
+</tr>
+<tr class="odd">
+<td><strong>Strg+Q</strong></td>
+<td>Programm beenden</td>
+</tr>
+</tbody>
+</table>
+<p>Unter macOS steht <strong>⌘</strong> für <strong>Strg</strong>.</p>
+<h2 id="dateien">Dateien und Speicherorte</h2>
+<p><strong>Eine Rezeptdatenbank</strong> ist ein Ordner:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Datei</th>
+<th>Inhalt</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>viviameals.vmdb</code></td>
+<td>Kennung und Name der Datenbank</td>
+</tr>
+<tr class="even">
+<td><code>rezepte/&lt;id&gt;.vmr</code></td>
+<td>je Rezept eine Datei (JSON, Foto eingebettet)</td>
+</tr>
+<tr class="odd">
+<td><code>menues/&lt;id&gt;.vmmenu</code></td>
+<td>gespeicherte Menüs</td>
+</tr>
+<tr class="even">
+<td><code>index.json</code></td>
+<td>Zwischenspeicher für schnelle Listen – wird bei Bedarf neu erzeugt</td>
+</tr>
+<tr class="odd">
+<td><code>doubletten-ignoriert.json</code></td>
+<td>als „keine Doublette“ markierte Rezepte</td>
+</tr>
+<tr class="even">
+<td><code>sicherung-…/</code></td>
+<td>Sicherungskopien vor dem Leeren der Datenbank</td>
+</tr>
+<tr class="odd">
+<td><code>.sync/</code></td>
+<td>Stand und Verbindung des Abgleichs (bleibt auf diesem Gerät)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Persönliche Daten</strong> liegen nicht im Datenbankordner, sondern im Benutzerprofil:</p>
+<table>
+<thead>
+<tr class="header">
+<th>System</th>
+<th>Ordner</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Windows</td>
+<td><code>%APPDATA%\mbergmann-sh\ViviaMeals</code></td>
+</tr>
+<tr class="even">
+<td>Linux</td>
+<td><code>~/.local/share/mbergmann-sh/ViviaMeals</code></td>
+</tr>
+<tr class="odd">
+<td>macOS</td>
+<td><code>~/Library/Application Support/mbergmann-sh/ViviaMeals</code></td>
+</tr>
+</tbody>
+</table>
+<p>Dort stehen <code>profile.json</code> (Personen, Gewichtsverlauf, Wochenpläne), <code>tagebuch/&lt;Person&gt;.json</code> und <code>lebensmittel_eigene.json</code> (eigene Lebensmittel und Zuordnungen). Die Einstellungen speichert Windows in der Registrierung (<code>HKEY_CURRENT_USER\Software\mbergmann-sh\ViviaMeals</code>), Linux in <code>~/.config/mbergmann-sh/ViviaMeals.conf</code>.</p>
+<blockquote>
+<p><strong>Sichern:</strong> Kopieren Sie regelmäßig den Datenbankordner und den Ordner mit den persönlichen Daten.</p>
+</blockquote>
+<h2 id="kommandozeile">Kommandozeile und Doppelklick</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Aufruf</th>
+<th>Wirkung</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>ViviaMeals rezept.vmr</code></td>
+<td>Rezept übernehmen</td>
+</tr>
+<tr class="even">
+<td><code>ViviaMeals sammlung.mmf</code> bzw. <code>sammlung.rk</code></td>
+<td>Sammlung importieren (mit Vorschau)</td>
+</tr>
+<tr class="odd">
+<td><code>ViviaMeals paket.vmpack</code></td>
+<td>Rezeptpaket übernehmen</td>
+</tr>
+<tr class="even">
+<td><code>ViviaMeals &lt;ordner&gt;/viviameals.vmdb</code></td>
+<td>Datenbank öffnen</td>
+</tr>
+<tr class="odd">
+<td><code>ViviaMeals --demo</code></td>
+<td>Demo mit Beispieldaten in einem eigenen Bereich</td>
+</tr>
+</tbody>
+</table>
+<p>Unter Windows richtet der Installer die Dateizuordnungen ein – ein Doppelklick auf die Datei genügt.</p>
+<h2 id="faq">Häufige Fragen</h2>
+<p><strong>Die Nährwerte eines Rezepts sind offensichtlich falsch.</strong> Öffnen Sie das Rezept im Editor und sehen Sie in der Nährwertanalyse nach, welche Zutat ein unerwartetes Gewicht oder Lebensmittel hat. Oft hilft eine Gewichtsangabe in Klammern („1 Kürbis (800 g)“) oder eine andere Zuordnung per Doppelklick (<a href="rezepte.html#editor-naehrwerte">Nährwerte im Editor</a>).</p>
+<p><strong>Der Wochenplan findet kaum passende Rezepte.</strong> Prüfen Sie, ob die Rezepte Nährwerte und Mahlzeit-Tags haben (<em>Extras → Mahlzeit- und Nährwert-Tags für alle Rezepte ergänzen …</em>) und ob die Vorlieben der Person (Ernährung, „Nicht verwenden“) zu streng sind. Die Schaltfläche <strong>Gesunde Vorschläge übernehmen</strong> ergänzt Frühstücks- und leichte Rezepte.</p>
+<p><strong>Das Handbuch (.chm) zeigt unter Windows nur leere Seiten.</strong> Windows sperrt Hilfedateien, die aus dem Internet oder von einem Netzlaufwerk stammen. Rechte Maustaste auf <code>ViviaMeals-Handbuch.chm</code> → <em>Eigenschaften</em> → <strong>Zulassen</strong> ankreuzen. Mit dem Installer eingerichtete Handbücher sind davon nicht betroffen.</p>
+<p><strong>Wie bringe ich meine Rezepte auf einen neuen Rechner?</strong> Am bequemsten mit dem <a href="abgleich.html#abgleich-neues-geraet">Abgleich</a>. Ohne Abgleich kopieren Sie den Datenbankordner und den Ordner mit den persönlichen Daten (<a href="#dateien">Dateien und Speicherorte</a>) und öffnen die Datenbank mit <em>Datei → Rezeptdatenbank öffnen …</em>.</p>
+<p><strong>ViviaMeals hieß früher VitaMeals – sind meine alten Daten noch da?</strong> Ja. Beim ersten Start übernimmt ViviaMeals Einstellungen, Profile, Tagebücher und eigene Lebensmittel der alten Fassung; alte Rezeptdatenbanken öffnet es weiterhin.</p>
+<h2 id="datenschutz">Datenschutz</h2>
+<p>ViviaMeals arbeitet vollständig auf Ihrem Rechner. Daten verlassen ihn nur, wenn Sie eine der folgenden Funktionen ausdrücklich nutzen:</p>
+<ul>
+<li><strong>DeepL-Übersetzung:</strong> Titel, Zutaten und Zubereitung fremdsprachiger Rezepte gehen an die DeepL SE (<a href="import.html#deepl">Übersetzen mit DeepL</a>).</li>
+<li><strong>Open Food Facts:</strong> nur der eingegebene Barcode bzw. Suchbegriff.</li>
+<li><strong>Abgleich:</strong> die abgeglichenen Daten an Ihre eigene Website bzw. an Ihre eigenen Geräte im lokalen Netz.</li>
+<li><strong>Netzwerkscanner:</strong> die Scan-Anfrage an Ihr eigenes Gerät.</li>
+</ul>
+<p>Es gibt keine Werbung, keine Nutzungsstatistik und keine Verbindung zu Servern des Autors.</p>
+<h2 id="lizenz">Lizenz</h2>
+<p>ViviaMeals © 2026 Michael Bergmann steht unter der <strong>PolyForm Noncommercial License 1.0.0</strong>. Die Nutzung ist für alle nicht-kommerziellen Zwecke kostenlos erlaubt – privat sowie durch gemeinnützige Organisationen, Schulen und Behörden –, einschließlich Verändern und Weitergeben mit dem Lizenztext. Kommerzielle Nutzung und Verkauf sind nur mit Erlaubnis des Autors gestattet. Den vollständigen Lizenztext zeigt <em>Hilfe → Über ViviaMeals → Details einblenden …</em>.</p>
+<p>ViviaMeals verwendet Qt (LGPL-3.0). Die Texterkennung nutzt das eigenständige Programm Tesseract (Apache-2.0). Nährwerte stammen überwiegend aus USDA FoodData Central (gemeinfrei); Daten von Open Food Facts stehen unter der Open Database License (ODbL).</p>
+<nav class="pager"><span><a href="extras.html">← Extras und Einstellungen</a></span><span class="weiter"></span></nav></main></div>
+<footer>ViviaMeals 0.9.3 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
+</body></html>

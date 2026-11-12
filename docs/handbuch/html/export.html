@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Exportieren – ViviaMeals – Handbuch</title><link rel="stylesheet" href="handbuch.css"></head>
+<body class="web">
+<header class="top"><span class="version">Version 0.9.3</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
+<div class="wrap"><nav class="side"><input id="suche" class="such" type="search" placeholder="Im Handbuch suchen …"><ol>
+<li><a href="index.html">Start und Inhalt</a></li>
+<li><a href="willkommen.html">Willkommen bei ViviaMeals</a>
+</li>
+<li><a href="hauptfenster.html">Das Hauptfenster</a>
+</li>
+<li><a href="rezepte.html">Rezepte anlegen und bearbeiten</a>
+</li>
+<li><a href="import.html">Rezepte importieren</a>
+</li>
+<li><a href="scannen.html">Rezepte scannen</a>
+</li>
+<li><a href="naehrwerte.html">Nährwerte</a>
+</li>
+<li><a href="planen.html">Planen und Gewichtskontrolle</a>
+</li>
+<li><a href="menue.html">Der Menüassistent</a>
+</li>
+<li class="aktiv"><a href="export.html">Exportieren</a>
+<ol><li><a href="#website">Als Website</a></li><li><a href="#latex">Als LaTeX-Datei und Kochbuch</a></li><li><a href="#odt">Als LibreOffice-Writer-Datei</a></li><li><a href="#rezeptpaket">Rezeptpakete weitergeben</a></li></ol>
+</li>
+<li><a href="abgleich.html">Abgleich zwischen Geräten</a>
+</li>
+<li><a href="extras.html">Extras und Einstellungen</a>
+</li>
+<li><a href="anhang.html">Anhang</a>
+</li>
+</ol></nav><main>
+<h1 id="export">Exportieren</h1>
+<p>Alle Exporte finden Sie unter <em>Datei → Export</em>. Einzelne Rezepte lassen sich außerdem über das Kontextmenü der Rezeptliste (rechte Maustaste) exportieren.</p>
+<h2 id="website">Als Website</h2>
+<p><em>Datei → Export → Als Website exportieren …</em> erzeugt aus Ihrer Sammlung eine themenbasierte Website (HTML5 mit PHP-Suche), die Sie nur noch auf Ihren Webspace hochladen müssen.</p>
+<ul>
+<li><strong>Titel der Website</strong>, <strong>Untertitel</strong> und <strong>Autor/Betreiber</strong> erscheinen im Kopf und im Impressum-Hinweis.</li>
+<li><strong>Umfang:</strong> alle Rezepte oder nur die Rezepte der aktuell angezeigten (gefilterten) Liste.</li>
+<li><strong>Nährwerte anzeigen</strong>, <strong>Zielordner</strong>, <strong>Nach dem Export im Browser öffnen</strong>.</li>
+</ul>
+<p>Die Website enthält eine Startseite, eine Seite je Thema (Tag) und je Rezept – mit Foto und Nährwerten –, ein Menü und eine Suche: sofort im Browser (JavaScript) und auf dem Server (<code>suche.php</code>, PHP 7.4 oder neuer). Das Layout passt sich Handys und Tablets an. Zum Veröffentlichen laden Sie den Inhalt des Zielordners per FTP oder SFTP auf Ihren Webspace.</p>
+<h2 id="latex">Als LaTeX-Datei und Kochbuch</h2>
+<p><em>Datei → Export → Als LaTeX-Datei exportieren …</em> (F2) erzeugt aus dem ausgewählten Rezept eine LaTeX-Datei – für ein eigenes, gesetztes Kochbuch. Der Befehl ist nur aktiv, wenn eine LaTeX-Installation gefunden wird (TeX Live, MiKTeX oder MacTeX); der Tooltip nennt die gefundene Installation.</p>
+<figure>
+<img src="bilder/latex-kochbuch.png" alt="Der LaTeX-Export mit neuem Master-Dokument" />
+<figcaption aria-hidden="true">Der LaTeX-Export mit neuem Master-Dokument</figcaption>
+</figure>
+<h3 id="latex-ausgabe">Ausgabe</h3>
+<ol type="1">
+<li><strong>Kapitel zum Einbinden in ein Master-Dokument</strong> (Vorgabe). Mit „eintragen in“ schreibt ViviaMeals <code>\input{rezepte/&lt;datei&gt;}</code> in das gewählte Master-Dokument – vor die Zeile <code>% ViviaMeals: weitere Rezepte hier</code>, sonst vor <code>\backmatter</code> bzw. <code>\end{document}</code>. Steht das Rezept schon darin, wird nichts doppelt eingetragen.</li>
+<li><strong>Neues Master-Dokument (Kochbuch) erstellen</strong> und das Rezept eintragen – siehe unten.</li>
+<li><strong>Vollständiges Einzeldokument</strong> – nur dieses Rezept.</li>
+</ol>
+<p><strong>Rezept-Optionen:</strong> Foto, Nährwerttabelle, Quelle angeben (Vorgabe aus), Stichwörter für das Stichwortverzeichnis. <strong>Einbinden als</strong> eigenes Kapitel (<code>\chapter</code>) oder als <strong>Abschnitt in einem Themen-Kapitel</strong> (<code>\section</code>) – etwa „Vorspeisen“, „Hauptgerichte“, „Süßspeisen“. ViviaMeals schlägt ein passendes Kapitel vor und legt es bei Bedarf im Master-Dokument an.</p>
+<h3 id="latex-kochbuch">Ein neues Kochbuch</h3>
+<p>Für ein neues Master-Dokument (<code>kochbuch.tex</code>) wählen Sie:</p>
+<ul>
+<li><strong>Dokumentklasse</strong> scrbook (KOMA-Script) oder book,</li>
+<li><strong>Buchtitel</strong>, <strong>Untertitel</strong> und <strong>Autor</strong> (Vorgabe: Standard-Quelle), auf Wunsch ohne Datum,</li>
+<li><strong>Schriftfarbe</strong> für Titel und Untertitel (Vorgabe Schwarz) und einen Schatten,</li>
+<li>ein <strong>Hintergrundbild</strong> für Schmutztitel oder Titelseite – ganze Seite, waagerecht mittig oder frei positioniert, zuschneidbar und stufenlos skalierbar; auf Wunsch zusätzlich auf der Titelseite zwischen Überschrift und Autor,</li>
+<li><strong>Inhaltsverzeichnis</strong>, <strong>Glossar</strong>, <strong>Stichwortverzeichnis</strong> und die <strong>Bindekorrektur</strong> (Vorgabe 12 mm für Ringbindung).</li>
+</ul>
+<p>Das Buch ist zweiseitig gesetzt, mit Kopfzeile (Kapitel und Abschnitt, Linie darunter) und Fußzeile (Seitenzahl, Linie darüber); Titelseiten bleiben ohne beides. Vor dem Hauptteil steht ein <strong>Vorwort</strong> (<code>vorwort.tex</code>), das ViviaMeals einmal anlegt und danach nie überschreibt – schreiben Sie dort Ihren eigenen Text hinein. Danach merkt sich ViviaMeals das Master-Dokument; weitere Rezepte werden dort eingetragen.</p>
+<figure>
+<img src="bilder/latex-kochbuch-seiten.png" alt="Seiten eines Kochbuchs: Titelseite, Inhaltsverzeichnis und ein Rezept" />
+<figcaption aria-hidden="true">Seiten eines Kochbuchs: Titelseite, Inhaltsverzeichnis und ein Rezept</figcaption>
+</figure>
+<p><strong>Übersetzen:</strong> <code>latexmk -pdf kochbuch.tex</code> im Ordner des Master-Dokuments (oder dreimal <code>pdflatex</code>). Glossar und Stichwortverzeichnis brauchen keine Zusatzprogramme.</p>
+<h2 id="odt">Als LibreOffice-Writer-Datei</h2>
+<p><em>Datei → Export → Als LibreOffice-Writer-Datei (.odt) exportieren …</em> speichert das ausgewählte Rezept als Textdokument (A4) – mit der gerade eingestellten Portionenzahl. Titel, rechts daneben das Foto (der Text fließt links vorbei), Portionen, Energie, Tags, Zutaten, Zubereitung, Nährwerttabelle und Quelle; in der Fußzeile Rezepttitel und „Seite x von y“. Die Datei lässt sich in LibreOffice, OpenOffice und Microsoft Word öffnen und weiterbearbeiten.</p>
+<p>Menükarten mit mehreren Rezepten erstellt der <a href="menue.html#menue">Menüassistent</a>.</p>
+<h2 id="rezeptpaket">Rezeptpakete weitergeben</h2>
+<p><em>Datei → Export → Rezeptdatenbank weitergeben (.vmpack) …</em> packt Rezepte zum Weitergeben an andere ViviaMeals-Nutzer – etwa die Familienrezepte für die Kinder.</p>
+<figure>
+<img src="bilder/paket-export.png" alt="Rezeptsammlung weitergeben" />
+<figcaption aria-hidden="true">Rezeptsammlung weitergeben</figcaption>
+</figure>
+<ul>
+<li><strong>Welche Rezepte?</strong> alle Rezepte, die angezeigte Liste, nur Favoriten oder Rezepte mit einem Tag.</li>
+<li><strong>Name der Sammlung</strong>, <strong>Beschreibung</strong> und <strong>Zusammengestellt von</strong> (optional).</li>
+<li><strong>Mitgeben:</strong> Rezeptfotos (Vorgabe ja), eigene Lebensmittel und Zuordnungen, die in den Rezepten vorkommen – damit beim Empfänger dieselben Nährwerte herauskommen (ja), Favoriten-Markierungen (nein).</li>
+</ul>
+<p><strong>Nie enthalten</strong> sind Profile, Ziele, Gewichtsverlauf, Tagebuch, Wochenpläne, Einkaufslisten und Einstellungen (auch nicht der DeepL-Schlüssel).</p>
+<p><strong>Ein Paket übernehmen:</strong> <em>Datei → Import → Rezeptpaket (.vmpack) übernehmen …</em> oder Doppelklick auf die Datei. Die Vorschau zeigt Name, Beschreibung, Absender und Anzahl der Rezepte. Das Paket lässt sich <strong>in die geöffnete Datenbank übernehmen</strong> (mit Doubletten-Prüfung) oder <strong>als neue Rezeptdatenbank anlegen</strong>. Eigene Lebensmittel des Pakets werden ergänzt, ohne vorhandene zu verändern.</p>
+<figure>
+<img src="bilder/paket-import.png" alt="Ein Rezeptpaket übernehmen" />
+<figcaption aria-hidden="true">Ein Rezeptpaket übernehmen</figcaption>
+</figure>
+<blockquote>
+<p>Ein Rezeptpaket ist ein gewöhnliches ZIP-Archiv – es lässt sich auch mit jedem Entpackprogramm öffnen.</p>
+</blockquote>
+<nav class="pager"><span><a href="menue.html">← Der Menüassistent</a></span><span class="weiter"><a href="abgleich.html">Abgleich zwischen Geräten →</a></span></nav></main></div>
+<footer>ViviaMeals 0.9.3 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
+</body></html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Rezepte anlegen und bearbeiten – ViviaMeals – Handbuch</title><link rel="stylesheet" href="handbuch.css"></head>
+<body class="web">
+<header class="top"><span class="version">Version 0.9.3</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
+<div class="wrap"><nav class="side"><input id="suche" class="such" type="search" placeholder="Im Handbuch suchen …"><ol>
+<li><a href="index.html">Start und Inhalt</a></li>
+<li><a href="willkommen.html">Willkommen bei ViviaMeals</a>
+</li>
+<li><a href="hauptfenster.html">Das Hauptfenster</a>
+</li>
+<li class="aktiv"><a href="rezepte.html">Rezepte anlegen und bearbeiten</a>
+<ol><li><a href="#editor">Der Rezepteditor</a></li><li><a href="#zutaten">Zutaten richtig eingeben</a></li><li><a href="#editor-naehrwerte">Nährwerte im Editor</a></li><li><a href="#tags">Tags</a></li><li><a href="#bild">Rezeptbild zuschneiden</a></li><li><a href="#quelle">Quelle und Standard-Quelle</a></li><li><a href="#editor-umlaute">Umlaute und Übersetzung im Editor</a></li><li><a href="#suchen">Suchen</a></li><li><a href="#drucken">Drucken, Speichern, Löschen</a></li></ol>
+</li>
+<li><a href="import.html">Rezepte importieren</a>
+</li>
+<li><a href="scannen.html">Rezepte scannen</a>
+</li>
+<li><a href="naehrwerte.html">Nährwerte</a>
+</li>
+<li><a href="planen.html">Planen und Gewichtskontrolle</a>
+</li>
+<li><a href="menue.html">Der Menüassistent</a>
+</li>
+<li><a href="export.html">Exportieren</a>
+</li>
+<li><a href="abgleich.html">Abgleich zwischen Geräten</a>
+</li>
+<li><a href="extras.html">Extras und Einstellungen</a>
+</li>
+<li><a href="anhang.html">Anhang</a>
+</li>
+</ol></nav><main>
+<h1 id="rezepte">Rezepte anlegen und bearbeiten</h1>
+<h2 id="editor">Der Rezepteditor</h2>
+<p><em>Datei → Neues Rezept …</em> (Strg+N) öffnet einen leeren Editor, <em>Datei → Rezept bearbeiten …</em> (Strg+E) oder ein Doppelklick in der Rezeptliste öffnet das ausgewählte Rezept.</p>
+<figure>
+<img src="bilder/editor.png" alt="Der Rezepteditor mit Nährwertanalyse" />
+<figcaption aria-hidden="true">Der Rezepteditor mit Nährwertanalyse</figcaption>
+</figure>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Feld</th>
+<th>Bedeutung</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Titel</strong></td>
+<td>Name des Rezepts (Pflichtfeld)</td>
+</tr>
+<tr class="even">
+<td><strong>Menge</strong></td>
+<td>Anzahl und Einheit: Portionen, Stück, Kuchen, Gläser … – Grundlage für die Werte „je Portion“</td>
+</tr>
+<tr class="odd">
+<td><strong>Zubereitungszeit</strong></td>
+<td>in Minuten (optional)</td>
+</tr>
+<tr class="even">
+<td><strong>Tags</strong></td>
+<td>Stichwörter, durch Komma getrennt, z. B. „vegetarisch, suppen, schnell“</td>
+</tr>
+<tr class="odd">
+<td><strong>Quelle</strong></td>
+<td>woher das Rezept stammt – Buch, Website, Person</td>
+</tr>
+<tr class="even">
+<td><strong>Favorit</strong></td>
+<td>markiert das Rezept; Favoriten lassen sich gezielt anzeigen und bevorzugen</td>
+</tr>
+<tr class="odd">
+<td><strong>Bild</strong></td>
+<td>Rezeptfoto (siehe <a href="#bild">Rezeptbild zuschneiden</a>)</td>
+</tr>
+<tr class="even">
+<td><strong>Zutaten</strong></td>
+<td>eine Zutat je Zeile (siehe <a href="#zutaten">Zutaten richtig eingeben</a>)</td>
+</tr>
+<tr class="odd">
+<td><strong>Zubereitung</strong></td>
+<td>Arbeitsschritte – Absätze durch eine Leerzeile trennen</td>
+</tr>
+</tbody>
+</table>
+<p>Rechts unten zeigt die <strong>Nährwertanalyse</strong> schon während der Eingabe Energie und Nährwerte je Portion und für jede Zutat das erkannte Lebensmittel mit Gewicht und Kalorien. Mit <strong>Speichern</strong> wird das Rezept übernommen; <strong>Abbrechen</strong> verwirft alle Änderungen.</p>
+<h2 id="zutaten">Zutaten richtig eingeben</h2>
+<p>Jede Zeile enthält Menge, Einheit und Zutat, wahlweise mit einem Zusatz nach einem Komma:</p>
+<pre><code>500 g Mehl
+2 EL Olivenöl
+1 Prise Salz
+3 Eier
+1/2 TL Zimt
+1 Zwiebel, fein gehackt
+1 Süßkartoffel (ca. 400 g)
+Salz und Pfeffer
+== Für die Soße ==
+200 ml Sahne</code></pre>
+<ul>
+<li><strong>Mengen</strong> dürfen Brüche („1/2“, „½“), Dezimalzahlen („0,5“) und Bereiche („2-3“) sein.</li>
+<li><strong>Einheiten:</strong> g, kg, ml, l, EL, TL, Prise, Msp., Pck., Becher, Dose, Glas, Bund, Zehe, Scheibe, Stück, Tasse und viele mehr – auch englische (cup, tbsp, oz …), die ViviaMeals umrechnet.</li>
+<li><strong>Ohne Einheit</strong> zählt ViviaMeals Stück und rechnet mit einem durchschnittlichen Stückgewicht (1 Ei ≈ 58 g, 1 Zwiebel ≈ 100 g). Eine Angabe in Klammern wie „(ca. 400 g)“ hat Vorrang.</li>
+<li><strong>Zwischenüberschriften</strong> schreiben Sie als <code>== Für den Teig ==</code>. Sie erscheinen in der Ansicht und im Ausdruck als Abschnitt.</li>
+<li>Zutaten ohne Menge („Salz und Pfeffer“) werden angezeigt, zählen für die Nährwerte aber nicht.</li>
+</ul>
+<h2 id="editor-naehrwerte">Nährwerte im Editor</h2>
+<p>Erkennt ViviaMeals eine Zutat nicht oder ordnet sie falsch zu, klicken Sie in der Nährwertanalyse doppelt auf die Zeile (oder <strong>Zuordnung ändern …</strong>). Wählen Sie das passende Lebensmittel und kreuzen Sie bei Bedarf an, dass diese Zutat künftig in <strong>allen</strong> Rezepten so zugeordnet werden soll.</p>
+<p>Gibt es für eine Zutat überhaupt kein passendes Lebensmittel – etwa bei einem Fertigprodukt –, legt <strong>Fehlende Lebensmittel anlegen …</strong> es mit den Angaben von der Verpackung an (<a href="naehrwerte.html#eigene-lebensmittel">Eigene Lebensmittel anlegen</a>).</p>
+<p>Kann eine Menge nicht in Gramm umgerechnet werden („1 Stück Kürbis“), weist die Analyse darauf hin. Am einfachsten ergänzen Sie dann das Gewicht in Klammern: „1 Stück Kürbis (800 g)“.</p>
+<h2 id="tags">Tags</h2>
+<p>Tags ordnen Rezepte nach Themen. Sie erscheinen in der Themenauswahl des Hauptfensters, in der Suche, auf der exportierten Website und im Menüassistenten.</p>
+<p><strong>Ergänzen</strong> neben dem Tag-Feld schlägt Tags aus Titel, Zutaten und Nährwerten vor:</p>
+<ul>
+<li><strong>Ernährung:</strong> vegan, vegetarisch, fleischgerichte, fisch</li>
+<li><strong>Mahlzeit:</strong> frühstück, hauptgerichte, leichte mahlzeit, zwischenmahlzeit, desserts, süßspeise, backen</li>
+<li><strong>Nährwerte:</strong> eiweißreich, fettarm, kalorienarm, hochkalorisch, vitaminreich, reduktionsdiät (die Regeln stehen unter <a href="naehrwerte.html#naehrwert-tags">Nährwert-Tags</a>)</li>
+</ul>
+<p>Vorhandene Tags werden nur ergänzt, nie entfernt. Ein unpassender Vorschlag lässt sich im Feld einfach löschen. Für den Wochenplan und den Menüassistenten sind besonders hilfreich: <strong>frühstück</strong>, <strong>leichte mahlzeit</strong>, <strong>vorspeisen</strong>, <strong>suppen</strong>, <strong>zwischengang</strong>, <strong>hauptgerichte</strong> und <strong>desserts</strong>.</p>
+<h2 id="bild">Rezeptbild zuschneiden</h2>
+<p><strong>Bild wählen …</strong> öffnet ein Foto von der Festplatte (PNG, JPEG, WebP, BMP, GIF). Danach erscheint der Zuschnitt:</p>
+<figure>
+<img src="bilder/bild-zuschneiden.png" alt="Rezeptbild zuschneiden" />
+<figcaption aria-hidden="true">Rezeptbild zuschneiden</figcaption>
+</figure>
+<ul>
+<li>Rahmen verschieben, an den Ecken die Größe ändern oder außerhalb einen neuen Rahmen aufziehen.</li>
+<li>Seitenverhältnis 4 : 3, 3 : 2, 16 : 9, 1 : 1, 3 : 4 oder frei.</li>
+<li>In 90°-Schritten drehen; <strong>Größter Ausschnitt</strong> setzt den Rahmen zurück.</li>
+</ul>
+<p>Gespeichert wird nur der Ausschnitt (höchstens 800 Pixel breit) im Rezept. Das Originalfoto bleibt unverändert auf der Festplatte. Das Papierkorb-Symbol entfernt das Bild aus dem Rezept.</p>
+<h2 id="quelle">Quelle und Standard-Quelle</h2>
+<p>Unter <em>Extras → Einstellungen → Allgemein → Standard-Quelle</em> können Sie einen Text hinterlegen, z. B. Ihren Namen. Hat ein Rezept noch keine Quelle – ein neues, gescanntes oder importiertes Rezept ohne Quellenangabe –, steht dieser Text im Feld <strong>Quelle</strong> und wird beim Speichern übernommen. Sie können ihn im Editor überschreiben oder löschen. Rezepte mit eigener Quelle bleiben unverändert.</p>
+<h2 id="editor-umlaute">Umlaute und Übersetzung im Editor</h2>
+<ul>
+<li><strong>Umlaute korrigieren</strong> macht aus „Kaese“, „Gemuesebruehe“ und „heiss“ die richtigen Wörter „Käse“, „Gemüsebrühe“ und „heiß“ (siehe <a href="import.html#umlaute">Umlaut-Korrektur</a>).</li>
+<li><strong>Mit DeepL übersetzen</strong> übersetzt ein fremdsprachiges Rezept ins Deutsche, wenn die DeepL-Übersetzung eingerichtet ist (siehe <a href="import.html#deepl">Übersetzen mit DeepL</a>).</li>
+</ul>
+<p>Beide Änderungen erscheinen sofort in den Feldern und werden erst mit <strong>Speichern</strong> übernommen.</p>
+<h2 id="suchen">Suchen</h2>
+<p><em>Datei → Suchen …</em> (Strg+F) bietet mehr als das Filterfeld:</p>
+<figure>
+<img src="bilder/suche.png" alt="Die Suche" />
+<figcaption aria-hidden="true">Die Suche</figcaption>
+</figure>
+<ul>
+<li><strong>Suchbegriff:</strong> Rezeptname oder Teil davon, wahlweise auch in den Zutaten.</li>
+<li><strong>Tags:</strong> mehrere anklicken; „alle gewählten Tags müssen passen“ verknüpft sie mit UND, sonst mit ODER.</li>
+<li><strong>höchstens … kcal je Portion</strong>, <strong>nur Favoriten</strong>, <strong>nur mit Foto</strong>.</li>
+</ul>
+<p>Die Trefferliste zeigt Titel, Tags und kcal je Portion. <strong>Anzeigen</strong> (oder Doppelklick) springt zum Rezept im Hauptfenster.</p>
+<h2 id="drucken">Drucken, Speichern, Löschen</h2>
+<ul>
+<li><em>Datei → Drucken …</em> (Strg+P) druckt das angezeigte Rezept – mit der gerade eingestellten Portionenzahl.</li>
+<li><em>Datei → Export → Als ViviaMeals-Rezept (.vmr) speichern …</em> speichert ein einzelnes Rezept als Datei,
+<ol start="26" type="a">
+<li>B. zum Verschicken per E-Mail. Der Empfänger öffnet sie per Doppelklick in ViviaMeals.</li>
+</ol></li>
+<li><em>Datei → Rezept löschen …</em> (Entf in der Liste) löscht das Rezept nach einer Rückfrage.</li>
+<li><em>Planen → Zufälliges Rezept</em> (Strg+R) zeigt ein beliebiges Rezept der Datenbank – für Unentschlossene.</li>
+</ul>
+<nav class="pager"><span><a href="hauptfenster.html">← Das Hauptfenster</a></span><span class="weiter"><a href="import.html">Rezepte importieren →</a></span></nav></main></div>
+<footer>ViviaMeals 0.9.3 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
+</body></html>

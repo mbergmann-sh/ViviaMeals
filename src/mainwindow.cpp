@@ -31,6 +31,7 @@
 #include "mealtypes.h"
 #include "odtexport.h"
 #include "deepl.h"
+#include "manual.h"
 #include "menudialog.h"
 #include "sync.h"
 #include "syncdialog.h"
@@ -440,6 +441,15 @@ void MainWindow::buildMenus()
     a->setShortcut(QKeySequence::Preferences);
 
     QMenu *help = menuBar()->addMenu(tr("&Hilfe"));
+    a = help->addAction(Icons::get(QStringLiteral("help")), tr("&Handbuch"), this, [this] { Manual::open(this); });
+    a->setObjectName(QStringLiteral("actManual"));
+    {
+        QList<QKeySequence> keys{ QKeySequence(Qt::Key_F1) };
+        if (QKeySequence(QKeySequence::HelpContents) != keys.first()) keys << QKeySequence(QKeySequence::HelpContents);   // macOS: ⌘?
+        a->setShortcuts(keys);
+    }
+    a->setStatusTip(tr("Das Handbuch zu ViviaMeals öffnen (Windows: Hilfedatei, sonst im Browser)"));
+    help->addSeparator();
     help->addAction(Icons::get(QStringLiteral("info")), tr("&Über ViviaMeals …"), this, &MainWindow::about);
     help->addAction(tr("Über &Qt …"), qApp, &QApplication::aboutQt);
     updateRecentMenu();
