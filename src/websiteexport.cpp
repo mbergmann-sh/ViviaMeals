@@ -213,9 +213,12 @@ QString slug(const QString &text)
     s.replace(QStringLiteral("ü"), QStringLiteral("ue"));
     s.replace(QStringLiteral("ß"), QStringLiteral("ss"));
     s = s.normalized(QString::NormalizationForm_D);
-    s.remove(QRegularExpression(QStringLiteral("[\\x{0300}-\\x{036f}]")));
-    s.replace(QRegularExpression(QStringLiteral("[^a-z0-9]+")), QStringLiteral("-"));
-    s.remove(QRegularExpression(QStringLiteral("^-+|-+$")));
+    static const QRegularExpression kRe216_0(QStringLiteral("[\\x{0300}-\\x{036f}]"));
+    s.remove(kRe216_0);
+    static const QRegularExpression kRe217_0(QStringLiteral("[^a-z0-9]+"));
+    s.replace(kRe217_0, QStringLiteral("-"));
+    static const QRegularExpression kRe218_0(QStringLiteral("^-+|-+$"));
+    s.remove(kRe218_0);
     if (s.size() > 60) s = s.left(60);
     return s.isEmpty() ? QStringLiteral("rezept") : s;
 }
@@ -291,7 +294,8 @@ bool exportSite(const QString &folder, const Options &opt, QString *error, const
         body += RecipeHtml::instructionsHtml(r);
         if (opt.nutrition) body += QStringLiteral("<h2>%1</h2>").arg(tr("Nährwerte")) + RecipeHtml::nutritionTable(r, st);
         if (!r.source.isEmpty()) body += QStringLiteral("<p class=\"small\">%1 %2</p>").arg(tr("Quelle:"), esc(r.source));
-        it.ingredients.replaceInStrings(QRegularExpression(QStringLiteral("\\s+")), QStringLiteral(" "));
+        static const QRegularExpression kRe294_0(QStringLiteral("\\s+"));
+        it.ingredients.replaceInStrings(kRe294_0, QStringLiteral(" "));
         items << it;
         // Navigation wird nach dem Sammeln geschrieben – Rezeptseite vorläufig merken
         if (!writeText(out.filePath(it.file), body, error)) return false;

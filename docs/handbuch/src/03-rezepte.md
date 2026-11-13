@@ -17,11 +17,35 @@ ein Doppelklick in der Rezeptliste öffnet das ausgewählte Rezept.
 | **Favorit** | markiert das Rezept; Favoriten lassen sich gezielt anzeigen und bevorzugen |
 | **Bild** | Rezeptfoto (siehe [Rezeptbild zuschneiden](#bild)) |
 | **Zutaten** | eine Zutat je Zeile (siehe [Zutaten richtig eingeben](#zutaten)) |
-| **Zubereitung** | Arbeitsschritte – Absätze durch eine Leerzeile trennen |
+| **Zubereitung** | Arbeitsschritte, jeder Absatz mit der Eingabetaste; mit Formatleiste (siehe [Zubereitung formatieren](#formatieren)) |
 
 Rechts unten zeigt die **Nährwertanalyse** schon während der Eingabe Energie und Nährwerte je Portion
 und für jede Zutat das erkannte Lebensmittel mit Gewicht und Kalorien. Mit **Speichern** wird das Rezept
 übernommen; **Abbrechen** verwirft alle Änderungen.
+
+## Zubereitung formatieren {#formatieren}
+
+Über dem Feld **Zubereitung** steht eine kleine Formatleiste. Sie wirkt auf den **markierten Text** – ohne
+Markierung auf das Wort unter der Schreibmarke bzw. auf das, was Sie als Nächstes schreiben:
+
+| Knopf | Tastenkürzel | Wirkung |
+|---|---|---|
+| **B** | Strg+B | fett |
+| *I* | Strg+I | kursiv |
+| U | Strg+U | unterstrichen |
+| Aufzählung | Strg+Umschalt+8 | markierte Absätze als Aufzählung mit Punkten |
+| Nummerierte Liste | Strg+Umschalt+7 | markierte Absätze als nummerierte Schritte 1., 2., 3. … |
+
+Ein zweiter Klick auf denselben Listenknopf hebt die Liste wieder auf; der andere Listenknopf wandelt sie
+um. Die Formatierung erscheint in der Rezeptansicht, im Ausdruck, auf der exportierten Website sowie im
+LaTeX- und Writer-Export. Aus dem Browser oder einer Textverarbeitung eingefügter Text behält nur diese
+Formate – Schriftarten, Farben, Bilder und Links fallen weg.
+
+> **Hinweis:** Gespeichert wird die Zubereitung weiterhin als einfacher Text mit wenigen Zeichen:
+> `**fett**`, `*kursiv*`, `__unterstrichen__`, Zeilen mit `- ` für Aufzählungen und `1. ` für
+> nummerierte Schritte. Deshalb funktionieren Übersetzung, Umlautkorrektur, Suche und Abgleich wie
+> bisher, und ältere Rezepte bleiben unverändert. Importierte Rezepte, deren Schritte mit „1.“, „2.“ …
+> beginnen, erscheinen automatisch als nummerierte Liste.
 
 ## Zutaten richtig eingeben {#zutaten}
 
@@ -73,6 +97,8 @@ auf der exportierten Website und im Menüassistenten.
 - **Mahlzeit:** frühstück, hauptgerichte, leichte mahlzeit, zwischenmahlzeit, desserts, süßspeise, backen
 - **Nährwerte:** eiweißreich, fettarm, kalorienarm, hochkalorisch, vitaminreich, reduktionsdiät
   (die Regeln stehen unter [Nährwert-Tags](naehrwerte.md#naehrwert-tags))
+- **Saison:** frühling, sommer, herbst, winter, ganzjährig
+  (siehe [Saison-Tags](naehrwerte.md#saison-tags))
 
 Vorhandene Tags werden nur ergänzt, nie entfernt. Ein unpassender Vorschlag lässt sich im Feld einfach
 löschen. Für den Wochenplan und den Menüassistenten sind besonders hilfreich: **frühstück**,

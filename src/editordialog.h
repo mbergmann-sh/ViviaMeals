@@ -19,6 +19,7 @@ class QDoubleSpinBox;
 class QLabel;
 class QLineEdit;
 class QPlainTextEdit;
+class InstructionsEdit;
 class QSpinBox;
 class QSplitter;
 class QTableWidget;
@@ -57,7 +58,7 @@ private:
     QCheckBox *m_fav;
     QLineEdit *m_source;
     QPlainTextEdit *m_ingredients;
-    QPlainTextEdit *m_instructions;
+    InstructionsEdit *m_instructions;
     QTableWidget *m_table;
     QLabel *m_summary;
     QTimer *m_timer;

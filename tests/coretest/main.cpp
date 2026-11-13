@@ -6,6 +6,8 @@
 #include "latexexport.h"
 #include "ingredientparser.h"
 #include "nutrition.h"
+#include "markup.h"
+#include "season.h"
 #include "recipedb.h"
 #include "textcodec.h"
 #include "units.h"
@@ -245,6 +247,7 @@ int main(int argc, char **argv)
                 for (int cls = 0; cls < 2; ++cls) {
                     LatexExport::Options lo;
                     lo.docClass = cls ? LatexExport::DocClass::Book : LatexExport::DocClass::ScrBook;
+                    lo.mode = LatexExport::Mode::Standalone;   // eigenständig übersetzbar
                     const QString f = QStringLiteral("%1/%2_%3_%4.tex").arg(QString::fromLocal8Bit(argv[1])).arg(QFileInfo(file).completeBaseName()).arg(k).arg(cls ? "book" : "scrbook");
                     CHECK(LatexExport::exportRecipe(res.recipes[k], f, lo), "LaTeX " + f);
                 }
@@ -1606,6 +1609,186 @@ int main(int argc, char **argv)
         CHECK(results.size() == 1 && lastPath.contains("search_terms=Nutella"), "Namenssuche über HTTP");
         qunsetenv("VIVIA_OFF_URL");
         out << "  " << got.name << " (" << got.brand << "), " << got.quantity << ": " << qRound(got.per100.kcal) << " kcal/100 g\n";
+    }
+
+    // ---------------------------------------------------------------- Laden ohne Foto, Sortierung, Index (Leistung)
+    {
+        out << "\n=== Textauszeichnung (Zubereitung) ===\n";
+        {
+            using namespace Markup;
+            // alte Rezepte bleiben unverändert
+            const QString legacy = "Zwiebeln würfeln.\nIn Butter anbraten.\n\nMit 5 * 3 cm Teig belegen.";
+            CHECK(serialize(parse(legacy)) == legacy, "Altrezept unverändert: " + serialize(parse(legacy)));
+            CHECK(toHtml(legacy) == "<p>Zwiebeln würfeln.<br/>In Butter anbraten.</p><p>Mit 5 * 3 cm Teig belegen.</p>", "Altrezept HTML: " + toHtml(legacy));
+            // Auszeichnung
+            const QString m = "Den **Teig** *kurz* __kneten__ und ***ruhen*** lassen.";
+            CHECK(toHtml(m) == "<p>Den <b>Teig</b> <i>kurz</i> <u>kneten</u> und <b><i>ruhen</i></b> lassen.</p>", "HTML: " + toHtml(m));
+            CHECK(serialize(parse(m)) == "Den **Teig** *kurz* __kneten__ und ***ruhen*** lassen.", "Rundreise: " + serialize(parse(m)));
+            // Listen
+            const QString l = "Vorbereitung:\n\n- Mehl\n- Zucker\n\n1. Rühren\n2. Backen\n\nGuten Appetit!";
+            const QList<Block> bl = parse(l);
+            CHECK(bl.size() == 6 && bl[1].kind == Block::Bullet && bl[3].kind == Block::Number && bl[4].number == 2, "Listen erkannt");
+            CHECK(toHtml(l) == "<p>Vorbereitung:</p><ul><li>Mehl</li><li>Zucker</li></ul><ol><li>Rühren</li><li>Backen</li></ol><p>Guten Appetit!</p>",
+                  "Listen HTML: " + toHtml(l));
+            CHECK(serialize(bl) == l, "Listen Rundreise: " + serialize(bl));
+            // importierte Schritte mit Leerzeilen → eine Liste
+            CHECK(toHtml("1. Eins\n\n2. Zwei") == "<ol><li>Eins</li><li>Zwei</li></ol>", "Schritte als Liste");
+            CHECK(toHtml("3. Drei\n4. Vier").startsWith("<ol start=\"3\">"), "Startnummer");
+            // wörtliche Zeichen
+            QList<Block> lit;
+            Block b;
+            b.runs << Run{ "2*3 und __init__ und - kein Punkt", false, false, false };
+            lit << b;
+            const QString ser = serialize(lit);
+            QString back;
+            for (const Run &r : parse(ser).value(0).runs) back += r.text;
+            CHECK(back == "2*3 und __init__ und - kein Punkt" && parse(ser).value(0).runs.size() == 1, "Wörtliche Zeichen: " + ser + " → " + back);
+            Block p2;
+            p2.runs << Run{ "- sieht aus wie ein Punkt", false, false, false };
+            Block p3;
+            p3.runs << Run{ "1. sieht aus wie eine Nummer", false, false, false };
+            const QString ser2 = serialize({ p2, p3 });
+            CHECK(parse(ser2).size() == 2 && parse(ser2)[0].kind == Block::Paragraph && parse(ser2)[1].kind == Block::Paragraph
+                      && parse(ser2)[0].runs.value(0).text == "- sieht aus wie ein Punkt" && parse(ser2)[1].runs.value(0).text == "1. sieht aus wie eine Nummer",
+                  "Absatz, der wie eine Liste beginnt: " + ser2);
+            // Leerraum am Rand formatierter Läufe
+            Block w;
+            w.runs << Run{ "Den ", false, false, false } << Run{ "Teig ", true, false, false } << Run{ "kneten", false, false, false };
+            CHECK(serialize({ w }) == "Den **Teig** kneten", "Leerraum: " + serialize({ w }));
+            // LaTeX und ODT
+            const QString tex = toLatex(l, [](const QString &x) { return x; });
+            CHECK(tex.contains("\\begin{itemize}\n\\item Mehl\n\\item Zucker\n\\end{itemize}") && tex.contains("\\begin{enumerate}"), "LaTeX-Listen");
+            CHECK(toLatex(m, [](const QString &x) { return x; }).contains("\\textbf{Teig} \\emph{kurz} \\underline{kneten}"), "LaTeX-Format");
+            const QString odt = toOdt(l + "\n\n**fett**", [](const QString &x) { return x.toHtmlEscaped(); }, "Text_20_body");
+            CHECK(odt.contains("<text:list text:style-name=\"L_Punkt\"><text:list-item><text:p text:style-name=\"Text_20_body\">Mehl</text:p></text:list-item>")
+                      && odt.contains("<text:span text:style-name=\"T_b\">fett</text:span>"),
+                  "ODT");
+            CHECK(toPlain(l).contains("\u2022 Mehl") && !toPlain(m).contains("*"), "Klartext");
+        }
+
+        out << "\n=== Saison-Tags ===\n";
+        {
+            auto mk = [](const QList<QPair<QString, double>> &items) {
+                Recipe r;
+                r.title = "Test";
+                for (const auto &it : items) {
+                    Ingredient i;
+                    i.amount = it.second;
+                    i.unit = "g";
+                    i.name = it.first;
+                    i.grams = it.second;
+                    r.ingredients << i;
+                }
+                return r;
+            };
+            QStringList t = Season::suggestTags(mk({ { "weißer Spargel", 1000 }, { "Kartoffeln", 600 }, { "Butter", 50 }, { "Schinken", 200 } }));
+            CHECK(t == QStringList{ "frühling" }, "Spargel: " + t.join(","));
+            t = Season::suggestTags(mk({ { "Erdbeeren", 500 }, { "Sahne", 200 }, { "Zucker", 50 } }));
+            CHECK(t.contains("sommer") && t.contains("frühling") == false, "Erdbeeren: " + t.join(","));
+            t = Season::suggestTags(mk({ { "Grünkohl", 1000 }, { "Kartoffeln", 800 }, { "Pinkel", 300 }, { "Frühlingszwiebeln", 20 } }));
+            CHECK(t == QStringList{ "winter" }, "Grünkohl: " + t.join(","));
+            t = Season::suggestTags(mk({ { "Hokkaido-Kürbis", 800 }, { "Zwiebel", 100 }, { "Gemüsebrühe", 500 } }));
+            CHECK(t.contains("herbst"), "Kürbis: " + t.join(","));
+            t = Season::suggestTags(mk({ { "Feldsalat", 200 }, { "Walnüsse", 50 } }));
+            CHECK(t.contains("winter") && !t.contains("sommer"), "Feldsalat: " + t.join(","));
+            t = Season::suggestTags(mk({ { "Kartoffeln", 800 }, { "Zwiebeln", 100 }, { "Speck", 100 } }));
+            CHECK(t == QStringList{ "ganzjährig" }, "Bratkartoffeln: " + t.join(","));
+            t = Season::suggestTags(mk({ { "Erbsen (TK)", 300 }, { "Tomaten aus der Dose", 400 }, { "Nudeln", 500 } }));
+            CHECK(t.isEmpty(), "TK/Dose zählt nicht: " + t.join(","));
+            t = Season::suggestTags(mk({ { "Mehl", 500 }, { "Zucker", 200 }, { "Eier", 200 }, { "Zitrone", 50 } }));
+            CHECK(t.isEmpty(), "Kuchen mit Zitrone: " + t.join(","));
+            t = Season::suggestTags(mk({ { "Paprikapulver", 5 }, { "Hähnchen", 600 }, { "Reis", 300 } }));
+            CHECK(t.isEmpty(), "Paprikapulver ist kein Gemüse: " + t.join(","));
+            CHECK(Season::monthsFor([] { Ingredient i; i.name = "Kürbiskerne"; return i; }()) == 0, "Kürbiskerne sind keine frische Ware");
+            t = Season::suggestTags(mk({ { "Apfelsinen", 400 }, { "Zucker", 50 } }));
+            CHECK(t.contains("winter"), "Apfelsine: " + t.join(","));
+            Recipe r = mk({ { "Spargel", 500 } });
+            r.addTag("winter");
+            r.addTag("vegetarisch");
+            Season::applyTags(r);
+            CHECK(r.hasTag("frühling") && !r.hasTag("winter") && r.hasTag("vegetarisch"), "applyTags ersetzt nur Saison-Tags");
+            CHECK(Season::seasonTagFor(QDate(2026, 11, 13)) == "herbst" && Season::seasonTagFor(QDate(2026, 12, 1)) == "winter"
+                      && Season::seasonTagFor(QDate(2027, 2, 28)) == "winter" && Season::seasonTagFor(QDate(2027, 3, 1)) == "frühling"
+                      && Season::seasonTagFor(QDate(2027, 6, 1)) == "sommer",
+                  "Jahreszeit zum Datum");
+            CHECK(Season::monthsText(Season::recipeMonths(mk({ { "Grünkohl", 500 } }))) == "Nov.–Feb.", "Monatstext: " + Season::monthsText(Season::recipeMonths(mk({ { "Grünkohl", 500 } }))));
+        }
+
+        out << "\n=== Fisch und Fleisch erkennen ===\n";
+        {
+            auto mk = [](const QStringList &names) {
+                Recipe r;
+                r.title = "Test";
+                for (const QString &n : names) {
+                    Ingredient i;
+                    i.amount = 100;
+                    i.unit = "g";
+                    i.name = n;
+                    r.ingredients << i;
+                }
+                return r;
+            };
+            const QStringList veg{ "Kartoffeln", "Zwiebeln", "Knoblauch", "Olivenöl", "Petersilie", "Eier", "Oliven", "Salz", "Pfeffer" };
+            QStringList t = Nutrition::suggestTags(mk(QStringList{ "Bacalhau" } + veg));
+            CHECK(t.contains("fisch") && !t.contains("vegetarisch"), "Bacalhau ist Fisch: " + t.join(","));
+            t = Nutrition::suggestTags(mk(QStringList{ "Stockfisch, gewässert" } + veg));
+            CHECK(t.contains("fisch") && !t.contains("vegetarisch"), "Stockfisch ist Fisch: " + t.join(","));
+            t = Nutrition::suggestTags(mk(QStringList{ "Klippfisch" } + veg));
+            CHECK(t.contains("fisch"), "Klippfisch ist Fisch");
+            const Food *f = FoodTable::instance().match("Bacalao");
+            CHECK(f && f->category == "fisch", "Bacalao in der Nährwerttabelle");
+            // unbekannte Zutaten: am Namen erkennen
+            t = Nutrition::suggestTags(mk(QStringList{ "Seeteufelmedaillons" } + veg));
+            CHECK(t.contains("fisch") && !t.contains("vegetarisch"), "unbekannter Fisch: " + t.join(","));
+            t = Nutrition::suggestTags(mk(QStringList{ "Wildschweinrücken" } + veg));
+            CHECK(!t.contains("vegetarisch"), "unbekanntes Fleisch: " + t.join(","));
+            t = Nutrition::suggestTags(mk(QStringList{ "Fleischtomaten" } + veg));
+            CHECK(t.contains("vegetarisch"), "Fleischtomaten bleiben vegetarisch: " + t.join(","));
+            t = Nutrition::suggestTags(mk(veg));
+            CHECK(t.contains("vegetarisch"), "vegetarisch weiterhin erkannt");
+        }
+
+        out << "\n=== Schnelles Laden ===\n";
+        QTemporaryDir tmpL;
+        RecipeDb &db = RecipeDb::instance();
+        CHECK(db.create(tmpL.filePath("l"), "Leicht"), "Datenbank");
+        Recipe r;
+        r.title = "Zwiebelkuchen";
+        r.servings = 4;
+        r.image = QString::fromLatin1(QByteArray(5000, 'A').toBase64());
+        r.instructions = "Ein \"image\": \"x\" im Text darf nicht stören.";
+        Ingredient z;
+        z.amount = 500;
+        z.unit = "g";
+        z.name = "Zwiebeln";
+        r.ingredients << z;
+        db.save(r);
+        Recipe b = r;
+        b.id.clear();
+        b.title = "Apfelstrudel";
+        b.image.clear();
+        db.save(b);
+        Recipe light;
+        bool had = false;
+        CHECK(Recipe::loadWithoutImage(db.folder() + "/rezepte/" + r.id + ".vmr", &light, &had) && light.image.isEmpty() && had
+                  && light.instructions == r.instructions && light.ingredients.size() == 1,
+              "ohne Foto laden");
+        light.title = "Zwiebelkuchen vom Blech";
+        CHECK(db.saveLight(light), "leicht speichern");
+        Recipe full;
+        CHECK(db.load(r.id, &full) && full.image == r.image && full.title == "Zwiebelkuchen vom Blech", "Foto bleibt beim leichten Speichern erhalten");
+        CHECK(db.summaries().value(0).title == "Apfelstrudel" && db.summaries().value(1).title.startsWith("Zwiebel"), "Liste nach Titeländerung sortiert");
+        QFile::remove(db.folder() + "/index.json");
+        db.open(db.folder());
+        const RecipeSummary *s = db.summary(r.id);
+        CHECK(s && s->hasImage && !db.summary(b.id)->hasImage && db.count() == 2, "Index ohne Fotos neu aufgebaut (hasImage stimmt)");
+        // Treffer-Zwischenspeicher der Nährwerttabelle: gelernte Zuordnung wirkt sofort
+        const Food *before = FoodTable::instance().match("Spezialzwiebeln");
+        FoodTable::instance().learn("Spezialzwiebeln", "knoblauch");
+        const Food *after = FoodTable::instance().match("Spezialzwiebeln");
+        CHECK(after && after->key == "knoblauch" && (!before || before->key != "knoblauch"), "Zuordnung lernen leert den Zwischenspeicher");
+        FoodTable::instance().learn("Spezialzwiebeln", QString());
+        db.close();
     }
 
     // ---------------------------------------------------------------- Menüassistent

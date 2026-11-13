@@ -9,6 +9,7 @@
 #include "recipe.h"
 #include "recipehtml.h"
 
+#include <QImage>
 #include <QWidget>
 
 class QDoubleSpinBox;
@@ -49,6 +50,8 @@ private:
     QLabel *m_servLabel;
     QTimer *m_resizeTimer;
     Recipe m_recipe;
+    QImage m_image;        // Rezeptfoto im Original (einmal dekodiert)
+    int m_scaledFor = 0;   // Breite in Pixeln, für die das Foto zuletzt verkleinert wurde
     bool m_has = false;
     int m_lastWidth = 0;
 };

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "latexexport.h"
+#include "markup.h"
 #include "nutrition.h"
 #include "recipehtml.h"
 
@@ -65,7 +66,8 @@ QString indexEntry(const QString &term, const QString &sub)
     // makeindex: " ! @ | maskieren; Sortierschlüssel ohne Umlaute, damit „Äpfel“ bei A steht
     auto clean = [](QString s) {
         s = s.simplified();
-        s.remove(QRegularExpression(QStringLiteral("[\\\\{}]")));
+        static const QRegularExpression kRe68_0(QStringLiteral("[\\\\{}]"));
+        s.remove(kRe68_0);
         return s;
     };
     auto quote = [](QString s) {
@@ -187,8 +189,7 @@ QString toLatex(const Recipe &r, const Options &opt, const QString &imageFile)
         t += QStringLiteral("\\textbf{%1} & %2\\\\\n").arg(escape(amount).replace(QStringLiteral("\\textasciitilde{}"), QStringLiteral("~")), name);
     }
     t += QStringLiteral("\\end{tabularx}\n\n") + heading(tr("Zubereitung"));
-    for (const QString &p : r.instructions.split(QStringLiteral("\n\n"), Qt::SkipEmptyParts))
-        t += escape(p.trimmed()) + QStringLiteral("\n\n");
+    t += Markup::toLatex(r.instructions, [](const QString &x) { return escape(x); });
     if (opt.nutrition && r.nutrition.valid() && r.nutrition.matched > 0) {
         const Nutrients &p = r.nutrition.perServing, &a = r.nutrition.total;
         const Nutrients ri = Nutrition::referenceIntake();

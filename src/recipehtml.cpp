@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "recipehtml.h"
+#include "markup.h"
 #include "nutrition.h"
 #include "mealtypes.h"
 
@@ -57,16 +58,7 @@ QString ingredientsTable(const Recipe &r, const Style &st, double factor)
 
 QString instructionsHtml(const Recipe &r)
 {
-    QString h;
-    int n = 0;
-    for (const QString &p : r.instructions.split(QStringLiteral("\n\n"), Qt::SkipEmptyParts)) {
-        const QString t = p.trimmed();
-        if (t.isEmpty()) continue;
-        ++n;
-        h += QStringLiteral("<p>%1</p>").arg(escape(t).replace(QLatin1Char('\n'), QStringLiteral("<br/>")));
-    }
-    Q_UNUSED(n)
-    return h;
+    return Markup::toHtml(r.instructions);   // Absätze, Listen, fett/kursiv/unterstrichen
 }
 
 QString nutritionTable(const Recipe &r, const Style &st, double servings)
@@ -143,7 +135,7 @@ QString render(const Recipe &r, const Style &st, double servings)
     }
     h += QStringLiteral("<table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td valign=\"top\">");
     h += QStringLiteral("<h1 style=\"color:%1; margin-bottom:4px;\">%2%3</h1>")
-             .arg(col(st.primary), r.favorite ? QStringLiteral("<span style=\"color:%1;\">★</span> ").arg(col(st.accent)) : QString(),
+             .arg(col(st.primary), r.favorite ? QStringLiteral("<span style=\"color:%1;\">%2</span> ").arg(col(st.accent), st.starHtml) : QString(),
                   escape(r.title));
     QString meta;
     QString portions = r.yieldUnit.isEmpty() ? (sv == 1.0 ? tr("1 Portion") : tr("%1 Portionen").arg(Fmt::number(sv, 1)))

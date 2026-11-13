@@ -52,7 +52,18 @@
 #include <QComboBox>
 #include <QRadioButton>
 #include <QCommandLineParser>
+#include <QClipboard>
 #include <QDir>
+#include <QFile>
+#include <QWindow>
+#include <QSet>
+#include <QMetaEnum>
+#include <QEvent>
+#include <QFontDatabase>
+#include <QScreen>
+#include <QSysInfo>
+#include <QGuiApplication>
+#include <QPushButton>
 #include <QFileInfo>
 #include <QEventLoop>
 #include <QLinearGradient>
@@ -72,6 +83,10 @@
 #include "syncdialog.h"
 #include "menudialog.h"
 #include "menu.h"
+#include "perf.h"
+#include "splash.h"
+#include "symbols.h"
+#include "foodtable.h"
 #include "syncserver.h"
 #include <cmath>
 
@@ -344,7 +359,15 @@ void takeScreenshots(MainWindow *w, const QString &dir)
     for (const RecipeSummary &s : RecipeDb::instance().summaries())
         if (s.title.contains(QStringLiteral("Cookies"))) w->selectRecipe(s.id);
     shot(w, dir, QStringLiteral("hauptfenster-englisch"));
-    // Editor
+    // Themenauswahl „Saisonal“ (Datum für das Bild fest: Herbst)
+    w->setTagFilter(QStringLiteral(":season"));
+    for (const RecipeSummary &s : RecipeDb::instance().summaries())
+        if (s.title.contains(QStringLiteral("Kürbiscremesuppe"))) w->selectRecipe(s.id);
+    shot(w, dir, QStringLiteral("hauptfenster-saisonal"));
+    w->setTagFilter(QString());
+    // Editor (Curry: Zubereitung mit Liste und Auszeichnung)
+    for (const RecipeSummary &s : RecipeDb::instance().summaries())
+        if (s.title.contains(QStringLiteral("Curry"))) w->selectRecipe(s.id);
     {
         EditorDialog d(w->view()->recipe(), w);
         d.resize(1180, 760);
@@ -628,6 +651,13 @@ void takeScreenshots(MainWindow *w, const QString &dir)
         }
     }
     {
+        // Startbildschirm mit Ladefortschritt
+        Splash::start(true);
+        Splash::message(QObject::tr("Rezepte werden eingelesen: 312 von 450"), 68);
+        if (QWidget *sp = Splash::widget()) shot(sp, dir, QStringLiteral("startbildschirm"));
+        Splash::finish(nullptr);
+    }
+    {
         // Über ViviaMeals (modal: per Timer fotografieren und schließen)
         QTimer::singleShot(400, [&] {
             if (QWidget *m = QApplication::activeModalWidget()) {
@@ -735,17 +765,116 @@ void takeScreenshots(MainWindow *w, const QString &dir)
 
 } // namespace
 
+// --profile: Qt-Meldungen (QT_LOGGING_RULES) und die ersten Ereignisse jedes Fensters mit Zeitstempel
+namespace perfdiag {
+
+QtMessageHandler g_previous = nullptr;
+
+void messageHandler(QtMsgType type, const QMessageLogContext &ctx, const QString &msg)
+{
+    const QString line = QStringLiteral("[qt %1] %2").arg(QString::fromLatin1(ctx.category ? ctx.category : "default"), msg);
+    Perf::mark(line.toUtf8().constData());
+    if (g_previous) g_previous(type, ctx, msg);
+}
+
+class FirstEvents : public QObject
+{
+public:
+    using QObject::QObject;
+
+protected:
+    bool eventFilter(QObject *o, QEvent *e) override
+    {
+        switch (e->type()) {
+        case QEvent::Polish:
+        case QEvent::Show:
+        case QEvent::Expose:
+        case QEvent::Paint:
+        case QEvent::UpdateRequest:
+        case QEvent::PlatformSurface:
+        case QEvent::WinIdChange:
+        case QEvent::ScreenChangeInternal:
+        case QEvent::StyleChange:
+        case QEvent::ThemeChange:
+        case QEvent::ApplicationPaletteChange:
+        case QEvent::ApplicationFontChange:
+            break;
+        default:
+            return false;
+        }
+        // nur Fenster (QWindow bzw. oberste Widgets), jeweils erstes Auftreten je Fensterklasse und Ereignis
+        QString who;
+        if (auto *w = qobject_cast<QWidget *>(o)) {
+            if (!w->isWindow()) return false;
+            who = QString::fromLatin1(w->metaObject()->className());
+        } else if (auto *win = qobject_cast<QWindow *>(o)) {
+            who = QString::fromLatin1(win->metaObject()->className());
+        } else {
+            return false;
+        }
+        const QString key = who + QLatin1Char('/') + QString::number(int(e->type()));
+        if (m_seen.contains(key)) return false;
+        m_seen.insert(key);
+        const char *name = QMetaEnum::fromType<QEvent::Type>().valueToKey(e->type());
+        Perf::mark(QStringLiteral("  Ereignis %1 an %2").arg(QString::fromLatin1(name ? name : "?"), who).toUtf8().constData());
+        return false;
+    }
+
+private:
+    QSet<QString> m_seen;
+};
+
+} // namespace perfdiag
+using namespace perfdiag;
+
+static void perfInstallMessageLog()
+{
+    if (!Perf::enabled() || g_previous) return;
+    g_previous = qInstallMessageHandler(messageHandler);
+}
+
+static void perfInstallDiagnostics()
+{
+    if (!Perf::enabled() || !QCoreApplication::instance()) return;
+    perfInstallMessageLog();
+    QCoreApplication::instance()->installEventFilter(new FirstEvents(QCoreApplication::instance()));
+}
+
+// Messergebnis von --profile anzeigen (unter Windows gibt es keine Konsolenausgabe)
+static void showProfileResult(QWidget *parent)
+{
+    QFile f(Perf::logFile());
+    const QString text = f.open(QIODevice::ReadOnly) ? QString::fromUtf8(f.readAll()) : QString();
+    QMessageBox box(parent);
+    box.setWindowTitle(QObject::tr("Startzeiten"));
+    box.setIcon(QMessageBox::Information);
+    box.setText(QObject::tr("Die Startzeiten wurden gemessen und gespeichert in:<br><b>%1</b><br><br>"
+                            "Unter „Details“ stehen die Werte zum Kopieren.")
+                    .arg(QDir::toNativeSeparators(Perf::logFile()).toHtmlEscaped()));
+    box.setDetailedText(text);
+    QPushButton *copy = box.addButton(QObject::tr("In Zwischenablage kopieren"), QMessageBox::ActionRole);
+    box.addButton(QMessageBox::Ok);
+    box.exec();
+    if (box.clickedButton() == copy) QGuiApplication::clipboard()->setText(text);
+}
+
 int main(int argc, char *argv[])
 {
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 #endif
+    Perf::init(argc, argv);
+    perfInstallMessageLog();
+    Perf::mark("main – ViviaMeals " VIVIAMEALS_VERSION ", gebaut " __DATE__ " " __TIME__);
     QApplication app(argc, argv);
+    Perf::mark("QApplication");
+    perfInstallDiagnostics();
     QApplication::setOrganizationName(QStringLiteral("mbergmann-sh"));
     QApplication::setApplicationName(QStringLiteral("ViviaMeals"));
     QApplication::setApplicationVersion(QStringLiteral(VIVIAMEALS_VERSION));
     QApplication::setWindowIcon(Icons::app());
+    Perf::mark("Programmsymbol");
 
     QCommandLineParser parser;
     parser.setApplicationDescription(QStringLiteral("ViviaMeals – Rezeptverwaltung mit Nährwertanalyse und Gewichtskontrolle"));
@@ -754,13 +883,31 @@ int main(int argc, char *argv[])
     QCommandLineOption demo(QStringLiteral("demo"), QStringLiteral("Demo mit Beispielrezepten in einem temporären Ordner"));
     QCommandLineOption shots(QStringLiteral("screenshots"), QStringLiteral("Bildschirmfotos erzeugen (mit --demo)"), QStringLiteral("ordner"));
     QCommandLineOption dbOpt(QStringLiteral("database"), QStringLiteral("Rezeptdatenbank (Ordner)"), QStringLiteral("ordner"));
-    parser.addOptions({ demo, shots, dbOpt });
+    QCommandLineOption noSplash(QStringLiteral("no-splash"), QStringLiteral("ohne Startbildschirm starten"));
+    QCommandLineOption profile(QStringLiteral("profile"),
+                               QStringLiteral("Startzeiten messen und in %1 schreiben").arg(QDir::toNativeSeparators(Perf::logFile())));
+    parser.addOptions({ demo, shots, dbOpt, noSplash, profile });
     parser.addPositionalArgument(QStringLiteral("dateien"), QStringLiteral("Rezepte (.vmr), Datenbank (viviameals.vmdb), RezKonv- oder MealMaster-Dateien"),
                                  QStringLiteral("[dateien…]"));
     parser.process(app);
     const bool isDemo = parser.isSet(demo);
     if (isDemo) QApplication::setApplicationName(QStringLiteral("ViviaMeals-Demo"));   // eigene Einstellungen und Profile
     else migrateFromVitaMeals();
+    Perf::mark("Befehlszeile, Einstellungen übernommen");
+    if (Perf::enabled()) {
+        // Schriftendatenbank einmal gezielt anfassen: unter Windows kann das Einlesen vieler Schriften dauern
+        const int families = QFontDatabase::families().size();
+        Perf::mark(QStringLiteral("Schriften eingelesen (%1 Familien), Qt %2, %3, Skalierung %4")
+                       .arg(families)
+                       .arg(QString::fromLatin1(qVersion()), QSysInfo::prettyProductName())
+                       .arg(QGuiApplication::primaryScreen() ? QGuiApplication::primaryScreen()->devicePixelRatio() : 1.0)
+                       .toUtf8()
+                       .constData());
+    }
+    // Startbildschirm mit Ladefortschritt (abschaltbar; nicht in der Demo)
+    if (!isDemo && !parser.isSet(noSplash)) Splash::start();
+    Perf::mark("Startbildschirm gestartet");
+    Splash::message(QObject::tr("Einstellungen und Übersetzungen werden geladen …"), 6);
 
     // Programm ist deutschsprachig: Zahlen/Datumsformate und Qt-eigene Texte (Schaltflächen, Dialoge) auf Deutsch
     QLocale::setDefault(QLocale(QLocale::German, QLocale::Germany));
@@ -771,18 +918,51 @@ int main(int argc, char *argv[])
         || qtTr->load(QStringLiteral("qt_de"), appTr) || qtTr->load(QStringLiteral("qtbase_de"), appTr))
         QApplication::installTranslator(qtTr);
 
+    Perf::mark("Einstellungen, Übersetzungen");
     UiScale::apply(app);
     Themes::init();
     ScreenFit::install(app);
     WindowState::install(app);   // nach ScreenFit: erst wiederherstellen, dann an den Bildschirm anpassen
 
+    Perf::mark("Themes, Fenstermanagement");
+    if (Perf::enabled()) Perf::mark(Sym::report().toUtf8().constData());
+    Splash::message(QObject::tr("Oberfläche wird aufgebaut …"), 12);
     MainWindow w;
+    Perf::mark("Hauptfenster erzeugt");
+    Splash::message(QObject::tr("Nährwerttabelle wird geladen …"), 22);
+    FoodTable::instance();   // einmal vorab laden (auch für das parallele Einlesen der Rezepte)
+    Perf::mark("Nährwerttabelle");
     if (isDemo) {
         const QString folder = QDir::temp().filePath(QStringLiteral("viviameals-demo"));
         createDemo(folder);
         w.openDatabase(folder);
     }
+    // zuletzt geöffnete Datenbank schon hinter dem Startbildschirm laden; per Doppelklick bzw. --database
+    // gewählte Datenbanken (mit möglichen Rückfragen) erst, wenn das Hauptfenster steht
+    QStringList startFiles = parser.positionalArguments();
+    QString startDb = parser.value(dbOpt);
+    for (const QString &f : startFiles)
+        if (QFileInfo(f).fileName() == RecipeDb::markerName() || QFileInfo(f).isDir()) startDb = f;
+    startFiles.removeAll(startDb);
+    bool startOpened = false;
+    if (!isDemo && startDb.isEmpty()) {
+        const QString last = QSettings().value(QStringLiteral("db/last")).toString();
+        if (!last.isEmpty() && RecipeDb::isDatabaseFolder(last)) {
+            Splash::message(QObject::tr("Rezeptdatenbank „%1“ wird geöffnet …").arg(QFileInfo(last).fileName()), 28);
+            RecipeDb::instance().setProgress([](const QString &text, int done, int total) {
+                Splash::message(text, total > 0 ? 30 + 55 * done / total : 30);
+            });
+            startOpened = w.openDatabase(last, true);
+            RecipeDb::instance().setProgress(nullptr);
+            Perf::mark("Datenbank geöffnet");
+        }
+    }
+    Splash::message(QObject::tr("Hauptfenster wird angezeigt …"), 95);
+    Perf::mark("Startbildschirm: 95 %");
     w.show();
+    Perf::mark("Hauptfenster: show()");
+    Splash::finish(&w);
+    Perf::mark("Hauptfenster angezeigt");
 
     if (isDemo && parser.isSet(shots)) {
         QTimer::singleShot(300, &w, [&w, &parser, &shots] {
@@ -792,15 +972,29 @@ int main(int argc, char *argv[])
         return app.exec();
     }
     if (!isDemo) {
-        QTimer::singleShot(0, &w, [&w, &parser, &dbOpt] {
-            QStringList files = parser.positionalArguments();
-            QString db = parser.value(dbOpt);
+        QTimer::singleShot(0, &w, [&w, startDb, startFiles, startOpened] {
+            const QStringList files = startFiles;
             // per Doppelklick geöffnete Datenbank hat Vorrang vor der zuletzt geöffneten
-            for (const QString &f : files)
-                if (QFileInfo(f).fileName() == RecipeDb::markerName() || QFileInfo(f).isDir()) db = f;
-            files.removeAll(db);
-            if (db.isEmpty() || !w.openDatabase(db)) w.ensureDatabase();
+            if (!startDb.isEmpty()) {
+                if (!w.openDatabase(startDb)) w.ensureDatabase();
+            } else if (!startOpened) {
+                w.ensureDatabase();
+            }
             if (!files.isEmpty()) w.openFiles(files);
+            if (Perf::enabled()) {
+                QTimer::singleShot(0, &w, [] { Perf::mark("Ereignisschleife frei"); });
+                // etwas warten, damit ein automatischer Abgleich nach dem Start mitgemessen wird
+                const bool quitAfter = qEnvironmentVariableIsSet("VIVIA_PROFILE_QUIT");
+                QTimer::singleShot(quitAfter ? 0 : 3000, &w, [&w, quitAfter] {
+                    Perf::mark("Ende der Messung");
+                    Perf::finish();
+                    if (quitAfter) {
+                        QApplication::quit();
+                        return;
+                    }
+                    showProfileResult(&w);
+                });
+            }
         });
     }
     if (QSettings().value(QStringLiteral("ui/startNotice"), true).toBool()) {

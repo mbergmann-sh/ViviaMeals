@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Anhang – ViviaMeals – Handbuch</title><link rel="stylesheet" href="handbuch.css"></head>
 <body class="web">
-<header class="top"><span class="version">Version 0.9.3</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
+<header class="top"><span class="version">Version 0.9.5</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
 <div class="wrap"><nav class="side"><input id="suche" class="such" type="search" placeholder="Im Handbuch suchen …"><ol>
 <li><a href="index.html">Start und Inhalt</a></li>
 <li><a href="willkommen.html">Willkommen bei ViviaMeals</a>
@@ -223,11 +223,20 @@
 <td><code>ViviaMeals --demo</code></td>
 <td>Demo mit Beispieldaten in einem eigenen Bereich</td>
 </tr>
+<tr class="even">
+<td><code>ViviaMeals --no-splash</code></td>
+<td>ohne Startbildschirm starten</td>
+</tr>
+<tr class="odd">
+<td><code>ViviaMeals --profile</code></td>
+<td>Startzeiten messen; Ergebnis in <code>%TEMP%\ViviaMeals-Startzeiten.txt</code> und in einem Fenster zum Kopieren</td>
+</tr>
 </tbody>
 </table>
 <p>Unter Windows richtet der Installer die Dateizuordnungen ein – ein Doppelklick auf die Datei genügt.</p>
 <h2 id="faq">Häufige Fragen</h2>
 <p><strong>Die Nährwerte eines Rezepts sind offensichtlich falsch.</strong> Öffnen Sie das Rezept im Editor und sehen Sie in der Nährwertanalyse nach, welche Zutat ein unerwartetes Gewicht oder Lebensmittel hat. Oft hilft eine Gewichtsangabe in Klammern („1 Kürbis (800 g)“) oder eine andere Zuordnung per Doppelklick (<a href="rezepte.html#editor-naehrwerte">Nährwerte im Editor</a>).</p>
+<p><strong>ViviaMeals startet langsam.</strong> Beim ersten Start nach einem Update oder nachdem Rezepte außerhalb des Programms geändert wurden, liest ViviaMeals die Rezeptdateien einmal neu ein (der Startbildschirm zeigt den Fortschritt). Danach genügt das Verzeichnis <code>index.json</code>. Ist ein <a href="abgleich.html#abgleich">Abgleich</a> eingerichtet, gleicht ViviaMeals nach dem Start ab – ist die Website bzw. der freigebende Rechner nicht erreichbar, bricht es nach wenigen Sekunden ab. Liegt die Datenbank in einem Ordner, in den ViviaMeals nicht schreiben darf (z. B. „Überwachter Ordnerzugriff“ von Windows), kann das Verzeichnis nicht gespeichert werden und jeder Start liest alle Rezepte neu – dann die Datenbank an einen anderen Ort verschieben oder ViviaMeals den Zugriff erlauben. Wo die Zeit verloren geht, zeigt ein Start mit <code>ViviaMeals --profile</code>.</p>
 <p><strong>Der Wochenplan findet kaum passende Rezepte.</strong> Prüfen Sie, ob die Rezepte Nährwerte und Mahlzeit-Tags haben (<em>Extras → Mahlzeit- und Nährwert-Tags für alle Rezepte ergänzen …</em>) und ob die Vorlieben der Person (Ernährung, „Nicht verwenden“) zu streng sind. Die Schaltfläche <strong>Gesunde Vorschläge übernehmen</strong> ergänzt Frühstücks- und leichte Rezepte.</p>
 <p><strong>Das Handbuch (.chm) zeigt unter Windows nur leere Seiten.</strong> Windows sperrt Hilfedateien, die aus dem Internet oder von einem Netzlaufwerk stammen. Rechte Maustaste auf <code>ViviaMeals-Handbuch.chm</code> → <em>Eigenschaften</em> → <strong>Zulassen</strong> ankreuzen. Mit dem Installer eingerichtete Handbücher sind davon nicht betroffen.</p>
 <p><strong>Wie bringe ich meine Rezepte auf einen neuen Rechner?</strong> Am bequemsten mit dem <a href="abgleich.html#abgleich-neues-geraet">Abgleich</a>. Ohne Abgleich kopieren Sie den Datenbankordner und den Ordner mit den persönlichen Daten (<a href="#dateien">Dateien und Speicherorte</a>) und öffnen die Datenbank mit <em>Datei → Rezeptdatenbank öffnen …</em>.</p>
@@ -245,5 +254,5 @@
 <p>ViviaMeals © 2026 Michael Bergmann steht unter der <strong>PolyForm Noncommercial License 1.0.0</strong>. Die Nutzung ist für alle nicht-kommerziellen Zwecke kostenlos erlaubt – privat sowie durch gemeinnützige Organisationen, Schulen und Behörden –, einschließlich Verändern und Weitergeben mit dem Lizenztext. Kommerzielle Nutzung und Verkauf sind nur mit Erlaubnis des Autors gestattet. Den vollständigen Lizenztext zeigt <em>Hilfe → Über ViviaMeals → Details einblenden …</em>.</p>
 <p>ViviaMeals verwendet Qt (LGPL-3.0). Die Texterkennung nutzt das eigenständige Programm Tesseract (Apache-2.0). Nährwerte stammen überwiegend aus USDA FoodData Central (gemeinfrei); Daten von Open Food Facts stehen unter der Open Database License (ODbL).</p>
 <nav class="pager"><span><a href="extras.html">← Extras und Einstellungen</a></span><span class="weiter"></span></nav></main></div>
-<footer>ViviaMeals 0.9.3 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
+<footer>ViviaMeals 0.9.5 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
 </body></html>

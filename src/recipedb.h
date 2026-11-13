@@ -14,6 +14,8 @@
 #include <QHash>
 #include <QObject>
 
+#include <functional>
+
 struct RecipeSummary {
     QString id;
     QString title;
@@ -60,7 +62,11 @@ public:
     const RecipeSummary *summary(const QString &id) const;
     int count() const { return int(m_list.size()); }
     bool load(const QString &id, Recipe *out, QString *error = nullptr) const;
-    bool save(Recipe &r, QString *error = nullptr);     // setzt modified/created
+    bool save(Recipe &r, QString *error = nullptr);
+    // schnell ohne Foto laden (für Prüfungen und Sammelaktionen) und ein so geladenes Rezept speichern,
+    // ohne das Foto zu verlieren (es wird aus der Datei übernommen)
+    bool loadLight(const QString &id, Recipe *out, QString *error = nullptr) const;
+    bool saveLight(Recipe &r, QString *error = nullptr);     // setzt modified/created
     bool remove(const QString &id);
     // alle Rezepte löschen; mit Sicherung werden die .vmr-Dateien vorher in einen Unterordner
     // „sicherung-JJJJ-MM-TT-hhmmss“ der Datenbank verschoben (gibt dessen Pfad zurück)
@@ -75,6 +81,10 @@ public:
     void beginBatch();
     void endBatch();
 
+    // Fortschritt beim Öffnen (Startbildschirm): Text, erledigt, gesamt (gesamt 0 = unbestimmt)
+    using Progress = std::function<void(const QString &, int, int)>;
+    void setProgress(Progress p) { m_progress = std::move(p); }
+
 signals:
     void opened();
     void changed();
@@ -82,6 +92,7 @@ signals:
 private:
     RecipeDb() = default;
     void rebuildIndex();
+    Progress m_progress;
     void writeIndex();
     void touched();
     QString m_folder, m_name;

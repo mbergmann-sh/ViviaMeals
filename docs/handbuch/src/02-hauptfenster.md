@@ -8,7 +8,14 @@ Das Hauptfenster ist zweigeteilt. Die Trennlinie zwischen den Hälften lässt si
 
 - **Filterfeld** „Rezepte filtern (Name, Zutat, Tag) …“: Schon beim Tippen zeigt die Liste nur noch
   Rezepte, deren Name, Zutaten oder Tags den Text enthalten. Das Kreuz im Feld hebt den Filter auf.
-- **Themenauswahl** darunter: „Alle Themen“, „Favoriten“ oder ein Tag wie „Suppen“ oder „vegetarisch“.
+- **Themenauswahl** darunter: „Alle Themen“, „Favoriten“, „Saisonal“ oder ein Tag wie „Suppen“ oder
+  „vegetarisch“. **Saisonal** zeigt die Rezepte der aktuellen Jahreszeit – im Frühling (März–Mai) alle mit
+  dem Tag „frühling“, im Sommer (Juni–August) „sommer“, im Herbst (September–November) „herbst“ und im
+  Winter (Dezember–Februar) „winter“. In Klammern steht, welche Jahreszeit gerade gilt. Die Tags vergibt
+  ViviaMeals beim Import oder über *Extras → Saison-Tags für alle Rezepte vergeben …*
+  ([Saison-Tags](naehrwerte.md#saison-tags)).
+
+![Themenauswahl „Saisonal“ im Herbst](bilder/hauptfenster-saisonal.png)
 - Über der Liste steht, wie viele Rezepte die Datenbank enthält, wie viele davon Nährwerte haben, wie
   viele vegetarisch oder vegan sind und wie viele als Favorit markiert sind.
 - Ein Klick auf ein Rezept zeigt es rechts an. Ein **Doppelklick** öffnet es im Editor.

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "settingsdialog.h"
+#include "symbols.h"
 #include "deepl.h"
 #include "icons.h"
 #include "themes.h"
@@ -86,6 +87,11 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
     m_nutrientTags->setToolTip(tr("Aus den berechneten Nährwerten je Portion bzw. 100 g; „vitaminreich“ nach der Menge an Gemüse, Obst und Kräutern"));
     m_nutrientTags->setChecked(s.value(QStringLiteral("import/nutrientTags"), true).toBool());
     il->addWidget(m_nutrientTags);
+    m_seasonTags = new QCheckBox(tr("Saison-Tags vergeben (frühling, sommer, herbst, winter, ganzjährig)"));
+    m_seasonTags->setToolTip(tr("Nach der Saison frischer Zutaten aus regionalem Anbau (z. B. Spargel, Erdbeeren, Kürbis, Grünkohl); "
+                                "Tiefkühlware, Konserven und Getrocknetes zählen nicht"));
+    m_seasonTags->setChecked(s.value(QStringLiteral("import/seasonTags"), true).toBool());
+    il->addWidget(m_seasonTags);
     m_offerFoods = new QCheckBox(tr("Für Zutaten ohne Nährwerte den Lebensmittel-Assistenten anbieten (nach dem Import, beim Speichern neuer Rezepte)"));
     m_offerFoods->setToolTip(tr("Eigene Lebensmittel, z. B. Fertigprodukte, mit den Angaben von der Verpackung anlegen oder vorhandenen zuordnen"));
     m_offerFoods->setChecked(QSettings().value(QStringLiteral("foods/offerWizard"), true).toBool());
@@ -116,6 +122,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
     dl->addLayout(kf);
     m_deeplStatus = new QLabel;
     m_deeplStatus->setWordWrap(true);
+    m_deeplStatus->setTextFormat(Qt::RichText);
     dl->addWidget(m_deeplStatus);
     auto *info = new QLabel(tr("<small>Den Schlüssel gibt es kostenlos mit dem Tarif <b>DeepL API Free</b> (500.000 Zeichen im Monat) unter "
                                "<a href=\"https://www.deepl.com/pro-api\">deepl.com/pro-api</a>. Er wird nur auf diesem Rechner gespeichert. "
@@ -138,6 +145,10 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
 
     auto *start = new QGroupBox(tr("Programmstart"));
     auto *sl = new QVBoxLayout(start);
+    m_splash = new QCheckBox(tr("Startbildschirm mit Ladefortschritt anzeigen"));
+    m_splash->setToolTip(tr("Zeigt beim Programmstart, was gerade geladen wird – hilfreich bei großen Rezeptdatenbanken"));
+    m_splash->setChecked(s.value(QStringLiteral("ui/splash"), true).toBool());
+    sl->addWidget(m_splash);
     m_random = new QCheckBox(tr("Zufälliges Rezept anzeigen"));
     m_random->setChecked(s.value(QStringLiteral("ui/randomStart"), true).toBool());
     sl->addWidget(m_random);
@@ -170,6 +181,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
     sf->addRow(tr("Netzwerkscanner:"), esclRow);
     m_esclStatus = new QLabel;
     m_esclStatus->setWordWrap(true);
+    m_esclStatus->setTextFormat(Qt::RichText);
     sf->addRow(QString(), m_esclStatus);
     // Herstellerprogramm + überwachter Ordner
     auto *watchRow = new QWidget;
@@ -205,14 +217,14 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
     });
     m_escl = new Escl::Scanner(this);
     connect(esclCheck, &QPushButton::clicked, this, [this, esclCheck] {
-        m_esclStatus->setText(tr("Verbindung wird geprüft …"));
+        m_esclStatus->setText(Sym::plainToHtml(tr("Verbindung wird geprüft …")));
         m_esclStatus->setVisible(true);
         esclCheck->setEnabled(false);
         m_escl->check(m_esclAddress->text());
     });
     connect(m_escl, &Escl::Scanner::checked, this, [this, esclCheck](bool ok, const QString &model, const QString &err) {
         esclCheck->setEnabled(true);
-        m_esclStatus->setText(ok ? tr("✓ Gefunden: %1").arg(model) : QStringLiteral("✗ ") + err);
+        m_esclStatus->setText(Sym::plainToHtml(ok ? tr("✓ Gefunden: %1").arg(model) : QStringLiteral("✗ ") + err));
         m_esclStatus->setVisible(true);
     });
     m_scanColor = new QCheckBox(tr("In Farbe scannen (nötig, um Rezeptfotos zu übernehmen)"));
@@ -305,17 +317,17 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
 void SettingsDialog::testDeepL()
 {
     const QString key = m_deeplKey->text().trimmed();
-    m_deeplStatus->setText(tr("Verbindung wird geprüft …"));
+    m_deeplStatus->setText(Sym::plainToHtml(tr("Verbindung wird geprüft …")));
     m_deeplStatus->repaint();
     DeepL::Usage u;
     QString err;
     if (DeepL::usage(key, &u, &err)) {
         const QLocale de(QLocale::German);
-        m_deeplStatus->setText(tr("✓ Verbunden (%1). Diesen Monat verbraucht: %2 von %3 Zeichen.")
+        m_deeplStatus->setText(Sym::plainToHtml(tr("✓ Verbunden (%1). Diesen Monat verbraucht: %2 von %3 Zeichen.")
                                    .arg(DeepL::isFreeKey(key) ? tr("DeepL API Free") : tr("DeepL API Pro"),
-                                        de.toString(u.characterCount), u.characterLimit > 0 ? de.toString(u.characterLimit) : tr("unbegrenzt")));
+                                        de.toString(u.characterCount), u.characterLimit > 0 ? de.toString(u.characterLimit) : tr("unbegrenzt"))));
     } else {
-        m_deeplStatus->setText(tr("✗ %1").arg(err));
+        m_deeplStatus->setText(Sym::plainToHtml(tr("✗ %1").arg(err)));
     }
 }
 
@@ -323,7 +335,7 @@ void SettingsDialog::checkTesseract()
 {
     const QString exe = Ocr::findTesseract(m_tesseract->text());
     if (exe.isEmpty()) {
-        m_ocrStatus->setText(QStringLiteral("✗ ") + Ocr::installHint().toHtmlEscaped());
+        m_ocrStatus->setText(Sym::fixHtml(QStringLiteral("✗ ") + Ocr::installHint().toHtmlEscaped()));
         return;
     }
     const QStringList langs = Ocr::languages(exe);
@@ -331,7 +343,7 @@ void SettingsDialog::checkTesseract()
                        .arg(Ocr::version(exe), QDir::toNativeSeparators(exe).toHtmlEscaped(), langs.join(QStringLiteral(", ")));
     if (!langs.contains(QStringLiteral("deu")))
         text += tr("<br><b>Deutsch (deu) fehlt</b> – bitte die deutschen Sprachdaten nachinstallieren.");
-    m_ocrStatus->setText(text);
+    m_ocrStatus->setText(Sym::fixHtml(text));
 }
 
 void SettingsDialog::reject()
@@ -352,6 +364,7 @@ void SettingsDialog::accept()
     s.setValue(QStringLiteral("import/fixUmlauts"), m_umlauts->isChecked());
     s.setValue(QStringLiteral("import/mealTags"), m_mealTags->isChecked());
     s.setValue(QStringLiteral("import/nutrientTags"), m_nutrientTags->isChecked());
+    s.setValue(QStringLiteral("import/seasonTags"), m_seasonTags->isChecked());
     s.setValue(QStringLiteral("foods/offerWizard"), m_offerFoods->isChecked());
     DeepL::Settings ds;
     ds.enabled = m_deepl->isChecked();
@@ -365,6 +378,7 @@ void SettingsDialog::accept()
     s.setValue(QStringLiteral("scan/color"), m_scanColor->isChecked());
     s.setValue(QStringLiteral("scan/tesseract"), m_tesseract->text().trimmed());
     s.setValue(QStringLiteral("scan/languages"), m_ocrLangs->text().trimmed());
+    s.setValue(QStringLiteral("ui/splash"), m_splash->isChecked());
     s.setValue(QStringLiteral("ui/randomStart"), m_random->isChecked());
     s.setValue(QStringLiteral("ui/startNotice"), m_notice->isChecked());
     const int f = m_font->currentData().toInt();

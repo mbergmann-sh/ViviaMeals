@@ -253,7 +253,8 @@ const QRegularExpression &stapleRe()
 QString cleanName(QString n)
 {
     n = n.section(QLatin1Char(','), 0, 0);
-    n.remove(QRegularExpression(QStringLiteral("\\([^)]*\\)")));
+    static const QRegularExpression kRe256_0(QStringLiteral("\\([^)]*\\)"));
+    n.remove(kRe256_0);
     return n.simplified();
 }
 
@@ -378,7 +379,9 @@ Composer::Composer(const QList<RecipeSummary> &recipes, const Prefs &prefs, quin
                      || key == QLatin1String("gefluegelleber"))
                 setProtein(tr("Geflügel"));
             else if (key == QLatin1String("lamm") || key == QLatin1String("wild") || key == QLatin1String("kaninchen")) setProtein(tr("Lamm/Wild"));
-            else if (key == QLatin1String("fisch_mager") || key == QLatin1String("lachs") || key == QLatin1String("thunfisch")) setProtein(tr("Fisch"));
+            else if (key == QLatin1String("fisch_mager") || key == QLatin1String("lachs") || key == QLatin1String("thunfisch")
+                     || key == QLatin1String("stockfisch"))
+                setProtein(tr("Fisch"));
             else if (key == QLatin1String("garnelen")) setProtein(tr("Meeresfrüchte"));
             if (key.startsWith(QLatin1String("nudeln")) || key == QLatin1String("vollkornnudeln")) in.starches << tr("Nudeln");
             else if (key.startsWith(QLatin1String("reis")) || key == QLatin1String("vollkornreis")) in.starches << tr("Reis");
@@ -402,7 +405,8 @@ Composer::Composer(const QList<RecipeSummary> &recipes, const Prefs &prefs, quin
         // Namen als Ergänzung (nicht zugeordnete Zutaten)
         const QString &ing = in.ingredients;
         if (in.protein.isEmpty()) {
-            if (containsAny(ing, { "lachs", "forelle", "kabeljau", "zander", "seelachs", "dorade", "thunfisch", "fischfilet", "scholle", "hering" }))
+            if (containsAny(ing, { "lachs", "forelle", "kabeljau", "zander", "seelachs", "dorade", "thunfisch", "fischfilet", "scholle", "hering",
+                                  "stockfisch", "klippfisch", "bacalhau", "bacalao", "baccal" }))
                 in.protein = tr("Fisch");
             else if (containsAny(ing, { "garnele", "scampi", "muschel", "krabbe", "hummer", "tintenfisch", "calamar" })) in.protein = tr("Meeresfrüchte");
             else if (containsAny(ing, { "rind", "kalb", "beef", "hackfleisch" })) in.protein = tr("Rind");

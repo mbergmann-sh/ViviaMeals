@@ -35,6 +35,7 @@ public:
     bool ensureDatabase();                     // beim Start: letzte Datenbank öffnen oder anlegen lassen
     bool openDatabase(const QString &path, bool quiet = false);
     void selectRecipe(const QString &id);
+    void setTagFilter(const QString &data);   // Themenauswahl setzen (":fav", ":season" oder Tag)
     // Dateien aus der Kommandozeile bzw. per Doppelklick (Dateizuordnung des Installers):
     // viviameals.vmdb/Ordner → Datenbank öffnen, .vmr → Rezept übernehmen, .rk/.mmf/.vtm → Import
     void openFiles(const QStringList &files);
@@ -59,6 +60,7 @@ public slots:
     void exportOdt();
     void clearDatabase();
     void mealTagsAll();
+    void seasonTagsAll();
     void exportVmr();
     void exportPackage();
     void importPackage(const QString &file = QString());
@@ -86,6 +88,7 @@ public slots:
 
 protected:
     void closeEvent(QCloseEvent *e) override;
+    void showEvent(QShowEvent *e) override;
 
 private:
     void buildMenus();
@@ -117,6 +120,7 @@ private:
     Sync::Server *m_server = nullptr;
     QTimer *m_hostSync = nullptr;   // Freigabe: nach Änderungen verzögert in den Sync-Speicher übernehmen
     bool m_syncing = false;
+    bool m_syncAfterShow = false;   // automatischer Abgleich wartet, bis das Fenster sichtbar ist
     bool m_closing = false;
     QMenu *m_recent;
     QList<QAction *> m_needRecipe;

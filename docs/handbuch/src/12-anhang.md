@@ -64,6 +64,8 @@ der Registrierung (`HKEY_CURRENT_USER\Software\mbergmann-sh\ViviaMeals`), Linux 
 | `ViviaMeals paket.vmpack` | Rezeptpaket übernehmen |
 | `ViviaMeals <ordner>/viviameals.vmdb` | Datenbank öffnen |
 | `ViviaMeals --demo` | Demo mit Beispieldaten in einem eigenen Bereich |
+| `ViviaMeals --no-splash` | ohne Startbildschirm starten |
+| `ViviaMeals --profile` | Startzeiten messen; Ergebnis in `%TEMP%\ViviaMeals-Startzeiten.txt` und in einem Fenster zum Kopieren |
 
 Unter Windows richtet der Installer die Dateizuordnungen ein – ein Doppelklick auf die Datei genügt.
 
@@ -73,6 +75,16 @@ Unter Windows richtet der Installer die Dateizuordnungen ein – ein Doppelklick
 Öffnen Sie das Rezept im Editor und sehen Sie in der Nährwertanalyse nach, welche Zutat ein unerwartetes
 Gewicht oder Lebensmittel hat. Oft hilft eine Gewichtsangabe in Klammern („1 Kürbis (800 g)“) oder eine
 andere Zuordnung per Doppelklick ([Nährwerte im Editor](rezepte.md#editor-naehrwerte)).
+
+**ViviaMeals startet langsam.**
+Beim ersten Start nach einem Update oder nachdem Rezepte außerhalb des Programms geändert wurden, liest
+ViviaMeals die Rezeptdateien einmal neu ein (der Startbildschirm zeigt den Fortschritt). Danach genügt das
+Verzeichnis `index.json`. Ist ein [Abgleich](abgleich.md#abgleich) eingerichtet, gleicht ViviaMeals nach dem
+Start ab – ist die Website bzw. der freigebende Rechner nicht erreichbar, bricht es nach wenigen Sekunden ab.
+Liegt die Datenbank in einem Ordner, in den ViviaMeals nicht schreiben darf (z. B. „Überwachter
+Ordnerzugriff“ von Windows), kann das Verzeichnis nicht gespeichert werden und jeder Start liest alle
+Rezepte neu – dann die Datenbank an einen anderen Ort verschieben oder ViviaMeals den Zugriff erlauben.
+Wo die Zeit verloren geht, zeigt ein Start mit `ViviaMeals --profile`.
 
 **Der Wochenplan findet kaum passende Rezepte.**
 Prüfen Sie, ob die Rezepte Nährwerte und Mahlzeit-Tags haben (*Extras → Mahlzeit- und Nährwert-Tags für

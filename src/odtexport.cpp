@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "odtexport.h"
+#include "markup.h"
 #include "nutrition.h"
 #include "mealtypes.h"
 #include "recipehtml.h"
@@ -294,11 +295,7 @@ Part recipeBody(const Recipe &r, const Options &opt, int index, const QString &h
         b += QStringLiteral("<text:h text:style-name=\"Heading_20_2\" text:outline-level=\"2\">%1</text:h>").arg(tr("Zubereitung"));
         const QString note = RecipeHtml::languageNote(r);
         if (!note.isEmpty()) b += QStringLiteral("<text:p text:style-name=\"VM_Klein\">%1</text:p>").arg(esc(note));
-        for (const QString &para : r.instructions.split(QRegularExpression(QStringLiteral("\\n\\s*\\n")), Qt::SkipEmptyParts)) {
-            QString t = esc(para.trimmed());
-            t.replace(QLatin1Char('\n'), QStringLiteral("<text:line-break/>"));
-            b += QStringLiteral("<text:p text:style-name=\"Text_20_body\">%1</text:p>").arg(t);
-        }
+        b += Markup::toOdt(r.instructions, [](const QString &x) { return esc(x); }, QStringLiteral("Text_20_body"));
     }
 
     // Nährwerte
@@ -369,6 +366,20 @@ QString recipeAutoStyles()
         "</style:style>"
         "<style:style style:name=\"T_note\" style:family=\"text\"><style:text-properties fo:color=\"#555555\" fo:font-style=\"italic\"/></style:style>"
         "<style:style style:name=\"T_bold\" style:family=\"text\"><style:text-properties fo:font-weight=\"bold\"/></style:style>"
+        // Textauszeichnung der Zubereitung (Markup::toOdt)
+        "<style:style style:name=\"T_b\" style:family=\"text\"><style:text-properties fo:font-weight=\"bold\" style:font-weight-asian=\"bold\" style:font-weight-complex=\"bold\"/></style:style>"
+        "<style:style style:name=\"T_i\" style:family=\"text\"><style:text-properties fo:font-style=\"italic\" style:font-style-asian=\"italic\" style:font-style-complex=\"italic\"/></style:style>"
+        "<style:style style:name=\"T_u\" style:family=\"text\"><style:text-properties style:text-underline-style=\"solid\" style:text-underline-width=\"auto\" style:text-underline-color=\"font-color\"/></style:style>"
+        "<text:list-style style:name=\"L_Punkt\">"
+        "<text:list-level-style-bullet text:level=\"1\" text:bullet-char=\"\u2022\">"
+        "<style:list-level-properties text:list-level-position-and-space-mode=\"label-alignment\">"
+        "<style:list-level-label-alignment text:label-followed-by=\"listtab\" text:list-tab-stop-position=\"0.635cm\" fo:text-indent=\"-0.635cm\" fo:margin-left=\"0.635cm\"/>"
+        "</style:list-level-properties></text:list-level-style-bullet></text:list-style>"
+        "<text:list-style style:name=\"L_Nummer\">"
+        "<text:list-level-style-number text:level=\"1\" style:num-suffix=\".\" style:num-format=\"1\">"
+        "<style:list-level-properties text:list-level-position-and-space-mode=\"label-alignment\">"
+        "<style:list-level-label-alignment text:label-followed-by=\"listtab\" text:list-tab-stop-position=\"0.635cm\" fo:text-indent=\"-0.635cm\" fo:margin-left=\"0.635cm\"/>"
+        "</style:list-level-properties></text:list-level-style-number></text:list-style>"
         "<style:style style:name=\"Tab\" style:family=\"table\"><style:table-properties style:width=\"12cm\" style:may-break-between-rows=\"false\" table:align=\"left\" fo:margin-top=\"0.1cm\" fo:margin-bottom=\"0.2cm\"/></style:style>"
         "<style:style style:name=\"Tab.A\" style:family=\"table-column\"><style:table-column-properties style:column-width=\"5.4cm\"/></style:style>"
         "<style:style style:name=\"Tab.B\" style:family=\"table-column\"><style:table-column-properties style:column-width=\"2.2cm\"/></style:style>"

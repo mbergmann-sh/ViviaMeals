@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "duplicatesdialog.h"
+#include "symbols.h"
 #include "editordialog.h"
 #include "icons.h"
 #include "recipedb.h"
@@ -163,8 +164,17 @@ void DuplicatesDialog::fill(const QString &selectId)
             it->setText(1, Fmt::number(s->servings, 1));
             it->setText(2, s->hasNutrition ? QString::number(qRound(s->perServing.kcal)) : QStringLiteral("–"));
             it->setText(3, QString::number(s->ingredientNames.size()));
-            it->setText(4, s->hasImage ? QStringLiteral("✓") : QString());
-            it->setText(5, s->favorite ? QStringLiteral("★") : QString());
+            it->setText(4, s->hasImage ? Sym::get(Sym::Check) : QString());
+            it->setText(5, s->favorite ? Sym::get(Sym::Star) : QString());
+            QFont sf;
+            if (s->hasImage && Sym::font(Sym::Check, it->font(4), &sf)) {
+                it->setFont(4, sf);
+                it->setText(4, Sym::wanted(Sym::Check));
+            }
+            if (s->favorite && Sym::font(Sym::Star, it->font(5), &sf)) {
+                it->setFont(5, sf);
+                it->setText(5, Sym::wanted(Sym::Star));
+            }
             it->setText(6, s->modified.isValid() ? de.toString(s->modified.date(), QLocale::ShortFormat) : QString());
             for (int c = 1; c < 7; ++c) it->setTextAlignment(c, Qt::AlignCenter);
             it->setData(0, IdRole, id);

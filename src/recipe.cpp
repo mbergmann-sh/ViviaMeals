@@ -270,6 +270,46 @@ bool Recipe::save(const QString &file, QString *error) const
     return true;
 }
 
+namespace {
+// „"image": "<Base64>"“ aus dem JSON-Text entfernen (Base64 enthält weder " noch \ – ein einfacher Schnitt genügt)
+QByteArray stripImage(QByteArray json, bool *had)
+{
+    if (had) *had = false;
+    const int key = json.indexOf("\"image\"");
+    if (key < 0) return json;
+    int p = key + 7;
+    while (p < json.size() && (json[p] == ' ' || json[p] == ':' || json[p] == '\t' || json[p] == '\n' || json[p] == '\r')) ++p;
+    if (p >= json.size() || json[p] != '"') return json;
+    const int end = json.indexOf('"', p + 1);
+    if (end < 0) return json;
+    if (had) *had = end > p + 1;
+    json.replace(p, end - p + 1, "\"\"");
+    return json;
+}
+} // namespace
+
+bool Recipe::loadWithoutImage(const QString &file, Recipe *out, bool *hadImage, QString *error)
+{
+    QFile f(file);
+    if (!f.open(QIODevice::ReadOnly)) {
+        if (error) *error = f.errorString();
+        return false;
+    }
+    QJsonParseError pe;
+    const QJsonDocument d = QJsonDocument::fromJson(stripImage(f.readAll(), hadImage), &pe);
+    const QString fmt = d.object().value(QStringLiteral("format")).toString();
+    if (!d.isObject() || (fmt != QLatin1String("ViviaMeals-Recipe") && fmt != QLatin1String("VitaMeals-Recipe"))) {
+        if (error) *error = pe.error != QJsonParseError::NoError ? pe.errorString() : QStringLiteral("kein ViviaMeals-Rezept");
+        return false;
+    }
+    *out = fromJson(d.object());
+    if (!out->image.isEmpty()) {   // Schnitt nicht möglich (ungewöhnlicher Aufbau): Bild trotzdem verwerfen
+        if (hadImage) *hadImage = true;
+        out->image.clear();
+    }
+    return true;
+}
+
 bool Recipe::load(const QString &file, Recipe *out, QString *error)
 {
     QFile f(file);
@@ -307,7 +347,8 @@ QString Recipe::newId()
 
 QString Recipe::normalizedTitle(const QString &t)
 {
+    static const QRegularExpression nonWord(QStringLiteral("[^\\p{L}\\p{N}]+"));   // einmal übersetzen (wird für jedes Rezept gebraucht)
     QString s = t.toLower();
-    s.replace(QRegularExpression(QStringLiteral("[^\\p{L}\\p{N}]+")), QStringLiteral(" "));
+    s.replace(nonWord, QStringLiteral(" "));
     return s.simplified();
 }

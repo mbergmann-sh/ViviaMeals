@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Rezepte anlegen und bearbeiten – ViviaMeals – Handbuch</title><link rel="stylesheet" href="handbuch.css"></head>
 <body class="web">
-<header class="top"><span class="version">Version 0.9.3</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
+<header class="top"><span class="version">Version 0.9.5</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
 <div class="wrap"><nav class="side"><input id="suche" class="such" type="search" placeholder="Im Handbuch suchen …"><ol>
 <li><a href="index.html">Start und Inhalt</a></li>
 <li><a href="willkommen.html">Willkommen bei ViviaMeals</a>
@@ -9,7 +9,7 @@
 <li><a href="hauptfenster.html">Das Hauptfenster</a>
 </li>
 <li class="aktiv"><a href="rezepte.html">Rezepte anlegen und bearbeiten</a>
-<ol><li><a href="#editor">Der Rezepteditor</a></li><li><a href="#zutaten">Zutaten richtig eingeben</a></li><li><a href="#editor-naehrwerte">Nährwerte im Editor</a></li><li><a href="#tags">Tags</a></li><li><a href="#bild">Rezeptbild zuschneiden</a></li><li><a href="#quelle">Quelle und Standard-Quelle</a></li><li><a href="#editor-umlaute">Umlaute und Übersetzung im Editor</a></li><li><a href="#suchen">Suchen</a></li><li><a href="#drucken">Drucken, Speichern, Löschen</a></li></ol>
+<ol><li><a href="#editor">Der Rezepteditor</a></li><li><a href="#formatieren">Zubereitung formatieren</a></li><li><a href="#zutaten">Zutaten richtig eingeben</a></li><li><a href="#editor-naehrwerte">Nährwerte im Editor</a></li><li><a href="#tags">Tags</a></li><li><a href="#bild">Rezeptbild zuschneiden</a></li><li><a href="#quelle">Quelle und Standard-Quelle</a></li><li><a href="#editor-umlaute">Umlaute und Übersetzung im Editor</a></li><li><a href="#suchen">Suchen</a></li><li><a href="#drucken">Drucken, Speichern, Löschen</a></li></ol>
 </li>
 <li><a href="import.html">Rezepte importieren</a>
 </li>
@@ -83,11 +83,58 @@
 </tr>
 <tr class="odd">
 <td><strong>Zubereitung</strong></td>
-<td>Arbeitsschritte – Absätze durch eine Leerzeile trennen</td>
+<td>Arbeitsschritte, jeder Absatz mit der Eingabetaste; mit Formatleiste (siehe <a href="#formatieren">Zubereitung formatieren</a>)</td>
 </tr>
 </tbody>
 </table>
 <p>Rechts unten zeigt die <strong>Nährwertanalyse</strong> schon während der Eingabe Energie und Nährwerte je Portion und für jede Zutat das erkannte Lebensmittel mit Gewicht und Kalorien. Mit <strong>Speichern</strong> wird das Rezept übernommen; <strong>Abbrechen</strong> verwirft alle Änderungen.</p>
+<h2 id="formatieren">Zubereitung formatieren</h2>
+<p>Über dem Feld <strong>Zubereitung</strong> steht eine kleine Formatleiste. Sie wirkt auf den <strong>markierten Text</strong> – ohne Markierung auf das Wort unter der Schreibmarke bzw. auf das, was Sie als Nächstes schreiben:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Knopf</th>
+<th>Tastenkürzel</th>
+<th>Wirkung</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>B</strong></td>
+<td>Strg+B</td>
+<td>fett</td>
+</tr>
+<tr class="even">
+<td><em>I</em></td>
+<td>Strg+I</td>
+<td>kursiv</td>
+</tr>
+<tr class="odd">
+<td>U</td>
+<td>Strg+U</td>
+<td>unterstrichen</td>
+</tr>
+<tr class="even">
+<td>Aufzählung</td>
+<td>Strg+Umschalt+8</td>
+<td>markierte Absätze als Aufzählung mit Punkten</td>
+</tr>
+<tr class="odd">
+<td>Nummerierte Liste</td>
+<td>Strg+Umschalt+7</td>
+<td>markierte Absätze als nummerierte Schritte 1., 2., 3. …</td>
+</tr>
+</tbody>
+</table>
+<p>Ein zweiter Klick auf denselben Listenknopf hebt die Liste wieder auf; der andere Listenknopf wandelt sie um. Die Formatierung erscheint in der Rezeptansicht, im Ausdruck, auf der exportierten Website sowie im LaTeX- und Writer-Export. Aus dem Browser oder einer Textverarbeitung eingefügter Text behält nur diese Formate – Schriftarten, Farben, Bilder und Links fallen weg.</p>
+<blockquote>
+<p><strong>Hinweis:</strong> Gespeichert wird die Zubereitung weiterhin als einfacher Text mit wenigen Zeichen: <code>**fett**</code>, <code>*kursiv*</code>, <code>__unterstrichen__</code>, Zeilen mit <code>-</code> für Aufzählungen und <code>1.</code> für nummerierte Schritte. Deshalb funktionieren Übersetzung, Umlautkorrektur, Suche und Abgleich wie bisher, und ältere Rezepte bleiben unverändert. Importierte Rezepte, deren Schritte mit „1.“, „2.“ … beginnen, erscheinen automatisch als nummerierte Liste.</p>
+</blockquote>
 <h2 id="zutaten">Zutaten richtig eingeben</h2>
 <p>Jede Zeile enthält Menge, Einheit und Zutat, wahlweise mit einem Zusatz nach einem Komma:</p>
 <pre><code>500 g Mehl
@@ -118,6 +165,7 @@ Salz und Pfeffer
 <li><strong>Ernährung:</strong> vegan, vegetarisch, fleischgerichte, fisch</li>
 <li><strong>Mahlzeit:</strong> frühstück, hauptgerichte, leichte mahlzeit, zwischenmahlzeit, desserts, süßspeise, backen</li>
 <li><strong>Nährwerte:</strong> eiweißreich, fettarm, kalorienarm, hochkalorisch, vitaminreich, reduktionsdiät (die Regeln stehen unter <a href="naehrwerte.html#naehrwert-tags">Nährwert-Tags</a>)</li>
+<li><strong>Saison:</strong> frühling, sommer, herbst, winter, ganzjährig (siehe <a href="naehrwerte.html#saison-tags">Saison-Tags</a>)</li>
 </ul>
 <p>Vorhandene Tags werden nur ergänzt, nie entfernt. Ein unpassender Vorschlag lässt sich im Feld einfach löschen. Für den Wochenplan und den Menüassistenten sind besonders hilfreich: <strong>frühstück</strong>, <strong>leichte mahlzeit</strong>, <strong>vorspeisen</strong>, <strong>suppen</strong>, <strong>zwischengang</strong>, <strong>hauptgerichte</strong> und <strong>desserts</strong>.</p>
 <h2 id="bild">Rezeptbild zuschneiden</h2>
@@ -163,5 +211,5 @@ Salz und Pfeffer
 <li><em>Planen → Zufälliges Rezept</em> (Strg+R) zeigt ein beliebiges Rezept der Datenbank – für Unentschlossene.</li>
 </ul>
 <nav class="pager"><span><a href="hauptfenster.html">← Das Hauptfenster</a></span><span class="weiter"><a href="import.html">Rezepte importieren →</a></span></nav></main></div>
-<footer>ViviaMeals 0.9.3 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
+<footer>ViviaMeals 0.9.5 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
 </body></html>

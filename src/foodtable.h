@@ -73,7 +73,12 @@ private:
     QHash<QString, Food> m_builtin;
     QHash<QString, Food> m_userFoods;
     QHash<QString, QString> m_learned;     // normalisierter Name → Schlüssel
-    struct Alias { QString text; QString key; };
+    struct Alias {
+        QString text, key;
+        QString spaced, leading;   // „ text “ und „ text“ – vorberechnet für match()
+        bool multiWord = false;
+    };
+    mutable QHash<QString, QString> m_matchCache;   // normalisierter Name → Schlüssel (leer = kein Treffer)
     QList<Alias> m_aliases;                // nach Länge absteigend
     QHash<QString, QString> m_exact;       // Alias → Schlüssel
 };

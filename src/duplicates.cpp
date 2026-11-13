@@ -95,8 +95,10 @@ QString titleKey(const QString &title)
         .replace(QStringLiteral("ue"), QStringLiteral("u"));
     // Akzente (Crème, Purée) entfernen
     s = s.normalized(QString::NormalizationForm_D);
-    s.remove(QRegularExpression(QStringLiteral("\\p{Mn}")));
-    s.replace(QRegularExpression(QStringLiteral("[^\\p{L}\\p{N}]+")), QStringLiteral(" "));
+    static const QRegularExpression kRe98_0(QStringLiteral("\\p{Mn}"));
+    s.remove(kRe98_0);
+    static const QRegularExpression kRe99_0(QStringLiteral("[^\\p{L}\\p{N}]+"));
+    s.replace(kRe99_0, QStringLiteral(" "));
     return s.simplified();
 }
 

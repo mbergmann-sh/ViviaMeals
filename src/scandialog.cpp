@@ -883,6 +883,7 @@ void ScanDialog::accept()
     opt.fixUmlauts = s.value(QStringLiteral("import/fixUmlauts"), true).toBool();
     opt.mealTags = s.value(QStringLiteral("import/mealTags"), true).toBool();
     opt.nutrientTags = s.value(QStringLiteral("import/nutrientTags"), true).toBool();
+    opt.seasonTags = s.value(QStringLiteral("import/seasonTags"), true).toBool();
     opt.translator = ImportFlow::deeplTranslator();
     QApplication::setOverrideCursor(Qt::WaitCursor);
     m_recipe = RecipeScan::toRecipe(parts, opt);

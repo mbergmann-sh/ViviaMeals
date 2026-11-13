@@ -232,7 +232,8 @@ int fixRecipe(Recipe &r)
         const QString f = fixText(s);
         if (f != s) {
             // grob die Anzahl geänderter Wörter zählen
-            const QStringList a = s.split(QRegularExpression(QStringLiteral("\\s+"))), b = f.split(QRegularExpression(QStringLiteral("\\s+")));
+            static const QRegularExpression kRe235_0(QStringLiteral("\\s+"));
+            const QStringList a = s.split(kRe235_0), b = f.split(kRe235_0);
             for (int k = 0; k < qMin(a.size(), b.size()); ++k)
                 if (a[k] != b[k]) ++changed;
             s = f;

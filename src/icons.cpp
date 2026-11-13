@@ -7,6 +7,7 @@
 #include <QWidget>
 #include <QFile>
 #include <QHash>
+#include <QIconEngine>
 #include <QPainter>
 #include <QPalette>
 #include <QPixmap>
@@ -50,6 +51,62 @@ QIcon app()
     return i;
 }
 
+namespace {
+// Symbol-Engine: rendert das SVG erst, wenn eine Größe tatsächlich gebraucht wird, und merkt sich das Ergebnis.
+// (Früher wurden je Symbol 20 Pixmaps im Voraus gerendert – beim Programmstart rund 40 % der Rechenzeit.)
+class SvgIconEngine : public QIconEngine
+{
+public:
+    SvgIconEngine(const QByteArray &normal, const QByteArray &disabled) : m_normal(normal), m_disabled(disabled) {}
+    SvgIconEngine(const SvgIconEngine &o) : QIconEngine(o), m_normal(o.m_normal), m_disabled(o.m_disabled), m_cache(o.m_cache) {}
+
+    QPixmap pixmap(const QSize &size, QIcon::Mode mode, QIcon::State state) override { return scaledPixmap(size, mode, state, 1.0); }
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QPixmap scaledPixmap(const QSize &size, QIcon::Mode mode, QIcon::State, qreal scale) override
+#else
+    QPixmap scaledPixmap(const QSize &size, QIcon::Mode mode, QIcon::State, qreal scale)
+#endif
+    {
+        const int side = qMax(1, qMin(size.width(), size.height()));
+        const bool off = mode == QIcon::Disabled;
+        const quint64 key = (quint64(side) << 32) | (quint64(qRound(scale * 100)) << 1) | (off ? 1 : 0);
+        auto it = m_cache.constFind(key);
+        if (it != m_cache.constEnd()) return *it;
+        QPixmap pm = render(off ? m_disabled : m_normal, side, scale);
+        m_cache.insert(key, pm);
+        return pm;
+    }
+    void paint(QPainter *p, const QRect &rect, QIcon::Mode mode, QIcon::State state) override
+    {
+        const qreal dpr = p->device() ? p->device()->devicePixelRatioF() : 1.0;
+        p->drawPixmap(rect, scaledPixmap(rect.size(), mode, state, dpr));
+    }
+    QSize actualSize(const QSize &size, QIcon::Mode, QIcon::State) override
+    {
+        const int side = qMin(size.width(), size.height());
+        return QSize(side, side);
+    }
+    QList<QSize> availableSizes(QIcon::Mode, QIcon::State) override { return { { 16, 16 }, { 20, 20 }, { 24, 24 }, { 32, 32 }, { 48, 48 } }; }
+    QIconEngine *clone() const override { return new SvgIconEngine(*this); }
+    QString key() const override { return QStringLiteral("ViviaMealsSvg"); }
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    void virtual_hook(int id, void *data) override
+    {
+        if (id == QIconEngine::ScaledPixmapHook) {
+            auto *arg = static_cast<QIconEngine::ScaledPixmapArgument *>(data);
+            arg->pixmap = scaledPixmap(arg->size, arg->mode, arg->state, arg->scale);
+            return;
+        }
+        QIconEngine::virtual_hook(id, data);
+    }
+#endif
+
+private:
+    QByteArray m_normal, m_disabled;
+    QHash<quint64, QPixmap> m_cache;
+};
+} // namespace
+
 QIcon get(const QString &name)
 {
     auto it = cache().constFind(name);
@@ -68,14 +125,7 @@ QIcon get(const QString &name)
         s.replace("#ACCENT", a.name().toLatin1());
         return s;
     };
-    const QByteArray normal = colored(fg, acc), off = colored(disabled, disabled);
-    QIcon icon;
-    for (int size : { 16, 20, 24, 32, 48 }) {
-        icon.addPixmap(render(normal, size, 1.0), QIcon::Normal);
-        icon.addPixmap(render(normal, size, 2.0), QIcon::Normal);
-        icon.addPixmap(render(off, size, 1.0), QIcon::Disabled);
-        icon.addPixmap(render(off, size, 2.0), QIcon::Disabled);
-    }
+    const QIcon icon(new SvgIconEngine(colored(fg, acc), colored(disabled, disabled)));
     cache().insert(name, icon);
     names().insert(icon.cacheKey(), name);
     return icon;

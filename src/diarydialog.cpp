@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "diarydialog.h"
+#include "symbols.h"
 #include "editordialog.h"
 #include "icons.h"
 #include "mealplanner.h"
@@ -163,7 +164,7 @@ void DiaryEntryDialog::recipeChosen()
     auto *it = m_list->currentItem();
     if (!it) return;
     Recipe r;
-    if (!RecipeDb::instance().load(it->data(Qt::UserRole).toString(), &r)) return;
+    if (!RecipeDb::instance().loadLight(it->data(Qt::UserRole).toString(), &r)) return;
     const Diary::Entry fresh = Diary::Entry::fromRecipe(r, false);
     m_entry.title = fresh.title;
     m_entry.recipeId = fresh.recipeId;
@@ -327,13 +328,13 @@ DiaryDialog::DiaryDialog(QWidget *parent) : QDialog(parent)
     top->addWidget(m_profile);
     top->addSpacing(16);
     auto *prev = new QToolButton;
-    prev->setText(QStringLiteral("◀"));
+    Sym::setButton(prev, Sym::Left);
     prev->setToolTip(tr("Vortag"));
     m_date = new QDateEdit(QDate::currentDate());
     m_date->setCalendarPopup(true);
     m_date->setDisplayFormat(QStringLiteral("dddd, dd.MM.yyyy"));
     auto *next = new QToolButton;
-    next->setText(QStringLiteral("▶"));
+    Sym::setButton(next, Sym::Right);
     next->setToolTip(tr("Folgetag"));
     auto *today = new QPushButton(tr("Heute"));
     top->addWidget(prev);
@@ -626,7 +627,7 @@ void DiaryDialog::addFromPlan()
         if (pe.recipeId.isEmpty()) continue;
         Recipe r;
         Diary::Entry e;
-        if (RecipeDb::instance().load(pe.recipeId, &r)) {
+        if (RecipeDb::instance().loadLight(pe.recipeId, &r)) {
             e = Diary::Entry::fromRecipe(r, false);
         } else {
             e.title = pe.title;

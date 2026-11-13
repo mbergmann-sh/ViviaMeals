@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "imagecropdialog.h"
+#include "symbols.h"
 #include "icons.h"
 #include "qtcompat.h"
 
@@ -264,8 +265,10 @@ ImageCropDialog::ImageCropDialog(const QImage &img, QWidget *parent, Purpose pur
     const QString aspectKey = print ? QStringLiteral("tex/cropAspect") : QStringLiteral("editor/cropAspect");
     m_aspect->setCurrentIndex(qBound(0, s.value(aspectKey, print ? 5 : 0).toInt(), m_aspect->count() - 1));
     bar->addWidget(m_aspect);
-    auto *left = new QPushButton(tr("⟲ Drehen"));
-    auto *right = new QPushButton(tr("Drehen ⟳"));
+    auto *left = new QPushButton;
+    Sym::setButton(left, Sym::RotateLeft, QString(), tr("Drehen"));
+    auto *right = new QPushButton;
+    Sym::setButton(right, Sym::RotateRight, tr("Drehen"));
     auto *all = new QPushButton(tr("Größter Ausschnitt"));
     bar->addWidget(left);
     bar->addWidget(right);

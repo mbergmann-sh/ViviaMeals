@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "foodwizard.h"
+#include "symbols.h"
 #include "fooddialog.h"
 #include "icons.h"
 
@@ -456,7 +457,7 @@ void FoodWizard::updateCheck()
     if (!err.isEmpty()) t += QStringLiteral("<br><span style=\"color:#c0392b\">✗ %1</span>").arg(err.toHtmlEscaped());
     else if (!warnings.isEmpty()) t += QStringLiteral("<br><span style=\"color:#b85400\">⚠ %1</span>").arg(warnings.join(QLatin1Char(' ')).toHtmlEscaped());
     else if (n.kcal > 0) t += QStringLiteral("<br><span style=\"color:#2e7d32\">✓ %1</span>").arg(tr("Angaben passen zusammen."));
-    m_check->setText(t);
+    m_check->setText(Sym::fixHtml(t));
 }
 
 Food FoodWizard::food() const
@@ -553,7 +554,7 @@ void FoodWizard::setEntered(const Nutrients &n, const QString &brand)
 
 void FoodWizard::setOffStatus(const QString &html, bool busy)
 {
-    m_offStatus->setText(busy ? QStringLiteral("⏳ ") + html : html);
+    m_offStatus->setText(Sym::fixHtml(busy ? QStringLiteral("⏳ ") + html : html));
 }
 
 void FoodWizard::offLookup()
@@ -561,7 +562,7 @@ void FoodWizard::offLookup()
     QString err;
     const QString code = OpenFoodFacts::normalizeBarcode(m_barcode->text(), &err);
     if (code.isEmpty()) {
-        m_offStatus->setText(QStringLiteral("<span style=\"color:#c0392b\">✗ %1</span>").arg(err.toHtmlEscaped()));
+        m_offStatus->setText(Sym::fixHtml(QStringLiteral("<span style=\"color:#c0392b\">✗ %1</span>").arg(err.toHtmlEscaped())));
         m_barcode->setFocus();
         return;
     }
@@ -646,7 +647,7 @@ void FoodWizard::applyProduct(const OpenFoodFacts::Product &p)
     }
     if (p.perMl && m_category->currentData().toString() != QLatin1String("fett")) m_density->setValue(1.0);
     t += QStringLiteral(" · <a href=\"%1\">%2</a>").arg(OpenFoodFacts::productPage(p.code), tr("Produktseite"));
-    m_offStatus->setText(t);
+    m_offStatus->setText(Sym::fixHtml(t));
     updateCheck();
 }
 
@@ -744,7 +745,7 @@ int MissingFoodsDialog::currentRow() const
 
 void MissingFoodsDialog::setStatus(int row, const QString &text)
 {
-    m_table->item(row, 3)->setText(text);
+    m_table->item(row, 3)->setText(Sym::fix(text));
     for (int c = 0; c < 4; ++c) m_table->item(row, c)->setForeground(palette().color(QPalette::Disabled, QPalette::Text));
     // nächste offene Zeile
     for (int r = row + 1; r < m_table->rowCount(); ++r)

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "menudialog.h"
+#include "symbols.h"
 #include "icons.h"
 #include "importers.h"
 #include "latexexport.h"
@@ -534,7 +535,7 @@ void MenuWizard::updateNotes()
         if (x.startsWith(QStringLiteral("⚠"))) x = QStringLiteral("<span style='color:#c0392b'>%1</span>").arg(x);
         else if (x.startsWith(QStringLiteral("✓"))) x = QStringLiteral("<span style='color:#2e7d32'>%1</span>").arg(x);
     }
-    m_notes->setText(n.join(QStringLiteral("<br>")));
+    m_notes->setText(Sym::fixHtml(n.join(QStringLiteral("<br>"))));
 }
 
 int MenuWizard::currentRow() const
@@ -757,7 +758,12 @@ void MenuCandidateDialog::fill()
         if (!s || !matches(*s)) continue;
         const double rel = best > worst ? (c.score - worst) / (best - worst) : 1;
         const int stars = 1 + qRound(rel * 4);
-        auto *it = new QTreeWidgetItem(m_list, { s->title, QString(stars, QChar(0x2605)) + QString(5 - stars, QChar(0x2606)), kcalText(s), c.notes.join(QStringLiteral("; ")) });
+        auto *it = new QTreeWidgetItem(m_list, { s->title, Sym::get(Sym::Star).repeated(stars) + Sym::get(Sym::StarEmpty).repeated(5 - stars), kcalText(s), Sym::fix(c.notes.join(QStringLiteral("; "))) });
+        QFont sf;
+        if (Sym::font(Sym::Star, it->font(1), &sf) && Sym::font(Sym::StarEmpty, it->font(1), nullptr)) {
+            it->setFont(1, sf);
+            it->setText(1, Sym::wanted(Sym::Star).repeated(stars) + Sym::wanted(Sym::StarEmpty).repeated(5 - stars));
+        }
         it->setData(0, Qt::UserRole, c.id);
         if (s->favorite) it->setIcon(0, Icons::get(QStringLiteral("star-filled")));
         shown.insert(c.id);

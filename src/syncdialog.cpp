@@ -530,7 +530,7 @@ Sync::Result run(QWidget *parent, const Sync::Connection &c, const QString &dbFo
     if (quiet && c.kind == Sync::Connection::Kind::Host) return e.run();   // nur lokale Dateien: sofort fertig
     BusyProgress prog(parent, QCoreApplication::translate("SyncUi", "Datenbank abgleichen"), 100);
     Sync::Result r = e.run(prog.callback());
-    if (!r.ok && c.kind == Sync::Connection::Kind::Lan && !r.canceled) {
+    if (!r.ok && c.kind == Sync::Connection::Kind::Lan && !r.canceled && !quiet) {   // automatischer Abgleich: nicht im Netz suchen
         // Adresse des freigebenden Rechners geändert (DHCP)? Im Netz neu suchen
         const QString store = QJsonDocument::fromJson([&] {
                                   QFile f(QDir(dbFolder).filePath(QStringLiteral(".sync/zustand.json")));

@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "recipeview.h"
+#include "symbols.h"
+#include "perf.h"
 #include "icons.h"
 #include "recipehtml.h"
 #include "themes.h"
@@ -34,6 +36,7 @@ RecipeHtml::Style styleFromPalette(int imageWidth)
     st.headBg = dark ? QColor(0x2d, 0x33, 0x3a) : QColor(0xee, 0xf3, 0xf8);
     st.imageWidth = imageWidth;
     st.fontScale = UiScale::factor();
+    st.starHtml = Sym::html(Sym::Star);
     return st;
 }
 }
@@ -117,11 +120,14 @@ void RecipeView::setRecipe(const Recipe &r)
     m_fav->blockSignals(false);
     m_servLabel->setText(r.yieldUnit.isEmpty() ? tr("Portionen:") : r.yieldUnit + QLatin1Char(':'));
     // Bild als Ressource des Dokuments (QTextBrowser kennt keine data:-URIs zuverlässig)
-    QImage img;
-    if (!r.image.isEmpty()) img.loadFromData(QByteArray::fromBase64(r.image.toLatin1()));
-    m_browser->document()->addResource(QTextDocument::ImageResource, kImageUrl, img);
+    Perf::mark("RecipeView: Felder");
+    m_image = QImage();
+    if (!r.image.isEmpty()) m_image.loadFromData(QByteArray::fromBase64(r.image.toLatin1()));
+    m_scaledFor = 0;
+    Perf::mark("RecipeView: Bild dekodiert");
     render();
     m_browser->moveCursor(QTextCursor::Start);
+    Perf::mark("RecipeView: HTML gesetzt");
 }
 
 void RecipeView::showMessage(const QString &title, const QString &html)
@@ -142,6 +148,16 @@ void RecipeView::render()
     const int imgW = qBound(160, int(w * 0.40), 420);
     RecipeHtml::Style st = styleFromPalette(imgW);
     st.imageSrc = kImageUrl.toString();
+    // Foto einmal auf die Anzeigegröße bringen – sonst skaliert QTextBrowser das Original bei jedem Neuzeichnen
+    const qreal dpr = devicePixelRatioF();
+    const int px = qRound(imgW * dpr);
+    if (m_scaledFor != px) {
+        QImage shown = m_image;
+        if (!shown.isNull() && shown.width() > px) shown = shown.scaledToWidth(px, Qt::SmoothTransformation);
+        shown.setDevicePixelRatio(dpr);
+        m_browser->document()->addResource(QTextDocument::ImageResource, kImageUrl, shown);
+        m_scaledFor = px;
+    }
     const int scroll = m_browser->verticalScrollBar() ? m_browser->verticalScrollBar()->value() : 0;
     m_browser->setHtml(RecipeHtml::render(m_recipe, st, m_servings->value()));
     if (m_browser->verticalScrollBar()) m_browser->verticalScrollBar()->setValue(scroll);
@@ -151,6 +167,7 @@ void RecipeView::fillDocument(QTextDocument *doc) const
 {
     if (!m_has) return;
     RecipeHtml::Style st;     // helle Farben für den Druck
+    st.starHtml = Sym::html(Sym::Star);
     st.imageWidth = 240;
     QImage img;
     if (!m_recipe.image.isEmpty()) img.loadFromData(QByteArray::fromBase64(m_recipe.image.toLatin1()));

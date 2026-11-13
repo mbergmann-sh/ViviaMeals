@@ -1,5 +1,14 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "recipedb.h"
+#include "perf.h"
+
+#include <QCollator>
+#include <QRunnable>
+#include <QThread>
+#include <QThreadPool>
+
+#include <atomic>
+#include <numeric>
 #include "mealtypes.h"
 
 #include <QDir>
@@ -25,6 +34,21 @@ QStringList arr(const QJsonValue &v)
     return l;
 }
 }
+
+namespace {
+// einheitliche deutsche Sortierung der Rezepttitel (Liste, Einfügen, Sammelaktionen)
+const QCollator &titleCollator()
+{
+    static const QCollator c = [] {
+        QCollator x(QLocale(QLocale::German, QLocale::Germany));
+        x.setCaseSensitivity(Qt::CaseInsensitive);
+        x.setNumericMode(true);
+        return x;
+    }();
+    return c;
+}
+bool titleLess(const RecipeSummary &a, const RecipeSummary &b) { return titleCollator().compare(a.title, b.title) < 0; }
+} // namespace
 
 // ---------------------------------------------------------------- RecipeSummary
 
@@ -182,7 +206,11 @@ QString RecipeDb::fileFor(const QString &id) const
 
 void RecipeDb::rebuildIndex()
 {
+    auto report = [this](const QString &text, int done, int total) {
+        if (m_progress) m_progress(text, done, total);
+    };
     // vorhandenen Zwischenspeicher lesen
+    report(tr("Rezeptverzeichnis wird gelesen …"), 0, 0);
     QHash<QString, RecipeSummary> cached;
     QFile f(QDir(m_folder).filePath(QLatin1String(kIndex)));
     if (f.open(QIODevice::ReadOnly)) {
@@ -193,13 +221,20 @@ void RecipeDb::rebuildIndex()
                 cached.insert(s.id, s);
             }
     }
+    Perf::mark("RecipeDb: Index gelesen");
     m_list.clear();
     m_pos.clear();
     bool changedIndex = false;
+    // Dateien mit Zeitstempel erfassen; geänderte bzw. neue Rezepte später (parallel) einlesen
+    struct Pending {
+        QString file, id;
+        qint64 time;
+    };
+    QList<Pending> pending;
     QDirIterator it(QDir(m_folder).filePath(QLatin1String(kRecipes)), { QStringLiteral("*.vmr") }, QDir::Files);
     while (it.hasNext()) {
         const QString file = it.next();
-        const QFileInfo fi(file);
+        const QFileInfo fi = it.fileInfo();
         const QString id = fi.completeBaseName();
         const qint64 t = fi.lastModified().toMSecsSinceEpoch();
         auto c = cached.constFind(id);
@@ -207,19 +242,59 @@ void RecipeDb::rebuildIndex()
             m_list << *c;
             continue;
         }
-        Recipe r;
-        if (!Recipe::load(file, &r)) continue;
-        if (r.id != id) r.id = id;      // Dateiname ist maßgeblich
-        RecipeSummary s = RecipeSummary::from(r);
-        s.fileTime = t;
-        m_list << s;
+        pending << Pending{ file, id, t };
+    }
+    Perf::mark("RecipeDb: Verzeichnis geprüft");
+    if (!pending.isEmpty()) {
+        // Rezepte einlesen (JSON mit eingebettetem Foto) – auf alle Prozessorkerne verteilt
         changedIndex = true;
+        QVector<RecipeSummary> results(pending.size());
+        QVector<char> ok(pending.size(), 0);
+        std::atomic<int> done{ 0 };
+        QThreadPool pool;
+        pool.setMaxThreadCount(qBound(1, QThread::idealThreadCount(), 8));
+        const int chunk = 8;
+        for (int start = 0; start < pending.size(); start += chunk) {
+            const int end = qMin(int(pending.size()), start + chunk);
+            pool.start(QRunnable::create([&, start, end] {
+                for (int i = start; i < end; ++i) {
+                    Recipe r;
+                    bool hadImage = false;
+                    if (Recipe::loadWithoutImage(pending[i].file, &r, &hadImage)) {   // Foto wird für die Liste nicht gebraucht
+                        r.id = pending[i].id;      // Dateiname ist maßgeblich
+                        results[i] = RecipeSummary::from(r);
+                        results[i].hasImage = hadImage;
+                        results[i].fileTime = pending[i].time;
+                        ok[i] = 1;
+                    }
+                    ++done;
+                }
+            }));
+        }
+        const int total = int(pending.size());
+        while (!pool.waitForDone(60)) report(tr("Rezepte werden eingelesen: %1 von %2").arg(done.load()).arg(total), done.load(), total);
+        report(tr("Rezepte werden eingelesen: %1 von %2").arg(total).arg(total), total, total);
+        for (int i = 0; i < pending.size(); ++i)
+            if (ok[i]) m_list << results[i];
     }
     if (m_list.size() != cached.size()) changedIndex = true;
-    std::sort(m_list.begin(), m_list.end(), [](const RecipeSummary &a, const RecipeSummary &b) {
-        return QString::localeAwareCompare(a.title, b.title) < 0;
-    });
+    report(tr("Rezeptliste wird sortiert …"), 0, 0);
+    // Sortieren mit vorberechneten Sortierschlüsseln (localeAwareCompare je Vergleich ist teuer)
+    {
+        const QCollator &coll = titleCollator();
+        QVector<QCollatorSortKey> keys;
+        keys.reserve(m_list.size());
+        for (const RecipeSummary &s : m_list) keys << coll.sortKey(s.title);
+        QVector<int> order(m_list.size());
+        std::iota(order.begin(), order.end(), 0);
+        std::stable_sort(order.begin(), order.end(), [&](int a, int b) { return keys[a].compare(keys[b]) < 0; });
+        QList<RecipeSummary> sorted;
+        sorted.reserve(m_list.size());
+        for (int i : order) sorted << m_list[i];
+        m_list = sorted;
+    }
     for (int i = 0; i < m_list.size(); ++i) m_pos.insert(m_list[i].id, i);
+    Perf::mark(changedIndex ? "RecipeDb: Rezepte neu eingelesen und sortiert" : "RecipeDb: aus dem Zwischenspeicher, sortiert");
     if (changedIndex) writeIndex();
 }
 
@@ -251,9 +326,7 @@ void RecipeDb::endBatch()
 {
     if (m_batch > 0 && --m_batch == 0 && m_dirty) {
         m_dirty = false;
-        std::sort(m_list.begin(), m_list.end(), [](const RecipeSummary &a, const RecipeSummary &b) {
-            return QString::localeAwareCompare(a.title, b.title) < 0;
-        });
+        std::stable_sort(m_list.begin(), m_list.end(), titleLess);
         m_pos.clear();
         for (int i = 0; i < m_list.size(); ++i) m_pos.insert(m_list[i].id, i);
         writeIndex();
@@ -274,6 +347,24 @@ bool RecipeDb::load(const QString &id, Recipe *out, QString *error) const
     return true;
 }
 
+bool RecipeDb::loadLight(const QString &id, Recipe *out, QString *error) const
+{
+    if (!Recipe::loadWithoutImage(fileFor(id), out, nullptr, error)) return false;
+    out->id = id;
+    return true;
+}
+
+bool RecipeDb::saveLight(Recipe &r, QString *error)
+{
+    if (r.image.isEmpty() && !r.id.isEmpty()) {
+        Recipe full;
+        if (Recipe::load(fileFor(r.id), &full)) r.image = full.image;
+    }
+    const bool ok = save(r, error);
+    r.image.clear();   // Aufrufer arbeitet weiter mit der leichten Fassung
+    return ok;
+}
+
 bool RecipeDb::save(Recipe &r, QString *error)
 {
     if (!isOpen()) {
@@ -289,13 +380,12 @@ bool RecipeDb::save(Recipe &r, QString *error)
     RecipeSummary s = RecipeSummary::from(r);
     s.fileTime = QFileInfo(file).lastModified().toMSecsSinceEpoch();
     auto it = m_pos.constFind(r.id);
-    if (it != m_pos.constEnd()) {
+    if (it != m_pos.constEnd() && m_list[*it].title == s.title) {
         m_list[*it] = s;
     } else {
+        if (it != m_pos.constEnd()) m_list.removeAt(*it);   // Titel geändert: neu einsortieren
         // alphabetisch einsortieren
-        auto pos = std::lower_bound(m_list.begin(), m_list.end(), s, [](const RecipeSummary &a, const RecipeSummary &b) {
-            return QString::localeAwareCompare(a.title, b.title) < 0;
-        });
+        auto pos = std::lower_bound(m_list.begin(), m_list.end(), s, titleLess);
         m_list.insert(pos, s);
         m_pos.clear();
         for (int i = 0; i < m_list.size(); ++i) m_pos.insert(m_list[i].id, i);

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "importdialogs.h"
+#include "season.h"
 #include "busyprogress.h"
 #include "foodwizard.h"
 #include "mealtypes.h"
@@ -187,6 +188,7 @@ QString run(QWidget *parent, Importers::Format format, const QStringList &givenF
     opt.fixUmlauts = s.value(QStringLiteral("import/fixUmlauts"), true).toBool();
     opt.mealTags = s.value(QStringLiteral("import/mealTags"), true).toBool();
     opt.nutrientTags = s.value(QStringLiteral("import/nutrientTags"), true).toBool();
+    opt.seasonTags = s.value(QStringLiteral("import/seasonTags"), true).toBool();
 
     QList<Recipe> recipes;
     QStringList origins, warnings;
@@ -329,7 +331,7 @@ int offerMissingFoods(QWidget *parent, const QStringList &ids)
     QList<Recipe> list;
     for (const QString &id : ids) {
         Recipe r;
-        if (db.load(id, &r)) list << r;
+        if (db.loadLight(id, &r)) list << r;   // ohne Foto – nur die Zutaten werden gebraucht
     }
     const auto missing = Nutrition::missingFoods(list, MissingFoodsDialog::ignoredNames());
     if (missing.isEmpty()) return 0;
@@ -348,6 +350,7 @@ int offerMissingFoods(QWidget *parent, const QStringList &ids)
     if (!d.changed()) return 0;
     // Nährwerte der betroffenen Rezepte neu berechnen
     const bool nutrientTags = QSettings().value(QStringLiteral("import/nutrientTags"), true).toBool();
+    const bool seasonTags = QSettings().value(QStringLiteral("import/seasonTags"), true).toBool();
     int updated = 0;
     BusyProgress prog(parent, QObject::tr("Kalorien und Nährwerte neu berechnen"), int(list.size()), false);
     int i = 0;
@@ -359,7 +362,8 @@ int offerMissingFoods(QWidget *parent, const QStringList &ids)
         const int matchedBefore = r.nutrition.matched;
         Nutrition::analyze(r);
         if (nutrientTags) MealTypes::applyNutrientTags(r);
-        if (r.nutrition.matched != matchedBefore || !qFuzzyCompare(1 + before, 1 + r.nutrition.total.kcal)) {
+        const int seasonChanges = (seasonTags && !Nutrition::isMenu(r)) ? Season::applyTags(r) : 0;
+        if (seasonChanges || r.nutrition.matched != matchedBefore || !qFuzzyCompare(1 + before, 1 + r.nutrition.total.kcal)) {
             if (db.save(r)) ++updated;
         }
     }

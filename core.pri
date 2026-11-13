@@ -12,6 +12,8 @@ SOURCES += \
     $$PWD/src/foodtable.cpp \
     $$PWD/src/foodcsv.cpp \
     $$PWD/src/nutrition.cpp \
+    $$PWD/src/markup.cpp \
+    $$PWD/src/season.cpp \
     $$PWD/src/textcodec.cpp \
     $$PWD/src/importers.cpp \
     $$PWD/src/recipehtml.cpp \
@@ -47,6 +49,8 @@ HEADERS += \
     $$PWD/src/foodtable.h \
     $$PWD/src/foodcsv.h \
     $$PWD/src/nutrition.h \
+    $$PWD/src/markup.h \
+    $$PWD/src/season.h \
     $$PWD/src/textcodec.h \
     $$PWD/src/importers.h \
     $$PWD/src/recipehtml.h \
@@ -62,6 +66,7 @@ HEADERS += \
     $$PWD/src/odtexport.h \
     $$PWD/src/recipepackage.h \
     $$PWD/src/openfoodfacts.h \
+    $$PWD/src/perf.h \
     $$PWD/src/sync.h \
     $$PWD/src/menu.h \
     $$PWD/src/menuexport.h \

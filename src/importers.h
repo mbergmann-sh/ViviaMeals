@@ -23,6 +23,7 @@ struct Options {
     bool autoTags = true;     // vegan/vegetarisch/fleischgerichte/fisch aus den Zutaten ergänzen
     bool mealTags = true;     // frühstück/hauptgerichte/zwischenmahlzeit/desserts/süßspeise/backen ergänzen
     bool nutrientTags = true; // eiweißreich/kalorienarm/fettarm/hochkalorisch/vitaminreich/reduktionsdiät
+    bool seasonTags = true;   // frühling/sommer/herbst/winter/ganzjährig nach frischen Zutaten
     bool fixUmlauts = true;   // deutsche Rezepte in ASCII-Umschrift: ae/oe/ue/ss → ä/ö/ü/ß
     // Übersetzer für fremdsprachige Rezepte (z. B. DeepL). Gesetzt → Zutaten werden nicht über das Glossar
     // übersetzt, sondern das fertige Rezept wird übergeben. Liefert false (mit Fehlertext), greift das Glossar.

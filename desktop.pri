@@ -25,6 +25,9 @@ SOURCES += \
     $$PWD/src/syncdialog.cpp \
     $$PWD/src/menudialog.cpp \
     $$PWD/src/manual.cpp \
+    $$PWD/src/splash.cpp \
+    $$PWD/src/instructionsedit.cpp \
+    $$PWD/src/symbols.cpp \
     $$PWD/src/uiscale.cpp \
     $$PWD/src/themes.cpp \
     $$PWD/src/icons.cpp \
@@ -57,6 +60,9 @@ HEADERS += \
     $$PWD/src/syncdialog.h \
     $$PWD/src/menudialog.h \
     $$PWD/src/manual.h \
+    $$PWD/src/splash.h \
+    $$PWD/src/instructionsedit.h \
+    $$PWD/src/symbols.h \
     $$PWD/src/uiscale.h \
     $$PWD/src/themes.h \
     $$PWD/src/icons.h \

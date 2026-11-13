@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Nährwerte – ViviaMeals – Handbuch</title><link rel="stylesheet" href="handbuch.css"></head>
 <body class="web">
-<header class="top"><span class="version">Version 0.9.3</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
+<header class="top"><span class="version">Version 0.9.5</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
 <div class="wrap"><nav class="side"><input id="suche" class="such" type="search" placeholder="Im Handbuch suchen …"><ol>
 <li><a href="index.html">Start und Inhalt</a></li>
 <li><a href="willkommen.html">Willkommen bei ViviaMeals</a>
@@ -15,7 +15,7 @@
 <li><a href="scannen.html">Rezepte scannen</a>
 </li>
 <li class="aktiv"><a href="naehrwerte.html">Nährwerte</a>
-<ol><li><a href="#naehrwerte-rechnen">Wie ViviaMeals rechnet</a></li><li><a href="#naehrwerttabelle">Die Nährwerttabelle</a></li><li><a href="#eigene-lebensmittel">Eigene Lebensmittel anlegen</a></li><li><a href="#zutaten-ohne-naehrwerte">Zutaten ohne Nährwerte</a></li><li><a href="#naehrwerte-csv">Nährwerte importieren und exportieren</a></li><li><a href="#naehrwert-tags">Mahlzeit- und Nährwert-Tags</a></li><li><a href="#neu-berechnen">Alles neu berechnen</a></li></ol>
+<ol><li><a href="#naehrwerte-rechnen">Wie ViviaMeals rechnet</a></li><li><a href="#naehrwerttabelle">Die Nährwerttabelle</a></li><li><a href="#eigene-lebensmittel">Eigene Lebensmittel anlegen</a></li><li><a href="#zutaten-ohne-naehrwerte">Zutaten ohne Nährwerte</a></li><li><a href="#naehrwerte-csv">Nährwerte importieren und exportieren</a></li><li><a href="#naehrwert-tags">Mahlzeit- und Nährwert-Tags</a></li><li><a href="#saison-tags">Saison-Tags</a></li><li><a href="#neu-berechnen">Alles neu berechnen</a></li></ol>
 </li>
 <li><a href="planen.html">Planen und Gewichtskontrolle</a>
 </li>
@@ -134,6 +134,18 @@
 </tbody>
 </table>
 <p>„eiweißreich“ und „fettarm“ folgen den Grenzwerten der EU-Verordnung über nährwertbezogene Angaben; „vitaminreich“ ist ein Näherungswert, denn die Tabelle enthält keine Vitamine. Tags werden nur ergänzt, nie entfernt – mit einer Ausnahme: Nährwert-Tags, die nach einer Änderung der Zutaten nicht mehr zutreffen, entfallen beim Neuberechnen.</p>
+<h2 id="saison-tags">Saison-Tags</h2>
+<p>Frische Zutaten haben in Deutschland ihre Saison – Spargel im Frühling, Erdbeeren im Sommer, Kürbis im Herbst, Grünkohl im Winter. ViviaMeals vergibt danach die Tags <strong>frühling</strong>, <strong>sommer</strong>, <strong>herbst</strong>, <strong>winter</strong> oder <strong>ganzjährig</strong>: beim Import (abschaltbar unter <em>Einstellungen → Import</em>), im Editor über <strong>Ergänzen</strong> und nachträglich für die ganze Datenbank über <em>Extras → Saison-Tags für alle Rezepte vergeben …</em> (mit Vorschau und Rückfrage).</p>
+<p>So wird gerechnet:</p>
+<ul>
+<li>Grundlage ist ein Saisonkalender für <strong>regionale Ware</strong> (Freiland bzw. Lager) nach Monaten, etwa Spargel April–Juni, Erdbeeren Mai–August, Tomaten Juli–Oktober, Kürbis August–Dezember, Feldsalat Oktober–März, Grünkohl November–Februar. Auch Wild (Oktober–Januar) und Gans (November–Dezember) haben eine Saison.</li>
+<li>Ein Monat passt zum Rezept, wenn <strong>mindestens 80 % des Gewichts</strong> der Saisonzutaten dann Saison haben – ein Bund Frühlingszwiebeln macht aus einem Grünkohlgericht also kein Sommeressen.</li>
+<li>Eine Jahreszeit (Frühling März–Mai, Sommer Juni–August, Herbst September–November, Winter Dezember–Februar) wird vergeben, wenn <strong>mindestens zwei</strong> ihrer Monate passen.</li>
+<li><strong>ganzjährig</strong> bekommen Rezepte, deren frische Zutaten es immer gibt (Kartoffeln, Zwiebeln, Möhren, Kohl und Äpfel vom Lager, Champignons, Bananen …) und die einen nennenswerten Anteil frischer Zutaten haben.</li>
+<li><strong>Nicht</strong> gezählt werden Tiefkühlware, Konserven, Getrocknetes, Säfte, Mus, Pulver und Ähnliches – „Erbsen (TK)“ oder „Tomaten aus der Dose“ gibt es das ganze Jahr.</li>
+</ul>
+<p>Die Themenauswahl <strong>Saisonal</strong> im Hauptfenster zeigt automatisch die Rezepte der aktuellen Jahreszeit (<a href="hauptfenster.html#rezeptliste">Die Rezeptliste</a>).</p>
+<p>Anders als die übrigen Tags werden Saison-Tags dabei ersetzt: Ändern Sie die Zutaten, passt ViviaMeals die Jahreszeit an. Andere Tags bleiben unberührt.</p>
 <h2 id="neu-berechnen">Alles neu berechnen</h2>
 <p><em>Extras → Nährwerte aller Rezepte neu berechnen</em> wendet die aktuelle Nährwerttabelle auf alle Rezepte an – etwa nachdem Sie eigene Lebensmittel angelegt haben. Ein Fortschrittsbalken zeigt den Stand; beim Abbrechen bleiben die schon berechneten Rezepte gespeichert.</p>
 <figure>
@@ -141,5 +153,5 @@
 <figcaption aria-hidden="true">Fortschrittsanzeige bei der Neuberechnung</figcaption>
 </figure>
 <nav class="pager"><span><a href="scannen.html">← Rezepte scannen</a></span><span class="weiter"><a href="planen.html">Planen und Gewichtskontrolle →</a></span></nav></main></div>
-<footer>ViviaMeals 0.9.3 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
+<footer>ViviaMeals 0.9.5 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
 </body></html>

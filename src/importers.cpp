@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "importers.h"
+#include "season.h"
 #include "glossary.h"
 #include "ingredientparser.h"
 #include "nutrition.h"
@@ -260,6 +261,7 @@ Recipe finish(RawRecipe &raw, const Options &opt, const QString &format, Result 
     if (opt.autoTags) Nutrition::applyTagSuggestions(r);
     if (opt.mealTags && !Nutrition::isMenu(r)) MealTypes::applyTags(r);
     if (opt.nutrientTags) MealTypes::applyNutrientTags(r);
+    if (opt.seasonTags && !Nutrition::isMenu(r)) Season::applyTags(r);
     return r;
 }
 
@@ -529,8 +531,9 @@ Result parseRezKonv(const QString &text, const Options &opt)
             }
             double dummy = 0;
             const QString firstTok = t.section(QLatin1Char(' '), 0, 0);
+            static const QRegularExpression kRe533_0(QStringLiteral("^[\\d½¼¾]"));
             const bool startsWithAmount = IngredientParser::parseNumber(firstTok, &dummy)
-                                          || firstTok.contains(QRegularExpression(QStringLiteral("^[\\d½¼¾]")));
+                                          || firstTok.contains(kRe533_0);
             // Zutatenzeilen sind eingerückt (Mengenspalte rechtsbündig) bzw. beginnen mit einer Menge;
             // die Zubereitung steht linksbündig bzw. nur leicht eingerückt
             if ((lead >= 4 && (startsWithAmount || lead >= 6)) || (startsWithAmount && lead >= 1 && t.size() < 60)) {
@@ -584,6 +587,7 @@ Result parseVtm(const QByteArray &json, const Options &opt)
         normalizeTexts(r);
         Nutrition::analyze(r);
         if (opt.autoTags) Nutrition::applyTagSuggestions(r);
+        if (opt.seasonTags && !Nutrition::isMenu(r)) Season::applyTags(r);
         res.recipes << r;
     }
     return res;

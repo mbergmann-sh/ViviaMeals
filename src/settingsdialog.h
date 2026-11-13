@@ -35,6 +35,7 @@ private:
     QCheckBox *m_umlauts;
     QCheckBox *m_mealTags;
     QCheckBox *m_nutrientTags;
+    QCheckBox *m_seasonTags;
     QCheckBox *m_offerFoods;
     QLineEdit *m_defaultSource;
     QCheckBox *m_deepl;
@@ -42,6 +43,7 @@ private:
     QLabel *m_deeplStatus;
     QCheckBox *m_notice;
     QCheckBox *m_random;
+    QCheckBox *m_splash;
     QString m_origTheme;
     QComboBox *m_scanner;
     QLineEdit *m_esclAddress;

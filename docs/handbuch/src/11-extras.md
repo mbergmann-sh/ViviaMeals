@@ -33,6 +33,7 @@ zwei Rezepte nebeneinander verglichen.
 |---|---|
 | *Extras → Nährwerte aller Rezepte neu berechnen* | aktuelle Nährwerttabelle auf alle Rezepte anwenden |
 | *Extras → Mahlzeit- und Nährwert-Tags für alle Rezepte ergänzen …* | Tags nachholen, mit Vorschau der Anzahl |
+| *Extras → Saison-Tags für alle Rezepte vergeben …* | frühling, sommer, herbst, winter, ganzjährig nach den frischen Zutaten ([Saison-Tags](naehrwerte.md#saison-tags)) |
 | *Extras → Umlaute in allen Rezepten korrigieren …* | „Kaesespaetzle“ → „Käsespätzle“, mit Beispielen und Rückfrage |
 | *Extras → Fremdsprachige Rezepte mit DeepL übersetzen …* | nennt Anzahl und Zeichenmenge und fragt vor dem Senden |
 
@@ -59,13 +60,14 @@ Wiederherstellen lassen sich die Rezepte über *Datei → Import → ViviaMeals-
 - **Darstellung:** Theme und Schriftgröße (automatisch oder 85–140 %).
 - **Rezepte:** **Standard-Quelle** für Rezepte ohne Quellenangabe
   ([Quelle und Standard-Quelle](rezepte.md#quelle)).
-- **Programmstart:** zufälliges Rezept anzeigen; Hinweis „kein Medizinprodukt“ anzeigen.
+- **Programmstart:** Startbildschirm mit Ladefortschritt anzeigen; zufälliges Rezept anzeigen; Hinweis
+  „kein Medizinprodukt“ anzeigen.
 
 **Import und Übersetzung**
 
 - Englische Rezepte ohne DeepL umrechnen und übersetzen.
 - Deutsche Rezepte ohne Umlaute korrigieren.
-- Tags vegan/vegetarisch/fleischgerichte/fisch, Mahlzeit-Tags und Nährwert-Tags ergänzen.
+- Tags vegan/vegetarisch/fleischgerichte/fisch, Mahlzeit-Tags, Nährwert-Tags und Saison-Tags ergänzen.
 - Für Zutaten ohne Nährwerte den Lebensmittel-Assistenten anbieten.
 - **Übersetzung fremdsprachiger Rezepte (DeepL):** einschalten, API-Schlüssel, **Verbindung testen**
   ([Übersetzen mit DeepL](import.md#deepl)).

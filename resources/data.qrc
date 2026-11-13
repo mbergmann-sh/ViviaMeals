@@ -8,6 +8,7 @@
     </qresource>
     <qresource prefix="/images">
         <file alias="about-koch.jpg">images/about-koch.jpg</file>
+        <file alias="splash-koch.jpg">images/splash-koch.jpg</file>
     </qresource>
     <qresource prefix="/samples">
         <file alias="beispiele.rk">samples/beispiele.rk</file>

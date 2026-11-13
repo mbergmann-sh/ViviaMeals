@@ -292,7 +292,8 @@ bool HttpTransport::request(const QString &method, const QString &action, const 
     req.setHeader(QNetworkRequest::ContentTypeHeader, action == QLatin1String("put") ? QStringLiteral("application/octet-stream")
                                                                                        : QStringLiteral("application/json"));
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-    req.setTransferTimeout(60000);
+    // Verbindungsprüfung kurz halten: ein ausgeschalteter Rechner im LAN soll den Start nicht minutenlang aufhalten
+    req.setTransferTimeout(action == QLatin1String("info") ? 8000 : 60000);
 #endif
     QNetworkReply *r = method == QLatin1String("GET") ? m_nam->get(req) : m_nam->post(req, body);
     QEventLoop loop;
@@ -720,6 +721,12 @@ Result Engine::run(const Progress &progress)
         bool retry = false;
         res = runOnce(progress, &retry);
         if (!retry) break;
+    }
+    if (!res.ok) {
+        // Prüfsummen trotzdem merken – sonst würden beim nächsten Versuch wieder alle Dateien gelesen
+        QJsonObject st = loadState();
+        st[QStringLiteral("cache")] = m_cache;
+        saveState(st);
     }
     return res;
 }

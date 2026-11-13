@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "mealplandialog.h"
+#include "symbols.h"
 #include "busyprogress.h"
 #include "fridge.h"
 #include "icons.h"
@@ -81,6 +82,7 @@ MealPlanDialog::MealPlanDialog(const QString &profileId, QWidget *parent) : QDia
     lay->addWidget(m_table, 1);
     m_info = new QLabel;
     m_info->setWordWrap(true);
+    m_info->setTextFormat(Qt::RichText);
     lay->addWidget(m_info);
     auto *nl = new QHBoxLayout;
     m_notes = new QLabel;
@@ -151,7 +153,7 @@ void MealPlanDialog::profileChanged()
                 m_start->setDate(m_plan.start);
                 m_days->setValue(int(m_plan.days.size()));
                 fillTable();
-                m_info->setText(tr("Gespeicherter Plan geladen. „Neu planen“ erstellt einen neuen."));
+                m_info->setText(Sym::fixHtml(tr("Gespeicherter Plan geladen. „Neu planen“ erstellt einen neuen.")));
                 return;
             }
         }
@@ -169,8 +171,8 @@ void MealPlanDialog::create()
         m_table->setRowCount(0);
         m_table->setColumnCount(0);
         updateNotes();
-        m_info->setText(tr("<b>Keine passenden Rezepte.</b> Für den Wochenplan werden Rezepte mit berechneten Nährwerten gebraucht, "
-                           "die zur Ernährungsform und den ausgeschlossenen Zutaten passen."));
+        m_info->setText(Sym::fixHtml(tr("<b>Keine passenden Rezepte.</b> Für den Wochenplan werden Rezepte mit berechneten Nährwerten gebraucht, "
+                           "die zur Ernährungsform und den ausgeschlossenen Zutaten passen.")));
         return;
     }
     // Einstellungen „Zwischenmahlzeit“ und „warm mittags/abends“ im Profil merken
@@ -232,12 +234,12 @@ void MealPlanDialog::fillTable()
     m_table->horizontalHeader()->setSectionResizeMode(int(m_plan.meals.size()), QHeaderView::ResizeToContents);
     Q_UNUSED(sum)
     if (!m_plan.days.isEmpty())
-        m_info->setText(MealPlanner::summary(m_plan).toHtmlEscaped() + QStringLiteral("<br/><small>")
+        m_info->setText(Sym::fixHtml(MealPlanner::summary(m_plan).toHtmlEscaped() + QStringLiteral("<br/><small>")
                         + tr("Eine warme Hauptmahlzeit am Tag, die zweite leicht (beim Zunehmen dürfen beide warm sein); beide ohne gleiche Beilage und nicht "
                              "zweimal Fleisch oder Fisch. Portionen gerundet (Zwischenmahlzeit auf halbe, sonst auf Viertel; höchstens etwa 450 g zum "
                              "Frühstück, 350 g als Zwischenmahlzeit, 500 g als leichte und 750 g als warme Mahlzeit), Gramm = Gewicht der "
                              "Zutaten. Rechtsklick auf eine Mahlzeit, um sie auszutauschen.")
-                        + QStringLiteral("</small>"));
+                        + QStringLiteral("</small>")));
     updateNotes();
 }
 
@@ -313,7 +315,7 @@ void MealPlanDialog::shoppingList()
                               .arg(m_plan.start.toString(QStringLiteral("dd.MM.")), m_plan.start.addDays(int(m_plan.days.size()) - 1).toString(QStringLiteral("dd.MM.yyyy")));
     auto fill = [&] {
         const QList<ShoppingItem> list = MealPlanner::shoppingList(m_plan, useStock->isChecked() ? Fridge::stock() : QStringList());
-        view->setHtml(Shopping::toHtml(list, title));
+        view->setHtml(Sym::fixHtml(Shopping::toHtml(list, title)));
         text = Shopping::toText(list, title);
     };
     fill();
@@ -362,5 +364,5 @@ void MealPlanDialog::save()
     }
     p->lastPlan = m_plan.toJson();
     Profiles::instance().save();
-    m_info->setText(tr("Der Wochenplan wurde im Profil von %1 gespeichert.").arg(p->name));
+    m_info->setText(Sym::fixHtml(tr("Der Wochenplan wurde im Profil von %1 gespeichert.").arg(p->name)));
 }

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "fridgedialog.h"
+#include "symbols.h"
 #include "foodtable.h"
 #include "fridge.h"
 #include "icons.h"
@@ -202,8 +203,8 @@ void FridgeDialog::suggest()
     }
     m_table->resizeColumnToContents(1);
     if (list.isEmpty())
-        m_shopping->setHtml(tr("<p><i>Keine passenden Rezepte. Tragen Sie links ein, was im Kühlschrank ist, "
-                               "oder erlauben Sie mehr fehlende Zutaten.</i></p>"));
+        m_shopping->setHtml(Sym::fixHtml(tr("<p><i>Keine passenden Rezepte. Tragen Sie links ein, was im Kühlschrank ist, "
+                               "oder erlauben Sie mehr fehlende Zutaten.</i></p>")));
     else m_table->selectRow(0);
 }
 
@@ -212,16 +213,16 @@ void FridgeDialog::showShopping()
     const int r = m_table->currentRow();
     if (r < 0) return;
     Recipe rec;
-    if (!RecipeDb::instance().load(m_table->item(r, 0)->data(Qt::UserRole).toString(), &rec)) return;
+    if (!RecipeDb::instance().loadLight(m_table->item(r, 0)->data(Qt::UserRole).toString(), &rec)) return;
     QStringList stock;
     for (int i = 0; i < m_stock->count(); ++i) stock << m_stock->item(i)->text();
     const QList<ShoppingItem> list = Fridge::missingFor(rec, stock);
     const QString title = tr("Einkaufsliste: %1").arg(rec.title);
     if (list.isEmpty()) {
-        m_shopping->setHtml(tr("<p><b>Alles vorhanden</b> – es muss nichts eingekauft werden.</p>"));
+        m_shopping->setHtml(Sym::fixHtml(tr("<p><b>Alles vorhanden</b> – es muss nichts eingekauft werden.</p>")));
         m_shoppingText = title + QStringLiteral("\n\n") + tr("Alles vorhanden.");
         return;
     }
-    m_shopping->setHtml(Shopping::toHtml(list, title));
+    m_shopping->setHtml(Sym::fixHtml(Shopping::toHtml(list, title)));
     m_shoppingText = Shopping::toText(list, title);
 }

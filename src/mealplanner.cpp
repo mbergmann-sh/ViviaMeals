@@ -631,7 +631,7 @@ QList<ShoppingItem> shoppingList(const MealPlan &plan, const QStringList &stock)
             }
     for (auto it = portions.constBegin(); it != portions.constEnd(); ++it) {
         Recipe r;
-        if (!RecipeDb::instance().load(it.key(), &r)) continue;
+        if (!RecipeDb::instance().loadLight(it.key(), &r)) continue;
         const double factor = it.value() / (r.servings > 0 ? r.servings : 1.0);
         for (const Ingredient &i : r.ingredients) {
             if (i.heading || i.food == QLatin1String("wasser")) continue;

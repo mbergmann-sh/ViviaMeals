@@ -113,6 +113,35 @@ void analyze(Recipe &r)
     r.nutrition = info;
 }
 
+namespace {
+
+enum class AnimalKind { None, Meat, Fish };
+
+// Fleisch/Fisch am Zutatennamen erkennen (deutsch, englisch, gängige Landesnamen)
+AnimalKind animalByName(const QString &name)
+{
+    static const QRegularExpression veggie(QStringLiteral("vegan|vegetar|veggie|tofu|seitan|soja|fleischtomate|fleischersatz|ohne fleisch|fischlos"),
+                                           QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression fishRe(
+        QStringLiteral("fisch|kabeljau|dorsch|bacalh?au|bacal[aà]o?|baccal[aà]|lachs|thunfisch|sardine|sardelle|anchovi|hering|matjes|makrele|"
+                       "forelle|zander|scholle|dorade|wolfsbarsch|barsch|seehecht|heilbutt|steinbutt|seezunge|karpfen|aal\\b|garnele|crevette|scampi|"
+                       "shrimp|krabbe|hummer|languste|muschel|auster|tintenfisch|calamar|oktopus|krake|surimi|kaviar|seeteufel|hecht|saibling|\\bwels\\b|sprotte|pollack|\\bhake\\b|halibut|haddock|mackerel|herring|trout|"
+                       "\\bcod\\b|salmon|\\btuna\\b|\\bfish|prawn|anchov|mussel|clam|oyster|squid|lobster|\\bcrab"),
+        QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption);
+    static const QRegularExpression meatRe(
+        QStringLiteral("fleisch|\\brind|rinder|\\bkalb|kalbs|schwein|\\blamm|hammel|\\bziege|\\bwild\\b|wildschwein|\\breh|hirsch|"
+                       "hähnchen|hühnchen|hühnerbrust|hühnerkeule|huhn\\b|\\bpute|puten|truthahn|\\bente\\b|enten(brust|keule)|\\bgans\\b|gänse(brust|keule)|"
+                       "speck|schinken|wurst|würstchen|salami|chorizo|mortadella|\\bhack|\\bmett\\b|leber|kassler|kasseler|"
+                       "gelatine|\\bbacon|chicken|\\bbeef|\\bpork|\\bham\\b|\\blamb\\b|\\bveal|sausage|turkey|\\bduck\\b|prosciutto|pancetta|guanciale|jamón|presunto"),
+        QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption);
+    if (name.contains(veggie)) return AnimalKind::None;
+    if (name.contains(fishRe)) return AnimalKind::Fish;
+    if (name.contains(meatRe)) return AnimalKind::Meat;
+    return AnimalKind::None;
+}
+
+} // namespace
+
 QStringList suggestTags(const Recipe &r)
 {
     if (isMenu(r)) return {};
@@ -123,7 +152,14 @@ QStringList suggestTags(const Recipe &r)
         if (ing.heading) continue;
         ++all;
         const Food *f = ing.food.isEmpty() ? table.match(ing.name) : table.find(ing.food);
-        if (!f) continue;
+        if (!f) {
+            // unbekannte Zutat: wenigstens Fleisch und Fisch am Namen erkennen, damit z. B. „Bacalhau“
+            // ein Rezept nicht vegetarisch macht (die übrigen Zutaten allein erreichen die 85 %)
+            const AnimalKind kind = animalByName(ing.name);
+            if (kind == AnimalKind::Fish) fish = true;
+            else if (kind == AnimalKind::Meat) meat = true;
+            continue;
+        }
         ++known;
         if (f->category == QLatin1String("fleisch")) meat = true;
         if (f->category == QLatin1String("fisch")) fish = true;

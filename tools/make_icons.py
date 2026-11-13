@@ -88,6 +88,14 @@ icons = {
  "copy": f'<rect x="8" y="8" width="13" height="13" rx="1.5" {S}/><path d="M16 8V4.5A1.5 1.5 0 0 0 14.5 3h-10A1.5 1.5 0 0 0 3 4.5v10A1.5 1.5 0 0 0 4.5 16H8" {S}/>',
  "save": f'<path d="M5 3h11l3 3v15H5z" {S}/><path d="M8 3v5h7V3" {S}/><rect x="8" y="13" width="8" height="6" {A}/>',
  "link": f'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" {S}/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" {A}/>',
+ # Textformat im Editor (0.9.5)
+ "format-bold": f'<path d="M7 4h6a4 4 0 0 1 0 8H7zM7 12h7a4 4 0 0 1 0 8H7z" {S.replace('stroke-width="2"', 'stroke-width="2.6"')}/>',
+ "format-italic": f'<path d="M10 4h8M6 20h8M15 4L9 20" {S}/>',
+ "format-underline": f'<path d="M7 4v7a5 5 0 0 0 10 0V4" {S}/><path d="M5 20h14" {A}/>',
+ "list-bullet": f'<path d="M10 6h10M10 12h10M10 18h10" {S}/><circle cx="5" cy="6" r="1.4" fill="#ACCENT"/><circle cx="5" cy="12" r="1.4" fill="#ACCENT"/><circle cx="5" cy="18" r="1.4" fill="#ACCENT"/>',
+ "list-number": f'<path d="M10 6h10M10 12h10M10 18h10" {S}/><path d="M4 4.5l1.5-1V8M3.5 10.5a1.5 1.5 0 0 1 3 .5c0 1-3 2.2-3 3.5h3M3.6 16.2h2.7l-1.4 1.6a1.3 1.3 0 1 1-1.3 1.8" {A.replace('stroke-width="2"', 'stroke-width="1.4"')}/>',
+ # Saison (Blatt mit Sonne)
+ "season": f'<path d="M5 20c0-8 5-13 14-14 0 9-5 14-13 14" {S}/><path d="M5 20c3-4 6-7 10-10" {S}/><circle cx="18.5" cy="17.5" r="2.5" {A}/>',
 }
 
 os.makedirs(app, exist_ok=True); os.makedirs(ui, exist_ok=True)
@@ -115,7 +123,8 @@ except Exception as e:  # Pillow fehlt – PNG und SVG genügen zum Bauen unter 
 qrc = ['<!DOCTYPE RCC>', '<RCC version="1.0">', '    <qresource prefix="/icons">',
        '        <file alias="viviameals.png">icons/app/viviameals.png</file>',
        '        <file alias="viviameals.svg">icons/app/viviameals.svg</file>']
-for name in sorted(icons):
+# alle Symbole im Ordner (auch von Hand ergänzte wie sync, network, cloud-down, menu-card)
+for name in sorted(f[:-4] for f in os.listdir(ui) if f.endswith(".svg")):
     qrc.append(f'        <file alias="ui/{name}.svg">icons/ui/{name}.svg</file>')
 qrc += ['    </qresource>', '</RCC>', '']
 open(os.path.join(root, "resources/viviameals.qrc"), "w").write("\n".join(qrc))

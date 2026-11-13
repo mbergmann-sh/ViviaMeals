@@ -75,6 +75,17 @@ bietet an:
 Bei jedem weiteren Start öffnet ViviaMeals die zuletzt benutzte Datenbank und zeigt ein zufällig
 ausgewähltes Rezept – vielleicht eine Anregung für heute.
 
+Während des Ladens zeigt ein **Startbildschirm**, was gerade geschieht – bei großen Datenbanken etwa
+„Rezepte werden eingelesen: 312 von 450“. Er lässt sich unter *Extras → Einstellungen → Allgemein →
+Programmstart* abschalten (oder einmalig mit `ViviaMeals --no-splash`).
+
+![Der Startbildschirm](bilder/startbildschirm.png)
+
+> **Gut zu wissen:** ViviaMeals legt im Datenbankordner ein Verzeichnis der Rezepte an (`index.json`).
+> Damit startet auch eine Datenbank mit vielen hundert Rezepten in Sekundenbruchteilen. Nur wenn Rezepte
+> außerhalb von ViviaMeals geändert wurden oder das Verzeichnis fehlt, werden die Rezeptdateien einmal neu
+> eingelesen – auf allen Prozessorkernen gleichzeitig und ohne die Fotos.
+
 > **Tipp:** Die **Demo** (Startmenü „ViviaMeals – Demo“ bzw. `ViviaMeals --demo`) startet mit
 > Beispielrezepten, Fotos und einem Beispielprofil in einem eigenen, vorübergehenden Bereich. Ihre eigenen
 > Daten werden dabei nicht berührt – ideal, um alles gefahrlos auszuprobieren.

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Willkommen bei ViviaMeals – ViviaMeals – Handbuch</title><link rel="stylesheet" href="handbuch.css"></head>
 <body class="web">
-<header class="top"><span class="version">Version 0.9.3</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
+<header class="top"><span class="version">Version 0.9.5</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
 <div class="wrap"><nav class="side"><input id="suche" class="such" type="search" placeholder="Im Handbuch suchen …"><ol>
 <li><a href="index.html">Start und Inhalt</a></li>
 <li class="aktiv"><a href="willkommen.html">Willkommen bei ViviaMeals</a>
@@ -74,6 +74,14 @@ sudo make install        # optional: Programm und Handbuch nach /usr/local</code
 <li><strong>Aus dem Abgleich laden</strong> – eine Datenbank, die auf einem anderen Gerät schon abgeglichen wird, auf dieses Gerät holen (<a href="abgleich.html#abgleich-neues-geraet">Neue Installation einrichten</a>).</li>
 </ul>
 <p>Bei jedem weiteren Start öffnet ViviaMeals die zuletzt benutzte Datenbank und zeigt ein zufällig ausgewähltes Rezept – vielleicht eine Anregung für heute.</p>
+<p>Während des Ladens zeigt ein <strong>Startbildschirm</strong>, was gerade geschieht – bei großen Datenbanken etwa „Rezepte werden eingelesen: 312 von 450“. Er lässt sich unter <em>Extras → Einstellungen → Allgemein → Programmstart</em> abschalten (oder einmalig mit <code>ViviaMeals --no-splash</code>).</p>
+<figure>
+<img src="bilder/startbildschirm.png" alt="Der Startbildschirm" />
+<figcaption aria-hidden="true">Der Startbildschirm</figcaption>
+</figure>
+<blockquote>
+<p><strong>Gut zu wissen:</strong> ViviaMeals legt im Datenbankordner ein Verzeichnis der Rezepte an (<code>index.json</code>). Damit startet auch eine Datenbank mit vielen hundert Rezepten in Sekundenbruchteilen. Nur wenn Rezepte außerhalb von ViviaMeals geändert wurden oder das Verzeichnis fehlt, werden die Rezeptdateien einmal neu eingelesen – auf allen Prozessorkernen gleichzeitig und ohne die Fotos.</p>
+</blockquote>
 <blockquote>
 <p><strong>Tipp:</strong> Die <strong>Demo</strong> (Startmenü „ViviaMeals – Demo“ bzw. <code>ViviaMeals --demo</code>) startet mit Beispielrezepten, Fotos und einem Beispielprofil in einem eigenen, vorübergehenden Bereich. Ihre eigenen Daten werden dabei nicht berührt – ideal, um alles gefahrlos auszuprobieren.</p>
 </blockquote>
@@ -81,5 +89,5 @@ sudo make install        # optional: Programm und Handbuch nach /usr/local</code
 <p>Menübefehle sind <em>kursiv</em> gesetzt, mit Pfeilen für Untermenüs: <em>Datei → Export → Menüassistent …</em>. Schaltflächen und Feldnamen stehen <strong>fett</strong>. Tastenkürzel werden wie <strong>Strg+Umschalt+M</strong> geschrieben; unter macOS entspricht <strong>Strg</strong> der Befehlstaste ⌘.</p>
 <p>Das Handbuch öffnen Sie in ViviaMeals jederzeit mit <strong>F1</strong> oder <em>Hilfe → Handbuch</em>. Es liegt in drei Formen vor: als Windows-Hilfedatei (<code>.chm</code>), als Webseiten (HTML) und als PDF zum Drucken.</p>
 <nav class="pager"><span><a href="index.html">← Start und Inhalt</a></span><span class="weiter"><a href="hauptfenster.html">Das Hauptfenster →</a></span></nav></main></div>
-<footer>ViviaMeals 0.9.3 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
+<footer>ViviaMeals 0.9.5 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
 </body></html>

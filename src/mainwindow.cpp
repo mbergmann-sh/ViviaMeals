@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "mainwindow.h"
+#include "season.h"
+#include "symbols.h"
 #include "latexexport.h"
 #include "busyprogress.h"
 #include "foodwizard.h"
@@ -32,6 +34,7 @@
 #include "odtexport.h"
 #include "deepl.h"
 #include "manual.h"
+#include "perf.h"
 #include "menudialog.h"
 #include "sync.h"
 #include "syncdialog.h"
@@ -165,6 +168,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     m_statusDb = new QLabel;
     statusBar()->addPermanentWidget(m_statusDb);
     m_statusSync = new QLabel;
+    m_statusSync->setTextFormat(Qt::RichText);
     statusBar()->addPermanentWidget(m_statusSync);
     m_server = new Sync::Server(this);
     m_hostSync = new QTimer(this);
@@ -224,9 +228,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     connect(&RecipeDb::instance(), &RecipeDb::changed, this, [this] {
         if (m_server->isRunning() && !m_syncing) m_hostSync->start();
         refreshTags();
+        Perf::mark("changed: Themen");
         refreshList();
+        Perf::mark("changed: Liste");
         refreshHeader();
         updateActions();
+        Perf::mark("changed: Kopf, Aktionen");
     });
 
     QSettings s;
@@ -419,6 +426,9 @@ void MainWindow::buildMenus()
     a->setStatusTip(tr("Frühstück, Hauptgericht, Zwischenmahlzeit, Dessert, Süßspeise, Backen sowie eiweißreich, kalorienarm, fettarm, "
                        "hochkalorisch, vitaminreich und reduktionsdiät aus Titel, Zutaten und Nährwerten ableiten"));
     m_needDb << a;
+    a = extras->addAction(Icons::get(QStringLiteral("season")), tr("&Saison-Tags für alle Rezepte vergeben …"), this, &MainWindow::seasonTagsAll);
+    a->setStatusTip(tr("Frühling, Sommer, Herbst, Winter oder ganzjährig nach der Saison der frischen Zutaten (regionaler Anbau)"));
+    m_needDb << a;
     a = extras->addAction(Icons::get(QStringLiteral("umlaut")), tr("&Umlaute in allen Rezepten korrigieren …"), this, &MainWindow::fixUmlautsAll);
     a->setStatusTip(tr("Rezepte ohne ä, ö, ü und ß (z. B. „Kaese“, „heiss“) in der ganzen Datenbank korrigieren"));
     m_needDb << a;
@@ -542,18 +552,26 @@ bool MainWindow::openDatabase(const QString &path, bool quiet)
         const Sync::Connection c = Sync::Connection::load(previous);
         if (c.valid() && c.autoSync && c.kind != Sync::Connection::Kind::Host) syncNow(true);
     }
+    Perf::mark("openDatabase: Beginn");
     if (!RecipeDb::instance().open(path, &err)) {
         if (!quiet) QMessageBox::warning(this, tr("Rezeptdatenbank öffnen"), err);
         return false;
     }
+    Perf::mark("openDatabase: RecipeDb::open (inkl. Liste)");
     rememberDatabase(RecipeDb::instance().folder());
     updateSyncState();
     if (!m_syncing) {
         const Sync::Connection c = Sync::Connection::load(RecipeDb::instance().folder());
-        if (c.valid() && c.autoSync) QTimer::singleShot(0, this, [this] { syncNow(true); });
+        if (c.valid() && c.autoSync) {
+            // beim Programmstart erst nach dem Anzeigen des Fensters abgleichen (nicht hinter dem Startbildschirm)
+            if (isVisible()) QTimer::singleShot(0, this, [this] { syncNow(true); });
+            else m_syncAfterShow = true;
+        }
     }
     m_filter->clear();
+    Perf::mark("openDatabase: Abgleich-Status, Filter");
     if (QSettings().value(QStringLiteral("ui/randomStart"), true).toBool() || RecipeDb::instance().count() > 0) showRandom();
+    Perf::mark("openDatabase: zufälliges Rezept angezeigt");
     if (RecipeDb::instance().count() == 0)
         m_view->showMessage(tr("Die Datenbank „%1“ ist leer").arg(RecipeDb::instance().name()),
                             tr("Legen Sie mit <b>Datei → Neues Rezept</b> ein Rezept an oder importieren Sie Rezepte im "
@@ -669,6 +687,12 @@ void MainWindow::refreshHeader()
     setWindowTitle(QStringLiteral("%1 – ViviaMeals").arg(db.name()));
 }
 
+void MainWindow::setTagFilter(const QString &data)
+{
+    const int i = m_tagFilter->findData(data);
+    if (i >= 0) m_tagFilter->setCurrentIndex(i);
+}
+
 void MainWindow::refreshTags()
 {
     const QString cur = m_tagFilter->currentData().toString();
@@ -676,6 +700,12 @@ void MainWindow::refreshTags()
     m_tagFilter->clear();
     m_tagFilter->addItem(Icons::get(QStringLiteral("tag")), tr("Alle Themen"), QString());
     m_tagFilter->addItem(Icons::get(QStringLiteral("star-filled")), tr("Favoriten"), QStringLiteral(":fav"));
+    // Rezepte der aktuellen Jahreszeit (wechselt mit dem Datum, Tag „frühling“/„sommer“/„herbst“/„winter“)
+    m_tagFilter->addItem(Icons::get(QStringLiteral("season")),
+                         tr("Saisonal (jetzt: %1)").arg(RecipeHtml::tagLabel(Season::seasonTagFor(QDate::currentDate()))), QStringLiteral(":season"));
+    m_tagFilter->setItemData(m_tagFilter->count() - 1,
+                             tr("Zeigt die Rezepte mit dem Saison-Tag der aktuellen Jahreszeit – siehe Extras → Saison-Tags für alle Rezepte vergeben"),
+                             Qt::ToolTipRole);
     QStringList tags = RecipeDb::instance().allTags();
     std::sort(tags.begin(), tags.end(), [](const QString &a, const QString &b) { return QString::localeAwareCompare(a, b) < 0; });
     for (const QString &t : tags) m_tagFilter->addItem(RecipeHtml::tagLabel(t), t);
@@ -690,6 +720,7 @@ void MainWindow::refreshList()
     m_pendingSelect.clear();
     const QString text = m_filter->text().trimmed();
     const QString tag = m_tagFilter->currentData().toString();
+    const QString seasonTag = Season::seasonTagFor(QDate::currentDate());
     m_list->blockSignals(true);
     m_list->clear();
     const QIcon star = Icons::get(QStringLiteral("star-filled"));
@@ -698,6 +729,7 @@ void MainWindow::refreshList()
     for (const RecipeSummary &s : RecipeDb::instance().summaries()) {
         if (!text.isEmpty() && !SearchDialog::matches(s, text, true)) continue;
         if (tag == QLatin1String(":fav") && !s.favorite) continue;
+        if (tag == QLatin1String(":season") && !s.tags.contains(seasonTag, Qt::CaseInsensitive)) continue;
         if (!tag.isEmpty() && !tag.startsWith(QLatin1Char(':')) && !s.tags.contains(tag, Qt::CaseInsensitive)) continue;
         auto *it = new QListWidgetItem(s.favorite ? star : plain, s.title);
         it->setData(Qt::UserRole, s.id);
@@ -707,7 +739,12 @@ void MainWindow::refreshList()
         if (s.id == keep) select = m_list->count() - 1;
     }
     m_list->blockSignals(false);
-    statusBar()->showMessage(tr("%1 von %2 Rezepten angezeigt").arg(m_list->count()).arg(RecipeDb::instance().count()), 4000);
+    if (tag == QLatin1String(":season") && m_list->count() == 0 && text.isEmpty())
+        statusBar()->showMessage(tr("Keine Rezepte mit dem Tag „%1“ – Saison-Tags vergibt Extras → Saison-Tags für alle Rezepte vergeben …")
+                                     .arg(RecipeHtml::tagLabel(seasonTag)),
+                                 8000);
+    else
+        statusBar()->showMessage(tr("%1 von %2 Rezepten angezeigt").arg(m_list->count()).arg(RecipeDb::instance().count()), 4000);
     if (select >= 0) {
         m_list->setCurrentRow(select);
         m_list->scrollToItem(m_list->item(select));
@@ -753,9 +790,11 @@ void MainWindow::selectRecipe(const QString &id)
     for (int pass = 0; pass < 2; ++pass) {
         for (int i = 0; i < m_list->count(); ++i)
             if (m_list->item(i)->data(Qt::UserRole).toString() == id) {
+                // setCurrentRow zeigt das Rezept über currentRowChanged an – nur bei unveränderter Zeile selbst anzeigen
+                const bool same = m_list->currentRow() == i;
                 m_list->setCurrentRow(i);
                 m_list->scrollToItem(m_list->item(i), QAbstractItemView::PositionAtCenter);
-                showCurrent();
+                if (same) showCurrent();
                 return;
             }
         // durch Filter verborgen: Filter zurücksetzen
@@ -1018,7 +1057,7 @@ void MainWindow::mealTagsAll()
     QHash<QString, int> added, removed;
     for (const RecipeSummary &s : db.summaries()) {
         Recipe r;
-        if (!db.load(s.id, &r) || Nutrition::isMenu(r)) continue;
+        if (!db.loadLight(s.id, &r) || Nutrition::isMenu(r)) continue;   // ohne Foto: schneller, wenig Speicher
         const QStringList before = r.tags;
         MealTypes::applyTags(r);
         MealTypes::applyNutrientTags(r);
@@ -1045,9 +1084,55 @@ void MainWindow::mealTagsAll()
         != QMessageBox::Yes)
         return;
     db.beginBatch();
-    for (Recipe &r : todo) db.save(r);
+    for (Recipe &r : todo) db.saveLight(r);
     db.endBatch();
     statusBar()->showMessage(tr("Tags für %1 Rezepte aktualisiert.").arg(todo.size()), 5000);
+    showCurrent();
+}
+
+void MainWindow::seasonTagsAll()
+{
+    RecipeDb &db = RecipeDb::instance();
+    const QList<RecipeSummary> all = db.summaries();
+    QList<Recipe> todo;
+    QHash<QString, int> added, removed;
+    {
+        BusyProgress prog(this, tr("Saison-Tags ermitteln"), int(all.size()), false);
+        int n = 0;
+        for (const RecipeSummary &s : all) {
+            prog.step(n, tr("Rezept %1 von %2: %3").arg(n + 1).arg(all.size()).arg(s.title));
+            ++n;
+            Recipe r;
+            if (!db.loadLight(s.id, &r) || Nutrition::isMenu(r)) continue;   // ohne Foto: schneller, wenig Speicher
+            const QStringList before = r.tags;
+            if (!Season::applyTags(r)) continue;
+            for (const QString &t : r.tags)
+                if (!before.contains(t)) added[t]++;
+            for (const QString &t : before)
+                if (!r.tags.contains(t)) removed[t]++;
+            todo << r;
+        }
+    }
+    if (todo.isEmpty()) {
+        QMessageBox::information(this, tr("Saison-Tags"), tr("Alle Rezepte haben bereits passende Saison-Tags."));
+        return;
+    }
+    QStringList lines;
+    for (const QString &t : Season::tagNames()) {
+        if (added.value(t)) lines << tr("  + %1: %2").arg(RecipeHtml::tagLabel(t)).arg(added.value(t));
+        if (removed.value(t)) lines << tr("  − %1: %2").arg(RecipeHtml::tagLabel(t)).arg(removed.value(t));
+    }
+    if (QMessageBox::question(this, tr("Saison-Tags"),
+                              tr("Für %1 Rezepte ändern sich die Saison-Tags:\n\n%2\n\nGrundlage ist die Saison frischer Zutaten aus "
+                                 "regionalem Anbau; Tiefkühlware, Konserven und Getrocknetes zählen nicht. Andere Tags bleiben erhalten. Fortfahren?")
+                                  .arg(todo.size())
+                                  .arg(lines.join(QLatin1Char('\n'))))
+        != QMessageBox::Yes)
+        return;
+    db.beginBatch();
+    for (Recipe &r : todo) db.saveLight(r);
+    db.endBatch();
+    statusBar()->showMessage(tr("Saison-Tags für %1 Rezepte aktualisiert.").arg(todo.size()), 5000);
     showCurrent();
 }
 
@@ -1099,18 +1184,34 @@ void MainWindow::recalcAll()
     db.beginBatch();
     int n = 0;
     bool canceled = false;
+    int changed = 0;
     for (const QString &id : ids) {
         Recipe r;
-        if (!db.load(id, &r)) continue;
+        if (!db.loadLight(id, &r)) continue;   // Foto wird zum Rechnen nicht gebraucht
         if (!prog.step(n, tr("Rezept %1 von %2: %3").arg(n + 1).arg(ids.size()).arg(r.title))) {
             canceled = true;
             break;
         }
+        // Zeitstempel der Berechnung zählt nicht als Änderung
+        const auto values = [](const Recipe &x) {
+            QJsonObject o = x.nutrition.toJson();
+            o.remove(QStringLiteral("computed"));
+            return o;
+        };
+        const QJsonObject before = values(r);
+        const QStringList tagsBefore = r.tags;
         Nutrition::analyze(r);
         MealTypes::applyNutrientTags(r);   // abgeleitete Tags passend zu den neuen Werten
-        db.save(r);
+        // Fisch/Fleisch, das erst jetzt erkannt wird (z. B. Stockfisch), korrigiert ein falsches „vegetarisch“
+        const QStringList diet = Nutrition::suggestTags(r);
+        if (diet.contains(QStringLiteral("fisch")) || diet.contains(QStringLiteral("fleischgerichte"))) Nutrition::applyTagSuggestions(r);
+        if (values(r) != before || r.tags != tagsBefore) {   // nur geänderte Rezepte schreiben
+            db.saveLight(r);
+            ++changed;
+        }
         ++n;
     }
+    Perf::mark(QStringLiteral("Neuberechnung: %1 Rezepte, %2 geändert").arg(n).arg(changed).toUtf8().constData());
     db.endBatch();
     prog.step(int(ids.size()));
     statusBar()->showMessage(canceled ? tr("Neuberechnung abgebrochen – %1 von %2 Rezepten berechnet.").arg(n).arg(ids.size())
@@ -1127,7 +1228,7 @@ void MainWindow::fixUmlautsAll()
     QStringList examples;
     for (const RecipeSummary &s : db.summaries()) {
         Recipe r;
-        if (!db.load(s.id, &r) || r.language != QLatin1String("de")) continue;
+        if (!db.loadLight(s.id, &r) || r.language != QLatin1String("de")) continue;
         if (!Umlauts::looksTranscribed(Umlauts::allRecipeText(r))) continue;
         Recipe fixed = r;
         if (Umlauts::fixRecipe(fixed) == 0) continue;
@@ -1152,7 +1253,7 @@ void MainWindow::fixUmlautsAll()
         prog.step(i - 1, tr("Rezept %1 von %2: %3").arg(i).arg(todo.size()).arg(r.title));
         Nutrition::analyze(r);   // „Kaese“ → „Käse“ findet jetzt den Eintrag in der Nährwerttabelle
         Nutrition::applyTagSuggestions(r);
-        db.save(r);
+        db.saveLight(r);
     }
     db.endBatch();
     statusBar()->showMessage(tr("Umlaute in %1 Rezepten korrigiert.").arg(todo.size()), 5000);
@@ -1176,7 +1277,7 @@ void MainWindow::translateAll()
     for (const RecipeSummary &s : db.summaries()) {
         if (s.language == QLatin1String("de")) continue;
         Recipe r;
-        if (!db.load(s.id, &r)) continue;
+        if (!db.loadLight(s.id, &r)) continue;
         ids << s.id;
         chars += DeepL::characterCount(r);
     }
@@ -1378,7 +1479,7 @@ void MainWindow::missingFoods()
         if (!prog.step(i++)) return;
         if (s.coverage >= 0.999) continue;
         Recipe r;
-        if (db.load(s.id, &r)) list << r;
+        if (db.loadLight(s.id, &r)) list << r;
     }
     }
     const auto missing = Nutrition::missingFoods(list, MissingFoodsDialog::ignoredNames());
@@ -1463,6 +1564,15 @@ void MainWindow::appearanceChanged()
         if (a->isCheckable() && a->actionGroup()) a->setChecked(a->text() == Themes::displayName(Themes::current()));
 }
 
+void MainWindow::showEvent(QShowEvent *e)
+{
+    QMainWindow::showEvent(e);
+    if (m_syncAfterShow) {
+        m_syncAfterShow = false;
+        QTimer::singleShot(250, this, [this] { syncNow(true); });   // erst zeichnen lassen
+    }
+}
+
 void MainWindow::closeEvent(QCloseEvent *e)
 {
     if (!m_closing && RecipeDb::instance().isOpen()) {
@@ -1505,7 +1615,7 @@ void MainWindow::updateSyncState()
         case Sync::Connection::Kind::Host: way = m_server->isRunning() ? tr("im LAN freigegeben") : tr("Freigabe gestört"); break;
         case Sync::Connection::Kind::None: break;
         }
-        m_statusSync->setText(QStringLiteral("⇅ %1 · %2").arg(way, SyncUi::lastSyncText(RecipeDb::instance().folder())));
+        m_statusSync->setText(QStringLiteral("%1 %2 · %3").arg(Sym::html(Sym::Sync), way.toHtmlEscaped(), SyncUi::lastSyncText(RecipeDb::instance().folder()).toHtmlEscaped()));
         m_statusSync->setToolTip(c.kind == Sync::Connection::Kind::Website ? c.url : tr("Abgleich: Datei → Abgleich (Strg+Umschalt+Y)"));
     }
     updateActions();
@@ -1522,8 +1632,11 @@ bool MainWindow::syncNow(bool quiet)
     }
     m_syncing = true;
     statusBar()->showMessage(tr("Abgleich läuft …"));
+    Perf::mark("Abgleich: Beginn");
     const Sync::Result r = SyncUi::run(this, c, folder, quiet);
+    Perf::mark(r.ok ? "Abgleich: fertig" : "Abgleich: fehlgeschlagen");
     applySyncResult(r, quiet);
+    Perf::mark("Abgleich: Ergebnis übernommen");
     m_syncing = false;
     updateSyncState();
     return r.ok;

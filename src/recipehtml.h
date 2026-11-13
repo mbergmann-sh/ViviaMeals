@@ -25,6 +25,7 @@ struct Style {
     double fontScale = 1.0;
     QString imageSrc;              // URL des Bildes (leer = Rezeptbild als data:-URI einbetten)
     bool forWeb = false;           // Website: CSS-Klassen statt Inline-Farben
+    QString starHtml = QStringLiteral("\u2605");   // Favoriten-Stern als HTML (Programm: Sym::html(Sym::Star))
 };
 
 // servings ≤ 0: Portionen des Rezepts; sonst Mengen auf diese Portionenzahl umrechnen

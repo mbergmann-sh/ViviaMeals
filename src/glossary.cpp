@@ -212,7 +212,8 @@ const QHash<QString, QString> &categories()
 QStringList tokens(const QString &s)
 {
     QString t = s;
-    t.replace(QRegularExpression(QStringLiteral("([,;()])")), QStringLiteral(" \\1 "));
+    static const QRegularExpression kRe215_0(QStringLiteral("([,;()])"));
+    t.replace(kRe215_0, QStringLiteral(" \\1 "));
     return t.split(QLatin1Char(' '), Qt::SkipEmptyParts);
 }
 
@@ -292,7 +293,8 @@ bool looksEnglish(const QString &text)
                                    QStringLiteral("eine"), QStringLiteral("zugeben"), QStringLiteral("backen"),
                                    QStringLiteral("auf"), QStringLiteral("zu"), QStringLiteral("mit") };
     int e = 0, d = 0;
-    for (const QString &w : text.toLower().split(QRegularExpression(QStringLiteral("[^\\p{L}]+")), Qt::SkipEmptyParts)) {
+    static const QRegularExpression kRe295_0(QStringLiteral("[^\\p{L}]+"));
+    for (const QString &w : text.toLower().split(kRe295_0, Qt::SkipEmptyParts)) {
         if (en.contains(w)) ++e;
         if (de.contains(w)) ++d;
     }
@@ -322,7 +324,8 @@ QString detectLanguage(const QString &text)
                       "daarna", "op", "voor" }) },
     };
     QHash<QString, int> score;
-    const auto words = text.toLower().split(QRegularExpression(QStringLiteral("[^\\p{L}]+")), Qt::SkipEmptyParts);
+    static const QRegularExpression kRe325_0(QStringLiteral("[^\\p{L}]+"));
+    const auto words = text.toLower().split(kRe325_0, Qt::SkipEmptyParts);
     for (const QString &w : words)
         for (const L &l : langs)
             if (l.words.contains(w)) ++score[QString::fromLatin1(l.code)];

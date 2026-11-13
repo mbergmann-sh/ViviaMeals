@@ -89,6 +89,8 @@ struct Recipe {
     static Recipe fromJson(const QJsonObject &o);
     bool save(const QString &file, QString *error = nullptr) const;
     static bool load(const QString &file, Recipe *out, QString *error = nullptr);
+    // schneller ohne Foto (das eingebettete Bild wird vor dem JSON-Einlesen herausgeschnitten); hadImage: war eines da
+    static bool loadWithoutImage(const QString &file, Recipe *out, bool *hadImage = nullptr, QString *error = nullptr);
     bool hasTag(const QString &tag) const;
     void addTag(const QString &tag);
     static QString newId();

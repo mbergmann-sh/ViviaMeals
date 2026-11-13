@@ -107,6 +107,36 @@ leichte mahlzeit, zwischenmahlzeit, desserts, süßspeise, backen.
 nie entfernt – mit einer Ausnahme: Nährwert-Tags, die nach einer Änderung der Zutaten nicht mehr
 zutreffen, entfallen beim Neuberechnen.
 
+## Saison-Tags {#saison-tags}
+
+Frische Zutaten haben in Deutschland ihre Saison – Spargel im Frühling, Erdbeeren im Sommer, Kürbis im
+Herbst, Grünkohl im Winter. ViviaMeals vergibt danach die Tags **frühling**, **sommer**, **herbst**,
+**winter** oder **ganzjährig**: beim Import (abschaltbar unter *Einstellungen → Import*), im Editor über
+**Ergänzen** und nachträglich für die ganze Datenbank über
+*Extras → Saison-Tags für alle Rezepte vergeben …* (mit Vorschau und Rückfrage).
+
+So wird gerechnet:
+
+- Grundlage ist ein Saisonkalender für **regionale Ware** (Freiland bzw. Lager) nach Monaten, etwa
+  Spargel April–Juni, Erdbeeren Mai–August, Tomaten Juli–Oktober, Kürbis August–Dezember,
+  Feldsalat Oktober–März, Grünkohl November–Februar. Auch Wild (Oktober–Januar) und Gans
+  (November–Dezember) haben eine Saison.
+- Ein Monat passt zum Rezept, wenn **mindestens 80 % des Gewichts** der Saisonzutaten dann Saison haben –
+  ein Bund Frühlingszwiebeln macht aus einem Grünkohlgericht also kein Sommeressen.
+- Eine Jahreszeit (Frühling März–Mai, Sommer Juni–August, Herbst September–November,
+  Winter Dezember–Februar) wird vergeben, wenn **mindestens zwei** ihrer Monate passen.
+- **ganzjährig** bekommen Rezepte, deren frische Zutaten es immer gibt (Kartoffeln, Zwiebeln, Möhren,
+  Kohl und Äpfel vom Lager, Champignons, Bananen …) und die einen nennenswerten Anteil frischer Zutaten
+  haben.
+- **Nicht** gezählt werden Tiefkühlware, Konserven, Getrocknetes, Säfte, Mus, Pulver und Ähnliches –
+  „Erbsen (TK)“ oder „Tomaten aus der Dose“ gibt es das ganze Jahr.
+
+Die Themenauswahl **Saisonal** im Hauptfenster zeigt automatisch die Rezepte der aktuellen Jahreszeit
+([Die Rezeptliste](hauptfenster.md#rezeptliste)).
+
+Anders als die übrigen Tags werden Saison-Tags dabei ersetzt: Ändern Sie die Zutaten, passt ViviaMeals
+die Jahreszeit an. Andere Tags bleiben unberührt.
+
 ## Alles neu berechnen {#neu-berechnen}
 
 *Extras → Nährwerte aller Rezepte neu berechnen* wendet die aktuelle Nährwerttabelle auf alle Rezepte an

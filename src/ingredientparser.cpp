@@ -55,7 +55,8 @@ void splitNote(const QString &text, QString *name, QString *note)
         s = s.left(m.capturedStart()).trimmed();
     }
     // „Zitrone: Saft“, „Petersilie; gehackt“, „Zwiebel, fein gewürfelt“
-    const int c = s.indexOf(QRegularExpression(QStringLiteral("[,;]|:\\s")));
+    static const QRegularExpression kRe58_0(QStringLiteral("[,;]|:\\s"));
+    const int c = s.indexOf(kRe58_0);
     if (c > 0) {
         notes.prepend(s.mid(c + 1).trimmed());
         s = s.left(c).trimmed();

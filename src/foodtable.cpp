@@ -92,6 +92,7 @@ void FoodTable::reload()
     m_builtin.clear();
     m_userFoods.clear();
     m_learned.clear();
+    m_matchCache.clear();
     load();
 }
 
@@ -125,6 +126,7 @@ void FoodTable::rebuildAliases()
 {
     m_aliases.clear();
     m_exact.clear();
+    m_matchCache.clear();
     // eigene Einträge zuerst, damit ihre Namen gewinnen
     QList<const Food *> order;
     for (const Food &f : m_foods)
@@ -138,7 +140,13 @@ void FoodTable::rebuildAliases()
             const QString n = normalize(a);
             if (n.isEmpty() || m_exact.contains(n)) continue;
             m_exact.insert(n, f->key);
-            m_aliases.append({ n, f->key });
+            Alias al;
+            al.text = n;
+            al.key = f->key;
+            al.spaced = QLatin1Char(' ') + n + QLatin1Char(' ');
+            al.leading = QLatin1Char(' ') + n;
+            al.multiWord = n.contains(QLatin1Char(' '));
+            m_aliases.append(al);
         }
     }
     std::stable_sort(m_aliases.begin(), m_aliases.end(),
@@ -246,6 +254,7 @@ void FoodTable::learn(const QString &ingredientName, const QString &foodKey)
     if (n.isEmpty()) return;
     if (foodKey.isEmpty()) m_learned.remove(n);
     else m_learned.insert(n, foodKey);
+    m_matchCache.clear();
     saveUser();
 }
 
@@ -279,9 +288,12 @@ QList<const Food *> FoodTable::all() const
 QString FoodTable::normalize(const QString &name)
 {
     QString s = foldUmlauts(name.toLower());
-    s.remove(QRegularExpression(QStringLiteral("\\([^)]*\\)")));            // Klammerzusätze
-    s.replace(QRegularExpression(QStringLiteral("[\\d½¼¾⅓⅔⅛%]+")), QStringLiteral(" "));
-    s.replace(QRegularExpression(QStringLiteral("[^\\p{L}\\- ]")), QStringLiteral(" "));
+    static const QRegularExpression kRe282_0(QStringLiteral("\\([^)]*\\)"));
+    s.remove(kRe282_0);            // Klammerzusätze
+    static const QRegularExpression kRe283_0(QStringLiteral("[\\d½¼¾⅓⅔⅛%]+"));
+    s.replace(kRe283_0, QStringLiteral(" "));
+    static const QRegularExpression kRe284_0(QStringLiteral("[^\\p{L}\\- ]"));
+    s.replace(kRe284_0, QStringLiteral(" "));
     s.replace(QLatin1Char('-'), QLatin1Char(' '));
     static const QSet<QString> fillerRaw{
         QStringLiteral("frisch"), QStringLiteral("frische"), QStringLiteral("frischer"), QStringLiteral("frisches"),
@@ -389,6 +401,9 @@ const Food *FoodTable::match(const QString &ingredientName) const
     // 2. genauer Name
     auto e = m_exact.constFind(n);
     if (e != m_exact.constEnd()) return find(*e);
+    // schon einmal gesucht? (Ergebnis hängt nur vom normalisierten Namen ab)
+    auto cached = m_matchCache.constFind(n);
+    if (cached != m_matchCache.constEnd()) return cached->isEmpty() ? nullptr : find(*cached);
     // 3. längster Name, der als Wort, als Wortende (Komposita: „Rinderhackfleisch“) oder mit
     //    Beugungsendung („Zwiebeln“, „Tomaten“) vorkommt
     const QStringList words = n.split(QLatin1Char(' '), Qt::SkipEmptyParts);
@@ -398,10 +413,11 @@ const Food *FoodTable::match(const QString &ingredientName) const
     for (const Alias &a : m_aliases) {
         const int len = int(a.text.size());
         if (len * 3 < bestScore) break;   // kürzere können nicht mehr gewinnen
+        if (len > padded.size()) continue;   // länger als der ganze Name: kann nirgends vorkommen
         int score = 0;
-        if (padded.contains(QLatin1Char(' ') + a.text + QLatin1Char(' '))) {
+        if (padded.contains(a.spaced)) {
             score = len * 3;
-        } else if (!a.text.contains(QLatin1Char(' ')) && len >= 4) {
+        } else if (!a.multiWord && len >= 4) {
             for (const QString &w : words) {
                 if (w.size() > len && w.endsWith(a.text)) score = qMax(score, len * 2);
                 else if (len >= 5 && w.size() > len + 2 && w.startsWith(a.text) && isPartWord(w.mid(len)))
@@ -413,7 +429,7 @@ const Food *FoodTable::match(const QString &ingredientName) const
                     if (endings.contains(w.mid(len))) score = qMax(score, len * 3 - 1);
                 }
             }
-        } else if (a.text.contains(QLatin1Char(' ')) && padded.contains(QLatin1Char(' ') + a.text)) {
+        } else if (a.multiWord && padded.contains(a.leading)) {
             score = len * 2;   // mehrteiliger Name mit Endung („granny smith apples“)
         }
         if (score > bestScore) {
@@ -421,6 +437,7 @@ const Food *FoodTable::match(const QString &ingredientName) const
             best = &a;
         }
     }
+    m_matchCache.insert(n, best ? best->key : QString());
     return best ? find(best->key) : nullptr;
 }
 

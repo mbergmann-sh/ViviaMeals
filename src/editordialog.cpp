@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "editordialog.h"
+#include "instructionsedit.h"
+#include "season.h"
+#include "symbols.h"
 #include "foodwizard.h"
 #include "scandialog.h"
 #include "screenfit.h"
@@ -160,8 +163,10 @@ EditorDialog::EditorDialog(const Recipe &r, QWidget *parent) : QDialog(parent), 
     split->addWidget(ingBox);
     auto *insBox = new QGroupBox(tr("Zu&bereitung"));
     auto *inl = new QVBoxLayout(insBox);
-    m_instructions = new QPlainTextEdit(Units::normalizeCelsius(r.instructions));
-    m_instructions->setPlaceholderText(tr("Arbeitsschritte – Absätze durch eine Leerzeile trennen."));
+    m_instructions = new InstructionsEdit;
+    m_instructions->setMarkup(Units::normalizeCelsius(r.instructions));
+    m_instructions->setPlaceholderText(tr("Arbeitsschritte – jeder Absatz mit der Eingabetaste. Markierten Text mit der Leiste "
+                                          "fett, kursiv oder unterstrichen setzen bzw. als Aufzählung oder nummerierte Liste."));
     inl->addWidget(m_instructions);
     split->addWidget(insBox);
     auto *nutBox = new QGroupBox(tr("Nährwertanalyse"));
@@ -226,6 +231,7 @@ EditorDialog::EditorDialog(const Recipe &r, QWidget *parent) : QDialog(parent), 
         Nutrition::applyTagSuggestions(m_recipe);
         if (!Nutrition::isMenu(m_recipe)) MealTypes::applyTags(m_recipe);
         MealTypes::applyNutrientTags(m_recipe);
+        if (!Nutrition::isMenu(m_recipe)) Season::applyTags(m_recipe);
         m_tags->setText(m_recipe.tags.join(QStringLiteral(", ")));
     });
     updateImage();
@@ -303,7 +309,7 @@ void EditorDialog::showRecipe()
 {
     m_title->setText(m_recipe.title);
     m_ingredients->setPlainText(Units::normalizeCelsius(m_recipe.ingredientsText()));
-    m_instructions->setPlainText(Units::normalizeCelsius(m_recipe.instructions));
+    m_instructions->setMarkup(Units::normalizeCelsius(m_recipe.instructions));
     m_source->setText(sourceOrDefault(m_recipe.source));
     m_tags->setText(m_recipe.tags.join(QStringLiteral(", ")));
     if (!m_recipe.yieldUnit.isEmpty()) m_yield->setCurrentText(m_recipe.yieldUnit);
@@ -366,7 +372,7 @@ void EditorDialog::collect()
     for (const QString &t : m_tags->text().split(QLatin1Char(','), Qt::SkipEmptyParts)) m_recipe.addTag(t);
     m_recipe.source = m_source->text().trimmed();
     m_recipe.favorite = m_fav->isChecked();
-    m_recipe.instructions = Units::normalizeCelsius(m_instructions->toPlainText().trimmed());   // „200GradC“ → „200° C“
+    m_recipe.instructions = Units::normalizeCelsius(m_instructions->markup().trimmed());   // „200GradC“ → „200° C“
     // Zutaten neu zerlegen; Originalzeilen und manuelle Zuordnungen erhalten
     QHash<QString, QString> originals;
     for (const Ingredient &i : m_recipe.ingredients)
@@ -403,7 +409,7 @@ void EditorDialog::analyze()
         g->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         m_table->setItem(r, 1, g);
         const Food *f = i.food.isEmpty() ? nullptr : ft.find(i.food);
-        auto *fi = new QTableWidgetItem(f ? f->name + (i.foodManual ? QStringLiteral(" ✓") : QString()) : tr("— nicht zugeordnet —"));
+        auto *fi = new QTableWidgetItem(f ? f->name + (i.foodManual ? QStringLiteral(" ") + Sym::get(Sym::Check) : QString()) : tr("— nicht zugeordnet —"));
         const bool counted = i.amount > 0 && Units::kindOf(i.unit) != Units::Kind::Vague;
         if (!f && counted) fi->setForeground(QColor(0xd0, 0x40, 0x20));
         if (!f && !counted) fi->setText(tr("(ohne Menge)"));
