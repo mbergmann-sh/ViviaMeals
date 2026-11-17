@@ -85,10 +85,18 @@ SyncWayWidget::SyncWayWidget(bool allowHost, QWidget *parent) : QWidget(parent),
     m_url->setPlaceholderText(QStringLiteral("https://www.meine-seite.de/viviameals/viviameals-sync.php"));
     wf->addRow(tr("Adresse des Skripts:"), m_url);
     m_key = new QLineEdit;
-    m_key->setEchoMode(QLineEdit::PasswordEchoOnEdit);
+    m_key->setEchoMode(QLineEdit::Password);
     m_key->setPlaceholderText(tr("Zugangsschlüssel"));
     auto *keyRow = new QHBoxLayout;
     keyRow->addWidget(m_key, 1);
+    auto *showKey = m_showKey = new QPushButton(Icons::get(QStringLiteral("eye")), tr("Anzeigen"));
+    showKey->setCheckable(true);
+    showKey->setToolTip(tr("Zugangsschlüssel im Klartext anzeigen bzw. wieder verbergen"));
+    keyRow->addWidget(showKey);
+    connect(showKey, &QPushButton::toggled, this, [this, showKey](bool on) {
+        m_key->setEchoMode(on ? QLineEdit::Normal : QLineEdit::Password);
+        showKey->setText(on ? tr("Verbergen") : tr("Anzeigen"));
+    });
     auto *gen = new QPushButton(Icons::get(QStringLiteral("refresh")), tr("Neu"));
     gen->setToolTip(tr("Neuen zufälligen Zugangsschlüssel erzeugen (das Skript muss danach neu hochgeladen werden)"));
     keyRow->addWidget(gen);
@@ -106,9 +114,9 @@ SyncWayWidget::SyncWayWidget(bool allowHost, QWidget *parent) : QWidget(parent),
     wl->addLayout(wb);
     wl->addStretch();
     m_pages->addWidget(web);
-    connect(gen, &QPushButton::clicked, this, [this] {
+    connect(gen, &QPushButton::clicked, this, [this, showKey] {
         m_key->setText(Sync::newToken());
-        m_key->setEchoMode(QLineEdit::Normal);
+        showKey->setChecked(true);   // neuer Schlüssel: zum Notieren sichtbar
     });
     connect(script, &QPushButton::clicked, this, &SyncWayWidget::saveScript);
     connect(copyInv, &QPushButton::clicked, this, [this] {
@@ -333,7 +341,7 @@ void SyncWayWidget::saveScript()
 {
     if (m_key->text().trimmed().isEmpty()) {
         m_key->setText(Sync::newToken());
-        m_key->setEchoMode(QLineEdit::Normal);
+        m_showKey->setChecked(true);
     }
     const QString dir = QFileDialog::getExistingDirectory(this, tr("Ordner für das Sync-Skript wählen"),
                                                           QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));

@@ -1,6 +1,6 @@
 # ViviaMeals – Notizen für das Handbuch
 
-Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.9.5.
+Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.9.19.
 
 > **Name:** Das Programm heißt seit Version 0.6 **ViviaMeals** (vorher VitaMeals; die ganze Reihe heißt jetzt
 > Vivia – ViviaParms, ViviaBreathe). Alte Einstellungen, Profile, Tagebücher, eigene Lebensmittel und
@@ -255,7 +255,7 @@ werden diese Tags aus den berechneten Nährwerten bestimmt:
 | eiweißreich | mind. 20 % der Energie aus Eiweiß und mind. 15 g Eiweiß je Portion |
 | fettarm | höchstens 3 g Fett je 100 g |
 | kalorienarm | höchstens 80 kcal je 100 g und höchstens 400 kcal je Portion |
-| hochkalorisch | mind. 250 kcal je 100 g oder mind. 800 kcal je Portion |
+| hochkalorisch | Portion über dem Richtwert der Mahlzeitart (Hauptgericht 800, leichte Mahlzeit/Frühstück/Süßspeise 600, Zwischenmahlzeit/Dessert/Gebäck 300 kcal; ab 0.9.6) |
 | vitaminreich | mind. 200 g Gemüse, Obst und Kräuter je Portion – oder mind. die Hälfte des Portionsgewichts (nicht bei Kuchen/Gebäck; Desserts nur mit mind. 200 g Obst) |
 | reduktionsdiät | höchstens 600 kcal je Portion und 150 kcal je 100 g, höchstens 35 % der Energie aus Fett und 20 % aus Zucker, mind. 15 % aus Eiweiß, kein Dessert |
 
@@ -422,7 +422,7 @@ energiedichte Mahlzeiten empfohlen (5–6 am Tag).
   **Hülsenfrüchte mindestens 1×**, **Fleisch höchstens etwa 300 g** (im Plan höchstens drei
   Fleischmahlzeiten). Die Zusammenfassung unter dem Plan hakt die Werte ab; bei vegetarischer bzw.
   veganer Ernährung entfallen Fisch und Fleisch.
-* Der Tag „leichte mahlzeit“ wird beim Import automatisch vergeben (abschaltbar mit den Mahlzeit-Tags)
+* Der Tag „leichte Mahlzeit“ wird beim Import automatisch vergeben (abschaltbar mit den Mahlzeit-Tags)
   und lässt sich wie jeder Tag von Hand setzen; *Extras → Mahlzeit- und Nährwert-Tags ergänzen* holt ihn
   für vorhandene Rezepte nach.
 * Gibt es weniger als drei leichte Rezepte, verplant ViviaMeals ersatzweise kleine Portionen von
@@ -831,3 +831,215 @@ Gespeicherte Menüs: *Datei → Export → Gespeicherte Menüs …* – öffnen 
     („Menütitel“, „Gang“, „Gang-Titel“, „Gang-Beschreibung“, „Ornament“) lassen sich in LibreOffice anpassen.
 - **Folgeseiten:** je Gang ein Rezept auf neuer Seite, mit dem Gang als kleiner Überschrift.
 
+
+## Fehlende Lebensmittel, Abgleich, Suche (ab 0.9.6)
+
+- *Extras → Datenbank nach fehlenden Lebensmitteln durchsuchen …*: prüft **alle** Rezepte gegen die aktuelle
+  Tabelle (nur im Speicher). Tabelle mit Zutat, Anzahl, Rezepte, Beispiel, Erledigt. Doppelklick: offene Zeile →
+  Assistent; erledigte Zeile → Lebensmittel bearbeiten. Knöpfe Anlegen, Zuordnen, Bearbeiten, Kein Lebensmittel,
+  **Als Textdatei speichern** (UTF-8, mit Beispielzeilen und allen Rezepten).
+- *Extras → Alle Rezepte mit der Lebensmitteldatenbank abgleichen …* (ersetzt „Nährwerte aller Rezepte neu
+  berechnen“): neu zuordnen, Nährwerte, Nährwert-Tags, vegetarisch/vegan-Korrektur bei Fleisch/Fisch/Meeresfrüchten
+  und tierischen Würzmitteln, vorhandene Saison-Tags anpassen; Übersicht und Angebot zur Durchsicht.
+- Meeresfrüchte: Krabben, Garnelen, Gambas, Langostinos, Kaisergranat, Hummer, Langusten, Krebse, alle Muscheln,
+  Austern, Tintenfisch/Kalmar/Sepia/Oktopus; dazu Fischsauce, Austernsauce, Sardellen, Bonito, Dashi,
+  Worcestershiresauce. Austernpilze, Kokos-„fleisch“, Nori/Algen bleiben vegetarisch.
+- Frühlingszwiebeln: ganzjährig.
+- Suche/Filter: ohne Akzente und Umlautpunkte, ß = ss; „Kaese“ findet „Käse“.
+- Tag „leichte mahlzeit“ wird als „leichte Mahlzeit“ angezeigt.
+- Fortschrittsbalken jetzt auch beim Suchen (Tags ergänzen, Umlaute, DeepL) und Speichern der Sammelaktionen.
+
+## Ambrosia-Import (ab 0.9.7)
+
+- *Datei → Import → Ambrosia-Datenbank importieren …* (.mdb, auch per Ziehen/Doppelklick-Übergabe).
+- Eigener Access-Leser (JET 4/ACE, nur lesen): MSysObjects, Tabellendefinitionen, Datenseiten, Überlaufzeilen,
+  Memo/OLE (LVAL), komprimierter Unicode-Text. Kein Access 97, keine verschlüsselten Datenbanken.
+- Tabellen: T_REZ_KOPF, T_REZ_KOPFEINHEIT, T_REZ_ZUTAT, T_REZ_ANWEIS (RTF), T_REZ_CAT_NDX/T_CAT, T_LITERATUR, T_BLOB (Typ 5),
+  T_UNIT (wenn gefüllt). Fotos liegen als Windows-1252-Text in UTF-16 vor → zurückgewandelt.
+- Einheiten (aus der Beispieldatenbank ermittelt): 7 Prise (unsicher), 11 Bund, 13 Scheibe, 15 TL, 17 EL, 25 ml, 28 l, 31 g,
+  32 kg, 33 etwas, 34 nach Belieben, 37 Zehe; -1/0 ohne Einheit. Unbekannte werden gemeldet.
+- Nicht übernommen: Herkunft (Land-Nummer), Haltbarkeit, Menüs, Kochbücher, Einkaufslisten, Geräte, Adressen.
+
+## Lebensmittel, Aufräumen, Abgleich großer Datenbanken (ab 0.9.8)
+
+- Nährwerttabelle 238 Einträge: neu Bambussprossen, Sprossen, Glutamat, Artischocke, Okra, Reispapier, Tamarinde,
+  Garnelenpaste, Kaviar, Algen, Lebensmittelfarbe, Süßstoff, Zitronensäure, Trüffel, Knochen (0 kcal, nur für Brühe),
+  Maniok/Taro; rund 900 zusätzliche Namen (Schweizerdeutsch, asiatisch, Schreibvarianten), `EXTRA` in make_foods.py.
+- Abgleich der Namen: Einzahl zu Mehrzahl, Tippfehler (Abstand 1, Wörter ab 6 Zeichen), Gebinde-/Mengenwörter im
+  Namen („Dose“, „zw“, „po“), DOS-Zeichen.
+- Küchenhelfer (`FoodTable::isNonFood`): zählen weder als fehlend noch bei den Nährwerten.
+- `Importers::tidyIngredients` beim Import und Abgleich; `Importers::repairMojibake` in normalizeTexts.
+- Abgleich: HTTP/1.1, Wiederholungen (5 Versuche, 0,5–4 s), Zwischenstände alle 150 Dateien/60 s mit
+  Sperrverlängerung; PHP-Skript unverändert.
+- Abgleich einrichten: Zugangsschlüssel verdeckt, Knopf Anzeigen/Verbergen.
+
+## Strichcode-Scanner (ab 0.9.9)
+
+- Lebensmittel-Assistent, Schritt Bezeichnung: Knopf **Scannen …** (Symbol `barcode`) neben dem Barcode-Feld.
+  Erkannter Code → Barcode-Feld → sofort „Abrufen“ bei Open Food Facts.
+- Mit Kamera (Qt Multimedia vorhanden und mindestens eine Kamera): Dialog „Strichcode scannen“ mit Kamerawahl,
+  Vorschau, Auswertung etwa fünfmal je Sekunde; übernommen wird, wenn derselbe Code
+  in zwei Bildern hintereinander erkannt wird oder in einem Bild sehr sicher (≥ 3 Abtastzeilen). Ton, Dialog schließt.
+- Ohne Kamera: **Scannen …** öffnet gleich die Fotoauswahl (Ordner gemerkt: `barcode/photoDir`); der Dialog zeigt
+  sonst Symbol, Hinweis und **Foto öffnen …**. Fotos werden nach EXIF gedreht.
+- Decoder (`src/barcode.cpp`, eigene Umsetzung, keine Fremdbibliothek): EAN-13, EAN-8, UPC-A (als EAN-13 mit
+  führender 0), Abtastzeilen über das Bild mit örtlicher Schwelle, 0°/90°, bei Misserfolg 45°/135°, jeweils beide
+  Leserichtungen (Code auf dem Kopf). Prüfziffer muss stimmen, Code muss in mindestens zwei Zeilen gelesen werden,
+  durchweg schlechte Treffer werden verworfen (kein „Code“ in Text oder Mustern). Laufzeit: wenige ms je Bild.
+- Bau: `desktop.pri` bindet `multimedia multimediawidgets` ein, wenn vorhanden (Qt 6), und setzt `VIVIA_CAMERA`;
+  sonst Meldung bei qmake, nur Fotos. macOS: `resources/macos/Info.plist` mit `NSCameraUsageDescription`.
+- Bild für das Handbuch: `strichcode-scanner.png` (ohne Kamera). Test: `coretest` „=== Strichcode ===“
+  (gezeichnete Codes in 0°/12°/90°/180°, Prüfziffern, Rauschbild ohne Treffer).
+
+## Mehrere Kameras (ab 0.9.10)
+
+- Kameraliste mit allen Geräten (`QMediaDevices::videoInputs`); gleichnamige werden nummeriert
+  („USB Camera“, „USB Camera (2)“, `Barcode::uniqueLabels`).
+- Gemerkt wird die **Geräte-Kennung** (`barcode/cameraId`, dazu der Name `barcode/camera`). Auswahl
+  (`Barcode::pickCamera`): laufende Kamera → gespeicherte Kennung → gespeicherter Name aus 0.9.9 (nur wenn eindeutig)
+  → Standardkamera des Systems → erste.
+- Ein- und Ausstecken bei offenem Dialog (`QMediaDevices::videoInputsChanged`): Liste wird neu aufgebaut; wird die
+  benutzte Kamera getrennt, wechselt der Scanner mit Hinweis zur nächsten; ohne Kamera erscheint der Foto-Hinweis,
+  mit neuer Kamera die Vorschau (Fenster wird bei Bedarf vergrößert).
+- Test: coretest „=== Strichcode ===“ prüft Nummerierung und Auswahlreihenfolge.
+
+## Fisch, Meeresfrüchte, Fischsaison (ab 0.9.11)
+
+- Nährwerttabelle 290 Einträge: Fisch nach Arten statt fünf Sammeleinträgen (`kabeljau`, `seelachs`, `schellfisch`,
+  `seehecht`, `rotbarsch`, `seeteufel`, `scholle`, `seezunge`, `steinbutt`, `heilbutt`, `heilbutt_schwarz`, `dorade`,
+  `wolfsbarsch`, `snapper`, `meerbarbe`, `edelfisch_mager`, `rochen`, `schwertfisch`, `thunfisch_frisch`, `thunfisch_oel`,
+  `haifisch`, `makrele`, `makrele_geraeuchert`, `hering`, `hering_mariniert`, `bueckling`, `sardinen`, `sardinen_oel`,
+  `sardellen`, `aal`, `aal_geraeuchert`, `wildlachs`, `forelle`, `forelle_geraeuchert`, `felchen`, `zander`, `karpfen`,
+  `weissfisch`, `wels`, `pangasius`, `stoer`, `tintenfisch`, `oktopus`, `hummer`, `surimi`) und Muscheln (`miesmuscheln`,
+  `muschelfleisch`, `venusmuscheln`, `austern`, `jakobsmuscheln`, `gruenlippmuscheln`, `entenmuscheln`). Alte Schlüssel
+  (`fisch_mager`, `lachs`, `thunfisch`, `garnelen`, `stockfisch`) bleiben gültig.
+- Schalentiere mit Schale (essbarer Anteil: Miesmuscheln ~30 %, Venus-/Herzmuscheln/Meermandeln ~20 %, Grünlipp halbe
+  Schale ~40 %, Entenmuscheln ~35 %); Austern (15 g) und Jakobsmuscheln (25 g) je Stück ausgelöst.
+- `FoodTable::matchByRule`: entscheidende Beschreibungen, die sonst als Füllwort wegfallen („frisch“, „in Öl“, „Dose“,
+  „geräuchert“, „getrocknet/gesalzen“, „ausgelöst/ohne Schale“) – auch im Zusatz der Zutat.
+- Zuordnung jetzt **reproduzierbar**: feste Reihenfolge nach Schlüssel, Namenslisten vor Anzeigenamen (vorher konnte
+  z. B. „Makrele (geräuchert)“ als „makrele“ zufällig gewinnen).
+- Namenserkennung ohne Tabelleneintrag (vegetarisch-Prüfung) um Stör, Skrei, Köhler, Plattfische, Weißfische,
+  Meermandeln, Percebes, spanische/italienische Namen erweitert.
+- Saison (`season.cpp`): Fisch außerhalb der Laichzeit, Muscheln „Monate mit r“, Zucht ganzjährig; Name vor Tabelle für
+  Skrei, Matjes, Maischolle, Hecht, Sprotten; Geräuchertes/Mariniertes/Gesalzenes zählt nicht als frisch.
+- Beim Öffnen einer Datenbank: geänderter Fingerabdruck der eingebauten Tabelle (`foods/stamp/<Ordner>`) → einmalige
+  Rückfrage „Alle Rezepte jetzt abgleichen?“ (nicht im Demo-Modus).
+- Menüassistent: Fisch/Meeresfrüchte nach Kategorie statt fester Schlüssel.
+- Test: coretest „=== Fisch und Meeresfrüchte 0.9.11 ===“ (jeder Fischname landet bei seinem Eintrag, auch normalisiert;
+  Beispielnamen; Zusatz entscheidet; Stör/Meermandeln/Sterlet nicht vegetarisch; Saisonmonate).
+
+## Web-Import, Wartungslisten, Käse/Fleisch/Tapas/Obst (ab 0.9.12)
+
+- *Datei → Import → Rezept von einer Webseite …* (Strg+Umschalt+W, Werkzeugleiste „Webseite“, Symbol `web-import`):
+  `webrecipe.*` (Kern, ohne Netz) liest schema.org/Recipe aus JSON-LD (auch `@graph`, verschachtelt, HowToSection,
+  HTML-Zeichen, rohe Zeilenumbrüche) oder Microdata; Titel, Ertrag, ISO-Zeiten, Zutaten, Schritte (nummeriert, Abschnitte
+  fett), recipeCategory/recipeCuisine (keine keywords), Bild (relativ aufgelöst), Autor/Website (og:site_name) → Quelle
+  „Autor, Website – Adresse“; weiter über `Importers::fromParts` (Format „Web“).
+  `WebImportDialog`: mehrere Adressen, ehrliche Programmkennung als User-Agent, Weiterleitungen, 25 s Zeitlimit,
+  Zeichensatz aus Kopf/Meta, Foto ≤ 1000 px JPEG; 401/403/429/503 → Hinweis auf „Gespeicherte Seite öffnen …“ (Adresse aus
+  `rel=canonical`/`og:url`); ein Rezept → Editor (Einstellung `webimport/review`), mehrere → direkt, Doubletten übersprungen.
+  Bilder: `web-import.png`.
+- *Extras → Rezepte ohne Nährwerte / ohne Zutatenliste bearbeiten …* (Symbole `maintain-nutrition`, `maintain-ingredients`):
+  `MaintenanceWindow` (Qt::Tool, nicht modal, je Art einmal; `MainWindow::showMaintenance`), rechts neben dem Hauptfenster
+  (Breite gemerkt `maintenance/width`), Liste aus dem Index (coverage < 100 % bzw. keine Zutaten), Details per `loadLight`,
+  Klick/Eingabetaste → Editor, Aktualisierung bei `RecipeDb::changed`. Bilder: `wartung-naehrwerte.png`, `wartung-zutaten.png`.
+- Nährwerttabelle 402 Einträge: Käse nach Gruppen (u. a. alle Sorten der Wikipedia-Liste „Käsesorten nach Herkunftsländern“,
+  die dort kaum Kategorien nennt – eingeordnet nach Käseverordnung), Hackfleisch (Rind, Schwein, Lamm, gemischt, Lamm/Rind,
+  Mett), Steaks, Hammel, Geflügelteile, ganze Tiere mit Knochen, französische Pasteten, Tapas (Kategorie nach tierischer
+  Hauptzutat für vegetarisch/vegan), Obst nach Sorten inkl. Südfrüchte. Saisonkalender für die neuen Obstsorten.
+- Regeln (`FoodTable::matchByRule`) zusätzlich: Sardellen in Essig, junge Jackfruit, getrocknetes Obst → Trockenobst;
+  Saft/Schale auch von Limette, Mandarine, Grapefruit.
+- Tests: coretest „Rezept von einer Webseite“, „Käse, Fleisch, Pasteten, Tapas“, „Obst und Südfrüchte“; Abgleich mit 46
+  Rezeptdateien (5673 Zutatenzeilen): nur beabsichtigte Änderungen der Zuordnung.
+
+## Küchen-Glossar und Tipp des Tages (ab 0.9.13)
+
+- Daten: `tools/make_glossar.py` (Einträge als Python-Tupel: Begriff, Kategorie, Erklärung, Synonyme, „siehe auch“; prüft
+  doppelte Begriffe und unbekannte Verweise) → `resources/data/kuechenglossar.json` (in `data.qrc`). 351 Begriffe, 13 Kategorien,
+  Erklärungen selbst formuliert.
+- Kern `kitchenglossary.*` (Namensraum `KitchenGlossary`; nicht zu verwechseln mit `glossary.*` = Englisch→Deutsch-Übersetzung
+  beim Import): `entries()`, `categories()`, `indexOf()` (auch Synonyme), `fold()` (klein, ohne Akzente, ß→ss, œ→oe),
+  `search()` (Rang: exakt < Anfang < enthalten im Begriff < Synonym < Erklärung; alle Wörter müssen passen).
+- `GlossaryWindow` (Hilfe → Küchen-Glossar …, Strg+Umschalt+G, Symbol `glossary`): eigenes Fenster, einmal offen
+  (`MainWindow::showGlossary(term)`), Verweise `glossar:Begriff`, Verlauf Zurück/Vor (Alt+Links/Rechts), Strg+F.
+- `TipOfTheDayDialog` (Symbol `tip`): nicht modal; Start über `main.cpp` nach 1,5 s → `MainWindow::showTipOfTheDay(true)`,
+  wartet, solange ein modaler Dialog offen ist (Hinweis „kein Medizinprodukt“, Datenbank anlegen, Abgleich-Rückfrage);
+  nicht im Demo-/Bildschirmfoto-Modus. Zufällige Reihenfolge (QRandomGenerator), „Tipp n von N“, Häkchen und Einstellung
+  `ui/tipOfTheDay` (Einstellungen → Programmstart).
+- Bilder: `kuechen-glossar.png`, `tipp-des-tages.png`. Test: coretest „=== Küchen-Glossar ===“.
+
+## Website-Export: Hinweis auf ViviaMeals (ab 0.9.14)
+
+- Oben in `nav.themes` (alle statischen Seiten und `suche.php`): Block `.credit` mit `assets/viviameals-koch.jpg` (aus
+  `:/images/about-koch.jpg`, 420 px breit gespeichert, 210 px angezeigt – wie im Über-Dialog), „Erstellt mit ViviaMeals“
+  und Link https://portfolio.mbergmann-sh.de (neues Fenster). Unter 760 px Bild 72 px neben dem Text. Im Druck aus (wie die Spalte).
+- Themenseiten: „1 Rezept“ / „n Rezepte“ statt „Rezept(e)“.
+
+## Website-Export: Impressum und Datenschutz (ab 0.9.15)
+
+- `WebsiteExportDialog`: zwei Reiter (QTabWidget) „Website“ und „Impressum & Datenschutz“; Felder Name*, Straße*,
+  PLZ/Ort*, Land, E-Mail*, Telefon, Verantwortlich (§ 18 MStV, leer = Betreiber), Webhoster; Häkchen zum Abschalten.
+  Einstellungen `web/legal/*` (nur lokal). Fehlende Pflichtangaben → Hinweis, Reiter 2 wird gezeigt.
+- `WebsiteExport::Legal` (in `Options::legal`), `impressumBody()`, `datenschutzBody()`, `obfuscatedMail()` (alle Zeichen
+  als `&#n;`, auch `mailto:`). Seiten `impressum.html` und `datenschutz.html` im normalen Rahmen (`main.legal-page`,
+  max. 760 px), bei abgeschaltetem Häkchen gelöscht.
+- Kopfzeile: `nav.legal` rechts neben der Suche, weiße, halbfette Links mit feiner Unterstreichung, aktive Seite voll
+  unterstrichen; unter 760 px eigene Zeile rechtsbündig. Auch in `suche.php` (über `site.legal` in `daten/rezepte.json`)
+  und in der Fußzeile.
+- Texte: § 5 DDG (seit 14.05.2024 statt TMG), § 18 Abs. 2 MStV, DSGVO Art. 6 Abs. 1 lit. f, 15–18, 20, 21, 28, 77;
+  Stand-Datum (Monat Jahr). Keine Rechtsberatung – Hinweis im Dialog und im Handbuch.
+- Bilder: `website-export.png`, `website-impressum.png` (Musterangaben „Erika Mustermann“, nur im Demo-Modus).
+- Test: coretest „=== Website: Impressum und Datenschutz ===“.
+
+
+## Korrektur 0.9.16: verschleierte E-Mail-Adresse
+
+- `obfuscatedMail()` erzeugte unter neueren Qt-6-Versionen „&#m;&#b;…“ statt „&#109;&#98;…“: `QString::arg(char16_t)` setzt dort
+  das Zeichen selbst ein. Jetzt `arg(int(c.unicode()))`; Qt 6.4 (Bauumgebung) war nicht betroffen, daher fiel es im Test nicht auf.
+- Test prüft jetzt das genaue Ergebnis („a@b.de“ → „&#97;&#64;&#98;&#46;&#100;&#101;“) und die Rückübersetzung.
+- Datenschutz: Satz zum Hoster umformuliert („Die Website wird bei folgendem Anbieter betrieben: …“).
+
+## Website-Export für große Sammlungen (ab 0.9.17)
+
+- Problem: nach dem Rezeptdurchlauf zweiter Durchgang ohne Fortschritt (jede Rezeptseite neu gelesen und geschrieben,
+  Themenliste für jede Seite neu gebaut) → „Keine Rückmeldung“; jede Seite trug die volle Themenliste.
+  Messung (`coretest --bench-web <ordner> 4200 600`): vorher 11,7 s, längste Pause 10,1 s, 293 MB.
+- Jetzt: Seiteninhalt bis zum Schreiben im Speicher (`Item::body`), jede Seite einmal geschrieben; Themen-`<li>` je Pfadtiefe
+  einmal gebaut (`liCache`); Fortschritt über Laden, Rezeptseiten, Themenseiten, Startseite, Suchindex (`step()`).
+  Ergebnis: 3,5 s, längste Pause 0,05 s, 30 MB.
+- Über `kFullNavThemes` (60) Themen: kurze Navigation auf Rezept-, Themen-, Impressums- und Datenschutzseiten (Alle Rezepte,
+  eigene Themen, „Alle n Themen …“ → `themen.html`, mehrspaltige Übersicht `ul.theme-index`); Startseite mit voller Liste.
+
+## Datenbank prüfen (ab 0.9.18)
+
+- Kern `dbcheck.*` (Namensraum `DbCheck`): `analyze()` liest alle Dateien im Rezeptordner (nicht nur den Index): fremde
+  Dateien (ohne .vmr), unlesbare/leere .vmr, leere Rezepte, Fotos per `QImageReader::size()` (nur Kopf) – unlesbar bzw.
+  übergroß (`kMaxSide` 1200 px oder `kMaxBytes` 350 KB). `apply()`: Fotos auf `kTargetSide` 1000 px (JPEG 85, Transparenz
+  auf Weiß; nur wenn kleiner), kaputte Fotos entfernen, Dateien nach `aussortiert/JJJJ-MM-TT-hhmmss` verschieben,
+  danach `RecipeDb::reindex()` (neu, öffentlich; außerdem `recipesFolder()`).
+- `DbCheckDialog`: Befund-Baum mit Gruppen-Häkchen (leere Rezepte standardmäßig aus), Einzelaufstellung bis 500 je Gruppe,
+  Doppelklick → Rezept im Hauptfenster, Fortschritt mit Abbrechen, Hinweis bei eingerichtetem Abgleich, Link zum Ordner.
+- Abgleich: nur `rezepte/*.vmr` u. a. werden abgeglichen – `aussortiert/` bleibt lokal; verschobene Rezepte gelten beim
+  nächsten Abgleich als gelöscht.
+- Bild `datenbank-pruefen.png`; Test coretest „=== Datenbank prüfen ===“.
+
+## Registrierung und Komfortfunktionen (ab 0.9.19)
+
+- Gesperrt ohne Schlüssel: *Rezept scannen*, *Rezept aus Bild oder Foto erkennen* (Texterkennung), Export *Website*,
+  *LaTeX*, *LibreOffice Writer*. Frei: alles andere (Import inkl. Webseite, Strichcode-Scanner, Pakete, .vmr, Drucken …).
+- Aktionen bleiben sichtbar; Statuszeile/Tooltip „Komfortfunktion (Registrierung erforderlich)“; beim Aufruf
+  Hinweis mit Schaltfläche **Registrierung eingeben …** (`Registration::require`). Demo (`--demo`) schaltet alles frei.
+- *Hilfe → Registrierung eingeben …*: E-Mail, Schlüssel (mehrzeilig), Prüfung beim Tippen, **Aus Zwischenablage einfügen**
+  (ganzes Schreiben, `License::parsePasted`), **Registrierung entfernen**. Über-Dialog: „Registriert für … (Nr. n)“.
+- Schlüssel: `VM1-` + Crockford-Base32 in Fünfergruppen (137 Zeichen); Inhalt Version, Seriennummer (1–10 000), Tag seit
+  1.1.2026, 64-Byte-Signatur (EdDSA/BLAKE2b, Monocypher) über `ViviaMeals-1|<email klein>|<nr>|<datum>`.
+  Gespeichert in QSettings `license/email`, `license/key`. Kein Netzzugriff.
+- Prüfschlüssel `src/license_pubkey.h` (Platzhalter = Nullen → kein Schlüssel gültig, Dialog erklärt das),
+  Sperrliste `src/license_revoked.h`. Beides schreibt der Schlüsselgenerator; danach einmal neu bauen.
+- Schlüsselgenerator `tools/keygen` (ViviaMealsKeygen): Schlüsselpaar beim ersten Start (oder aus Sicherung),
+  E-Mail/Name/Notiz → Schlüssel mit nächster Nummer, Warnung bei schon vorhandener Adresse, Schlüssel bzw.
+  Registrierungsschreiben kopieren, Liste mit Suche, Sperren/Entsperren, CSV-Export, Export der Header,
+  Warnung, wenn im Quelltext ein anderer Prüfschlüssel steht. Daten: `schluesselpaar.json` (GEHEIM),
+  `schluessel.json` (+ `.bak`) im Datenordner bzw. `--data <ordner>`.
+- Bilder `registrierung.png`, `keygen.png` (`ViviaMealsKeygen --screenshot`); Test coretest „=== Registrierungsschlüssel ===“.

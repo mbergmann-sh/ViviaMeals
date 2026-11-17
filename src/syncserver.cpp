@@ -247,7 +247,7 @@ QList<Found> discover(int ms, quint16 port)
 {
     QList<Found> out;
     QUdpSocket sock;
-    if (!sock.bind(QHostAddress::AnyIPv4, 0)) return out;
+    if (!sock.bind(QHostAddress(QHostAddress::AnyIPv4), quint16(0))) return out;
     auto send = [&] {
         sock.writeDatagram(kDiscover, QHostAddress::Broadcast, port);
         sock.writeDatagram(kDiscover, QHostAddress::LocalHost, port);   // auch eine Freigabe auf diesem Rechner

@@ -42,6 +42,7 @@ private:
     QLineEdit *m_deeplKey;
     QLabel *m_deeplStatus;
     QCheckBox *m_notice;
+    QCheckBox *m_tips;
     QCheckBox *m_random;
     QCheckBox *m_splash;
     QString m_origTheme;

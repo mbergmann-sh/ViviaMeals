@@ -21,6 +21,8 @@
 | **Strg+Umschalt+S** | Rezept scannen |
 | **Strg+Umschalt+M** | Menüassistent |
 | **Strg+Umschalt+Y** | Jetzt abgleichen |
+| **Strg+Umschalt+W** | Rezept von einer Webseite |
+| **Strg+Umschalt+G** | Küchen-Glossar |
 | **Strg+,** | Einstellungen |
 | **Strg+Q** | Programm beenden |
 
@@ -112,7 +114,8 @@ Funktionen ausdrücklich nutzen:
 
 - **DeepL-Übersetzung:** Titel, Zutaten und Zubereitung fremdsprachiger Rezepte gehen an die DeepL SE
   ([Übersetzen mit DeepL](import.md#deepl)).
-- **Open Food Facts:** nur der eingegebene Barcode bzw. Suchbegriff.
+- **Open Food Facts:** nur der eingegebene oder gescannte Barcode bzw. Suchbegriff. Kamerabilder und Fotos
+  von Strichcodes werden nur im Programm ausgewertet, weder gespeichert noch gesendet.
 - **Abgleich:** die abgeglichenen Daten an Ihre eigene Website bzw. an Ihre eigenen Geräte im lokalen Netz.
 - **Netzwerkscanner:** die Scan-Anfrage an Ihr eigenes Gerät.
 

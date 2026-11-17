@@ -20,6 +20,8 @@ QString escape(const QString &s) { return s.toHtmlEscaped(); }
 QString tagLabel(const QString &tag)
 {
     if (tag.isEmpty()) return tag;
+    // Tags aus mehreren Wörtern mit Adjektiv vorn: nur das Substantiv groß
+    if (tag == QLatin1String("leichte mahlzeit")) return QStringLiteral("leichte Mahlzeit");
     QString t = tag;
     t[0] = t[0].toUpper();
     return t;

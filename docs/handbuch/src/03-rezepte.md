@@ -94,7 +94,7 @@ auf der exportierten Website und im Menüassistenten.
 **Ergänzen** neben dem Tag-Feld schlägt Tags aus Titel, Zutaten und Nährwerten vor:
 
 - **Ernährung:** vegan, vegetarisch, fleischgerichte, fisch
-- **Mahlzeit:** frühstück, hauptgerichte, leichte mahlzeit, zwischenmahlzeit, desserts, süßspeise, backen
+- **Mahlzeit:** frühstück, hauptgerichte, leichte Mahlzeit, zwischenmahlzeit, desserts, süßspeise, backen
 - **Nährwerte:** eiweißreich, fettarm, kalorienarm, hochkalorisch, vitaminreich, reduktionsdiät
   (die Regeln stehen unter [Nährwert-Tags](naehrwerte.md#naehrwert-tags))
 - **Saison:** frühling, sommer, herbst, winter, ganzjährig
@@ -102,7 +102,7 @@ auf der exportierten Website und im Menüassistenten.
 
 Vorhandene Tags werden nur ergänzt, nie entfernt. Ein unpassender Vorschlag lässt sich im Feld einfach
 löschen. Für den Wochenplan und den Menüassistenten sind besonders hilfreich: **frühstück**,
-**leichte mahlzeit**, **vorspeisen**, **suppen**, **zwischengang**, **hauptgerichte** und **desserts**.
+**leichte Mahlzeit**, **vorspeisen**, **suppen**, **zwischengang**, **hauptgerichte** und **desserts**.
 
 ## Rezeptbild zuschneiden {#bild}
 
@@ -140,7 +140,10 @@ Beide Änderungen erscheinen sofort in den Feldern und werden erst mit **Speiche
 
 ![Die Suche](bilder/suche.png)
 
-- **Suchbegriff:** Rezeptname oder Teil davon, wahlweise auch in den Zutaten.
+- **Suchbegriff:** Rezeptname oder Teil davon, wahlweise auch in den Zutaten. Groß- und Kleinschreibung
+  und Akzente spielen keine Rolle: „crepes“ findet „Crêpes“, „creme brulee“ findet „Crème brûlée“,
+  „strasse“ findet „Straße“; ohne Umlaut-Tastatur getippt findet „Kaese“ auch „Käse“. Das gilt auch für das
+  Filterfeld im Hauptfenster.
 - **Tags:** mehrere anklicken; „alle gewählten Tags müssen passen“ verknüpft sie mit UND, sonst mit ODER.
 - **höchstens … kcal je Portion**, **nur Favoriten**, **nur mit Foto**.
 

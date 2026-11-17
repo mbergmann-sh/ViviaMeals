@@ -5,6 +5,9 @@ fotografieren. ViviaMeals liest den Text mit dem freien Programm **Tesseract** �
 eigenen Rechner –, teilt ihn in Titel, Portionen, Zutaten und Zubereitung auf und öffnet das Ergebnis im
 Rezepteditor.
 
+> **Komfortfunktion:** Scannen und die Texterkennung aus Bildern und Fotos stehen nach der
+> [Registrierung](extras.md#registrierung) zur Verfügung. In der Demo sind sie zum Ausprobieren frei.
+
 ![Rezept scannen: links die Seite, rechts der erkannte Text](bilder/scannen.png)
 
 ## Was man braucht {#scannen-voraussetzungen}

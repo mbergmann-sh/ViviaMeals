@@ -379,10 +379,14 @@ Composer::Composer(const QList<RecipeSummary> &recipes, const Prefs &prefs, quin
                      || key == QLatin1String("gefluegelleber"))
                 setProtein(tr("Geflügel"));
             else if (key == QLatin1String("lamm") || key == QLatin1String("wild") || key == QLatin1String("kaninchen")) setProtein(tr("Lamm/Wild"));
-            else if (key == QLatin1String("fisch_mager") || key == QLatin1String("lachs") || key == QLatin1String("thunfisch")
-                     || key == QLatin1String("stockfisch"))
-                setProtein(tr("Fisch"));
-            else if (key == QLatin1String("garnelen")) setProtein(tr("Meeresfrüchte"));
+            else if (f && f->category == QLatin1String("fisch") && key != QLatin1String("kaviar") && key != QLatin1String("garnelenpaste")) {
+                // Krebstiere, Tintenfische und Muscheln sind Meeresfrüchte, alles andere Fisch
+                static const QSet<QString> seafood{ QStringLiteral("garnelen"), QStringLiteral("hummer"), QStringLiteral("surimi"),
+                                                    QStringLiteral("tintenfisch"), QStringLiteral("oktopus"), QStringLiteral("miesmuscheln"),
+                                                    QStringLiteral("muschelfleisch"), QStringLiteral("venusmuscheln"), QStringLiteral("austern"),
+                                                    QStringLiteral("jakobsmuscheln"), QStringLiteral("gruenlippmuscheln"), QStringLiteral("entenmuscheln") };
+                setProtein(seafood.contains(key) ? tr("Meeresfrüchte") : tr("Fisch"));
+            }
             if (key.startsWith(QLatin1String("nudeln")) || key == QLatin1String("vollkornnudeln")) in.starches << tr("Nudeln");
             else if (key.startsWith(QLatin1String("reis")) || key == QLatin1String("vollkornreis")) in.starches << tr("Reis");
             else if (key.startsWith(QLatin1String("kartoffel")) || key == QLatin1String("pommes")) in.starches << tr("Kartoffeln");
@@ -406,9 +410,11 @@ Composer::Composer(const QList<RecipeSummary> &recipes, const Prefs &prefs, quin
         const QString &ing = in.ingredients;
         if (in.protein.isEmpty()) {
             if (containsAny(ing, { "lachs", "forelle", "kabeljau", "zander", "seelachs", "dorade", "thunfisch", "fischfilet", "scholle", "hering",
-                                  "stockfisch", "klippfisch", "bacalhau", "bacalao", "baccal" }))
+                                  "stockfisch", "klippfisch", "bacalhau", "bacalao", "baccal", "dorsch", "stör", "karpfen", "makrele",
+                                  "seezunge", "steinbutt", "wolfsbarsch", "hecht", "saibling", "seeteufel", "pangasius", "skrei" }))
                 in.protein = tr("Fisch");
-            else if (containsAny(ing, { "garnele", "scampi", "muschel", "krabbe", "hummer", "tintenfisch", "calamar" })) in.protein = tr("Meeresfrüchte");
+            else if (containsAny(ing, { "garnele", "scampi", "muschel", "krabbe", "hummer", "tintenfisch", "calamar", "auster", "oktopus",
+                                         "pulpo", "meermandel", "percebes", "languste", "vongole" })) in.protein = tr("Meeresfrüchte");
             else if (containsAny(ing, { "rind", "kalb", "beef", "hackfleisch" })) in.protein = tr("Rind");
             else if (containsAny(ing, { "schwein", "speck", "schinken", "bacon", "chorizo", "salami" })) in.protein = tr("Schwein");
             else if (containsAny(ing, { "hähnchen", "huhn", "hühn", "pute", "ente", "gans", "chicken", "geflügel" })) in.protein = tr("Geflügel");

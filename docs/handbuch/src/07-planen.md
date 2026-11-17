@@ -98,7 +98,7 @@ Plan zusammen, der zum Kalorienziel der Person passt.
 **So wählt der Plan aus:**
 
 - Frühstück nur aus Rezepten mit dem Tag „frühstück“, die warme Mahlzeit aus Hauptgerichten, die leichte
-  aus Rezepten mit „leichte mahlzeit“ (Salat, Suppe, Brotzeit, Quark, Omelett …), Zwischenmahlzeiten aus
+  aus Rezepten mit „leichte Mahlzeit“ (Salat, Suppe, Brotzeit, Quark, Omelett …), Zwischenmahlzeiten aus
   Snacks.
 - Am selben Tag keine gleiche Beilage (Nudeln, Reis, Kartoffeln, Brot) und nicht zweimal Fleisch oder Fisch;
   dasselbe Rezept nicht an zwei Tagen hintereinander.

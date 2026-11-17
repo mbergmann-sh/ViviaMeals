@@ -155,6 +155,10 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
     m_notice = new QCheckBox(tr("Hinweis „kein Medizinprodukt“ anzeigen"));
     m_notice->setChecked(s.value(QStringLiteral("ui/startNotice"), true).toBool());
     sl->addWidget(m_notice);
+    m_tips = new QCheckBox(tr("„Tipp des Tages“ aus dem Küchen-Glossar anzeigen"));
+    m_tips->setToolTip(tr("Zeigt nach dem Start einen zufälligen Fachbegriff der gehobenen Küche mit Erklärung"));
+    m_tips->setChecked(s.value(QStringLiteral("ui/tipOfTheDay"), true).toBool());
+    sl->addWidget(m_tips);
     lay->addWidget(start);
     lay->addStretch(1);
 
@@ -381,6 +385,7 @@ void SettingsDialog::accept()
     s.setValue(QStringLiteral("ui/splash"), m_splash->isChecked());
     s.setValue(QStringLiteral("ui/randomStart"), m_random->isChecked());
     s.setValue(QStringLiteral("ui/startNotice"), m_notice->isChecked());
+    s.setValue(QStringLiteral("ui/tipOfTheDay"), m_tips->isChecked());
     const int f = m_font->currentData().toInt();
     if (f != UiScale::setting()) {
         UiScale::setSetting(f);

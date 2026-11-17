@@ -1,0 +1,4000 @@
+{
+ "titel": "ViviaMeals Küchen-Glossar",
+ "eintraege": [
+  {
+   "begriff": "Abats",
+   "kategorie": "Fleisch, Geflügel & Fisch",
+   "text": "Innereien wie Leber, Niere, Herz, Zunge oder Bries.",
+   "synonyme": [
+    "Innereien"
+   ],
+   "siehe": [
+    "Ris"
+   ]
+  },
+  {
+   "begriff": "Abbinden",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Flüssigkeit sämig machen, z. B. mit Stärke, Mehlbutter, Roux, Eigelb oder Sahne.",
+   "synonyme": [
+    "binden",
+    "andicken"
+   ],
+   "siehe": [
+    "Roux",
+    "Liaison",
+    "Beurre manié"
+   ]
+  },
+  {
+   "begriff": "Abbrennen",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Mehl in kochende Flüssigkeit mit Fett geben und rühren, bis sich ein Kloß vom Topfboden löst (Brandteig).",
+   "synonyme": [],
+   "siehe": [
+    "Pâte à choux"
+   ]
+  },
+  {
+   "begriff": "Abflämmen",
+   "kategorie": "Garverfahren",
+   "text": "Oberfläche kurz mit dem Gasbrenner bräunen oder karamellisieren, etwa Zucker auf einer Creme oder die Haut von Fisch.",
+   "synonyme": [
+    "flämmen",
+    "abbrennen"
+   ],
+   "siehe": [
+    "Crème brûlée",
+    "Karamellisieren"
+   ]
+  },
+  {
+   "begriff": "Ablöschen",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Angebratenes mit Flüssigkeit (Wein, Fond, Wasser) aufgießen, um den Bratsatz zu lösen.",
+   "synonyme": [
+    "deglacieren",
+    "déglacer"
+   ],
+   "siehe": [
+    "Deglacieren",
+    "Bratsatz"
+   ]
+  },
+  {
+   "begriff": "Abschmecken",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Gegen Ende nachwürzen und das Gleichgewicht von Salz, Säure, Süße und Schärfe prüfen.",
+   "synonyme": [
+    "rectifier"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Abschrecken",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Gegartes sofort in Eiswasser oder unter kaltem Wasser abkühlen, um den Garvorgang zu stoppen.",
+   "synonyme": [
+    "rafraîchir"
+   ],
+   "siehe": [
+    "Blanchieren"
+   ]
+  },
+  {
+   "begriff": "Abschäumen",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Beim Aufkochen von Fonds und Brühen aufsteigenden Eiweißschaum abschöpfen; die Brühe bleibt klar.",
+   "synonyme": [
+    "écumer"
+   ],
+   "siehe": [
+    "Fond"
+   ]
+  },
+  {
+   "begriff": "Abziehen",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Eine Sauce oder Creme mit Eigelb unter Rühren knapp unter dem Siedepunkt binden (zur Rose abziehen); auch: Mandeln, Tomaten häuten.",
+   "synonyme": [
+    "zur Rose abziehen"
+   ],
+   "siehe": [
+    "Legieren",
+    "Liaison",
+    "Mondieren"
+   ]
+  },
+  {
+   "begriff": "Agar-Agar",
+   "kategorie": "Zutaten & Würzen",
+   "text": "Pflanzliches Geliermittel aus Algen; geliert nach dem Aufkochen, schon bei Raumtemperatur.",
+   "synonyme": [
+    "Agar"
+   ],
+   "siehe": [
+    "Aspik"
+   ]
+  },
+  {
+   "begriff": "Aioli",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Provenzalische Knoblauchsauce, als Emulsion aus Knoblauch und Öl, oft mit Eigelb.",
+   "synonyme": [
+    "Allioli",
+    "Aïoli"
+   ],
+   "siehe": [
+    "Mayonnaise"
+   ]
+  },
+  {
+   "begriff": "Al dente",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "„Bissfest“: Nudeln, Reis oder Gemüse so garen, dass sie im Kern noch leichten Widerstand haben.",
+   "synonyme": [
+    "bissfest"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Amuse-Bouche",
+   "kategorie": "Menü & Service",
+   "text": "Kleiner Gruß aus der Küche vor dem Menü, nicht bestellt.",
+   "synonyme": [
+    "Amuse-Gueule",
+    "Gruß aus der Küche"
+   ],
+   "siehe": [
+    "Menüfolge"
+   ]
+  },
+  {
+   "begriff": "Anschwitzen",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Zwiebeln, Gemüse oder Mehl in Fett bei mäßiger Hitze garen, ohne dass sie Farbe nehmen.",
+   "synonyme": [
+    "glasig dünsten",
+    "suer"
+   ],
+   "siehe": [
+    "Roux"
+   ]
+  },
+  {
+   "begriff": "Arrosieren",
+   "kategorie": "Garverfahren",
+   "text": "Bratgut während des Bratens immer wieder mit dem Fett oder Bratensaft aus der Pfanne übergießen; hält es saftig und bräunt gleichmäßig.",
+   "synonyme": [
+    "begießen",
+    "nappieren mit Butter"
+   ],
+   "siehe": [
+    "Braten",
+    "Beurre noisette"
+   ]
+  },
+  {
+   "begriff": "Aspik",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Klare Gelee aus Fond mit Gelatine; Speisen darin eingelegt oder damit überzogen.",
+   "synonyme": [
+    "Aspic",
+    "Sülze",
+    "Gelee"
+   ],
+   "siehe": [
+    "Chemisieren",
+    "Chaud-froid"
+   ]
+  },
+  {
+   "begriff": "Aufmontieren",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Kalte Butterstücke unter Schwenken oder Rühren in eine heiße, nicht mehr kochende Sauce einarbeiten; bindet und gibt Glanz.",
+   "synonyme": [
+    "montieren",
+    "monter au beurre"
+   ],
+   "siehe": [
+    "Beurre blanc",
+    "Emulsion"
+   ]
+  },
+  {
+   "begriff": "Ausstechring",
+   "kategorie": "Geräte & Utensilien",
+   "text": "Edelstahlring zum Ausstechen und zum runden Anrichten (Türmchen) von Speisen.",
+   "synonyme": [
+    "Servierring",
+    "Dessertring"
+   ],
+   "siehe": [
+    "Dressieren"
+   ]
+  },
+  {
+   "begriff": "Backen",
+   "kategorie": "Garverfahren",
+   "text": "Garen in trockener, heißer Luft im Ofen, meist zwischen 140 und 250 °C; bildet eine gebräunte Kruste.",
+   "synonyme": [],
+   "siehe": [
+    "Blindbacken",
+    "Gratinieren"
+   ]
+  },
+  {
+   "begriff": "Baiser",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Gebackener Eischnee mit Zucker; französisch (kalt), schweizerisch (warm) oder italienisch (mit heißem Zuckersirup) geschlagen.",
+   "synonyme": [
+    "Meringue",
+    "Meringe",
+    "Merengue"
+   ],
+   "siehe": [
+    "Eischnee",
+    "Pavlova"
+   ]
+  },
+  {
+   "begriff": "Ballotine",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Entbeintes, gefülltes und aufgerolltes Geflügelteil (meist Keule), gegart und warm serviert.",
+   "synonyme": [
+    "Ballottine"
+   ],
+   "siehe": [
+    "Galantine",
+    "Farce"
+   ]
+  },
+  {
+   "begriff": "Bardieren",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Mageres Fleisch oder Geflügel mit dünnen Speckscheiben umwickeln, damit es beim Garen nicht austrocknet.",
+   "synonyme": [
+    "barder"
+   ],
+   "siehe": [
+    "Spicken"
+   ]
+  },
+  {
+   "begriff": "Beignet",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "In Teig gehüllte und frittierte Stücke von Obst, Gemüse oder Fisch; auch frittiertes Brandteig- oder Hefegebäck.",
+   "synonyme": [
+    "Krapfen",
+    "Fritter",
+    "Ausgebackenes"
+   ],
+   "siehe": [
+    "Frittieren",
+    "Pâte à choux"
+   ]
+  },
+  {
+   "begriff": "Beize",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Würzige, säurehaltige Marinade (z. B. aus Wein, Essig, Gewürzen) für Wild und Sauerbraten.",
+   "synonyme": [
+    "beizen"
+   ],
+   "siehe": [
+    "Marinieren"
+   ]
+  },
+  {
+   "begriff": "Beurre blanc",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Weiße Buttersauce: Reduktion aus Weißwein, Essig und Schalotten mit kalter Butter aufmontiert; klassisch zu Fisch.",
+   "synonyme": [
+    "Beurre nantais",
+    "weiße Buttersauce"
+   ],
+   "siehe": [
+    "Aufmontieren",
+    "Reduktion"
+   ]
+  },
+  {
+   "begriff": "Beurre manié",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Mehlbutter: weiche Butter mit Mehl verknetet, zum schnellen Binden in heiße Saucen einrühren.",
+   "synonyme": [
+    "Mehlbutter"
+   ],
+   "siehe": [
+    "Abbinden",
+    "Roux"
+   ]
+  },
+  {
+   "begriff": "Beurre noir",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Dunkelbraun gebräunte Butter, oft mit Essig und Kapern; z. B. zu Rochen.",
+   "synonyme": [
+    "schwarze Butter"
+   ],
+   "siehe": [
+    "Beurre noisette"
+   ]
+  },
+  {
+   "begriff": "Beurre noisette",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Nussbutter: Butter erhitzen, bis die Molke hellbraun wird und nussig duftet.",
+   "synonyme": [
+    "Nussbutter",
+    "braune Butter"
+   ],
+   "siehe": [
+    "Beurre noir",
+    "Arrosieren"
+   ]
+  },
+  {
+   "begriff": "Biskuit",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Lockere Masse aus Eiern, Zucker und Mehl (ggf. Stärke), ohne Fett; Basis für Torten und Rouladen.",
+   "synonyme": [
+    "Génoise",
+    "Biskuitmasse"
+   ],
+   "siehe": [
+    "Génoise",
+    "Joconde"
+   ]
+  },
+  {
+   "begriff": "Bisque",
+   "kategorie": "Suppen",
+   "text": "Cremige Suppe aus Krustentieren (Hummer, Krebse, Garnelen), deren Schalen geröstet und mitgekocht werden.",
+   "synonyme": [
+    "Hummersuppe",
+    "Krebssuppe"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Blanchieren",
+   "kategorie": "Garverfahren",
+   "text": "Kurz in sprudelnd kochendes, gesalzenes Wasser geben und sofort in Eiswasser abschrecken. Erhält Farbe und Biss, löst Schalen und macht Gemüse vorgarbereit.",
+   "synonyme": [
+    "überbrühen"
+   ],
+   "siehe": [
+    "Abschrecken",
+    "Mondieren"
+   ]
+  },
+  {
+   "begriff": "Blanquette",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Helles Ragout von Kalb oder Lamm, in Fond gekocht, Sauce mit Sahne und Eigelb legiert.",
+   "synonyme": [
+    "Blanquette de veau"
+   ],
+   "siehe": [
+    "Fricassée"
+   ]
+  },
+  {
+   "begriff": "Blindbacken",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Teigboden ohne Füllung vorbacken, mit Backpapier und Hülsenfrüchten beschwert, damit er nicht aufgeht.",
+   "synonyme": [
+    "vorbacken",
+    "à blanc"
+   ],
+   "siehe": [
+    "Pâte brisée"
+   ]
+  },
+  {
+   "begriff": "Bouchée",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Kleine Blätterteigpastete als Häppchen mit warmer Füllung („ein Bissen“).",
+   "synonyme": [
+    "Bouchées",
+    "Pastetchen"
+   ],
+   "siehe": [
+    "Vol-au-vent"
+   ]
+  },
+  {
+   "begriff": "Bouillabaisse",
+   "kategorie": "Suppen",
+   "text": "Provenzalische Fischsuppe aus mehreren Fischsorten mit Safran, Tomaten, Fenchel und Knoblauch; dazu Rouille.",
+   "synonyme": [],
+   "siehe": [
+    "Rouille"
+   ]
+  },
+  {
+   "begriff": "Bouquet garni",
+   "kategorie": "Zutaten & Würzen",
+   "text": "Kräutersträußchen aus Thymian, Lorbeer und Petersilienstielen (oft in Lauch gebunden), mitgekocht und vor dem Servieren entfernt.",
+   "synonyme": [
+    "Kräutersträußchen",
+    "Suppenbund"
+   ],
+   "siehe": [
+    "Fond"
+   ]
+  },
+  {
+   "begriff": "Braisieren",
+   "kategorie": "Garverfahren",
+   "text": "Schmoren von Fleisch oder Gemüse: anbraten, mit wenig Flüssigkeit aufgießen und zugedeckt langsam garen.",
+   "synonyme": [
+    "braiser",
+    "schmoren"
+   ],
+   "siehe": [
+    "Schmoren",
+    "Glacieren"
+   ]
+  },
+  {
+   "begriff": "Brandade",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Provenzalisches Püree aus gewässertem Stockfisch, Olivenöl, Knoblauch und oft Kartoffeln.",
+   "synonyme": [
+    "Brandade de morue"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Braten",
+   "kategorie": "Garverfahren",
+   "text": "Garen in wenig heißem Fett in der Pfanne oder im Ofen; die Oberfläche bräunt durch Röststoffe.",
+   "synonyme": [
+    "anbraten"
+   ],
+   "siehe": [
+    "Sautieren",
+    "Arrosieren",
+    "Maillard-Reaktion"
+   ]
+  },
+  {
+   "begriff": "Bratsatz",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Die beim Braten am Pfannenboden angesetzten Röststoffe; Grundlage für Sauce und Jus.",
+   "synonyme": [
+    "fond de cuisson",
+    "Bratrückstand"
+   ],
+   "siehe": [
+    "Ablöschen",
+    "Jus"
+   ]
+  },
+  {
+   "begriff": "Bridieren",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Geflügel oder Fleisch mit Küchengarn und Dressiernadel in Form binden, damit es gleichmäßig gart.",
+   "synonyme": [
+    "binden",
+    "dressieren",
+    "brider"
+   ],
+   "siehe": [
+    "Dressieren"
+   ]
+  },
+  {
+   "begriff": "Brigade de cuisine",
+   "kategorie": "Küchenbrigade & Organisation",
+   "text": "Klassische Küchenorganisation nach Escoffier mit klar verteilten Posten unter der Leitung des Küchenchefs.",
+   "synonyme": [
+    "Küchenbrigade",
+    "Brigade"
+   ],
+   "siehe": [
+    "Chef de cuisine",
+    "Chef de partie"
+   ]
+  },
+  {
+   "begriff": "Brunoise",
+   "kategorie": "Schneiden & Formen",
+   "text": "Gemüse in sehr feine Würfel von 1–2 mm schneiden.",
+   "synonyme": [],
+   "siehe": [
+    "Julienne",
+    "Mirepoix",
+    "Macédoine"
+   ]
+  },
+  {
+   "begriff": "Bâtonnet",
+   "kategorie": "Schneiden & Formen",
+   "text": "Gemüse in Stäbchen von etwa 6 mm Kantenlänge schneiden, z. B. für Pommes allumettes.",
+   "synonyme": [
+    "Batonnet"
+   ],
+   "siehe": [
+    "Jardinière"
+   ]
+  },
+  {
+   "begriff": "Bœuf bourguignon",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Rinderschmorgericht in Burgunder-Rotwein mit Speck, Pilzen und Perlzwiebeln.",
+   "synonyme": [
+    "Boeuf bourguignon"
+   ],
+   "siehe": [
+    "Schmoren"
+   ]
+  },
+  {
+   "begriff": "Canapé",
+   "kategorie": "Menü & Service",
+   "text": "Kleine, belegte Brot- oder Teighappen für Empfänge.",
+   "synonyme": [
+    "Canape",
+    "Canapés"
+   ],
+   "siehe": [
+    "Amuse-Bouche"
+   ]
+  },
+  {
+   "begriff": "Carpaccio",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Hauchdünn geschnittenes rohes Rindfleisch, mit Öl, Zitrone und Parmesan; heute auch von Fisch, Gemüse oder Obst.",
+   "synonyme": [],
+   "siehe": [
+    "Tatar"
+   ]
+  },
+  {
+   "begriff": "Carré",
+   "kategorie": "Fleisch, Geflügel & Fisch",
+   "text": "Rippenstück vom Lamm, Kalb oder Schwein, meist mit freigelegten Knochen (french trimmed) im Ganzen gebraten.",
+   "synonyme": [
+    "Carree",
+    "Rack",
+    "Lammkarree"
+   ],
+   "siehe": [
+    "Parieren"
+   ]
+  },
+  {
+   "begriff": "Cassoulet",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Südfranzösischer Bohneneintopf mit Ente, Wurst und Schweinefleisch, im Ofen überbacken.",
+   "synonyme": [],
+   "siehe": [
+    "Confit"
+   ]
+  },
+  {
+   "begriff": "Ceviche",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Roher Fisch, in Zitrus-Saft „gegart“ (mariniert), mit Zwiebeln, Chili und Koriander.",
+   "synonyme": [
+    "Cebiche"
+   ],
+   "siehe": [
+    "Marinieren"
+   ]
+  },
+  {
+   "begriff": "Charlotte",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Dessert in einer Form, ausgelegt mit Löffelbiskuits oder Brot, gefüllt mit Creme oder Früchten.",
+   "synonyme": [],
+   "siehe": [
+    "Löffelbiskuit"
+   ]
+  },
+  {
+   "begriff": "Chateaubriand",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Doppelt dickes Steak aus dem Mittelstück des Rinderfilets für zwei Personen.",
+   "synonyme": [
+    "Châteaubriand"
+   ],
+   "siehe": [
+    "Tournedos",
+    "Sauce béarnaise"
+   ]
+  },
+  {
+   "begriff": "Chaud-froid",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Gegartes Fleisch oder Geflügel, kalt mit einer gelierenden Sauce überzogen.",
+   "synonyme": [
+    "Chaudfroid"
+   ],
+   "siehe": [
+    "Aspik"
+   ]
+  },
+  {
+   "begriff": "Chef de cuisine",
+   "kategorie": "Küchenbrigade & Organisation",
+   "text": "Küchenchef: leitet die Küche, plant Karte, Einkauf und Personal.",
+   "synonyme": [
+    "Küchenchef",
+    "Chef"
+   ],
+   "siehe": [
+    "Sous-chef"
+   ]
+  },
+  {
+   "begriff": "Chef de partie",
+   "kategorie": "Küchenbrigade & Organisation",
+   "text": "Postenchef: verantwortlich für einen Posten der Küche, z. B. Saucier oder Pâtissier.",
+   "synonyme": [
+    "Postenchef"
+   ],
+   "siehe": [
+    "Commis",
+    "Brigade de cuisine"
+   ]
+  },
+  {
+   "begriff": "Chemisieren",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Eine Form innen dünn mit Gelee, Butter und Mehl/Zucker oder Teig auskleiden.",
+   "synonyme": [
+    "chemiser",
+    "ausfüttern"
+   ],
+   "siehe": [
+    "Aspik"
+   ]
+  },
+  {
+   "begriff": "Chiffonade",
+   "kategorie": "Schneiden & Formen",
+   "text": "Blattgemüse oder Kräuter (z. B. Basilikum, Spinat) aufrollen und in sehr feine Streifen schneiden.",
+   "synonyme": [
+    "Chiffonnade"
+   ],
+   "siehe": [
+    "Julienne"
+   ]
+  },
+  {
+   "begriff": "Chinois",
+   "kategorie": "Geräte & Utensilien",
+   "text": "Spitzsieb, kegelförmig, zum Passieren von Fonds und Saucen.",
+   "synonyme": [
+    "Spitzsieb"
+   ],
+   "siehe": [
+    "Passieren",
+    "Etamine"
+   ]
+  },
+  {
+   "begriff": "Clafoutis",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Französischer Auflauf aus Kirschen (oder anderem Obst) in einem Eier-Pfannkuchenteig.",
+   "synonyme": [],
+   "siehe": []
+  },
+  {
+   "begriff": "Clarifizieren",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Brühe, Fond oder Butter klären, d. h. Trübstoffe entfernen; bei Brühe meist mit Eiweiß und Klärfleisch.",
+   "synonyme": [
+    "klären",
+    "klarifizieren"
+   ],
+   "siehe": [
+    "Consommé",
+    "Geklärte Butter"
+   ]
+  },
+  {
+   "begriff": "Cloche",
+   "kategorie": "Menü & Service",
+   "text": "Glocke bzw. Haube, unter der Teller warm gehalten und am Tisch gelüftet werden.",
+   "synonyme": [
+    "Speiseglocke"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Cocotte",
+   "kategorie": "Geräte & Utensilien",
+   "text": "Schwerer Schmortopf mit Deckel; auch kleine feuerfeste Förmchen (Œufs en cocotte).",
+   "synonyme": [
+    "Bräter",
+    "Schmortopf",
+    "Kokotte"
+   ],
+   "siehe": [
+    "Schmoren"
+   ]
+  },
+  {
+   "begriff": "Commis",
+   "kategorie": "Küchenbrigade & Organisation",
+   "text": "Jungkoch, arbeitet einem Chef de partie zu.",
+   "synonyme": [
+    "Commis de cuisine",
+    "Jungkoch"
+   ],
+   "siehe": [
+    "Chef de partie"
+   ]
+  },
+  {
+   "begriff": "Compote",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Kompott: in Zuckersirup gedünstetes Obst.",
+   "synonyme": [
+    "Kompott"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Concassée",
+   "kategorie": "Schneiden & Formen",
+   "text": "Tomaten häuten, entkernen und in kleine Würfel schneiden; auch allgemein grob gehackt.",
+   "synonyme": [
+    "Tomatenconcassée",
+    "concasser"
+   ],
+   "siehe": [
+    "Mondieren"
+   ]
+  },
+  {
+   "begriff": "Confieren",
+   "kategorie": "Garverfahren",
+   "text": "Langsames Garen in reichlich Fett bei niedriger Temperatur (etwa 80–100 °C), klassisch Entenkeulen in Entenschmalz; auch Gemüse und Fisch in Öl.",
+   "synonyme": [
+    "Confit",
+    "confit",
+    "konfieren"
+   ],
+   "siehe": [
+    "Confit"
+   ]
+  },
+  {
+   "begriff": "Confit",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Langsam in Fett gegartes und darin konserviertes Fleisch (z. B. Confit de canard); auch eingekochtes Obst oder Gemüse.",
+   "synonyme": [
+    "Confit de canard"
+   ],
+   "siehe": [
+    "Confieren"
+   ]
+  },
+  {
+   "begriff": "Consommé",
+   "kategorie": "Suppen",
+   "text": "Mit Klärfleisch und Eiweiß geklärte, kristallklare, kräftige Kraftbrühe.",
+   "synonyme": [
+    "Kraftbrühe",
+    "Consomme",
+    "Consommé double"
+   ],
+   "siehe": [
+    "Clarifizieren",
+    "Royale"
+   ]
+  },
+  {
+   "begriff": "Coq au vin",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "In Rotwein geschmortes Huhn mit Speck, Champignons und Perlzwiebeln.",
+   "synonyme": [],
+   "siehe": [
+    "Schmoren"
+   ]
+  },
+  {
+   "begriff": "Coulis",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Glattes Püree aus Obst oder Gemüse, als Sauce verwendet, z. B. Himbeer- oder Tomatencoulis.",
+   "synonyme": [
+    "Fruchtsauce"
+   ],
+   "siehe": [
+    "Passieren"
+   ]
+  },
+  {
+   "begriff": "Court-bouillon",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Würziger Sud aus Wasser, Wein oder Essig, Gemüse und Kräutern zum Pochieren von Fisch und Krustentieren.",
+   "synonyme": [
+    "Court bouillon",
+    "Fischsud"
+   ],
+   "siehe": [
+    "Pochieren",
+    "Fumet"
+   ]
+  },
+  {
+   "begriff": "Croustade",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Knusprige Hülle aus Teig oder Brot, gefüllt mit Ragout oder Gemüse.",
+   "synonyme": [],
+   "siehe": [
+    "Vol-au-vent"
+   ]
+  },
+  {
+   "begriff": "Croûtons",
+   "kategorie": "Garnituren & Beilagen",
+   "text": "Geröstete Brotwürfel als Suppeneinlage oder Salatgarnitur.",
+   "synonyme": [
+    "Croutons",
+    "Brotwürfel"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Crudités",
+   "kategorie": "Garnituren & Beilagen",
+   "text": "Rohes, in Stifte oder Scheiben geschnittenes Gemüse, oft mit Dip.",
+   "synonyme": [
+    "Rohkost"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Crumble",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Ofengericht aus Obst unter einer Decke aus Butterstreuseln.",
+   "synonyme": [
+    "Streusel"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Crème (Suppe)",
+   "kategorie": "Suppen",
+   "text": "Mit Sahne verfeinerte, pürierte und gebundene Suppe.",
+   "synonyme": [
+    "Cremesuppe",
+    "Crème"
+   ],
+   "siehe": [
+    "Velouté (Suppe)"
+   ]
+  },
+  {
+   "begriff": "Crème anglaise",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Englische Creme: Vanillesauce aus Milch, Sahne, Eigelb und Zucker, zur Rose abgezogen.",
+   "synonyme": [
+    "Vanillesauce",
+    "Englische Creme"
+   ],
+   "siehe": [
+    "Abziehen",
+    "Crème pâtissière"
+   ]
+  },
+  {
+   "begriff": "Crème brûlée",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Gestockte Vanillecreme mit karamellisierter Zuckerkruste.",
+   "synonyme": [
+    "Creme brulee"
+   ],
+   "siehe": [
+    "Abflämmen",
+    "Stocken lassen"
+   ]
+  },
+  {
+   "begriff": "Crème caramel",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Gestürzter Karamellpudding: im Wasserbad gestockte Eiercreme auf Karamell.",
+   "synonyme": [
+    "Flan",
+    "Karamellpudding"
+   ],
+   "siehe": [
+    "Wasserbad"
+   ]
+  },
+  {
+   "begriff": "Crème Chantilly",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Geschlagene Sahne mit Zucker und Vanille.",
+   "synonyme": [
+    "Chantilly",
+    "Schlagsahne"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Crème diplomate",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Konditorcreme mit untergehobener geschlagener Sahne (ggf. Gelatine).",
+   "synonyme": [
+    "Diplomatcreme"
+   ],
+   "siehe": [
+    "Crème pâtissière"
+   ]
+  },
+  {
+   "begriff": "Crème fraîche",
+   "kategorie": "Zutaten & Würzen",
+   "text": "Gesäuerte Sahne mit hohem Fettgehalt (mind. 30 %); flockt beim Kochen nicht aus.",
+   "synonyme": [
+    "Creme fraiche",
+    "Crème double"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Crème pâtissière",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Konditorcreme: mit Eigelb und Stärke gekochte Vanillecreme als Füllung.",
+   "synonyme": [
+    "Konditorcreme",
+    "Vanillecreme",
+    "Pâtissière"
+   ],
+   "siehe": [
+    "Crème anglaise",
+    "Crème diplomate"
+   ]
+  },
+  {
+   "begriff": "Crêpes Suzette",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Hauchdünne Pfannkuchen in Orangen-Butter-Sauce mit Orangenlikör, flambiert.",
+   "synonyme": [
+    "Crepes Suzette"
+   ],
+   "siehe": [
+    "Flambieren"
+   ]
+  },
+  {
+   "begriff": "Dacquoise",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Baisermasse mit gemahlenen Nüssen oder Mandeln, als Tortenboden gebacken.",
+   "synonyme": [],
+   "siehe": [
+    "Baiser"
+   ]
+  },
+  {
+   "begriff": "Dariole",
+   "kategorie": "Geräte & Utensilien",
+   "text": "Kleine, leicht konische Förmchen für Flans, Puddings und Timbalen.",
+   "synonyme": [
+    "Darioleförmchen"
+   ],
+   "siehe": [
+    "Timbale"
+   ]
+  },
+  {
+   "begriff": "Darne",
+   "kategorie": "Fleisch, Geflügel & Fisch",
+   "text": "Quer zur Mittelgräte geschnittene Scheibe von großem Rundfisch (Lachs, Kabeljau), mit Gräte und Haut.",
+   "synonyme": [
+    "Fischtranche",
+    "Fischsteak"
+   ],
+   "siehe": [
+    "Pavé",
+    "Filetieren"
+   ]
+  },
+  {
+   "begriff": "Dashi",
+   "kategorie": "Zutaten & Würzen",
+   "text": "Japanischer Grundfond aus Kombu-Alge und Bonitoflocken.",
+   "synonyme": [],
+   "siehe": [
+    "Umami",
+    "Fond"
+   ]
+  },
+  {
+   "begriff": "Deglacieren",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Bratsatz mit Wein, Fond oder anderer Flüssigkeit lösen und einkochen.",
+   "synonyme": [
+    "déglacer"
+   ],
+   "siehe": [
+    "Ablöschen",
+    "Bratsatz"
+   ]
+  },
+  {
+   "begriff": "Degustationsmenü",
+   "kategorie": "Menü & Service",
+   "text": "Probiermenü aus vielen kleinen Gängen, die die Küche vorstellt.",
+   "synonyme": [
+    "Menu dégustation",
+    "Tasting Menu"
+   ],
+   "siehe": [
+    "Menüfolge"
+   ]
+  },
+  {
+   "begriff": "Demi-glace",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Brauner Fond bzw. Sauce espagnole, zur Hälfte eingekocht; kräftige Grundsauce für dunkle Saucen.",
+   "synonyme": [
+    "Demiglace",
+    "demi glace"
+   ],
+   "siehe": [
+    "Fond brun",
+    "Sauce espagnole",
+    "Glace"
+   ]
+  },
+  {
+   "begriff": "Dressieren",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Speisen anrichten bzw. mit dem Spritzbeutel in Form spritzen; auch Geflügel in Form binden.",
+   "synonyme": [
+    "anrichten",
+    "dresser"
+   ],
+   "siehe": [
+    "Spritzbeutel",
+    "Bridieren"
+   ]
+  },
+  {
+   "begriff": "Dressiernadel",
+   "kategorie": "Geräte & Utensilien",
+   "text": "Lange Nadel zum Binden von Geflügel und Rouladen mit Küchengarn.",
+   "synonyme": [],
+   "siehe": [
+    "Bridieren"
+   ]
+  },
+  {
+   "begriff": "Duchesse",
+   "kategorie": "Garnituren & Beilagen",
+   "text": "Kartoffelpüree mit Eigelb und Butter, gespritzt und im Ofen gebräunt (Pommes duchesse).",
+   "synonyme": [
+    "Pommes duchesse",
+    "Herzoginkartoffeln"
+   ],
+   "siehe": [
+    "Dressieren"
+   ]
+  },
+  {
+   "begriff": "Duxelles",
+   "kategorie": "Garnituren & Beilagen",
+   "text": "Fein gehackte, mit Schalotten in Butter trocken gedünstete Pilze; Füllung und Würzbasis.",
+   "synonyme": [
+    "Pilzfarce"
+   ],
+   "siehe": [
+    "Farce"
+   ]
+  },
+  {
+   "begriff": "Dämpfen",
+   "kategorie": "Garverfahren",
+   "text": "Garen im aufsteigenden Wasserdampf über kochendem Wasser, ohne dass das Gargut im Wasser liegt; schonend und nährstofferhaltend.",
+   "synonyme": [
+    "dünsten im Dampf"
+   ],
+   "siehe": [
+    "Dünsten"
+   ]
+  },
+  {
+   "begriff": "Dünsten",
+   "kategorie": "Garverfahren",
+   "text": "Garen im eigenen Saft mit wenig Fett und ggf. etwas Flüssigkeit in geschlossenem Topf bei mäßiger Hitze.",
+   "synonyme": [
+    "étuver",
+    "Étuvée"
+   ],
+   "siehe": [
+    "Dämpfen",
+    "Glacieren"
+   ]
+  },
+  {
+   "begriff": "Effilieren",
+   "kategorie": "Schneiden & Formen",
+   "text": "In feine Blättchen oder Stifte schneiden, z. B. Mandeln (effiliert) oder Bohnen.",
+   "synonyme": [
+    "effilé",
+    "Mandelblättchen"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Eggs Benedict",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Pochierte Eier auf getoastetem Muffin mit Schinken und Sauce hollandaise.",
+   "synonyme": [
+    "Eier Benedict"
+   ],
+   "siehe": [
+    "Œuf poché",
+    "Sauce hollandaise"
+   ]
+  },
+  {
+   "begriff": "Eischnee",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Steif geschlagenes Eiweiß, oft mit etwas Zucker; lockert Massen und Soufflés.",
+   "synonyme": [
+    "Eiweiß steif schlagen",
+    "Schnee"
+   ],
+   "siehe": [
+    "Unterheben",
+    "Baiser",
+    "Soufflé"
+   ]
+  },
+  {
+   "begriff": "Emulsion",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Feine, stabile Mischung zweier eigentlich nicht mischbarer Flüssigkeiten wie Öl und Wasser, oft mit Eigelb oder Senf als Emulgator.",
+   "synonyme": [
+    "emulgieren"
+   ],
+   "siehe": [
+    "Mayonnaise",
+    "Sauce hollandaise",
+    "Vinaigrette"
+   ]
+  },
+  {
+   "begriff": "Entfetten",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Fett von Fonds, Saucen oder Suppen abschöpfen oder nach dem Erkalten abheben.",
+   "synonyme": [
+    "dégraisser",
+    "degraissieren"
+   ],
+   "siehe": [
+    "Fond"
+   ]
+  },
+  {
+   "begriff": "Entrecôte",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Zwischenrippenstück vom Rind, als Steak gebraten.",
+   "synonyme": [
+    "Entrecote",
+    "Rib-Eye"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Entremetier",
+   "kategorie": "Küchenbrigade & Organisation",
+   "text": "Posten für Beilagen, Gemüse, Eierspeisen und Suppen.",
+   "synonyme": [],
+   "siehe": [
+    "Chef de partie"
+   ]
+  },
+  {
+   "begriff": "Entrée",
+   "kategorie": "Menü & Service",
+   "text": "Im Französischen die Vorspeise bzw. das Zwischengericht; im amerikanischen Englisch der Hauptgang.",
+   "synonyme": [
+    "Entree",
+    "Vorspeise"
+   ],
+   "siehe": [
+    "Menüfolge"
+   ]
+  },
+  {
+   "begriff": "Envoi",
+   "kategorie": "Küchenbrigade & Organisation",
+   "text": "Abruf eines Gangs an der Ausgabe („Envoyez!“).",
+   "synonyme": [
+    "Abruf"
+   ],
+   "siehe": [
+    "Pass"
+   ]
+  },
+  {
+   "begriff": "Escabeche",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Gebratener oder pochierter Fisch bzw. Geflügel, in einem säuerlichen Sud aus Essig, Öl und Gewürzen eingelegt.",
+   "synonyme": [
+    "Escabèche"
+   ],
+   "siehe": [
+    "Marinieren"
+   ]
+  },
+  {
+   "begriff": "Escalope",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Dünne, plattierte Fleischscheibe, kurz gebraten.",
+   "synonyme": [
+    "Schnitzel",
+    "Scaloppine"
+   ],
+   "siehe": [
+    "Plattieren"
+   ]
+  },
+  {
+   "begriff": "Espuma",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Leichter Schaum aus einer gewürzten Flüssigkeit oder Masse, mit dem Sahnesiphon aufgeschäumt.",
+   "synonyme": [
+    "Schaum",
+    "Siphon-Schaum"
+   ],
+   "siehe": [
+    "Sahnesiphon"
+   ]
+  },
+  {
+   "begriff": "Etamine",
+   "kategorie": "Geräte & Utensilien",
+   "text": "Passiertuch aus feinem Stoff zum Klären und Passieren.",
+   "synonyme": [
+    "Passiertuch",
+    "Mulltuch"
+   ],
+   "siehe": [
+    "Passieren"
+   ]
+  },
+  {
+   "begriff": "Farce",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Fein zerkleinerte, gewürzte Füllmasse aus Fleisch, Fisch oder Gemüse, oft mit Sahne und Ei gebunden.",
+   "synonyme": [
+    "Füllung",
+    "Brät"
+   ],
+   "siehe": [
+    "Farcieren",
+    "Quenelle",
+    "Mousseline"
+   ]
+  },
+  {
+   "begriff": "Farcieren",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Füllen mit einer Farce oder Füllung, z. B. Geflügel, Gemüse oder Teigtaschen.",
+   "synonyme": [
+    "füllen",
+    "farcir"
+   ],
+   "siehe": [
+    "Farce"
+   ]
+  },
+  {
+   "begriff": "Feuilleté",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Gericht oder Gebäck aus Blätterteig.",
+   "synonyme": [
+    "Feuillete"
+   ],
+   "siehe": [
+    "Pâte feuilletée"
+   ]
+  },
+  {
+   "begriff": "Filet mignon",
+   "kategorie": "Fleisch, Geflügel & Fisch",
+   "text": "Das dünne Ende (Spitze) des Filets; beim Schwein auch das ganze Filet.",
+   "synonyme": [
+    "Filetspitze"
+   ],
+   "siehe": [
+    "Medaillon"
+   ]
+  },
+  {
+   "begriff": "Filetieren",
+   "kategorie": "Schneiden & Formen",
+   "text": "Fisch oder Zitrusfrüchte von Gräten, Haut bzw. Häuten befreien und in Filets zerlegen.",
+   "synonyme": [
+    "filieren",
+    "Filets schneiden"
+   ],
+   "siehe": [
+    "Parieren"
+   ]
+  },
+  {
+   "begriff": "Financier",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Kleiner, saftiger Mandelkuchen aus Eiweiß, Nussbutter und gemahlenen Mandeln.",
+   "synonyme": [
+    "Financiers"
+   ],
+   "siehe": [
+    "Beurre noisette"
+   ]
+  },
+  {
+   "begriff": "Fines herbes",
+   "kategorie": "Zutaten & Würzen",
+   "text": "Feine Kräutermischung aus Petersilie, Schnittlauch, Kerbel und Estragon.",
+   "synonyme": [
+    "feine Kräuter"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Fingerfood",
+   "kategorie": "Menü & Service",
+   "text": "Kleine Speisen, die ohne Besteck gegessen werden.",
+   "synonyme": [
+    "Flying Food",
+    "Fingerfood"
+   ],
+   "siehe": [
+    "Canapé"
+   ]
+  },
+  {
+   "begriff": "Flambieren",
+   "kategorie": "Garverfahren",
+   "text": "Speise mit hochprozentigem Alkohol übergießen und anzünden; der Alkohol verbrennt, Aroma bleibt.",
+   "synonyme": [
+    "flambé"
+   ],
+   "siehe": [
+    "Crêpes Suzette"
+   ]
+  },
+  {
+   "begriff": "Fleur de Sel",
+   "kategorie": "Zutaten & Würzen",
+   "text": "Feines, von Hand abgeschöpftes Meersalz aus Salzgärten; zum Nachsalzen bei Tisch.",
+   "synonyme": [
+    "Salzblume"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Foie gras",
+   "kategorie": "Fleisch, Geflügel & Fisch",
+   "text": "Leber gestopfter Gänse oder Enten; als Terrine, Parfait oder kurz gebraten.",
+   "synonyme": [
+    "Stopfleber",
+    "Gänsestopfleber"
+   ],
+   "siehe": [
+    "Terrine",
+    "Magret"
+   ]
+  },
+  {
+   "begriff": "Fond",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Kräftiger Grundansatz aus Knochen, Fleisch-, Fisch- oder Gemüseabschnitten mit Aromaten, lange ausgekocht und passiert; Basis für Saucen und Suppen.",
+   "synonyme": [
+    "Grundbrühe",
+    "Fonds"
+   ],
+   "siehe": [
+    "Fond blanc",
+    "Fond brun",
+    "Fumet",
+    "Mirepoix"
+   ]
+  },
+  {
+   "begriff": "Fond blanc",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Heller Fond aus nicht angerösteten Kalbs- oder Geflügelknochen.",
+   "synonyme": [
+    "heller Fond",
+    "weißer Fond"
+   ],
+   "siehe": [
+    "Fond",
+    "Velouté"
+   ]
+  },
+  {
+   "begriff": "Fond brun",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Brauner Fond aus kräftig angerösteten Knochen und Röstgemüse, oft mit Tomatenmark.",
+   "synonyme": [
+    "brauner Fond",
+    "Kalbsfond"
+   ],
+   "siehe": [
+    "Fond",
+    "Demi-glace"
+   ]
+  },
+  {
+   "begriff": "Fond de veau",
+   "kategorie": "Zutaten & Würzen",
+   "text": "Kalbsfond; Basis vieler klassischer Saucen.",
+   "synonyme": [
+    "Kalbsfond"
+   ],
+   "siehe": [
+    "Fond brun"
+   ]
+  },
+  {
+   "begriff": "Fondant",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Weiße, cremig-zähe Zuckermasse zum Glasieren; auch Schokoladenküchlein mit flüssigem Kern (Fondant au chocolat).",
+   "synonyme": [
+    "Fondantglasur",
+    "Fondant au chocolat"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Fondue",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Gericht, bei dem am Tisch im gemeinsamen Topf gegart oder getunkt wird (Käse, Brühe, Öl, Schokolade).",
+   "synonyme": [],
+   "siehe": []
+  },
+  {
+   "begriff": "Food Pairing",
+   "kategorie": "Menü & Service",
+   "text": "Kombination von Speisen und Getränken bzw. Zutaten nach passenden Aromen.",
+   "synonyme": [
+    "Speisenbegleitung",
+    "Foodpairing"
+   ],
+   "siehe": [
+    "Sommelier"
+   ]
+  },
+  {
+   "begriff": "Fricassée",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Helles Ragout aus Geflügel oder Kalbfleisch in heller, mit Eigelb und Sahne legierter Sauce.",
+   "synonyme": [
+    "Frikassee"
+   ],
+   "siehe": [
+    "Blanquette",
+    "Velouté"
+   ]
+  },
+  {
+   "begriff": "Frittieren",
+   "kategorie": "Garverfahren",
+   "text": "Ausbacken in heißem, schwimmendem Fett (meist 160–180 °C).",
+   "synonyme": [
+    "ausbacken",
+    "fritieren",
+    "deep-frying"
+   ],
+   "siehe": [
+    "Tempura",
+    "Beignet"
+   ]
+  },
+  {
+   "begriff": "Fumet",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Konzentrierter Fischfond aus Gräten und Köpfen, meist mit Weißwein; nur kurz (ca. 20 Minuten) gekocht.",
+   "synonyme": [
+    "Fischfond",
+    "Fumet de poisson"
+   ],
+   "siehe": [
+    "Fond",
+    "Court-bouillon"
+   ]
+  },
+  {
+   "begriff": "Galantine",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Entbeintes, mit Farce gefülltes Geflügel oder Fleisch, in Form gebunden, gegart und kalt in Scheiben serviert.",
+   "synonyme": [],
+   "siehe": [
+    "Ballotine",
+    "Terrine"
+   ]
+  },
+  {
+   "begriff": "Ganache",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Emulsion aus Schokolade und heißer Sahne; als Glasur, Füllung oder für Pralinen.",
+   "synonyme": [],
+   "siehe": [
+    "Emulsion",
+    "Kuvertüre"
+   ]
+  },
+  {
+   "begriff": "Garam Masala",
+   "kategorie": "Zutaten & Würzen",
+   "text": "Indische Gewürzmischung aus gerösteten Gewürzen wie Kreuzkümmel, Koriander, Kardamom, Zimt und Nelken.",
+   "synonyme": [],
+   "siehe": []
+  },
+  {
+   "begriff": "Gardemanger",
+   "kategorie": "Küchenbrigade & Organisation",
+   "text": "Posten der kalten Küche: Vorspeisen, Terrinen, Salate, Aufschnitt, Fleisch- und Fischvorbereitung.",
+   "synonyme": [
+    "Garde-manger",
+    "kalte Küche"
+   ],
+   "siehe": [
+    "Terrine"
+   ]
+  },
+  {
+   "begriff": "Gargrade",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Garstufen von Kurzbratfleisch: bleu (sehr roh), saignant/rare (blutig), à point/medium (rosa), bien cuit/well done (durch).",
+   "synonyme": [
+    "bleu",
+    "saignant",
+    "à point",
+    "rare",
+    "medium",
+    "well done"
+   ],
+   "siehe": [
+    "Kerntemperatur"
+   ]
+  },
+  {
+   "begriff": "Garnitur",
+   "kategorie": "Garnituren & Beilagen",
+   "text": "Beilagen und Dekoration, die ein Gericht vervollständigen; klassische Garnituren tragen eigene Namen (z. B. „à la jardinière“).",
+   "synonyme": [
+    "Garnierung",
+    "garnieren"
+   ],
+   "siehe": [
+    "Jardinière"
+   ]
+  },
+  {
+   "begriff": "Garziehen",
+   "kategorie": "Garverfahren",
+   "text": "Garen knapp unter dem Siedepunkt (etwa 75–95 °C), die Flüssigkeit bewegt sich kaum.",
+   "synonyme": [
+    "ziehen lassen",
+    "simmern"
+   ],
+   "siehe": [
+    "Pochieren"
+   ]
+  },
+  {
+   "begriff": "Gastrique",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Karamell mit Essig abgelöscht; süß-saure Basis für Saucen zu Ente, Wild und Obst.",
+   "synonyme": [
+    "Gastrik"
+   ],
+   "siehe": [
+    "Sauce bigarade",
+    "Karamellisieren"
+   ]
+  },
+  {
+   "begriff": "Gastronorm",
+   "kategorie": "Geräte & Utensilien",
+   "text": "Normgrößen für Behälter in der Profiküche (GN 1/1 = 530 × 325 mm).",
+   "synonyme": [
+    "GN-Behälter"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Gazpacho",
+   "kategorie": "Suppen",
+   "text": "Kalte spanische Suppe aus rohen Tomaten, Gurken, Paprika, Knoblauch, Brot und Olivenöl.",
+   "synonyme": [
+    "Gaspacho"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Geklärte Butter",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Butter, aus der Wasser und Milcheiweiß entfernt wurden; hoch erhitzbar. Ghee und Butterschmalz sind verwandt.",
+   "synonyme": [
+    "Beurre clarifié",
+    "Butterschmalz",
+    "Ghee"
+   ],
+   "siehe": [
+    "Clarifizieren"
+   ]
+  },
+  {
+   "begriff": "Gelatine",
+   "kategorie": "Zutaten & Würzen",
+   "text": "Geliermittel aus tierischem Kollagen; in Blatt- oder Pulverform, wird aufgelöst, nicht gekocht.",
+   "synonyme": [
+    "Blattgelatine"
+   ],
+   "siehe": [
+    "Aspik",
+    "Agar-Agar"
+   ]
+  },
+  {
+   "begriff": "Gigot",
+   "kategorie": "Fleisch, Geflügel & Fisch",
+   "text": "Lammkeule, meist im Ganzen gebraten.",
+   "synonyme": [
+    "Gigot d'agneau",
+    "Lammkeule"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Glace",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Bis zur sirupartigen Konsistenz eingekochter Fond (Glace de viande); auch Speiseeis.",
+   "synonyme": [
+    "Glace de viande",
+    "Fleischglace"
+   ],
+   "siehe": [
+    "Demi-glace",
+    "Reduzieren"
+   ]
+  },
+  {
+   "begriff": "Glacieren",
+   "kategorie": "Garverfahren",
+   "text": "Gemüse mit Butter, Zucker und wenig Flüssigkeit garen, bis die Flüssigkeit zu einem glänzenden Überzug eingekocht ist; auch Fleisch mit eingekochtem Fond überziehen.",
+   "synonyme": [
+    "glasieren",
+    "glacer"
+   ],
+   "siehe": [
+    "Glace",
+    "Karamellisieren"
+   ]
+  },
+  {
+   "begriff": "Glasur",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Überzug für Gebäck, z. B. aus Puderzucker, Schokolade oder Fondant; spiegelglatt als Spiegelglasur.",
+   "synonyme": [
+    "Glaçage",
+    "Spiegelglasur"
+   ],
+   "siehe": [
+    "Fondant"
+   ]
+  },
+  {
+   "begriff": "Gnocchi",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Kleine Nocken aus Kartoffel-, Grieß- oder Brandteig, gekocht oder gebraten.",
+   "synonyme": [
+    "Nocken"
+   ],
+   "siehe": [
+    "Quenelle"
+   ]
+  },
+  {
+   "begriff": "Goujonnettes",
+   "kategorie": "Fleisch, Geflügel & Fisch",
+   "text": "Schmale, schräg geschnittene Fischfilet-Streifen, meist paniert und frittiert.",
+   "synonyme": [
+    "Goujons",
+    "Fischstreifen"
+   ],
+   "siehe": [
+    "Panieren"
+   ]
+  },
+  {
+   "begriff": "Granité",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Grob gefrorenes, körniges Eis aus gesüßtem Saft, Kaffee oder Wein.",
+   "synonyme": [
+    "Granita"
+   ],
+   "siehe": [
+    "Sorbet"
+   ]
+  },
+  {
+   "begriff": "Gratin",
+   "kategorie": "Garverfahren",
+   "text": "Im Ofen überbackenes Gericht mit gebräunter Kruste, z. B. Kartoffelgratin.",
+   "synonyme": [
+    "Gratin dauphinois"
+   ],
+   "siehe": [
+    "Gratinieren"
+   ]
+  },
+  {
+   "begriff": "Gratinieren",
+   "kategorie": "Garverfahren",
+   "text": "Oberfläche bei starker Oberhitze bräunen, oft mit Käse, Butter oder einer Sauce.",
+   "synonyme": [
+    "überbacken",
+    "gratiner"
+   ],
+   "siehe": [
+    "Gratin",
+    "Salamander"
+   ]
+  },
+  {
+   "begriff": "Gremolata",
+   "kategorie": "Garnituren & Beilagen",
+   "text": "Mischung aus gehackter Petersilie, Zitronenschale und Knoblauch, über Ossobuco gestreut.",
+   "synonyme": [
+    "Gremolada"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Grillen",
+   "kategorie": "Garverfahren",
+   "text": "Garen durch Strahlungs- oder Kontakthitze auf dem Rost, der Grillplatte oder unter dem Grill.",
+   "synonyme": [
+    "griller"
+   ],
+   "siehe": [
+    "Plancha"
+   ]
+  },
+  {
+   "begriff": "Guéridon",
+   "kategorie": "Menü & Service",
+   "text": "Beistelltisch für Arbeiten am Tisch des Gastes wie Tranchieren oder Flambieren.",
+   "synonyme": [
+    "Gueridon"
+   ],
+   "siehe": [
+    "Flambieren",
+    "Tranchieren"
+   ]
+  },
+  {
+   "begriff": "Génoise",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Französischer Biskuit, warm aufgeschlagen und mit etwas flüssiger Butter.",
+   "synonyme": [
+    "Genoise"
+   ],
+   "siehe": [
+    "Biskuit"
+   ]
+  },
+  {
+   "begriff": "HACCP",
+   "kategorie": "Küchenbrigade & Organisation",
+   "text": "Hygienekonzept zur Gefahrenanalyse und Überwachung kritischer Kontrollpunkte in der Lebensmittelverarbeitung.",
+   "synonyme": [
+    "Hygienekonzept"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Hacheln",
+   "kategorie": "Schneiden & Formen",
+   "text": "Sehr fein hacken, z. B. Kräuter oder Schalotten.",
+   "synonyme": [
+    "hacher",
+    "fein hacken"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Hachis",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Fein gehacktes, gegartes Fleisch, z. B. im Hachis Parmentier unter Kartoffelpüree überbacken.",
+   "synonyme": [
+    "Haschee",
+    "Hachis Parmentier"
+   ],
+   "siehe": [
+    "Gratinieren"
+   ]
+  },
+  {
+   "begriff": "Herbes de Provence",
+   "kategorie": "Zutaten & Würzen",
+   "text": "Kräutermischung aus Thymian, Rosmarin, Bohnenkraut, Oregano und weiteren Kräutern der Provence.",
+   "synonyme": [
+    "Kräuter der Provence"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Hippenmasse",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Dünnflüssiger Teig aus Mehl, Zucker, Eiweiß und Butter für hauchdünnes Gebäck.",
+   "synonyme": [
+    "Hippen"
+   ],
+   "siehe": [
+    "Tuile"
+   ]
+  },
+  {
+   "begriff": "Hors d'œuvre",
+   "kategorie": "Menü & Service",
+   "text": "Kalte oder warme Vorspeise bzw. kleine Appetithappen.",
+   "synonyme": [
+    "Hors d'oeuvre",
+    "Horsd'œuvre"
+   ],
+   "siehe": [
+    "Amuse-Bouche"
+   ]
+  },
+  {
+   "begriff": "Jardinière",
+   "kategorie": "Schneiden & Formen",
+   "text": "Gemüse in Stäbchen von etwa 4 mm × 4 mm × 4 cm schneiden; auch eine Gemüsegarnitur aus solchen Stäbchen.",
+   "synonyme": [
+    "Jardiniere"
+   ],
+   "siehe": [
+    "Bâtonnet"
+   ]
+  },
+  {
+   "begriff": "Joconde",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Dünner Mandelbiskuit, oft gemustert, für Torten- und Dessertränder.",
+   "synonyme": [
+    "Biscuit Joconde"
+   ],
+   "siehe": [
+    "Biskuit"
+   ]
+  },
+  {
+   "begriff": "Julienne",
+   "kategorie": "Schneiden & Formen",
+   "text": "Gemüse, Schalen oder Fleisch in sehr feine, streichholzartige Streifen schneiden (etwa 1–2 mm × 4–5 cm).",
+   "synonyme": [
+    "Juliennestreifen"
+   ],
+   "siehe": [
+    "Brunoise",
+    "Chiffonade"
+   ]
+  },
+  {
+   "begriff": "Jus",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Aus dem Bratsatz und Fond gewonnener, entfetteter und reduzierter Bratensaft; nicht oder nur leicht gebunden.",
+   "synonyme": [
+    "Jus de rôti",
+    "Bratenjus"
+   ],
+   "siehe": [
+    "Bratsatz",
+    "Fond brun"
+   ]
+  },
+  {
+   "begriff": "Karamellisieren",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Zucker erhitzen, bis er schmilzt und braun wird; auch Speisen mit Zucker überziehen und bräunen.",
+   "synonyme": [
+    "caraméliser"
+   ],
+   "siehe": [
+    "Abflämmen",
+    "Glacieren"
+   ]
+  },
+  {
+   "begriff": "Kerntemperatur",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Temperatur im Inneren des Garguts, mit dem Thermometer gemessen; bestimmt den Gargrad, z. B. Rinderfilet rosa etwa 54–56 °C.",
+   "synonyme": [
+    "Garpunkt"
+   ],
+   "siehe": [
+    "Niedertemperaturgaren",
+    "Gargrade"
+   ]
+  },
+  {
+   "begriff": "Kochen",
+   "kategorie": "Garverfahren",
+   "text": "Garen in sprudelnd siedender Flüssigkeit bei etwa 100 °C.",
+   "synonyme": [
+    "sieden"
+   ],
+   "siehe": [
+    "Garziehen",
+    "Blanchieren"
+   ]
+  },
+  {
+   "begriff": "Kombidämpfer",
+   "kategorie": "Geräte & Utensilien",
+   "text": "Profi-Ofen, der Heißluft und Dampf kombiniert und Garprogramme steuert.",
+   "synonyme": [
+    "Combi-Steamer"
+   ],
+   "siehe": [
+    "Dämpfen",
+    "Niedertemperaturgaren"
+   ]
+  },
+  {
+   "begriff": "Krustentiere",
+   "kategorie": "Fleisch, Geflügel & Fisch",
+   "text": "Tiere mit Panzer wie Hummer, Langusten, Garnelen, Krebse und Krabben.",
+   "synonyme": [
+    "Krebstiere",
+    "Crustacés"
+   ],
+   "siehe": [
+    "Bisque"
+   ]
+  },
+  {
+   "begriff": "Kräuterbutter",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Butter mit gehackten Kräutern und Würzen, z. B. Beurre maître d'hôtel mit Petersilie und Zitrone; zu Gegrilltem.",
+   "synonyme": [
+    "Beurre maître d'hôtel",
+    "Café-de-Paris-Butter",
+    "Beurre composé"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Kuvertüre",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Hochwertige Schokolade mit hohem Kakaobutteranteil zum Überziehen; muss temperiert werden.",
+   "synonyme": [
+    "Couverture",
+    "Überzugsschokolade"
+   ],
+   "siehe": [
+    "Temperieren",
+    "Ganache"
+   ]
+  },
+  {
+   "begriff": "Lardons",
+   "kategorie": "Zutaten & Würzen",
+   "text": "Gewürfelter oder in Streifen geschnittener Speck.",
+   "synonyme": [
+    "Speckwürfel",
+    "Speckstreifen"
+   ],
+   "siehe": [
+    "Bardieren"
+   ]
+  },
+  {
+   "begriff": "Lecithin",
+   "kategorie": "Zutaten & Würzen",
+   "text": "Emulgator (z. B. aus Soja); stabilisiert Emulsionen und luftige Schäume („Airs“).",
+   "synonyme": [
+    "Sojalecithin"
+   ],
+   "siehe": [
+    "Emulsion",
+    "Espuma"
+   ]
+  },
+  {
+   "begriff": "Legieren",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Suppen oder Saucen mit einer Mischung aus Eigelb und Sahne binden, ohne sie danach noch kochen zu lassen.",
+   "synonyme": [
+    "Legierung"
+   ],
+   "siehe": [
+    "Liaison",
+    "Abziehen"
+   ]
+  },
+  {
+   "begriff": "Liaison",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Bindung aus Eigelb und Sahne für Suppen und Saucen.",
+   "synonyme": [
+    "Legierung"
+   ],
+   "siehe": [
+    "Legieren",
+    "Abziehen"
+   ]
+  },
+  {
+   "begriff": "Löffelbiskuit",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Längliche, trockene Biskuits; für Tiramisu und Charlotten.",
+   "synonyme": [
+    "Savoiardi",
+    "Biscuits à la cuillère"
+   ],
+   "siehe": [
+    "Charlotte",
+    "Biskuit"
+   ]
+  },
+  {
+   "begriff": "Macaron",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Mandel-Baiser-Gebäck mit glatter Oberfläche und „Füßchen“, gefüllt mit Ganache oder Creme.",
+   "synonyme": [
+    "Macarons",
+    "Makrone"
+   ],
+   "siehe": [
+    "Baiser",
+    "Ganache"
+   ]
+  },
+  {
+   "begriff": "Macédoine",
+   "kategorie": "Schneiden & Formen",
+   "text": "Gemüse oder Obst in gleichmäßige Würfel von etwa 5 mm schneiden; auch ein gemischter Salat daraus.",
+   "synonyme": [
+    "Macedoine"
+   ],
+   "siehe": [
+    "Brunoise"
+   ]
+  },
+  {
+   "begriff": "Madeleine",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Kleines Butterbiskuitgebäck in Muschelform.",
+   "synonyme": [
+    "Madeleines"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Magret",
+   "kategorie": "Fleisch, Geflügel & Fisch",
+   "text": "Brust der Mastente (für Foie gras), mit Fettschicht, rosa gebraten.",
+   "synonyme": [
+    "Magret de canard",
+    "Entenbrust"
+   ],
+   "siehe": [
+    "Foie gras"
+   ]
+  },
+  {
+   "begriff": "Maillard-Reaktion",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Bräunung beim Braten, Backen und Rösten: Eiweiß und Zucker bilden Röstaromen und braune Farbe.",
+   "synonyme": [
+    "Bräunungsreaktion"
+   ],
+   "siehe": [
+    "Braten",
+    "Rösten"
+   ]
+  },
+  {
+   "begriff": "Mandoline",
+   "kategorie": "Geräte & Utensilien",
+   "text": "Gemüsehobel mit verstellbarer Klinge für gleichmäßige Scheiben und Stifte.",
+   "synonyme": [
+    "Gemüsehobel"
+   ],
+   "siehe": [
+    "Julienne"
+   ]
+  },
+  {
+   "begriff": "Marinieren",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "In eine würzende, oft säurehaltige Flüssigkeit oder Paste einlegen, um Geschmack zu geben und ggf. zarter zu machen.",
+   "synonyme": [
+    "einlegen",
+    "beizen"
+   ],
+   "siehe": [
+    "Beize"
+   ]
+  },
+  {
+   "begriff": "Matignon",
+   "kategorie": "Schneiden & Formen",
+   "text": "Fein geschnittenes, in Butter angeschwitztes Gemüse (oft mit Schinken) als Aromabett für Fleisch und Fisch.",
+   "synonyme": [],
+   "siehe": [
+    "Mirepoix",
+    "Poëlieren"
+   ]
+  },
+  {
+   "begriff": "Mayonnaise",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Kalt aufgeschlagene Emulsion aus Eigelb, Senf, Öl und Säure; Basis für Remoulade, Aioli u. a.",
+   "synonyme": [
+    "Mayo"
+   ],
+   "siehe": [
+    "Emulsion",
+    "Aioli",
+    "Sauce rémoulade"
+   ]
+  },
+  {
+   "begriff": "Medaillon",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Kleine, runde, dicke Scheibe aus Filet (Kalb, Schwein, Rind, Seeteufel).",
+   "synonyme": [
+    "Medaillons",
+    "Mignon"
+   ],
+   "siehe": [
+    "Tournedos"
+   ]
+  },
+  {
+   "begriff": "Menüfolge",
+   "kategorie": "Menü & Service",
+   "text": "Reihenfolge der Gänge eines Menüs, klassisch z. B. Vorspeise, Suppe, Zwischengericht, Hauptgang, Käse, Dessert.",
+   "synonyme": [
+    "Gänge",
+    "Speisenfolge"
+   ],
+   "siehe": [
+    "Amuse-Bouche",
+    "Entrée",
+    "Trou normand"
+   ]
+  },
+  {
+   "begriff": "Mie de pain",
+   "kategorie": "Zutaten & Würzen",
+   "text": "Weißbrotkrume ohne Rinde, frisch gerieben; für Panaden, Farcen und Kräuterkrusten.",
+   "synonyme": [
+    "Weißbrotbrösel",
+    "Mie"
+   ],
+   "siehe": [
+    "Panieren"
+   ]
+  },
+  {
+   "begriff": "Mirepoix",
+   "kategorie": "Schneiden & Formen",
+   "text": "Grob gewürfeltes Röstgemüse aus Zwiebel, Karotte und Sellerie (ggf. Lauch) als Aromabasis für Fonds, Saucen und Schmorgerichte.",
+   "synonyme": [
+    "Röstgemüse",
+    "Matignon"
+   ],
+   "siehe": [
+    "Matignon",
+    "Fond"
+   ]
+  },
+  {
+   "begriff": "Mirin",
+   "kategorie": "Zutaten & Würzen",
+   "text": "Süßer japanischer Reiswein zum Würzen.",
+   "synonyme": [],
+   "siehe": []
+  },
+  {
+   "begriff": "Mise en place",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Alle Zutaten und Geräte vor dem Kochen vorbereitet, abgewogen und griffbereit hinstellen.",
+   "synonyme": [
+    "Mise-en-place",
+    "Mise"
+   ],
+   "siehe": [
+    "À la minute"
+   ]
+  },
+  {
+   "begriff": "Mondieren",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Häuten von Tomaten, Pfirsichen oder Mandeln nach kurzem Überbrühen.",
+   "synonyme": [
+    "monder",
+    "häuten",
+    "enthäuten"
+   ],
+   "siehe": [
+    "Blanchieren",
+    "Concassée"
+   ]
+  },
+  {
+   "begriff": "Mousse",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Luftige Masse aus einem Grundpüree, mit geschlagener Sahne und/oder Eischnee aufgelockert, süß oder herzhaft.",
+   "synonyme": [
+    "Schaum"
+   ],
+   "siehe": [
+    "Unterheben",
+    "Parfait"
+   ]
+  },
+  {
+   "begriff": "Mousseline",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Besonders feine, lockere Farce mit viel Sahne; auch Saucen oder Pürees mit geschlagener Sahne.",
+   "synonyme": [
+    "Mousseline-Farce"
+   ],
+   "siehe": [
+    "Farce",
+    "Sauce mousseline"
+   ]
+  },
+  {
+   "begriff": "Muttersaucen",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Die fünf klassischen Grundsaucen nach Escoffier, aus denen viele weitere abgeleitet werden: Béchamel, Velouté, Espagnole, Hollandaise und Tomate.",
+   "synonyme": [
+    "Grundsaucen",
+    "Mother sauces"
+   ],
+   "siehe": [
+    "Sauce béchamel",
+    "Velouté",
+    "Sauce espagnole",
+    "Sauce hollandaise",
+    "Sauce tomate"
+   ]
+  },
+  {
+   "begriff": "Nage",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Würziger Gemüse-Kräuter-Sud, in dem Meeresfrüchte gegart und mit dem sie serviert werden („à la nage“).",
+   "synonyme": [
+    "à la nage"
+   ],
+   "siehe": [
+    "Court-bouillon"
+   ]
+  },
+  {
+   "begriff": "Nappe",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Konsistenz, bei der eine Sauce oder Creme einen Löffelrücken gleichmäßig überzieht.",
+   "synonyme": [
+    "à la nappe"
+   ],
+   "siehe": [
+    "Nappieren",
+    "Crème anglaise"
+   ]
+  },
+  {
+   "begriff": "Nappieren",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Eine Speise gleichmäßig mit Sauce überziehen; auch: eine Sauce ist so dick, dass sie den Löffelrücken überzieht.",
+   "synonyme": [
+    "napper",
+    "überziehen"
+   ],
+   "siehe": [
+    "Nappe"
+   ]
+  },
+  {
+   "begriff": "Navarin",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Französisches Lammragout mit Frühlingsgemüse.",
+   "synonyme": [],
+   "siehe": [
+    "Ragout"
+   ]
+  },
+  {
+   "begriff": "Niedertemperaturgaren",
+   "kategorie": "Garverfahren",
+   "text": "Fleisch oder Fisch bei niedriger Ofentemperatur (etwa 70–100 °C) sehr langsam bis zur gewünschten Kerntemperatur garen; gleichmäßig rosa und saftig.",
+   "synonyme": [
+    "NT-Garen",
+    "Niedrigtemperaturgaren"
+   ],
+   "siehe": [
+    "Sous-vide",
+    "Kerntemperatur"
+   ]
+  },
+  {
+   "begriff": "Noisette",
+   "kategorie": "Fleisch, Geflügel & Fisch",
+   "text": "Kleines, rundes Nüsschen aus dem Lamm- oder Rehrücken; „noisette“ heißt auch haselnussgroß bzw. nussbraun.",
+   "synonyme": [
+    "Lammnüsschen"
+   ],
+   "siehe": [
+    "Medaillon",
+    "Beurre noisette"
+   ]
+  },
+  {
+   "begriff": "Nougat",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Masse aus Zucker oder Honig und Nüssen bzw. Mandeln; als heller (weißer) oder dunkler Nougat.",
+   "synonyme": [
+    "Nugat",
+    "Turrón"
+   ],
+   "siehe": [
+    "Pralinée"
+   ]
+  },
+  {
+   "begriff": "Pacojet",
+   "kategorie": "Geräte & Utensilien",
+   "text": "Gerät, das tiefgefrorene Massen fein zu Eis, Sorbet oder Farcen „paconiert“.",
+   "synonyme": [
+    "paconieren"
+   ],
+   "siehe": [
+    "Sorbet"
+   ]
+  },
+  {
+   "begriff": "Paillard",
+   "kategorie": "Fleisch, Geflügel & Fisch",
+   "text": "Sehr dünn plattierte Scheibe von Kalb oder Geflügel, kurz gegrillt.",
+   "synonyme": [],
+   "siehe": [
+    "Plattieren",
+    "Escalope"
+   ]
+  },
+  {
+   "begriff": "Panieren",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "In Mehl, verquirltem Ei und Bröseln wenden, bevor gebraten oder frittiert wird; „Wiener Art“.",
+   "synonyme": [
+    "Panade",
+    "panier"
+   ],
+   "siehe": [
+    "Panko",
+    "Frittieren"
+   ]
+  },
+  {
+   "begriff": "Panko",
+   "kategorie": "Zutaten & Würzen",
+   "text": "Grobe, luftige japanische Paniermehlflocken für besonders knusprige Panaden.",
+   "synonyme": [],
+   "siehe": [
+    "Panieren"
+   ]
+  },
+  {
+   "begriff": "Parfait",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Halbgefrorenes aus Eigelb-Zucker-Masse mit Sahne; herzhaft auch eine feine, gebundene Leber- oder Geflügelmasse.",
+   "synonyme": [
+    "Halbgefrorenes",
+    "Semifreddo"
+   ],
+   "siehe": [
+    "Mousse"
+   ]
+  },
+  {
+   "begriff": "Parieren",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Fleisch oder Fisch von Sehnen, Haut und Fett befreien und in Form schneiden; die Abschnitte heißen Parüren.",
+   "synonyme": [
+    "parer",
+    "Parüren"
+   ],
+   "siehe": [
+    "Filetieren"
+   ]
+  },
+  {
+   "begriff": "Parisienne",
+   "kategorie": "Schneiden & Formen",
+   "text": "Mit dem Kugelausstecher aus Kartoffeln, Gemüse oder Obst kleine Kugeln ausstechen.",
+   "synonyme": [
+    "Pariser Kartoffeln",
+    "Kugelausstecher"
+   ],
+   "siehe": [
+    "Pommes parisiennes"
+   ]
+  },
+  {
+   "begriff": "Parmentier",
+   "kategorie": "Garnituren & Beilagen",
+   "text": "Bezeichnung für Gerichte mit Kartoffeln (nach Antoine Parmentier), z. B. Potage Parmentier.",
+   "synonyme": [],
+   "siehe": [
+    "Hachis"
+   ]
+  },
+  {
+   "begriff": "Pass",
+   "kategorie": "Küchenbrigade & Organisation",
+   "text": "Ausgabe zwischen Küche und Service, wo Teller kontrolliert und abgerufen werden.",
+   "synonyme": [
+    "Passe",
+    "Ausgabe"
+   ],
+   "siehe": [
+    "Envoi"
+   ]
+  },
+  {
+   "begriff": "Passieren",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Durch ein feines Sieb oder Tuch streichen bzw. gießen, um eine glatte Masse oder klare Flüssigkeit zu erhalten.",
+   "synonyme": [
+    "passer",
+    "durchseihen"
+   ],
+   "siehe": [
+    "Chinois",
+    "Etamine"
+   ]
+  },
+  {
+   "begriff": "Paupiette",
+   "kategorie": "Fleisch, Geflügel & Fisch",
+   "text": "Gefüllte Roulade aus dünn plattiertem Fleisch oder Fischfilet.",
+   "synonyme": [
+    "Roulade",
+    "Rouladen"
+   ],
+   "siehe": [
+    "Farce",
+    "Plattieren"
+   ]
+  },
+  {
+   "begriff": "Pavlova",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Baisertorte mit knuspriger Hülle und weichem Inneren, mit Sahne und Früchten.",
+   "synonyme": [],
+   "siehe": [
+    "Baiser"
+   ]
+  },
+  {
+   "begriff": "Pavé",
+   "kategorie": "Fleisch, Geflügel & Fisch",
+   "text": "Dickes, rechteckiges Stück aus Filet von Fisch oder Fleisch.",
+   "synonyme": [
+    "Pave"
+   ],
+   "siehe": [
+    "Darne"
+   ]
+  },
+  {
+   "begriff": "Paysanne",
+   "kategorie": "Schneiden & Formen",
+   "text": "Gemüse in dünne, flache Blättchen von etwa 1 cm schneiden („nach Bauernart“).",
+   "synonyme": [],
+   "siehe": []
+  },
+  {
+   "begriff": "Persillade",
+   "kategorie": "Garnituren & Beilagen",
+   "text": "Gehackte Petersilie mit Knoblauch, kurz vor Schluss über Gebratenes gegeben.",
+   "synonyme": [],
+   "siehe": [
+    "Gremolata"
+   ]
+  },
+  {
+   "begriff": "Pesto",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Kalt gerührte Sauce aus Kräutern (klassisch Basilikum), Pinienkernen, Hartkäse, Knoblauch und Olivenöl.",
+   "synonyme": [
+    "Pesto genovese",
+    "Pistou"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Petits fours",
+   "kategorie": "Menü & Service",
+   "text": "Kleines Feingebäck und Konfekt zum Kaffee nach dem Dessert.",
+   "synonyme": [
+    "Mignardises",
+    "Friandises"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Pickles",
+   "kategorie": "Garnituren & Beilagen",
+   "text": "In Essig-Zucker-Sud eingelegtes Gemüse oder Obst; heute oft schnell eingelegt als frische Säurenote.",
+   "synonyme": [
+    "eingelegtes Gemüse",
+    "Quick Pickles"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Plancha",
+   "kategorie": "Garverfahren",
+   "text": "Heiße, glatte Metallplatte zum fettarmen Braten und Grillen; auch die Zubereitung „a la plancha“.",
+   "synonyme": [
+    "a la plancha"
+   ],
+   "siehe": [
+    "Grillen"
+   ]
+  },
+  {
+   "begriff": "Plat principal",
+   "kategorie": "Menü & Service",
+   "text": "Hauptgang eines Menüs.",
+   "synonyme": [
+    "Hauptgang",
+    "Plat de résistance"
+   ],
+   "siehe": [
+    "Menüfolge"
+   ]
+  },
+  {
+   "begriff": "Plattiereisen",
+   "kategorie": "Geräte & Utensilien",
+   "text": "Schwerer, flacher Fleischklopfer.",
+   "synonyme": [
+    "Fleischklopfer"
+   ],
+   "siehe": [
+    "Plattieren"
+   ]
+  },
+  {
+   "begriff": "Plattieren",
+   "kategorie": "Schneiden & Formen",
+   "text": "Fleisch zwischen Folie mit dem Plattiereisen gleichmäßig flach klopfen, etwa für Schnitzel oder Rouladen.",
+   "synonyme": [
+    "klopfen"
+   ],
+   "siehe": [
+    "Escalope"
+   ]
+  },
+  {
+   "begriff": "Pochieren",
+   "kategorie": "Garverfahren",
+   "text": "Schonendes Garziehen in heißer, nicht kochender Flüssigkeit; klassisch für Eier, Fisch und Geflügelbrust.",
+   "synonyme": [
+    "pocher",
+    "verlorene Eier"
+   ],
+   "siehe": [
+    "Garziehen",
+    "Court-bouillon"
+   ]
+  },
+  {
+   "begriff": "Poissonnier",
+   "kategorie": "Küchenbrigade & Organisation",
+   "text": "Posten für Fisch und Meeresfrüchte.",
+   "synonyme": [
+    "Fischkoch"
+   ],
+   "siehe": [
+    "Chef de partie"
+   ]
+  },
+  {
+   "begriff": "Polenta",
+   "kategorie": "Garnituren & Beilagen",
+   "text": "Maisgrieß, zu Brei gekocht; weich serviert oder fest werden lassen und gebraten bzw. gegrillt.",
+   "synonyme": [],
+   "siehe": []
+  },
+  {
+   "begriff": "Pommes Anna",
+   "kategorie": "Garnituren & Beilagen",
+   "text": "Dünne Kartoffelscheiben, mit Butter in einer Form geschichtet und zu einem Kuchen gebacken.",
+   "synonyme": [],
+   "siehe": []
+  },
+  {
+   "begriff": "Pommes château",
+   "kategorie": "Garnituren & Beilagen",
+   "text": "Tournierte Kartoffeln, in Butter goldbraun gebraten.",
+   "synonyme": [
+    "Schlosskartoffeln"
+   ],
+   "siehe": [
+    "Tournieren"
+   ]
+  },
+  {
+   "begriff": "Pommes parisiennes",
+   "kategorie": "Garnituren & Beilagen",
+   "text": "Ausgestochene Kartoffelkugeln, goldbraun gebraten.",
+   "synonyme": [
+    "Pariser Kartoffeln"
+   ],
+   "siehe": [
+    "Parisienne"
+   ]
+  },
+  {
+   "begriff": "Pot-au-feu",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Französischer Eintopf aus gekochtem Rindfleisch und Gemüse; Brühe und Fleisch werden getrennt serviert.",
+   "synonyme": [
+    "Pot au feu"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Potage",
+   "kategorie": "Suppen",
+   "text": "Allgemein: gebundene, sämige Suppe.",
+   "synonyme": [],
+   "siehe": []
+  },
+  {
+   "begriff": "Poëlieren",
+   "kategorie": "Garverfahren",
+   "text": "Hellbraun-Dünsten: Fleisch oder Geflügel auf Gemüsebett mit Butter zugedeckt im Ofen garen und dabei häufig begießen.",
+   "synonyme": [
+    "poelieren",
+    "poêler"
+   ],
+   "siehe": [
+    "Matignon",
+    "Arrosieren"
+   ]
+  },
+  {
+   "begriff": "Pralinée",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Paste aus karamellisierten Nüssen bzw. Mandeln; auch gefüllte Schokolade.",
+   "synonyme": [
+    "Praliné",
+    "Krokant"
+   ],
+   "siehe": [
+    "Nougat"
+   ]
+  },
+  {
+   "begriff": "Profiteroles",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Kleine Windbeutel aus Brandteig, gefüllt mit Creme oder Eis, oft mit Schokoladensauce.",
+   "synonyme": [
+    "Profiterole",
+    "Windbeutel"
+   ],
+   "siehe": [
+    "Pâte à choux"
+   ]
+  },
+  {
+   "begriff": "Purée",
+   "kategorie": "Garnituren & Beilagen",
+   "text": "Fein zerkleinerte, glatte Masse aus gegartem Gemüse, Kartoffeln oder Obst.",
+   "synonyme": [
+    "Püree",
+    "Mus"
+   ],
+   "siehe": [
+    "Passieren"
+   ]
+  },
+  {
+   "begriff": "Pâte brisée",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Mürber, ungesüßter Teig für Quiches und Tartes.",
+   "synonyme": [
+    "Pate brisee",
+    "Mürbeteig (salzig)"
+   ],
+   "siehe": [
+    "Pâte sucrée",
+    "Blindbacken"
+   ]
+  },
+  {
+   "begriff": "Pâte feuilletée",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Blätterteig: Teig und Butter durch Tourieren in viele hauchdünne Schichten gelegt.",
+   "synonyme": [
+    "Blätterteig",
+    "Feuilletage"
+   ],
+   "siehe": [
+    "Tourieren",
+    "Vol-au-vent"
+   ]
+  },
+  {
+   "begriff": "Pâte sablée",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Besonders mürber, sandiger Teig mit hohem Butteranteil.",
+   "synonyme": [
+    "Sablé",
+    "Sandteig"
+   ],
+   "siehe": [
+    "Pâte sucrée"
+   ]
+  },
+  {
+   "begriff": "Pâte sucrée",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Süßer Mürbeteig mit Zucker und Ei für Tartes und Törtchen.",
+   "synonyme": [
+    "Pate sucree",
+    "süßer Mürbeteig"
+   ],
+   "siehe": [
+    "Pâte brisée",
+    "Pâte sablée"
+   ]
+  },
+  {
+   "begriff": "Pâte à choux",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Brandteig: Wasser bzw. Milch, Butter und Mehl abgebrannt, dann Eier eingearbeitet; für Windbeutel, Éclairs, Profiteroles.",
+   "synonyme": [
+    "Brandteig",
+    "Choux"
+   ],
+   "siehe": [
+    "Éclair",
+    "Profiteroles",
+    "Abbrennen"
+   ]
+  },
+  {
+   "begriff": "Pâtissier",
+   "kategorie": "Küchenbrigade & Organisation",
+   "text": "Posten für Desserts, Gebäck und Süßspeisen.",
+   "synonyme": [
+    "Patissier",
+    "Konditor"
+   ],
+   "siehe": [
+    "Chef de partie"
+   ]
+  },
+  {
+   "begriff": "Pâté",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Pastete: würzige Fleisch-, Leber- oder Fischmasse, in der Form oder im Teigmantel (en croûte) gebacken.",
+   "synonyme": [
+    "Pastete",
+    "Pate",
+    "Pâté en croûte"
+   ],
+   "siehe": [
+    "Terrine",
+    "Farce"
+   ]
+  },
+  {
+   "begriff": "Quatre épices",
+   "kategorie": "Zutaten & Würzen",
+   "text": "Französische Gewürzmischung aus Pfeffer, Muskat, Nelken und Ingwer bzw. Zimt; für Pasteten und Terrinen.",
+   "synonyme": [
+    "Vier-Gewürze-Mischung"
+   ],
+   "siehe": [
+    "Pâté"
+   ]
+  },
+  {
+   "begriff": "Quenelle",
+   "kategorie": "Schneiden & Formen",
+   "text": "Mit zwei Löffeln oder einem Löffel geformte, ovale Nocke aus einer Masse (Eis, Mousse, Farce); auch Klößchen aus Farce.",
+   "synonyme": [
+    "Nocke",
+    "Nocken",
+    "Klößchen"
+   ],
+   "siehe": [
+    "Farce"
+   ]
+  },
+  {
+   "begriff": "Quiche",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Herzhafter Kuchen aus Mürbeteig mit Eier-Sahne-Guss (z. B. Quiche lorraine mit Speck).",
+   "synonyme": [
+    "Quiche lorraine"
+   ],
+   "siehe": [
+    "Pâte brisée",
+    "Blindbacken"
+   ]
+  },
+  {
+   "begriff": "Ragout",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Schmorgericht aus gewürfeltem Fleisch, Fisch oder Gemüse in reichlicher Sauce.",
+   "synonyme": [
+    "Ragoût"
+   ],
+   "siehe": [
+    "Schmoren"
+   ]
+  },
+  {
+   "begriff": "Ramequin",
+   "kategorie": "Geräte & Utensilien",
+   "text": "Kleines, feuerfestes Porzellanförmchen für Soufflés, Crème brûlée oder Eierspeisen.",
+   "synonyme": [
+    "Ramekin",
+    "Auflaufförmchen"
+   ],
+   "siehe": [
+    "Soufflé",
+    "Crème brûlée"
+   ]
+  },
+  {
+   "begriff": "Ras el-Hanout",
+   "kategorie": "Zutaten & Würzen",
+   "text": "Nordafrikanische Gewürzmischung aus vielen Gewürzen, mild-blumig.",
+   "synonyme": [
+    "Ras el Hanout"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Ratatouille",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Provenzalischer Gemüseeintopf aus Aubergine, Zucchini, Paprika, Tomaten und Zwiebeln in Olivenöl.",
+   "synonyme": [],
+   "siehe": []
+  },
+  {
+   "begriff": "Reduktion",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Durch Einkochen konzentrierte Flüssigkeit, etwa aus Wein, Essig und Schalotten als Basis für Butter-Saucen.",
+   "synonyme": [],
+   "siehe": [
+    "Reduzieren",
+    "Sauce béarnaise",
+    "Beurre blanc"
+   ]
+  },
+  {
+   "begriff": "Reduzieren",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Flüssigkeit offen einkochen, bis sie konzentriert und sämig ist.",
+   "synonyme": [
+    "einkochen",
+    "réduire",
+    "Reduktion"
+   ],
+   "siehe": [
+    "Glace",
+    "Jus"
+   ]
+  },
+  {
+   "begriff": "Ris",
+   "kategorie": "Fleisch, Geflügel & Fisch",
+   "text": "Bries, die Thymusdrüse vom Kalb oder Lamm; gilt als Delikatesse (Kalbsbries).",
+   "synonyme": [
+    "Bries",
+    "Kalbsbries",
+    "Ris de veau"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Risotto",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Italienisches Reisgericht aus Rundkornreis, nach und nach mit Brühe cremig gegart und mit Butter und Käse vollendet (mantecare).",
+   "synonyme": [
+    "mantecare"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Rogen",
+   "kategorie": "Fleisch, Geflügel & Fisch",
+   "text": "Fischeier; Kaviar ist der gesalzene Rogen des Störs, andere Rogen werden z. B. als Forellen- oder Lachskaviar angeboten.",
+   "synonyme": [
+    "Kaviar",
+    "Fischrogen"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Rouille",
+   "kategorie": "Suppen",
+   "text": "Würzige, rötliche Knoblauch-Paprika-Mayonnaise, klassisch zur Bouillabaisse.",
+   "synonyme": [],
+   "siehe": [
+    "Bouillabaisse",
+    "Aioli"
+   ]
+  },
+  {
+   "begriff": "Roux",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Mehlschwitze aus Butter und Mehl zu gleichen Teilen, hell (blond) oder braun angeschwitzt; bindet Saucen und Suppen.",
+   "synonyme": [
+    "Mehlschwitze",
+    "Einbrenne"
+   ],
+   "siehe": [
+    "Sauce béchamel",
+    "Velouté",
+    "Abbinden"
+   ]
+  },
+  {
+   "begriff": "Royale",
+   "kategorie": "Suppen",
+   "text": "Eierstich: gestockte Masse aus Ei und Milch bzw. Brühe, in Würfel oder Rauten geschnitten als Suppeneinlage.",
+   "synonyme": [
+    "Eierstich"
+   ],
+   "siehe": [
+    "Consommé",
+    "Stocken lassen"
+   ]
+  },
+  {
+   "begriff": "Ruhen lassen",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Gebratenes Fleisch vor dem Anschneiden einige Minuten warm ruhen lassen, damit sich der Saft verteilt.",
+   "synonyme": [
+    "rasten"
+   ],
+   "siehe": [
+    "Kerntemperatur"
+   ]
+  },
+  {
+   "begriff": "Râble",
+   "kategorie": "Fleisch, Geflügel & Fisch",
+   "text": "Rücken vom Hasen oder Kaninchen.",
+   "synonyme": [
+    "Hasenrücken",
+    "Rable"
+   ],
+   "siehe": [
+    "Selle"
+   ]
+  },
+  {
+   "begriff": "Räuchern",
+   "kategorie": "Garverfahren",
+   "text": "Aromatisieren und Haltbarmachen im Rauch glimmender Hölzer; heiß (garend) oder kalt (nur aromatisierend).",
+   "synonyme": [
+    "heißräuchern",
+    "kalträuchern"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Rôtisseur",
+   "kategorie": "Küchenbrigade & Organisation",
+   "text": "Posten für Braten und Gegrilltes.",
+   "synonyme": [
+    "Rotisseur",
+    "Bratenkoch"
+   ],
+   "siehe": [
+    "Chef de partie"
+   ]
+  },
+  {
+   "begriff": "Rösten",
+   "kategorie": "Garverfahren",
+   "text": "Trockenes Erhitzen ohne Fett, etwa Nüsse, Kerne, Gewürze oder Brot, bis Röstaromen entstehen.",
+   "synonyme": [
+    "torréfier"
+   ],
+   "siehe": [
+    "Maillard-Reaktion"
+   ]
+  },
+  {
+   "begriff": "Rösti",
+   "kategorie": "Garnituren & Beilagen",
+   "text": "Geraspelte Kartoffeln (roh oder gekocht), in der Pfanne zu einem knusprigen Fladen gebraten.",
+   "synonyme": [
+    "Röschti"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Sabayon",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Im Wasserbad schaumig aufgeschlagene Masse aus Eigelb, Zucker und Wein (süß) oder Fond/Champagner (herzhaft).",
+   "synonyme": [
+    "Zabaione",
+    "Zabaglione",
+    "Weinschaum"
+   ],
+   "siehe": [
+    "Wasserbad"
+   ]
+  },
+  {
+   "begriff": "Sahnesiphon",
+   "kategorie": "Geräte & Utensilien",
+   "text": "Druckflasche mit N₂O-Kapseln zum Aufschäumen von Sahne und Espumas.",
+   "synonyme": [
+    "Siphon",
+    "iSi"
+   ],
+   "siehe": [
+    "Espuma"
+   ]
+  },
+  {
+   "begriff": "Salamander",
+   "kategorie": "Geräte & Utensilien",
+   "text": "Oberhitzegrill zum Gratinieren und Überbacken in der Profiküche.",
+   "synonyme": [],
+   "siehe": [
+    "Gratinieren"
+   ]
+  },
+  {
+   "begriff": "Sashimi",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Japanisch: Scheiben von rohem, sehr frischem Fisch oder Meeresfrüchten, ohne Reis.",
+   "synonyme": [],
+   "siehe": [
+    "Tataki",
+    "Carpaccio"
+   ]
+  },
+  {
+   "begriff": "Sauce Bercy",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Sauce aus Schalotten-Weißwein-Reduktion mit Fisch-Velouté bzw. Fond und Butter.",
+   "synonyme": [
+    "Bercy"
+   ],
+   "siehe": [
+    "Velouté",
+    "Reduktion"
+   ]
+  },
+  {
+   "begriff": "Sauce bigarade",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Bittere Orangensauce aus Karamell, Essig, Bitterorangen und Entenfond; klassisch zur Ente.",
+   "synonyme": [
+    "Bigarade"
+   ],
+   "siehe": [
+    "Gastrique"
+   ]
+  },
+  {
+   "begriff": "Sauce bordelaise",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Rotweinsauce aus Rotwein-Schalotten-Reduktion und Demi-glace, klassisch mit Rindermark.",
+   "synonyme": [
+    "Bordelaise"
+   ],
+   "siehe": [
+    "Demi-glace",
+    "Reduktion"
+   ]
+  },
+  {
+   "begriff": "Sauce béarnaise",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Wie Hollandaise, aber mit Reduktion aus Weißwein, Essig, Schalotten und Estragon; mit frischem Estragon und Kerbel vollendet.",
+   "synonyme": [
+    "Béarnaise",
+    "Bearnaise"
+   ],
+   "siehe": [
+    "Sauce hollandaise",
+    "Sauce Choron",
+    "Reduktion"
+   ]
+  },
+  {
+   "begriff": "Sauce béchamel",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Milchsauce aus heller Mehlschwitze und Milch, gewürzt mit Muskat; eine der klassischen Grundsaucen.",
+   "synonyme": [
+    "Béchamel",
+    "Bechamelsauce",
+    "Béchamelsauce"
+   ],
+   "siehe": [
+    "Roux",
+    "Sauce Mornay",
+    "Muttersaucen"
+   ]
+  },
+  {
+   "begriff": "Sauce Choron",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Béarnaise, mit Tomatenpüree rosa gefärbt.",
+   "synonyme": [
+    "Choron"
+   ],
+   "siehe": [
+    "Sauce béarnaise"
+   ]
+  },
+  {
+   "begriff": "Sauce Cumberland",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Kalte, süß-pikante Sauce aus Johannisbeergelee, Portwein, Orange und Senf; zu Wild und Pasteten.",
+   "synonyme": [
+    "Cumberland"
+   ],
+   "siehe": [
+    "Pâté"
+   ]
+  },
+  {
+   "begriff": "Sauce diable",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Scharfe „Teufelssauce“ aus Weißwein-Schalotten-Reduktion, Demi-glace und Cayennepfeffer.",
+   "synonyme": [
+    "Teufelssauce"
+   ],
+   "siehe": [
+    "Demi-glace"
+   ]
+  },
+  {
+   "begriff": "Sauce espagnole",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Braune Grundsauce aus braunem Fond, Röstgemüse, Tomatenmark und brauner Mehlschwitze.",
+   "synonyme": [
+    "Espagnole",
+    "braune Grundsauce"
+   ],
+   "siehe": [
+    "Demi-glace",
+    "Muttersaucen"
+   ]
+  },
+  {
+   "begriff": "Sauce hollandaise",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Warm aufgeschlagene Buttersauce aus Eigelb, Reduktion bzw. Zitrone und geklärter Butter.",
+   "synonyme": [
+    "Hollandaise",
+    "holländische Sauce"
+   ],
+   "siehe": [
+    "Emulsion",
+    "Sauce béarnaise",
+    "Sauce mousseline",
+    "Muttersaucen"
+   ]
+  },
+  {
+   "begriff": "Sauce Mornay",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Béchamel mit Käse (z. B. Gruyère) und Eigelb verfeinert; zum Überbacken.",
+   "synonyme": [
+    "Mornay",
+    "Käsesauce"
+   ],
+   "siehe": [
+    "Sauce béchamel",
+    "Gratinieren"
+   ]
+  },
+  {
+   "begriff": "Sauce mousseline",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Hollandaise mit untergehobener geschlagener Sahne.",
+   "synonyme": [
+    "Mousseline-Sauce",
+    "Schaumsauce"
+   ],
+   "siehe": [
+    "Sauce hollandaise"
+   ]
+  },
+  {
+   "begriff": "Sauce Nantua",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Béchamel bzw. Velouté mit Krebsbutter und Flusskrebsen.",
+   "synonyme": [
+    "Nantua"
+   ],
+   "siehe": [
+    "Sauce béchamel",
+    "Krustentiere"
+   ]
+  },
+  {
+   "begriff": "Sauce Périgueux",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Demi-glace mit Madeira und gehackten Trüffeln.",
+   "synonyme": [
+    "Périgueux",
+    "Trüffelsauce"
+   ],
+   "siehe": [
+    "Demi-glace",
+    "Trüffel"
+   ]
+  },
+  {
+   "begriff": "Sauce Robert",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Braune Zwiebel-Senf-Sauce zu Schweinefleisch.",
+   "synonyme": [
+    "Robert"
+   ],
+   "siehe": [
+    "Demi-glace"
+   ]
+  },
+  {
+   "begriff": "Sauce rémoulade",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Mayonnaise mit gehackten Gewürzgurken, Kapern, Kräutern und Sardellen.",
+   "synonyme": [
+    "Remoulade"
+   ],
+   "siehe": [
+    "Mayonnaise"
+   ]
+  },
+  {
+   "begriff": "Sauce Soubise",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Weiße Zwiebelsauce aus Béchamel und püriertem Zwiebelmus.",
+   "synonyme": [
+    "Soubise"
+   ],
+   "siehe": [
+    "Sauce béchamel"
+   ]
+  },
+  {
+   "begriff": "Sauce suprême",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Geflügel-Velouté, mit Sahne und Butter verfeinert.",
+   "synonyme": [
+    "Suprêmesauce"
+   ],
+   "siehe": [
+    "Velouté"
+   ]
+  },
+  {
+   "begriff": "Sauce tomate",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Tomatensauce aus Tomaten, Röstgemüse und Fond; in der französischen Klassik eine der Grundsaucen.",
+   "synonyme": [
+    "Tomatensauce"
+   ],
+   "siehe": [
+    "Muttersaucen"
+   ]
+  },
+  {
+   "begriff": "Saucier",
+   "kategorie": "Küchenbrigade & Organisation",
+   "text": "Posten für Saucen, Fonds und Kurzgebratenes.",
+   "synonyme": [],
+   "siehe": [
+    "Chef de partie"
+   ]
+  },
+  {
+   "begriff": "Sauteuse",
+   "kategorie": "Geräte & Utensilien",
+   "text": "Flache Pfanne mit schrägem Rand zum Schwenken und Sautieren.",
+   "synonyme": [
+    "Schwenkpfanne"
+   ],
+   "siehe": [
+    "Sautieren"
+   ]
+  },
+  {
+   "begriff": "Sautieren",
+   "kategorie": "Garverfahren",
+   "text": "Kleine Stücke in der Pfanne (Sauteuse) bei starker Hitze unter Schwenken kurz braten.",
+   "synonyme": [
+    "sauter",
+    "schwenken"
+   ],
+   "siehe": [
+    "Sauteuse",
+    "Braten"
+   ]
+  },
+  {
+   "begriff": "Sautoir",
+   "kategorie": "Geräte & Utensilien",
+   "text": "Flache Pfanne mit geradem, höherem Rand zum Braten und Schmoren.",
+   "synonyme": [],
+   "siehe": [
+    "Sauteuse"
+   ]
+  },
+  {
+   "begriff": "Schmoren",
+   "kategorie": "Garverfahren",
+   "text": "Erst kräftig anbraten, dann mit Flüssigkeit teilweise bedeckt zugedeckt langsam weichgaren; ideal für bindegewebsreiches Fleisch.",
+   "synonyme": [
+    "braisieren",
+    "Schmorgericht"
+   ],
+   "siehe": [
+    "Braisieren",
+    "Ragout"
+   ]
+  },
+  {
+   "begriff": "Schäumen",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Eine Sauce kurz vor dem Servieren mit dem Stabmixer aufschlagen, damit sie luftig und leicht wird.",
+   "synonyme": [
+    "aufschäumen",
+    "mousser"
+   ],
+   "siehe": [
+    "Espuma"
+   ]
+  },
+  {
+   "begriff": "Selle",
+   "kategorie": "Fleisch, Geflügel & Fisch",
+   "text": "Sattelstück (Rücken) von Lamm, Reh oder Hase.",
+   "synonyme": [
+    "Sattel",
+    "Rücken"
+   ],
+   "siehe": [
+    "Carré"
+   ]
+  },
+  {
+   "begriff": "Sommelier",
+   "kategorie": "Menü & Service",
+   "text": "Weinfachkraft im Restaurant: berät zu Wein und Speisenbegleitung.",
+   "synonyme": [
+    "Sommelière",
+    "Weinkellner"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Sorbet",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Speiseeis aus Fruchtpüree oder Saft und Zuckersirup, ohne Milch.",
+   "synonyme": [
+    "Sorbett"
+   ],
+   "siehe": [
+    "Granité"
+   ]
+  },
+  {
+   "begriff": "Soufflé",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Auflauf, der durch Eischnee im Ofen stark aufgeht; muss sofort serviert werden.",
+   "synonyme": [
+    "Souffle",
+    "Auflauf"
+   ],
+   "siehe": [
+    "Eischnee"
+   ]
+  },
+  {
+   "begriff": "Sous-chef",
+   "kategorie": "Küchenbrigade & Organisation",
+   "text": "Stellvertretender Küchenchef; organisiert den Ablauf im Service.",
+   "synonyme": [
+    "Souschef"
+   ],
+   "siehe": [
+    "Chef de cuisine"
+   ]
+  },
+  {
+   "begriff": "Sous-vide",
+   "kategorie": "Garverfahren",
+   "text": "Vakuumiert im Wasserbad bei exakt geregelter, niedriger Temperatur garen; das Gargut wird nie heißer als das Wasser.",
+   "synonyme": [
+    "sous vide",
+    "Vakuumgaren"
+   ],
+   "siehe": [
+    "Niedertemperaturgaren",
+    "Kerntemperatur"
+   ]
+  },
+  {
+   "begriff": "Spicken",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Speckstreifen mit der Spicknadel in mageres Fleisch ziehen, damit es saftig bleibt.",
+   "synonyme": [
+    "larder",
+    "lardieren"
+   ],
+   "siehe": [
+    "Bardieren"
+   ]
+  },
+  {
+   "begriff": "Spritzbeutel",
+   "kategorie": "Geräte & Utensilien",
+   "text": "Beutel mit Tülle zum Formen und Dressieren von Massen und Cremes.",
+   "synonyme": [
+    "Dressiersack",
+    "Spritztüte"
+   ],
+   "siehe": [
+    "Dressieren"
+   ]
+  },
+  {
+   "begriff": "Steckerlfisch",
+   "kategorie": "Fleisch, Geflügel & Fisch",
+   "text": "Auf einen Stock gespießter, über Holzkohle gegrillter Fisch.",
+   "synonyme": [],
+   "siehe": [
+    "Grillen"
+   ]
+  },
+  {
+   "begriff": "Stocken lassen",
+   "kategorie": "Garverfahren",
+   "text": "Eier- oder Eiweißmassen durch sanfte Hitze fest werden lassen, ohne dass sie gerinnen.",
+   "synonyme": [
+    "stocken"
+   ],
+   "siehe": [
+    "Royale",
+    "Wasserbad"
+   ]
+  },
+  {
+   "begriff": "Suprême",
+   "kategorie": "Fleisch, Geflügel & Fisch",
+   "text": "Ausgelöste Geflügelbrust mit Flügelknochen (bei Geflügel) bzw. ein edles Filetstück vom Fisch.",
+   "synonyme": [
+    "Supreme"
+   ],
+   "siehe": [
+    "Sauce suprême"
+   ]
+  },
+  {
+   "begriff": "Table d'hôte",
+   "kategorie": "Menü & Service",
+   "text": "Festes Menü zu festem Preis, für alle Gäste gleich.",
+   "synonyme": [
+    "Menu",
+    "Tagesmenü"
+   ],
+   "siehe": [
+    "À la carte"
+   ]
+  },
+  {
+   "begriff": "Tablieren",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Zucker- oder Schokoladenmasse auf einer Marmorplatte hin- und herstreichen, bis sie die richtige Temperatur und Struktur hat.",
+   "synonyme": [],
+   "siehe": [
+    "Temperieren"
+   ]
+  },
+  {
+   "begriff": "Tafelspitz",
+   "kategorie": "Fleisch, Geflügel & Fisch",
+   "text": "Rinderteilstück aus der Hüfte, klassisch in Brühe gekocht (Wiener Küche).",
+   "synonyme": [],
+   "siehe": []
+  },
+  {
+   "begriff": "Tapenade",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Provenzalische Paste aus Oliven, Kapern, Sardellen und Olivenöl.",
+   "synonyme": [],
+   "siehe": []
+  },
+  {
+   "begriff": "Tarte Tatin",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Gestürzter Apfelkuchen: Äpfel in Karamell, mit Teig bedeckt gebacken und gestürzt.",
+   "synonyme": [
+    "Tatin"
+   ],
+   "siehe": [
+    "Karamellisieren"
+   ]
+  },
+  {
+   "begriff": "Tataki",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Japanische Zubereitung: Fisch oder Fleisch außen kurz scharf angebraten, innen roh, in Scheiben.",
+   "synonyme": [],
+   "siehe": [
+    "Sashimi"
+   ]
+  },
+  {
+   "begriff": "Tatar",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Fein gehacktes oder geschabtes rohes Rindfleisch bzw. Fisch, pikant gewürzt.",
+   "synonyme": [
+    "Tartar",
+    "Tartare",
+    "Beefsteak Tatar"
+   ],
+   "siehe": [
+    "Carpaccio"
+   ]
+  },
+  {
+   "begriff": "Temperieren",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Langsam auf die gewünschte Temperatur bringen; bei Schokolade gezieltes Abkühlen und Erwärmen für Glanz und Knackigkeit, bei Fleisch vor dem Braten auf Raumtemperatur.",
+   "synonyme": [
+    "temperiern"
+   ],
+   "siehe": [
+    "Kuvertüre"
+   ]
+  },
+  {
+   "begriff": "Tempura",
+   "kategorie": "Garverfahren",
+   "text": "Japanische Art, Gemüse oder Meeresfrüchte in sehr leichtem, eiskaltem Teig kurz zu frittieren.",
+   "synonyme": [],
+   "siehe": [
+    "Frittieren"
+   ]
+  },
+  {
+   "begriff": "Terrine",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "In einer Form (der Terrine) gegarte Farce oder geschichtete Zutaten, meist kalt in Scheiben serviert; auch die Form selbst.",
+   "synonyme": [],
+   "siehe": [
+    "Pâté",
+    "Farce"
+   ]
+  },
+  {
+   "begriff": "Thermomix",
+   "kategorie": "Geräte & Utensilien",
+   "text": "Küchenmaschine, die gleichzeitig zerkleinert, rührt und temperiert.",
+   "synonyme": [
+    "Thermo-Mixer"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Timbale",
+   "kategorie": "Geräte & Utensilien",
+   "text": "Kleine, glatte Becherform; auch das darin gegarte und gestürzte Gericht.",
+   "synonyme": [
+    "Timbal"
+   ],
+   "siehe": [
+    "Dariole"
+   ]
+  },
+  {
+   "begriff": "Tourieren",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Butter in Teig einschlagen und ihn wiederholt ausrollen und falten, um Blätterteig oder Plunderteig zu schichten.",
+   "synonyme": [
+    "Touren geben",
+    "einfache Tour",
+    "doppelte Tour"
+   ],
+   "siehe": [
+    "Pâte feuilletée"
+   ]
+  },
+  {
+   "begriff": "Tournant",
+   "kategorie": "Küchenbrigade & Organisation",
+   "text": "Springer, der auf allen Posten einspringt.",
+   "synonyme": [
+    "Springer"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Tournedos",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Runde, dicke Scheibe aus der Mitte des Rinderfilets, kurz gebraten.",
+   "synonyme": [],
+   "siehe": [
+    "Medaillon",
+    "Chateaubriand"
+   ]
+  },
+  {
+   "begriff": "Tournieren",
+   "kategorie": "Schneiden & Formen",
+   "text": "Gemüse oder Kartoffeln mit dem Tourniermesser in gleichmäßige, längliche Fässchen mit sieben Flächen schneiden.",
+   "synonyme": [
+    "tourner",
+    "Tourniermesser"
+   ],
+   "siehe": [
+    "Pommes château"
+   ]
+  },
+  {
+   "begriff": "Tourniermesser",
+   "kategorie": "Geräte & Utensilien",
+   "text": "Kurzes Messer mit gebogener Klinge zum Tournieren.",
+   "synonyme": [
+    "Bec d'oiseau"
+   ],
+   "siehe": [
+    "Tournieren"
+   ]
+  },
+  {
+   "begriff": "Tranchieren",
+   "kategorie": "Schneiden & Formen",
+   "text": "Gegartes Fleisch oder Geflügel fachgerecht in Scheiben bzw. Portionen schneiden, meist quer zur Faser.",
+   "synonyme": [
+    "aufschneiden"
+   ],
+   "siehe": [
+    "Tranchiermesser"
+   ]
+  },
+  {
+   "begriff": "Tranchiermesser",
+   "kategorie": "Geräte & Utensilien",
+   "text": "Langes, schmales Messer mit dünner Klinge zum Aufschneiden von Braten.",
+   "synonyme": [],
+   "siehe": [
+    "Tranchieren"
+   ]
+  },
+  {
+   "begriff": "Trou normand",
+   "kategorie": "Menü & Service",
+   "text": "Zwischengang zur „Erholung“, klassisch Calvados oder ein Sorbet.",
+   "synonyme": [
+    "Zwischensorbet"
+   ],
+   "siehe": [
+    "Sorbet",
+    "Menüfolge"
+   ]
+  },
+  {
+   "begriff": "Trüffel",
+   "kategorie": "Zutaten & Würzen",
+   "text": "Wertvolle unterirdische Pilze (weiße Alba-, schwarze Périgord-Trüffel); hauchdünn gehobelt zum Aromatisieren.",
+   "synonyme": [
+    "Trüffeln",
+    "Truffe"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Tuile",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Hauchdünnes, gebogenes Hippen- oder Mandelgebäck; dekorative Garnitur.",
+   "synonyme": [
+    "Hippe",
+    "Hippen"
+   ],
+   "siehe": [
+    "Hippenmasse"
+   ]
+  },
+  {
+   "begriff": "Umami",
+   "kategorie": "Zutaten & Würzen",
+   "text": "Fünfte Geschmacksrichtung, „herzhaft-fleischig“, ausgelöst vor allem durch Glutamat (z. B. in Parmesan, Tomaten, Pilzen, Sojasauce).",
+   "synonyme": [],
+   "siehe": [
+    "Dashi"
+   ]
+  },
+  {
+   "begriff": "Unterheben",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Lockere Masse (Eischnee, geschlagene Sahne) vorsichtig unter eine schwerere ziehen, damit die Luft erhalten bleibt.",
+   "synonyme": [
+    "melieren",
+    "unterziehen"
+   ],
+   "siehe": [
+    "Eischnee",
+    "Mousse"
+   ]
+  },
+  {
+   "begriff": "Velouter",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Einer Suppe oder Sauce durch Legieren oder Mixen eine samtige Konsistenz geben.",
+   "synonyme": [],
+   "siehe": [
+    "Legieren",
+    "Velouté"
+   ]
+  },
+  {
+   "begriff": "Velouté",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Samtige Grundsauce aus heller Mehlschwitze und hellem Fond (Kalb, Geflügel oder Fisch); auch gebundene, cremige Suppe.",
+   "synonyme": [
+    "Samtsauce",
+    "Veloute"
+   ],
+   "siehe": [
+    "Fond blanc",
+    "Sauce suprême",
+    "Muttersaucen"
+   ]
+  },
+  {
+   "begriff": "Velouté (Suppe)",
+   "kategorie": "Suppen",
+   "text": "Gebundene, samtige Cremesuppe mit Eigelb und Sahne legiert.",
+   "synonyme": [
+    "Cremesuppe"
+   ],
+   "siehe": [
+    "Velouté",
+    "Legieren"
+   ]
+  },
+  {
+   "begriff": "Velouté de poisson",
+   "kategorie": "Fleisch, Geflügel & Fisch",
+   "text": "Fisch-Velouté aus Fischfond und heller Mehlschwitze.",
+   "synonyme": [],
+   "siehe": [
+    "Velouté",
+    "Fumet"
+   ]
+  },
+  {
+   "begriff": "Verjus",
+   "kategorie": "Zutaten & Würzen",
+   "text": "Saft unreifer Trauben; mild-saures Würzmittel statt Essig oder Zitrone.",
+   "synonyme": [
+    "Agrest"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Vichyssoise",
+   "kategorie": "Suppen",
+   "text": "Kalt servierte Kartoffel-Lauch-Cremesuppe.",
+   "synonyme": [],
+   "siehe": []
+  },
+  {
+   "begriff": "Vinaigrette",
+   "kategorie": "Fonds, Saucen & Buttermischungen",
+   "text": "Salatsauce aus Essig, Öl, Salz, Pfeffer und oft Senf, kurz emulgiert.",
+   "synonyme": [
+    "French Dressing",
+    "Essig-Öl-Dressing"
+   ],
+   "siehe": [
+    "Emulsion"
+   ]
+  },
+  {
+   "begriff": "Vol-au-vent",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Pastetenhülle aus Blätterteig, warm gefüllt (Königinpastete).",
+   "synonyme": [
+    "Königinpastete",
+    "Blätterteigpastete"
+   ],
+   "siehe": [
+    "Pâte feuilletée"
+   ]
+  },
+  {
+   "begriff": "Wasserbad",
+   "kategorie": "Techniken & Vorbereitung",
+   "text": "Gefäß in heißes Wasser stellen, um sanft zu garen, zu schmelzen oder warm zu halten.",
+   "synonyme": [
+    "bain-marie",
+    "Bain-Marie"
+   ],
+   "siehe": [
+    "Stocken lassen",
+    "Sabayon"
+   ]
+  },
+  {
+   "begriff": "Weichtiere",
+   "kategorie": "Fleisch, Geflügel & Fisch",
+   "text": "Muscheln, Schnecken und Tintenfische.",
+   "synonyme": [
+    "Mollusken",
+    "Mollusques"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Wokgaren",
+   "kategorie": "Garverfahren",
+   "text": "Kurzbraten kleiner Stücke unter ständigem Rühren bei sehr hoher Hitze im Wok.",
+   "synonyme": [
+    "pfannenrühren",
+    "Stir-fry"
+   ],
+   "siehe": [
+    "Sautieren"
+   ]
+  },
+  {
+   "begriff": "Xanthan",
+   "kategorie": "Zutaten & Würzen",
+   "text": "Verdickungsmittel aus Fermentation; bindet kalt und warm schon in kleinsten Mengen.",
+   "synonyme": [
+    "Xanthan Gum"
+   ],
+   "siehe": [
+    "Abbinden"
+   ]
+  },
+  {
+   "begriff": "Zeste",
+   "kategorie": "Schneiden & Formen",
+   "text": "Hauchdünne Streifen der äußeren, farbigen Zitrusschale ohne das bittere Weiße; mit dem Zestenreißer abgezogen.",
+   "synonyme": [
+    "Zesten",
+    "Zestenreißer"
+   ],
+   "siehe": [
+    "Julienne"
+   ]
+  },
+  {
+   "begriff": "Ziselieren",
+   "kategorie": "Schneiden & Formen",
+   "text": "Die Oberfläche (Fischhaut, Fleisch) mit flachen Schnitten einritzen, damit es gleichmäßig gart und sich nicht wölbt.",
+   "synonyme": [
+    "ciseler",
+    "einschneiden"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Zuckerstufen",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Kochstufen von Zuckersirup nach Temperatur: Faden (~105 °C), Ballen (~115–120 °C), Bruch (~145–155 °C), Karamell (ab ~160 °C).",
+   "synonyme": [
+    "Fadenprobe",
+    "Ballen",
+    "Bruch",
+    "Soft ball",
+    "Hard crack"
+   ],
+   "siehe": [
+    "Karamellisieren"
+   ]
+  },
+  {
+   "begriff": "À la carte",
+   "kategorie": "Menü & Service",
+   "text": "Freie Auswahl einzelner Gerichte von der Speisekarte.",
+   "synonyme": [
+    "a la carte"
+   ],
+   "siehe": [
+    "Table d'hôte"
+   ]
+  },
+  {
+   "begriff": "À la minute",
+   "kategorie": "Garverfahren",
+   "text": "Erst auf Bestellung frisch zubereitet, nicht vorgegart und warmgehalten.",
+   "synonyme": [
+    "a la minute"
+   ],
+   "siehe": [
+    "Mise en place"
+   ]
+  },
+  {
+   "begriff": "Éclair",
+   "kategorie": "Pâtisserie, Teige & Massen",
+   "text": "Längliches Brandteiggebäck mit Crème-Füllung und Glasur.",
+   "synonyme": [
+    "Eclair",
+    "Liebesknochen"
+   ],
+   "siehe": [
+    "Pâte à choux"
+   ]
+  },
+  {
+   "begriff": "Émincé",
+   "kategorie": "Schneiden & Formen",
+   "text": "In dünne Scheiben oder Streifen geschnittenes Fleisch, kurz gebraten in Sauce (Geschnetzeltes).",
+   "synonyme": [
+    "Emince",
+    "Geschnetzeltes",
+    "émincer"
+   ],
+   "siehe": [
+    "Sautieren"
+   ]
+  },
+  {
+   "begriff": "Œuf mollet",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Wachsweich gekochtes Ei (etwa 5–6 Minuten), geschält serviert.",
+   "synonyme": [
+    "wachsweiches Ei",
+    "Oeuf mollet"
+   ],
+   "siehe": []
+  },
+  {
+   "begriff": "Œuf poché",
+   "kategorie": "Gerichte & Zubereitungen",
+   "text": "Verlorenes Ei: ohne Schale in leicht gesäuertem, siedendem Wasser pochiert.",
+   "synonyme": [
+    "Verlorenes Ei",
+    "Oeuf poché",
+    "pochiertes Ei"
+   ],
+   "siehe": [
+    "Pochieren",
+    "Eggs Benedict"
+   ]
+  }
+ ]
+}

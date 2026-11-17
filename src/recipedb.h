@@ -72,6 +72,8 @@ public:
     // „sicherung-JJJJ-MM-TT-hhmmss“ der Datenbank verschoben (gibt dessen Pfad zurück)
     int clear(bool backup, QString *backupFolder = nullptr, QString *error = nullptr);
     QString fileFor(const QString &id) const;
+    QString recipesFolder() const;   // Ordner mit den .vmr-Dateien
+    void reindex();                  // Inhaltsverzeichnis aus den Dateien neu aufbauen (nach Änderungen von außen)
 
     QStringList duplicatesOf(const Recipe &r) const;    // IDs mit gleichem (normalisiertem) Titel
     QStringList allTags() const;                        // alle Tags, nach Häufigkeit

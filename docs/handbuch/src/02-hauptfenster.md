@@ -40,8 +40,8 @@ Küchenmaßen, die Zubereitung, die Nährwerttabelle und die Quelle.
 |---|---|
 | **Datei** | Datenbank anlegen und öffnen, zuletzt geöffnete Datenbanken, Rezept neu/bearbeiten/löschen, Suchen, Import, Export (mit Menüassistent), Abgleich, Datenbank leeren, Drucken, Beenden |
 | **Planen** | Kühlschrank (F5), Assistent Gewichtskontrolle (F6), Ernährungstagebuch (F9), Gewichtskontrolle (F8), Wochenmenü-Plan (F7), Zufälliges Rezept (Strg+R) |
-| **Extras** | Nährwerttabelle, eigene Lebensmittel, Zutaten ohne Nährwerte, Doubletten, Nährwerte und Tags neu berechnen, Umlaute korrigieren, DeepL-Übersetzung, Darstellung, Einstellungen |
-| **Hilfe** | Handbuch (F1), Über ViviaMeals, Über Qt |
+| **Extras** | Nährwerttabelle, eigene Lebensmittel, fehlende Lebensmittel suchen, Doubletten, alle Rezepte abgleichen, Tags ergänzen, Umlaute korrigieren, DeepL-Übersetzung, Darstellung, Einstellungen |
+| **Hilfe** | Handbuch (F1), Küchen-Glossar, Tipp des Tages, Registrierung eingeben, Über ViviaMeals, Über Qt |
 
 Die **Werkzeugleiste** enthält die häufigsten Befehle als Symbole. Fährt man mit der Maus darüber,
 erscheint eine kurze Erklärung; die Statuszeile unten im Fenster beschreibt den Befehl genauer. Alle

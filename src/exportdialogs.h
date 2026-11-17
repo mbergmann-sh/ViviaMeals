@@ -30,6 +30,8 @@ private:
     QLineEdit *m_title, *m_subtitle, *m_author, *m_folder;
     QCheckBox *m_nutrition, *m_open;
     QRadioButton *m_all, *m_onlyFiltered;
+    QCheckBox *m_legal;
+    QLineEdit *m_lName, *m_lStreet, *m_lZipCity, *m_lCountry, *m_lEmail, *m_lPhone, *m_lResponsible, *m_lHoster;
 };
 
 class LatexExportDialog : public QDialog

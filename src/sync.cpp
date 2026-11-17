@@ -5,6 +5,7 @@
 #include <QCryptographicHash>
 #include <QDir>
 #include <QDirIterator>
+#include <QElapsedTimer>
 #include <QEventLoop>
 #include <QFile>
 #include <QFileInfo>
@@ -281,6 +282,30 @@ HttpTransport::~HttpTransport() { delete m_nam; }
 bool HttpTransport::request(const QString &method, const QString &action, const QMap<QString, QString> &params, const QByteArray &body, int *status,
                             QByteArray *replyData)
 {
+    // Webhoster begrenzen die Zahl der Anfragen je Verbindung (HTTP/2 „GOAWAY“, Keep-Alive-Grenze) oder lassen eine
+    // Anfrage bei Last ins Leere laufen. Bei vielen Dateien (Tausende Rezepte) trifft das fast sicher eine Anfrage –
+    // deshalb: Netzwerkfehler und vorübergehende Serverfehler bis zu viermal wiederholen, jeweils mit frischer Verbindung.
+    // Alle Aktionen sind wiederholbar (put schreibt dieselbe Datei mit derselben Prüfsumme, commit prüft die Revision).
+    const int attempts = action == QLatin1String("info") ? 1 : 5;
+    for (int attempt = 1;; ++attempt) {
+        const bool ok = requestOnce(method, action, params, body, status, replyData);
+        const bool transient = !ok || *status == 429 || *status == 500 || *status == 502 || *status == 503 || *status == 504;
+        if (!transient || attempt >= attempts) return ok;
+        // ein „commit“, der beim Server ankam, aber dessen Antwort verloren ging, meldet beim zweiten Versuch 409 –
+        // das erkennt der Abgleich und vergleicht neu
+        m_nam->clearConnectionCache();
+        QEventLoop wait;
+        QTimer::singleShot(500 * (1 << (attempt - 1)), &wait, &QEventLoop::quit);   // 0,5 / 1 / 2 / 4 s
+        wait.exec();
+        ++m_retries;
+    }
+}
+
+bool HttpTransport::requestOnce(const QString &method, const QString &action, const QMap<QString, QString> &params, const QByteArray &body,
+                                int *status, QByteArray *replyData)
+{
+    *status = 0;
+    replyData->clear();
     QUrl u(m_url);
     QUrlQuery q(u);
     q.addQueryItem(QStringLiteral("a"), action);
@@ -291,6 +316,9 @@ bool HttpTransport::request(const QString &method, const QString &action, const 
     req.setRawHeader("User-Agent", QStringLiteral("ViviaMeals/%1").arg(QCoreApplication::applicationVersion()).toLatin1());
     req.setHeader(QNetworkRequest::ContentTypeHeader, action == QLatin1String("put") ? QStringLiteral("application/octet-stream")
                                                                                        : QStringLiteral("application/json"));
+    // HTTP/1.1: viele Hoster beenden HTTP/2-Verbindungen nach einer festen Zahl von Anfragen, Qt meldet die dann
+    // wartenden Anfragen als Fehler („Server stopped accepting new streams …“)
+    req.setAttribute(QNetworkRequest::Http2AllowedAttribute, false);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
     // Verbindungsprüfung kurz halten: ein ausgeschalteter Rechner im LAN soll den Start nicht minutenlang aufhalten
     req.setTransferTimeout(action == QLatin1String("info") ? 8000 : 60000);
@@ -806,16 +834,55 @@ Result Engine::runOnce(const Progress &progress, bool *retry)
 
     // ---- Ausführen
     Manifest next = remote;
-    bool remoteChanged = false;
+    bool remoteChanged = false;   // seit dem letzten Zwischenstand noch nicht im Speicher eingetragen
     const QString nowT = nowIso();
+    QJsonObject baseNow = baseObj;   // Stand je Datei nach den bisher erledigten Schritten
     auto uploaded = [&](const QString &p, const QByteArray &data) {
         next.files.insert(p, FileEntry{ sha256(data), data.size(), nowT, deviceName() });
         next.deleted.remove(p);
+        baseNow[p] = sha256(data);
         remoteChanged = true;
         ++res.uploaded;
     };
+    // Zwischenstand: bei vielen Dateien regelmäßig eintragen, damit ein Abbruch (Verbindung, Zeitlimit des Hosters)
+    // das bereits Gesendete nicht verliert – der nächste Versuch macht dort weiter. Erneuert dabei die Sperre.
+    int expectRev = remote.revision;
+    int sinceCommit = 0;
+    QElapsedTimer sinceCommitTime;
+    sinceCommitTime.start();
+    auto checkpoint = [&]() -> bool {
+        bool conflict = false;
+        int rev = 0;
+        if (!m_t->commit(expectRev, next, dev, &rev, &conflict)) {
+            if (conflict) {
+                *retry = true;
+                res.error = tr("Ein anderes Gerät hat gleichzeitig abgeglichen.");
+            } else {
+                res.error = m_t->lastError();
+            }
+            return false;
+        }
+        expectRev = rev;
+        remoteChanged = false;
+        sinceCommit = 0;
+        sinceCommitTime.restart();
+        QJsonObject st = state;
+        st[QStringLiteral("store")] = info.uuid;
+        st[QStringLiteral("base")] = baseNow;
+        st[QStringLiteral("revision")] = rev;
+        st[QStringLiteral("cache")] = m_cache;
+        saveState(st);
+        QString h;
+        m_t->lock(dev, &h);
+        return true;
+    };
     int done = 0;
     for (const auto &a : plan) {
+        if (remoteChanged && (sinceCommit >= 150 || sinceCommitTime.elapsed() > 60000)) {
+            step(10 + 85 * done / qMax(1, int(plan.size())), 100, tr("Zwischenstand wird gespeichert …"));
+            if (!checkpoint()) return res;
+        }
+        ++sinceCommit;
         const QString &p = a.first;
         if (!step(10 + 85 * done++ / qMax(1, int(plan.size())), 100, tr("Abgleich: %1").arg(QFileInfo(p).fileName()))) {
             res.canceled = true;
@@ -833,6 +900,7 @@ Result Engine::runOnce(const Progress &progress, bool *retry)
                 res.error = tr("%1 kann nicht gespeichert werden.").arg(p);
                 return res;
             }
+            baseNow[p] = sha256(data);
             ++res.downloaded;
             (isDb ? res.dbChanged : res.appChanged) = true;
             break;
@@ -848,6 +916,7 @@ Result Engine::runOnce(const Progress &progress, bool *retry)
         }
         case DeleteLocal:
             removeLocal(p);
+            baseNow.remove(p);
             ++res.deletedLocal;
             (isDb ? res.dbChanged : res.appChanged) = true;
             break;
@@ -855,6 +924,7 @@ Result Engine::runOnce(const Progress &progress, bool *retry)
             m_t->remove(p);
             next.files.remove(p);
             next.deleted.insert(p, QJsonObject{ { QStringLiteral("t"), nowT }, { QStringLiteral("d"), deviceName() } });
+            baseNow.remove(p);
             remoteChanged = true;
             ++res.deletedRemote;
             break;
@@ -911,12 +981,12 @@ Result Engine::runOnce(const Progress &progress, bool *retry)
             ++it;
         }
     }
-    res.revision = remote.revision;
+    res.revision = expectRev;
     if (remoteChanged) {
         step(97, 100, tr("Abgleich wird abgeschlossen …"));
         bool conflict = false;
         int rev = 0;
-        if (!m_t->commit(remote.revision, next, dev, &rev, &conflict)) {
+        if (!m_t->commit(expectRev, next, dev, &rev, &conflict)) {
             if (conflict) {
                 *retry = true;   // ein anderes Gerät war schneller: neu vergleichen
                 res.error = tr("Ein anderes Gerät hat gleichzeitig abgeglichen.");

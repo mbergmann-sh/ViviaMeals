@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Extras und Einstellungen – ViviaMeals – Handbuch</title><link rel="stylesheet" href="handbuch.css"></head>
 <body class="web">
-<header class="top"><span class="version">Version 0.9.5</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
+<header class="top"><span class="version">Version 0.9.19</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
 <div class="wrap"><nav class="side"><input id="suche" class="such" type="search" placeholder="Im Handbuch suchen …"><ol>
 <li><a href="index.html">Start und Inhalt</a></li>
 <li><a href="willkommen.html">Willkommen bei ViviaMeals</a>
@@ -25,12 +25,59 @@
 <li><a href="abgleich.html">Abgleich zwischen Geräten</a>
 </li>
 <li class="aktiv"><a href="extras.html">Extras und Einstellungen</a>
-<ol><li><a href="#doubletten">Doubletten suchen</a></li><li><a href="#sammelaktionen">Alle Rezepte auf einmal bearbeiten</a></li><li><a href="#datenbank-leeren">Datenbank leeren</a></li><li><a href="#einstellungen">Einstellungen</a></li><li><a href="#viviamealscheat">ViviaMealsCheat</a></li></ol>
+<ol><li><a href="#wartungslisten">Rezepte ohne Nährwerte oder Zutatenliste bearbeiten</a></li><li><a href="#datenbank-pruefen">Datenbank prüfen</a></li><li><a href="#kuechen-glossar">Küchen-Glossar</a></li><li><a href="#tipp-des-tages">Tipp des Tages</a></li><li><a href="#doubletten">Doubletten suchen</a></li><li><a href="#sammelaktionen">Alle Rezepte auf einmal bearbeiten</a></li><li><a href="#datenbank-leeren">Datenbank leeren</a></li><li><a href="#einstellungen">Einstellungen</a></li><li><a href="#registrierung">Registrierung und Komfortfunktionen</a></li><li><a href="#viviamealscheat">ViviaMealsCheat</a></li></ol>
 </li>
 <li><a href="anhang.html">Anhang</a>
 </li>
 </ol></nav><main>
 <h1 id="extras">Extras und Einstellungen</h1>
+<h2 id="wartungslisten">Rezepte ohne Nährwerte oder Zutatenliste bearbeiten</h2>
+<p>Zwei Listen helfen, eine große Sammlung nach und nach zu vervollständigen:</p>
+<ul>
+<li><em>Extras → Rezepte ohne Nährwerte bearbeiten …</em> zeigt alle Rezepte mit Zutaten, bei denen für <strong>keine oder nicht alle Zutaten</strong> Nährwerte bekannt sind. Die Spalte <em>erfasst</em> nennt den Anteil der Zutaten mit Nährwerten (sortierbar, die unvollständigsten zuerst); unter der Liste stehen die Zutaten ohne Nährwerte des gewählten Rezepts.</li>
+<li><em>Extras → Rezepte ohne Zutatenliste bearbeiten …</em> zeigt alle Rezepte ohne eine einzige Zutat, darunter den Anfang der Zubereitung.</li>
+</ul>
+<figure>
+<img src="bilder/wartung-naehrwerte.png" alt="Rezepte ohne Nährwerte" />
+<figcaption aria-hidden="true">Rezepte ohne Nährwerte</figcaption>
+</figure>
+<p>Beide Listen öffnen sich <strong>rechts neben dem Hauptfenster</strong> (passt es nicht, am rechten Bildschirmrand) und bleiben offen, während Sie weiterarbeiten; jede Liste gibt es nur einmal – ein zweiter Aufruf holt sie nach vorn. Ein <strong>Klick</strong> auf ein Rezept (oder die Eingabetaste) öffnet es im <strong>Editor</strong>. Nach dem Speichern aktualisiert sich die Liste von selbst: Erledigte Rezepte verschwinden, die Auswahl rückt zum nächsten. Das Filterfeld sucht im Titel.</p>
+<p>Typische Ursachen für fehlende Nährwerte: Das Lebensmittel steht nicht in der Nährwerttabelle (im Editor zuordnen oder <a href="naehrwerte.html#eigene-lebensmittel">eigenes Lebensmittel anlegen</a>), oder die Menge lässt sich nicht in Gramm umrechnen („1 Schuss“, „1 Bund“ bei einem Lebensmittel ohne Stückgewicht). Nach einem Programm-Update mit erweiterter Tabelle hilft oft schon <a href="naehrwerte.html#neu-berechnen">Alle Rezepte abgleichen</a>.</p>
+<h2 id="datenbank-pruefen">Datenbank prüfen</h2>
+<p>Eine ViviaMeals-Datenbank ist ein Ordner mit einer Datei je Rezept; eine „Reorganisation“ wie bei klassischen Datenbanken braucht sie nicht – das Inhaltsverzeichnis gleicht ViviaMeals bei jedem Öffnen selbst ab. Mit der Zeit kann sich aber einiges ansammeln. <em>Extras → Datenbank prüfen …</em> findet es:</p>
+<ul>
+<li><strong>übergroße Fotos</strong> – länger als 1200 Pixel oder größer als 350 KB; sie werden auf 1000 Pixel verkleinert, was für Bildschirm, Website und Druck reicht und Platz sowie Abgleichszeit spart,</li>
+<li><strong>unlesbare Fotos</strong> – das Rezept bleibt, nur das Foto wird entfernt,</li>
+<li><strong>unlesbare Rezeptdateien</strong> – beschädigt oder leer; sie erscheinen nicht in der Rezeptliste,</li>
+<li><strong>fremde Dateien</strong> im Rezeptordner, z. B. Reste abgebrochener Speichervorgänge,</li>
+<li><strong>leere Rezepte</strong> ohne Titel, Zutaten und Zubereitung (standardmäßig nicht ausgewählt).</li>
+</ul>
+<figure>
+<img src="bilder/datenbank-pruefen.png" alt="Datenbank prüfen" />
+<figcaption aria-hidden="true">Datenbank prüfen</figcaption>
+</figure>
+<p>Die Prüfung selbst verändert nichts. Danach zeigt der Dialog die Befunde in Gruppen mit Häkchen; ein Doppelklick auf ein Rezept zeigt es im Hauptfenster. <strong>Ausgewähltes beheben</strong> führt die gewählten Schritte aus. <strong>Nichts wird endgültig gelöscht:</strong> Dateien und leere Rezepte landen im Unterordner <code>aussortiert/&lt;Datum&gt;</code> der Datenbank, der Dialog verlinkt ihn. Zum Schluss baut ViviaMeals das Inhaltsverzeichnis neu auf.</p>
+<p>Ist ein Abgleich eingerichtet, werden verkleinerte Fotos beim nächsten Abgleich hochgeladen; aussortierte Rezepte gelten dann als gelöscht und verschwinden auch auf den anderen Geräten. Der Ordner <code>aussortiert</code> selbst wird nicht abgeglichen.</p>
+<p>Unabhängig davon gilt: Die beste Pflege ist eine <strong>Sicherung</strong>. Weil die Datenbank ein normaler Ordner ist, genügt es, ihn gelegentlich zu kopieren oder zu zippen.</p>
+<h2 id="kuechen-glossar">Küchen-Glossar</h2>
+<p><em>Hilfe → Küchen-Glossar …</em> (Strg+Umschalt+G) erklärt rund 350 Fachbegriffe der gehobenen Küche – von <em>Arrosieren</em> über <em>Brunoise</em>, <em>Beurre blanc</em> und <em>Consommé</em> bis <em>Ziselieren</em>, dazu die Posten der Küchenbrigade, Begriffe aus Menü und Service, Pâtisserie, Geräte und Würzmittel.</p>
+<figure>
+<img src="bilder/kuechen-glossar.png" alt="Das Küchen-Glossar" />
+<figcaption aria-hidden="true">Das Küchen-Glossar</figcaption>
+</figure>
+<ul>
+<li><strong>Suchen:</strong> Tippen Sie einen Begriff oder ein Stichwort ins Suchfeld (Strg+F). Groß- und Kleinschreibung und Akzente spielen keine Rolle – „bechamel“ findet <em>Sauce béchamel</em>, „oeuf poche“ <em>Œuf poché</em>. Gesucht wird im Begriff, in anderen Schreibweisen („Mehlschwitze“ findet <em>Roux</em>) und in der Erklärung; Treffer im Begriff stehen oben. Mehrere Wörter grenzen die Suche ein.</li>
+<li><strong>Kategorie:</strong> Die Auswahl rechts zeigt nur Garverfahren, Schneidetechniken, Saucen, Pâtisserie, Küchenbrigade usw.</li>
+<li><strong>Verweise:</strong> Unter <em>Siehe auch</em> führen Links zu verwandten Begriffen; die Pfeile oben links blättern zurück und vor (Alt+Links/Alt+Rechts).</li>
+</ul>
+<p>Das Glossar ist ein eigenes Fenster und kann neben dem Rezept offen bleiben.</p>
+<h2 id="tipp-des-tages">Tipp des Tages</h2>
+<p>Nach dem Programmstart – sobald die Datenbank geladen ist und Start-Hinweise beantwortet sind – zeigt ViviaMeals einen zufälligen Begriff aus dem Küchen-Glossar. <strong>Weiter</strong> zeigt einen weiteren zufälligen Begriff, <strong>Zurück</strong> die schon gezeigten. <strong>Im Glossar öffnen</strong> (oder ein Klick auf einen Verweis) springt ins Küchen-Glossar. Jederzeit erreichbar über <em>Hilfe → Tipp des Tages …</em>.</p>
+<figure>
+<img src="bilder/tipp-des-tages.png" alt="Tipp des Tages" />
+<figcaption aria-hidden="true">Tipp des Tages</figcaption>
+</figure>
+<p>Abschalten lässt sich der Tipp mit dem Häkchen <em>Tipps beim Programmstart anzeigen</em> im Dialog oder unter <em>Extras → Einstellungen → Programmstart</em>.</p>
 <h2 id="doubletten">Doubletten suchen</h2>
 <p><em>Extras → Doubletten suchen …</em> findet mehrfach vorhandene Rezepte – typisch nach dem Import mehrerer Sammlungen.</p>
 <figure>
@@ -64,22 +111,26 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td><em>Extras → Nährwerte aller Rezepte neu berechnen</em></td>
-<td>aktuelle Nährwerttabelle auf alle Rezepte anwenden</td>
+<td><em>Extras → Datenbank nach fehlenden Lebensmitteln durchsuchen …</em></td>
+<td>Zutaten ohne Lebensmittel als anklickbare Tabelle, auch als Textdatei (<a href="naehrwerte.html#zutaten-ohne-naehrwerte">Fehlende Lebensmittel finden</a>)</td>
 </tr>
 <tr class="even">
+<td><em>Extras → Alle Rezepte mit der Lebensmitteldatenbank abgleichen …</em></td>
+<td>Zutaten neu zuordnen, Nährwerte und Tags korrigieren, mit Übersicht (<a href="naehrwerte.html#neu-berechnen">Alle Rezepte abgleichen</a>)</td>
+</tr>
+<tr class="odd">
 <td><em>Extras → Mahlzeit- und Nährwert-Tags für alle Rezepte ergänzen …</em></td>
 <td>Tags nachholen, mit Vorschau der Anzahl</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><em>Extras → Saison-Tags für alle Rezepte vergeben …</em></td>
 <td>frühling, sommer, herbst, winter, ganzjährig nach den frischen Zutaten (<a href="naehrwerte.html#saison-tags">Saison-Tags</a>)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><em>Extras → Umlaute in allen Rezepten korrigieren …</em></td>
 <td>„Kaesespaetzle“ → „Käsespätzle“, mit Beispielen und Rückfrage</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><em>Extras → Fremdsprachige Rezepte mit DeepL übersetzen …</em></td>
 <td>nennt Anzahl und Zeichenmenge und fragt vor dem Senden</td>
 </tr>
@@ -101,7 +152,7 @@
 <ul>
 <li><strong>Darstellung:</strong> Theme und Schriftgröße (automatisch oder 85–140 %).</li>
 <li><strong>Rezepte:</strong> <strong>Standard-Quelle</strong> für Rezepte ohne Quellenangabe (<a href="rezepte.html#quelle">Quelle und Standard-Quelle</a>).</li>
-<li><strong>Programmstart:</strong> Startbildschirm mit Ladefortschritt anzeigen; zufälliges Rezept anzeigen; Hinweis „kein Medizinprodukt“ anzeigen.</li>
+<li><strong>Programmstart:</strong> Startbildschirm mit Ladefortschritt anzeigen; zufälliges Rezept anzeigen; Hinweis „kein Medizinprodukt“ anzeigen; „Tipp des Tages“ aus dem Küchen-Glossar anzeigen (<a href="#tipp-des-tages">Tipp des Tages</a>).</li>
 </ul>
 <p><strong>Import und Übersetzung</strong></p>
 <ul>
@@ -116,8 +167,27 @@
 <li><strong>Scanner:</strong> Windows-Scandialog, Scanprogramm, Netzwerkscanner (IP-Adresse), überwachter Ordner oder eigener Befehl; in Farbe scannen.</li>
 <li><strong>Texterkennung (Tesseract):</strong> Programm (automatisch suchen oder wählen), Sprachen, <strong>Prüfen</strong> (<a href="scannen.html#scannen-voraussetzungen">Rezepte scannen</a>).</li>
 </ul>
+<h2 id="registrierung">Registrierung und Komfortfunktionen</h2>
+<p>ViviaMeals ist ohne Registrierung voll nutzbar: Rezepte verwalten, importieren (auch von Webseiten), Nährwerte, Kühlschrank, Wochenpläne, Assistenten, Tagebuch, Menüassistent, Abgleich, Rezeptpakete und Drucken. Einige <strong>Komfortfunktionen</strong> werden mit einem Registrierungsschlüssel freigeschaltet:</p>
+<ul>
+<li><em>Rezept scannen …</em> und <em>Rezept aus Bild oder Foto erkennen …</em> (Texterkennung),</li>
+<li>Export <em>als Website</em>, <em>als LaTeX-Datei</em> und <em>als LibreOffice-Writer-Datei</em>.</li>
+</ul>
+<p>Die Befehle bleiben in Menüs und Werkzeugleiste sichtbar; ohne Registrierung steht in der Statuszeile „Komfortfunktion (Registrierung erforderlich)“. Wählt man einen davon, erklärt ViviaMeals das und bietet <strong>Registrierung eingeben …</strong> an.</p>
+<h3 id="registrierung-eingeben">Schlüssel eingeben</h3>
+<p>Den Schlüssel erhalten Sie per E-Mail. Er gehört zu Ihrer E-Mail-Adresse und beginnt mit <code>VM1-</code>.</p>
+<ol type="1">
+<li><em>Hilfe → Registrierung eingeben …</em> wählen.</li>
+<li>Am einfachsten das ganze Registrierungsschreiben in der E-Mail markieren und kopieren, dann <strong>Aus Zwischenablage einfügen</strong> anklicken – E-Mail-Adresse und Schlüssel werden übernommen. Man kann beides auch von Hand eintragen; Groß- und Kleinschreibung, Leerzeichen und Zeilenumbrüche im Schlüssel spielen keine Rolle, ebenso Verwechslungen wie O/0 und I/1.</li>
+<li>Schon beim Tippen zeigt der Dialog, ob der Schlüssel zur Adresse passt. <strong>Registrieren</strong> schaltet die Komfortfunktionen sofort frei – ohne Neustart.</li>
+</ol>
+<figure>
+<img src="bilder/registrierung.png" alt="Registrierung eingeben" />
+<figcaption aria-hidden="true">Registrierung eingeben</figcaption>
+</figure>
+<p>Die Prüfung geschieht vollständig auf dem Rechner; ViviaMeals stellt dafür keine Internetverbindung her. <em>Hilfe → Über ViviaMeals …</em> zeigt, für wen das Programm registriert ist. <strong>Registrierung entfernen</strong> gibt den Rechner wieder frei (etwa vor dem Verkauf); mit demselben Schlüssel lässt sich jederzeit erneut registrieren – auch auf einem weiteren eigenen Rechner. Gespeichert wird die Registrierung bei den Einstellungen des Benutzerkontos, nicht in der Rezeptdatenbank.</p>
 <h2 id="viviamealscheat">ViviaMealsCheat</h2>
 <p>Das kleine Hilfsprogramm <strong>ViviaMealsCheat</strong> (eigener Installer, wird neben ViviaMeals installiert) ersetzt die Quelle vieler Rezepte auf einmal – entweder nur bestimmte Texte oder alle Quellen durch einen eigenen Text (Vorgabe „Micha B.“). Es zeigt vorher eine Vorschau, fragt vor dem Ändern nach und legt eine Sicherung an. Bitte ViviaMeals vorher schließen.</p>
 <nav class="pager"><span><a href="abgleich.html">← Abgleich zwischen Geräten</a></span><span class="weiter"><a href="anhang.html">Anhang →</a></span></nav></main></div>
-<footer>ViviaMeals 0.9.5 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
+<footer>ViviaMeals 0.9.19 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
 </body></html>

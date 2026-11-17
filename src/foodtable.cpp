@@ -2,6 +2,7 @@
 #include "foodtable.h"
 
 #include <QCoreApplication>
+#include <QCryptographicHash>
 #include <QDir>
 #include <QFile>
 #include <QJsonArray>
@@ -100,7 +101,9 @@ void FoodTable::load()
 {
     QFile f(QStringLiteral(":/data/lebensmittel.json"));
     if (f.open(QIODevice::ReadOnly)) {
-        const QJsonObject o = QJsonDocument::fromJson(f.readAll()).object();
+        const QByteArray data = f.readAll();
+        m_builtinStamp = QString::fromLatin1(QCryptographicHash::hash(data, QCryptographicHash::Sha1).toHex().left(16));
+        const QJsonObject o = QJsonDocument::fromJson(data).object();
         for (const auto &v : o.value(QStringLiteral("foods")).toArray()) {
             const Food food = Food::fromJson(v.toObject());
             m_builtin.insert(food.key, food);
@@ -128,15 +131,30 @@ void FoodTable::rebuildAliases()
     m_exact.clear();
     m_matchCache.clear();
     // eigene Einträge zuerst, damit ihre Namen gewinnen
+    // feste Reihenfolge (nach Schlüssel) statt der zufälligen der Hash-Tabelle: gleiche Zuordnung bei jedem Start
     QList<const Food *> order;
     for (const Food &f : m_foods)
         if (f.user) order << &f;
     for (const Food &f : m_foods)
         if (!f.user) order << &f;
+    std::stable_sort(order.begin(), order.end(), [](const Food *a, const Food *b) {
+        if (a->user != b->user) return a->user;
+        return a->key < b->key;
+    });
+    // erst alle Namen aus den Namenslisten, dann die Anzeigenamen – sonst würde „Makrele (geräuchert)“ ohne
+    // Klammerzusatz zu „makrele“ und könnte der frischen Makrele den Namen wegnehmen
+    // (eigene Lebensmittel behalten den Vorrang auch mit ihrem Namen)
+    QList<QPair<const Food *, QString>> names;
     for (const Food *f : order) {
-        QStringList names = f->aliases;
-        names << f->name.toLower();
-        for (const QString &a : names) {
+        for (const QString &a : f->aliases) names << qMakePair(f, a);
+        if (f->user) names << qMakePair(f, f->name.toLower());
+    }
+    for (const Food *f : order)
+        if (!f->user) names << qMakePair(f, f->name.toLower());
+    for (const auto &entry : names) {
+        const Food *f = entry.first;
+        const QString &a = entry.second;
+        {
             const QString n = normalize(a);
             if (n.isEmpty() || m_exact.contains(n)) continue;
             m_exact.insert(n, f->key);
@@ -287,7 +305,12 @@ QList<const Food *> FoodTable::all() const
 
 QString FoodTable::normalize(const QString &name)
 {
-    QString s = foldUmlauts(name.toLower());
+    QString lower = name.toLower();
+    // alte DOS-Sammlungen (CP850 als Windows-1252 gelesen): „Eiweiá“ = Eiweiß, „fraŒche“ = fraîche
+    static const QRegularExpression mojibakeSz(QStringLiteral("(?<=[aeiouäöü])á"));
+    lower.replace(mojibakeSz, QStringLiteral("ß"));
+    lower.replace(QChar(0x0153), QChar(0x00EE));   // œ (kleingeschriebenes Œ) → î
+    QString s = foldUmlauts(lower);
     static const QRegularExpression kRe282_0(QStringLiteral("\\([^)]*\\)"));
     s.remove(kRe282_0);            // Klammerzusätze
     static const QRegularExpression kRe283_0(QStringLiteral("[\\d½¼¾⅓⅔⅛%]+"));
@@ -326,6 +349,23 @@ QString FoodTable::normalize(const QString &name)
         QStringLiteral("to"), QStringLiteral("taste"), QStringLiteral("of"), QStringLiteral("the"),
         QStringLiteral("a"), QStringLiteral("an"), QStringLiteral("for"), QStringLiteral("about"),
         QStringLiteral("optional"), QStringLiteral("packed"), QStringLiteral("firmly"), QStringLiteral("lightly"),
+        // Mengen- und Gebindewörter, die im Namen stehen geblieben sind („Dose Bambussprossen“, „4 zw Peterli“)
+        QStringLiteral("po"), QStringLiteral("zw"), QStringLiteral("stück"), QStringLiteral("stücke"), QStringLiteral("stk"),
+        QStringLiteral("handvoll"), QStringLiteral("dose"), QStringLiteral("glas"), QStringLiteral("paket"),
+        QStringLiteral("packung"), QStringLiteral("päckchen"), QStringLiteral("beutel"), QStringLiteral("tüte"),
+        QStringLiteral("briefchen"), QStringLiteral("döschen"), QStringLiteral("kapsel"), QStringLiteral("flasche"),
+        QStringLiteral("fl"), QStringLiteral("topf"), QStringLiteral("schüssel"), QStringLiteral("spritzer"),
+        QStringLiteral("tropfen"), QStringLiteral("tr"), QStringLiteral("zweig"), QStringLiteral("zweige"),
+        QStringLiteral("stengel"), QStringLiteral("stängel"), QStringLiteral("stiele"), QStringLiteral("blätter"),
+        QStringLiteral("blatt"),
+        // Beschreibungen, die das Lebensmittel nicht ändern
+        QStringLiteral("junge"), QStringLiteral("junger"), QStringLiteral("junges"), QStringLiteral("jungen"),
+        QStringLiteral("dünne"), QStringLiteral("dünnen"), QStringLiteral("dicke"), QStringLiteral("abgehangene"),
+        QStringLiteral("ausgelöst"), QStringLiteral("ausgelöste"), QStringLiteral("ausgelöstes"), QStringLiteral("küchenfertig"),
+        QStringLiteral("küchenfertige"), QStringLiteral("bratfertige"), QStringLiteral("eingeweichte"), QStringLiteral("eingelegte"),
+        QStringLiteral("eingel"), QStringLiteral("trockene"), QStringLiteral("trockener"), QStringLiteral("pikante"),
+        QStringLiteral("kräftig"), QStringLiteral("extrascharfe"), QStringLiteral("abgeriebene"), QStringLiteral("ungezuckertes"),
+        QStringLiteral("ungesalzen"), QStringLiteral("ungesalzene"), QStringLiteral("geschälte"), QStringLiteral("frischen"),
     };
     static const QSet<QString> filler = [] {
         QSet<QString> f;
@@ -389,10 +429,54 @@ bool isPartWord(QString rest)
 }
 } // namespace
 
+// Beschreibungen, die beim Normalisieren als Füllwort wegfallen („frisch“, „ausgelöst“, „getrocknet“, „Dose“),
+// hier aber über das Lebensmittel entscheiden; geprüft vor dem gelernten und dem genauen Namen
+const Food *FoodTable::matchByRule(const QString &text) const
+{
+    struct Rule {
+        const char *what;    // Teil des Namens (regulärer Ausdruck)
+        const char *with;    // zusätzlich nötiges Wort
+        const char *key;
+    };
+    static const Rule rules[] = {
+        { "^(?!.*(jakobs|grünlipp|scallop|green)).*(muschel|clam|mussel)", "ausgelöst|ohne schale|shelled|shucked|canned|chopped", "muschelfleisch" },
+        { "kabeljau|dorsch|\\bcod\\b", "getrocknet|gesalzen|dried|salted", "stockfisch" },
+        { "thunfisch|tunfisch|\\btuna", "frisch|fresh|steak|\\broh|sushi|sashimi", "thunfisch_frisch" },
+        { "thunfisch|tunfisch|\\btuna", "in öl|olivenöl|pflanzenöl|in oil", "thunfisch_oel" },
+        { "sardine", "in öl|olivenöl|\\bdose|dosen|in oil|canned|tinned", "sardinen_oel" },
+        { "sardelle|anchovi|anchovy|\\bsprotte", "frisch|fresh", "sardinen" },
+        { "sardelle|anchovi|anchovy|boquerones", "essig|vinagre|mariniert|eingelegt|marinated|pickled", "sardellen_essig" },
+        { "jackfruit|jackfrucht", "jung|grün|lake|natur|pulled|dose|brine|young|green|canned", "jackfruit_jung" },
+        // getrocknetes Obst ist Trockenobst (Datteln, Rosinen, Goji haben eigene Einträge)
+        { "aprikose|marille|feige|pflaume|zwetschge|cranberr|preiselbeer|kirsche|mango|ananas|banane|apfel|äpfel|birne|papaya|kaki|"
+          "apricot|\\bfigs?\\b|prune|\\bplums?\\b|cherr|pineapple|banana|apple|\\bpears?\\b",
+          "getrocknet|gedörrt|dörr|soft|dried|sun-dried", "trockenobst" },
+        { "makrele|mackerel", "geräuchert|räucher|smoked", "makrele_geraeuchert" },
+        { "forelle|saibling|trout|char\\b", "geräuchert|räucher|smoked", "forelle_geraeuchert" },
+        { "\\baal\\b|\\beel\\b", "geräuchert|räucher|smoked", "aal_geraeuchert" },
+        { "hering|herring", "geräuchert|räucher|smoked", "bueckling" },
+    };
+    static const QList<QPair<QRegularExpression, QPair<QRegularExpression, QString>>> compiled = [] {
+        QList<QPair<QRegularExpression, QPair<QRegularExpression, QString>>> out;
+        const auto opt = QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption;
+        for (const Rule &r : rules)
+            out << qMakePair(QRegularExpression(QString::fromUtf8(r.what), opt),
+                             qMakePair(QRegularExpression(QString::fromUtf8(r.with), opt), QString::fromLatin1(r.key)));
+        return out;
+    }();
+    for (const auto &r : compiled) {
+        if (text.contains(r.first) && text.contains(r.second.first)) {
+            if (const Food *f = find(r.second.second)) return f;
+        }
+    }
+    return nullptr;
+}
+
 const Food *FoodTable::match(const QString &ingredientName) const
 {
     const QString n = normalize(ingredientName);
     if (n.isEmpty()) return nullptr;
+    if (const Food *f = matchByRule(ingredientName)) return f;
     // 1. vom Benutzer gelernt
     auto l = m_learned.constFind(n);
     if (l != m_learned.constEnd()) {
@@ -437,8 +521,89 @@ const Food *FoodTable::match(const QString &ingredientName) const
             best = &a;
         }
     }
+    // Einzahl zur Mehrzahl in der Tabelle: „Champignon“ → „champignons“, „Nelke“ → „nelken“, „Mandel“ → „mandeln“
+    if (!best) {
+        static const QStringList plural{ QStringLiteral("n"), QStringLiteral("en"), QStringLiteral("e"), QStringLiteral("s"),
+                                         QStringLiteral("es"), QStringLiteral("er"), QStringLiteral("nen") };
+        for (const Alias &a : m_aliases) {
+            if (a.multiWord) continue;
+            for (const QString &w : words) {
+                if (w.size() < 4 || a.text.size() <= w.size() || a.text.size() - w.size() > 3 || !a.text.startsWith(w)) continue;
+                if (!plural.contains(a.text.mid(w.size()))) continue;
+                const int score = int(w.size()) * 3 - 2;
+                if (score > bestScore) {
+                    bestScore = score;
+                    best = &a;
+                }
+            }
+        }
+    }
+    // Tippfehler („Pfefffer“, „Zwiebl“, „Puderzucekr“): ein Zeichen zu viel, zu wenig, falsch oder vertauscht –
+    // nur für längere Wörter und nur, wenn sonst nichts passt
+    if (!best) {
+        int bestLen = 0;
+        for (const Alias &a : m_aliases) {
+            if (a.multiWord || a.text.size() < 6) continue;
+            for (const QString &w : words) {
+                if (w.size() < 6 || qAbs(int(w.size()) - int(a.text.size())) > 1 || w == a.text) continue;
+                if (editDistanceAtMostOne(w, a.text) && a.text.size() > bestLen) {
+                    bestLen = int(a.text.size());
+                    best = &a;
+                }
+            }
+        }
+    }
     m_matchCache.insert(n, best ? best->key : QString());
     return best ? find(best->key) : nullptr;
+}
+
+bool FoodTable::isNonFood(const QString &ingredientName)
+{
+    // Küchenhelfer und Verpackung
+    static const QSet<QString> things{
+        QStringLiteral("backpapier"), QStringLiteral("alufolie"), QStringLiteral("aluminiumfolie"), QStringLiteral("zahnstocher"),
+        QStringLiteral("kuechengarn"), QStringLiteral("kuechenschnur"), QStringLiteral("bindfaden"), QStringLiteral("bambusmatte"),
+        QStringLiteral("sushimatte"), QStringLiteral("klarsichtfolie"), QStringLiteral("frischhaltefolie"), QStringLiteral("pergamentpapier"),
+        QStringLiteral("kuechenpapier"), QStringLiteral("gefrierbeutel"), QStringLiteral("einmachglaeser"), QStringLiteral("passiertuch"),
+        QStringLiteral("mulltuch"), QStringLiteral("nylontuch"), QStringLiteral("moerser"), QStringLiteral("loetlampe"), QStringLiteral("wok"),
+        QStringLiteral("ziegelstein"), QStringLiteral("tumbler"), QStringLiteral("shaker"), QStringLiteral("muffinblech"),
+        QStringLiteral("springform"), QStringLiteral("tortenring"), QStringLiteral("backrahmen"), QStringLiteral("auflaufform"),
+        QStringLiteral("stollenform"), QStringLiteral("raeucherspaene"), QStringLiteral("blattgold"), QStringLiteral("buchstabenausstecher"),
+        QStringLiteral("baender"), QStringLiteral("schablone"), QStringLiteral("kochbeutel"), QStringLiteral("twist off glas"),
+        QStringLiteral("gugelhupf form"), QStringLiteral("stern form"), QStringLiteral("dessertring"), QStringLiteral("toertchen"),
+        QStringLiteral("kalbsdarm"), QStringLiteral("schweinedaerme"), QStringLiteral("schweinedarm"), QStringLiteral("saitlinge"),
+        QStringLiteral("jakobsmuschelschalen"),
+    };
+    // Wortenden, die immer Geräte bezeichnen („Papierbackförmchen“, „Holzspieße“, „Muffinform“)
+    static const QStringList endings{ QStringLiteral("foermchen"), QStringLiteral("folie"), QStringLiteral("spiesse"),
+                                      QStringLiteral("spiesschen"), QStringLiteral("spieszchen"), QStringLiteral("staebchen"),
+                                      QStringLiteral("form"), QStringLiteral("matte"), QStringLiteral("ausstecher"),
+                                      QStringLiteral("schablone"), QStringLiteral("glaeser") };
+    const QString n = normalize(ingredientName);
+    if (n.isEmpty()) return false;
+    if (things.contains(n)) return true;
+    for (const QString &w : n.split(QLatin1Char(' '), Qt::SkipEmptyParts)) {
+        if (things.contains(w)) return true;
+        if (w == QLatin1String("reispapier") || w.endsWith(QLatin1String("reispapier"))) continue;
+        if (w.endsWith(QLatin1String("papier")) && w.size() > 6) return true;
+        for (const QString &e : endings)
+            if (w.endsWith(e)) return true;
+    }
+    return false;
+}
+
+bool FoodTable::editDistanceAtMostOne(const QString &a, const QString &b)
+{
+    const int la = int(a.size()), lb = int(b.size());
+    if (qAbs(la - lb) > 1) return false;
+    int i = 0;
+    while (i < la && i < lb && a[i] == b[i]) ++i;
+    if (i == la && i == lb) return true;
+    if (la == lb) {
+        if (a.mid(i + 1) == b.mid(i + 1)) return true;                                                  // ersetzt
+        return i + 1 < la && a[i] == b[i + 1] && a[i + 1] == b[i] && a.mid(i + 2) == b.mid(i + 2);      // vertauscht
+    }
+    return la > lb ? a.mid(i + 1) == b.mid(i) : a.mid(i) == b.mid(i + 1);                               // eingefügt/fehlt
 }
 
 QStringList FoodTable::categories()

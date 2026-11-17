@@ -37,6 +37,7 @@
 #include <QSettings>
 #include <QStandardPaths>
 #include <QUrl>
+#include <QTabWidget>
 #include <QVBoxLayout>
 
 // ---------------------------------------------------------------- Website
@@ -50,7 +51,9 @@ WebsiteExportDialog::WebsiteExportDialog(const QStringList &filteredIds, QWidget
                                "Den Ordner anschließend vollständig auf den eigenen Webserver hochladen."));
     info->setWordWrap(true);
     lay->addWidget(info);
-    auto *form = new QFormLayout;
+    auto *tabs = new QTabWidget;
+    auto *sitePage = new QWidget;
+    auto *form = new QFormLayout(sitePage);
     m_title = new QLineEdit(s.value(QStringLiteral("web/title"), RecipeDb::instance().name()).toString());
     form->addRow(tr("Titel der Website:"), m_title);
     m_subtitle = new QLineEdit(s.value(QStringLiteral("web/subtitle"), tr("Rezepte mit Nährwerten")).toString());
@@ -77,7 +80,50 @@ WebsiteExportDialog::WebsiteExportDialog(const QStringList &filteredIds, QWidget
     m_open = new QCheckBox(tr("Nach dem Export im Browser öffnen"));
     m_open->setChecked(true);
     form->addRow(QString(), m_open);
-    lay->addLayout(form);
+    tabs->addTab(sitePage, Icons::get(QStringLiteral("web")), tr("&Website"));
+
+    // Impressum und Datenschutz: persönliche Angaben (bleiben nur auf diesem Rechner gespeichert)
+    auto *legalPage = new QWidget;
+    auto *ll = new QVBoxLayout(legalPage);
+    m_legal = new QCheckBox(tr("&Impressum und Datenschutzhinweise erzeugen und in der Kopfzeile verlinken"));
+    m_legal->setChecked(s.value(QStringLiteral("web/legal/enabled"), true).toBool());
+    ll->addWidget(m_legal);
+    auto *lf = new QFormLayout;
+    auto field = [&](const char *key, const QString &label, const QString &placeholder, const QString &def = QString()) {
+        auto *e = new QLineEdit(s.value(QStringLiteral("web/legal/") + QLatin1String(key), def).toString());
+        e->setPlaceholderText(placeholder);
+        lf->addRow(label, e);
+        return e;
+    };
+    m_lName = field("name", tr("Name / Betreiber: *"), tr("Vor- und Nachname"), s.value(QStringLiteral("web/author")).toString());
+    m_lStreet = field("street", tr("Straße, Hausnummer: *"), tr("Musterstraße 1"));
+    m_lZipCity = field("zipCity", tr("PLZ, Ort: *"), tr("12345 Musterstadt"));
+    m_lCountry = field("country", tr("Land:"), tr("optional"), tr("Deutschland"));
+    m_lEmail = field("email", tr("E-Mail: *"), tr("kontakt@beispiel.de"));
+    m_lPhone = field("phone", tr("Telefon:"), tr("optional"));
+    m_lResponsible = field("responsible", tr("Verantwortlich (§ 18 MStV):"), tr("leer = Betreiber; sonst Name und Anschrift"));
+    m_lResponsible->setToolTip(tr("Verantwortlich für journalistisch-redaktionelle Inhalte nach § 18 Abs. 2 Medienstaatsvertrag – "
+                                  "meist der Betreiber selbst; dann leer lassen"));
+    m_lHoster = field("hoster", tr("Webhoster:"), tr("optional, z. B. Name und Anschrift des Anbieters"));
+    m_lHoster->setToolTip(tr("Erscheint in den Datenschutzhinweisen beim Abschnitt „Hosting und Server-Logdateien“"));
+    ll->addLayout(lf);
+    auto *hint = new QLabel(tr("<small>* Pflichtangaben. Die Seiten sind Muster nach deutschem Recht (§ 5 DDG, § 18 MStV, DSGVO) "
+                               "und auf diese Website zugeschnitten: statisch, ohne Cookies, Tracking oder eingebundene Fremdinhalte. "
+                               "Sie ersetzen keine Rechtsberatung – bitte vor dem Veröffentlichen prüfen. Mit dem Webhoster sollte "
+                               "ein Vertrag zur Auftragsverarbeitung (Art. 28 DSGVO) bestehen; die meisten Anbieter stellen ihn "
+                               "im Kundenbereich bereit. Die Angaben werden nur auf diesem Rechner gespeichert. "
+                               "Die E-Mail-Adresse wird auf der Website gegen einfache Adresssammler verschleiert.</small>"));
+    hint->setWordWrap(true);
+    ll->addWidget(hint);
+    ll->addStretch(1);
+    auto toggle = [this, lf](bool on) {
+        for (QLineEdit *e : { m_lName, m_lStreet, m_lZipCity, m_lCountry, m_lEmail, m_lPhone, m_lResponsible, m_lHoster }) e->setEnabled(on);
+        Q_UNUSED(lf);
+    };
+    connect(m_legal, &QCheckBox::toggled, this, toggle);
+    toggle(m_legal->isChecked());
+    tabs->addTab(legalPage, Icons::get(QStringLiteral("info")), tr("Impressum && &Datenschutz"));
+    lay->addWidget(tabs, 1);
     auto *bb = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     bb->button(QDialogButtonBox::Ok)->setText(tr("Exportieren"));
     lay->addWidget(bb);
@@ -87,7 +133,7 @@ WebsiteExportDialog::WebsiteExportDialog(const QStringList &filteredIds, QWidget
         const QString d = QFileDialog::getExistingDirectory(this, tr("Zielordner wählen"), m_folder->text());
         if (!d.isEmpty()) m_folder->setText(QDir::toNativeSeparators(d));
     });
-    resize(560, sizeHint().height());
+    resize(600, sizeHint().height());
 }
 
 void WebsiteExportDialog::accept()
@@ -98,7 +144,33 @@ void WebsiteExportDialog::accept()
     if (d.exists() && !d.isEmpty() && !QFileInfo::exists(d.filePath(QStringLiteral("index.html")))) {
         if (QMessageBox::question(this, windowTitle(), tr("Der Ordner ist nicht leer. Trotzdem hineinschreiben?")) != QMessageBox::Yes) return;
     }
+    WebsiteExport::Legal legal;
+    legal.enabled = m_legal->isChecked();
+    legal.name = m_lName->text().trimmed();
+    legal.street = m_lStreet->text().trimmed();
+    legal.zipCity = m_lZipCity->text().trimmed();
+    legal.country = m_lCountry->text().trimmed();
+    legal.email = m_lEmail->text().trimmed();
+    legal.phone = m_lPhone->text().trimmed();
+    legal.responsible = m_lResponsible->text().trimmed();
+    legal.hoster = m_lHoster->text().trimmed();
+    if (legal.enabled && !legal.missing().isEmpty()) {
+        QMessageBox::information(this, windowTitle(),
+                                 tr("Für das Impressum fehlen noch: %1.\n\nBitte auf der Seite „Impressum & Datenschutz“ ergänzen "
+                                    "oder die Erzeugung dort abschalten.").arg(legal.missing().join(QStringLiteral(", "))));
+        if (auto *tabs = findChild<QTabWidget *>()) tabs->setCurrentIndex(1);
+        return;
+    }
     QSettings s;
+    s.setValue(QStringLiteral("web/legal/enabled"), legal.enabled);
+    s.setValue(QStringLiteral("web/legal/name"), legal.name);
+    s.setValue(QStringLiteral("web/legal/street"), legal.street);
+    s.setValue(QStringLiteral("web/legal/zipCity"), legal.zipCity);
+    s.setValue(QStringLiteral("web/legal/country"), legal.country);
+    s.setValue(QStringLiteral("web/legal/email"), legal.email);
+    s.setValue(QStringLiteral("web/legal/phone"), legal.phone);
+    s.setValue(QStringLiteral("web/legal/responsible"), legal.responsible);
+    s.setValue(QStringLiteral("web/legal/hoster"), legal.hoster);
     s.setValue(QStringLiteral("web/title"), m_title->text());
     s.setValue(QStringLiteral("web/subtitle"), m_subtitle->text());
     s.setValue(QStringLiteral("web/author"), m_author->text());
@@ -109,6 +181,7 @@ void WebsiteExportDialog::accept()
     opt.subtitle = m_subtitle->text().trimmed();
     opt.author = m_author->text().trimmed();
     opt.nutrition = m_nutrition->isChecked();
+    opt.legal = legal;
     if (m_onlyFiltered->isChecked()) opt.onlyIds = m_filtered;
     QProgressDialog prog(tr("Website wird erzeugt …"), tr("Abbrechen"), 0, 100, this);
     prog.setWindowModality(Qt::WindowModal);

@@ -3,6 +3,10 @@
 Alle Exporte finden Sie unter *Datei → Export*. Einzelne Rezepte lassen sich außerdem über das
 Kontextmenü der Rezeptliste (rechte Maustaste) exportieren.
 
+> **Komfortfunktionen:** Der Export als Website, als LaTeX-Datei und als LibreOffice-Writer-Datei steht
+> nach der [Registrierung](extras.md#registrierung) zur Verfügung. Rezeptpakete, `.vmr`-Dateien, Drucken
+> und der Menüassistent sind immer frei.
+
 ## Als Website {#website}
 
 *Datei → Export → Als Website exportieren …* erzeugt aus Ihrer Sammlung eine themenbasierte Website
@@ -12,9 +16,49 @@ Kontextmenü der Rezeptliste (rechte Maustaste) exportieren.
 - **Umfang:** alle Rezepte oder nur die Rezepte der aktuell angezeigten (gefilterten) Liste.
 - **Nährwerte anzeigen**, **Zielordner**, **Nach dem Export im Browser öffnen**.
 
+![Website-Export: Reiter „Website“](bilder/website-export.png)
+
+### Impressum und Datenschutz {#website-impressum}
+
+Auf dem Reiter **Impressum & Datenschutz** erfassen Sie die Angaben, die eine deutsche Website braucht:
+Name bzw. Betreiber, Straße und Hausnummer, PLZ und Ort, E-Mail-Adresse (Pflicht, mit * markiert), dazu
+optional Land, Telefon, eine abweichende verantwortliche Person nach § 18 Abs. 2 MStV (leer = Sie selbst)
+und den Webhoster mit Anschrift. Fehlt eine Pflichtangabe, weist ViviaMeals vor dem Export darauf hin.
+
+![Website-Export: Reiter „Impressum & Datenschutz“](bilder/website-impressum.png)
+
+ViviaMeals erzeugt daraus zwei Seiten und verlinkt sie **in der Kopfzeile** (weiß auf Blau, rechts neben
+der Suche) und in der Fußzeile jeder Seite:
+
+- **impressum.html** – Angaben nach § 5 DDG, Kontakt, Verantwortlicher nach § 18 Abs. 2 MStV, Hinweise
+  zur Haftung für Inhalte (auch: Nährwerte sind Schätzwerte) und Links sowie zum Urheberrecht.
+- **datenschutz.html** – Datenschutzhinweise nach DSGVO, zugeschnitten auf diese Website: Sie ist
+  statisch, setzt keine Cookies, nutzt kein Tracking und bindet keine fremden Inhalte ein. Beschrieben
+  werden die Server-Logdateien beim Hoster, die Suche (im Browser bzw. über `suche.php`), Kontakt per
+  E-Mail, Links zu anderen Websites und Ihre Rechte als Betroffene.
+
+Die E-Mail-Adresse steht auf der Website verschleiert im Quelltext, damit einfache Adresssammler sie
+nicht lesen. Ihre Angaben speichert ViviaMeals nur auf Ihrem Rechner. Wer die Seiten nicht möchte, nimmt
+das Häkchen *Impressum und Datenschutzhinweise erzeugen* heraus.
+
+> **Hinweis:** Die Texte sind Muster nach deutschem Recht und **keine Rechtsberatung**. Prüfen Sie sie
+> vor dem Veröffentlichen, besonders wenn Sie die Website erweitern (Kontaktformular, Statistik,
+> eingebundene Videos …). Mit Ihrem Webhoster sollte ein Vertrag zur Auftragsverarbeitung
+> (Art. 28 DSGVO) bestehen – die meisten Anbieter stellen ihn im Kundenbereich bereit.
+
 Die Website enthält eine Startseite, eine Seite je Thema (Tag) und je Rezept – mit Foto und Nährwerten –,
 ein Menü und eine Suche: sofort im Browser (JavaScript) und auf dem Server (`suche.php`, PHP 7.4 oder
-neuer). Das Layout passt sich Handys und Tablets an. Zum Veröffentlichen laden Sie den Inhalt des
+neuer). Oben in der Themenspalte stehen auf jeder Seite das ViviaMeals-Bild aus dem Über-Dialog,
+„Erstellt mit ViviaMeals“ und ein Link zu portfolio.mbergmann-sh.de. Das Layout passt sich Handys und
+Tablets an; dort steht das Bild klein neben dem Text.
+
+Bei **sehr vielen Themen** (mehr als 60) zeigen Rezept- und Themenseiten links nur eine kurze Liste: *Alle
+Rezepte*, die Themen des Rezepts bzw. das aktuelle Thema und den Link *Alle … Themen*, der zur Übersicht
+`themen.html` führt. Die volle Liste steht auf der Startseite und in der Übersicht. Das hält große
+Websites klein – bei 4000 Rezepten und 600 Themen etwa 30 statt fast 300 MB – und spart Zeit beim
+Hochladen. Der Fortschrittsbalken begleitet den ganzen Export bis zur letzten Seite.
+
+Zum Veröffentlichen laden Sie den Inhalt des
 Zielordners per FTP oder SFTP auf Ihren Webspace.
 
 ## Als LaTeX-Datei und Kochbuch {#latex}

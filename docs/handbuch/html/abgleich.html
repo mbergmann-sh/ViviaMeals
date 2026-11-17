@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Abgleich zwischen Geräten – ViviaMeals – Handbuch</title><link rel="stylesheet" href="handbuch.css"></head>
 <body class="web">
-<header class="top"><span class="version">Version 0.9.5</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
+<header class="top"><span class="version">Version 0.9.19</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
 <div class="wrap"><nav class="side"><input id="suche" class="such" type="search" placeholder="Im Handbuch suchen …"><ol>
 <li><a href="index.html">Start und Inhalt</a></li>
 <li><a href="willkommen.html">Willkommen bei ViviaMeals</a>
@@ -23,7 +23,7 @@
 <li><a href="export.html">Exportieren</a>
 </li>
 <li class="aktiv"><a href="abgleich.html">Abgleich zwischen Geräten</a>
-<ol><li><a href="#abgleich-wege">Zwei Wege</a></li><li><a href="#abgleich-wann">Wann abgeglichen wird</a></li><li><a href="#abgleich-konflikte">Konflikte</a></li><li><a href="#abgleich-neues-geraet">Ein neues Gerät einrichten</a></li></ol>
+<ol><li><a href="#abgleich-wege">Zwei Wege</a></li><li><a href="#abgleich-wann">Wann abgeglichen wird</a></li><li><a href="#abgleich-konflikte">Konflikte</a></li><li><a href="#abgleich-neues-geraet">Ein neues Gerät einrichten</a></li><li><a href="#abgleich-gross">Große Datenbanken und Probleme mit dem Webhoster</a></li></ol>
 </li>
 <li><a href="extras.html">Extras und Einstellungen</a>
 </li>
@@ -43,7 +43,7 @@
 </figure>
 <ol type="1">
 <li><em>Datei → Abgleich → Abgleich einrichten …</em> öffnen und „die eigene Website“ wählen.</li>
-<li><strong>Neu</strong> erzeugt einen zufälligen <strong>Zugangsschlüssel</strong>.</li>
+<li><strong>Neu</strong> erzeugt einen zufälligen <strong>Zugangsschlüssel</strong>. Er ist verdeckt; <strong>Anzeigen</strong> zeigt ihn im Klartext (zum Notieren), <strong>Verbergen</strong> verdeckt ihn wieder.</li>
 <li><strong>Sync-Skript speichern …</strong> legt die Datei <code>viviameals-sync.php</code> in einem Ordner Ihrer Wahl ab.</li>
 <li>Diese Datei per FTP oder SFTP in einen Ordner Ihrer Website hochladen, z. B. <code>/viviameals/</code>.</li>
 <li>Die Adresse eintragen, z. B. <code>https://www.meine-seite.de/viviameals/viviameals-sync.php</code>, und <strong>Verbindung prüfen</strong>.</li>
@@ -92,6 +92,22 @@
 <li>Speicherort und Ordnername bestätigen und <strong>Laden</strong>.</li>
 </ol>
 <p>Die Datenbank wird mit Profilen, Tagebuch und Lebensmitteln geholt, geöffnet und künftig automatisch abgeglichen.</p>
+<h2 id="abgleich-gross">Große Datenbanken und Probleme mit dem Webhoster</h2>
+<p>Beim ersten Abgleich oder nach einem großen Import werden viele Dateien übertragen – bei 3000 Rezepten rund 3000 einzelne Anfragen an das Sync-Skript. Viele Webhoster begrenzen, wie viele Anfragen über eine Verbindung laufen dürfen, oder brechen bei Last einzelne Anfragen ab. Früher scheiterte der Abgleich dann mit Meldungen wie „Keine Verbindung: Server stopped accepting new streams …“ und musste von vorn beginnen.</p>
+<p>Seit Version 0.9.8 gilt:</p>
+<ul>
+<li>ViviaMeals verwendet für den Abgleich <strong>HTTP/1.1</strong> statt HTTP/2 (die häufigste Ursache dieser Meldung).</li>
+<li>Eine Anfrage, die an der Verbindung scheitert oder mit einem vorübergehenden Serverfehler (429, 500, 502, 503, 504) beantwortet wird, wird <strong>bis zu viermal wiederholt</strong> – jeweils mit neuer Verbindung und kurzer Pause (0,5 bis 4 Sekunden).</li>
+<li>Alle 150 Dateien bzw. jede Minute wird ein <strong>Zwischenstand</strong> eingetragen. Bricht der Abgleich doch ab, macht der nächste Versuch dort weiter, statt alles erneut zu senden. Dabei wird auch die Sperre des Speichers verlängert, damit kein anderes Gerät dazwischenfunkt.</li>
+</ul>
+<p>Das Sync-Skript auf der Website muss dafür <strong>nicht</strong> neu hochgeladen werden.</p>
+<p>Wenn es trotzdem hakt:</p>
+<ul>
+<li><strong>Abgleich einfach erneut starten</strong> – er setzt beim letzten Zwischenstand fort.</li>
+<li>Beim Hoster nachsehen, ob ein <strong>Schutz gegen viele Anfragen</strong> (Rate-Limit, „Bot-Schutz“, Web Application Firewall, z. B. ModSecurity) aktiv ist, und die Adresse des Skripts davon ausnehmen.</li>
+<li>Große Importe möglichst <strong>auf einem Gerät</strong> abschließen und erst danach abgleichen; die übrigen Geräte holen die Rezepte anschließend in einem Zug.</li>
+<li>Im <strong>lokalen Netz</strong> (anderes Gerät gibt frei) gibt es diese Grenzen nicht – für den allerersten Abgleich einer großen Datenbank ist das der schnellste Weg.</li>
+</ul>
 <nav class="pager"><span><a href="export.html">← Exportieren</a></span><span class="weiter"><a href="extras.html">Extras und Einstellungen →</a></span></nav></main></div>
-<footer>ViviaMeals 0.9.5 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
+<footer>ViviaMeals 0.9.19 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
 </body></html>

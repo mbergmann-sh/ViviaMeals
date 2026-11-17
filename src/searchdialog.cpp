@@ -116,18 +116,49 @@ SearchDialog::SearchDialog(QWidget *parent) : QDialog(parent)
     resize(900, 600);
 }
 
+QString SearchDialog::fold(const QString &text)
+{
+    // schneller Weg für reinen ASCII-Text (die meisten Tags und viele Titel)
+    bool ascii = true;
+    for (const QChar c : text)
+        if (c.unicode() >= 128) {
+            ascii = false;
+            break;
+        }
+    if (ascii) return text.toLower();
+    QString out;
+    out.reserve(text.size());
+    const QString d = text.toLower().normalized(QString::NormalizationForm_D);   // é → e + ´
+    for (const QChar c : d) {
+        if (c.category() == QChar::Mark_NonSpacing) continue;                       // Akzente, Umlautpunkte
+        if (c == QChar(0x00DF)) out += QLatin1String("ss");                          // ß
+        else if (c == QChar(0x00E6)) out += QLatin1String("ae");                     // æ
+        else if (c == QChar(0x0153)) out += QLatin1String("oe");                     // œ
+        else if (c == QChar(0x00F8)) out += QLatin1Char('o');                        // ø
+        else out += c;
+    }
+    return out;
+}
+
 bool SearchDialog::matches(const RecipeSummary &s, const QString &text, bool inIngredients)
 {
-    const QStringList words = text.toLower().split(QLatin1Char(' '), Qt::SkipEmptyParts);
-    for (const QString &w : words) {
-        bool hit = s.title.toLower().contains(w);
-        if (!hit)
-            for (const QString &t : s.tags)
-                if (t.contains(w)) hit = true;
-        if (!hit && inIngredients)
+    const QStringList words = fold(text).split(QLatin1Char(' '), Qt::SkipEmptyParts);
+    const auto has = [&](const QString &w) {
+        if (fold(s.title).contains(w)) return true;
+        for (const QString &t : s.tags)
+            if (fold(t).contains(w)) return true;
+        if (inIngredients)
             for (const QString &i : s.ingredientNames)
-                if (i.contains(w)) hit = true;
-        if (!hit) return false;
+                if (fold(i).contains(w)) return true;
+        return false;
+    };
+    for (const QString &w : words) {
+        if (has(w)) continue;
+        // ohne Umlaut-Tastatur getippt: „Kaese“ findet „Käse“
+        QString alt = w;
+        alt.replace(QLatin1String("ae"), QLatin1String("a")).replace(QLatin1String("oe"), QLatin1String("o")).replace(QLatin1String("ue"), QLatin1String("u"));
+        if (alt != w && has(alt)) continue;
+        return false;
     }
     return true;
 }

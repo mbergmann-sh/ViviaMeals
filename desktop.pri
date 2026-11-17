@@ -5,6 +5,12 @@ SOURCES += \
     $$PWD/src/main.cpp \
     $$PWD/src/mainwindow.cpp \
     $$PWD/src/foodwizard.cpp \
+    $$PWD/src/barcodedialog.cpp \
+    $$PWD/src/webimportdialog.cpp \
+    $$PWD/src/maintenancewindow.cpp \
+    $$PWD/src/kitchenglossarywindow.cpp \
+    $$PWD/src/dbcheckdialog.cpp \
+    $$PWD/src/registrationdialog.cpp \
     $$PWD/src/busyprogress.cpp \
     $$PWD/src/packagedialog.cpp \
     $$PWD/src/recipeview.cpp \
@@ -38,6 +44,12 @@ SOURCES += \
     $$PWD/src/duplicatesdialog.cpp
 
 HEADERS += \
+    $$PWD/src/barcodedialog.h \
+    $$PWD/src/webimportdialog.h \
+    $$PWD/src/maintenancewindow.h \
+    $$PWD/src/kitchenglossarywindow.h \
+    $$PWD/src/dbcheckdialog.h \
+    $$PWD/src/registrationdialog.h \
     $$PWD/src/mainwindow.h \
     $$PWD/src/foodwizard.h \
     $$PWD/src/busyprogress.h \
@@ -77,4 +89,12 @@ win32 {
     SOURCES += $$PWD/src/wiascan_win.cpp
     HEADERS += $$PWD/src/wiascan_win.h
     LIBS += -lole32 -loleaut32 -luuid
+}
+
+# Strichcode-Scanner mit Webcam (Qt 6 Multimedia, optional): fehlt das Modul, gibt es nur „Foto öffnen“
+greaterThan(QT_MAJOR_VERSION, 5):qtHaveModule(multimediawidgets) {
+    QT += multimedia multimediawidgets
+    DEFINES += VIVIA_CAMERA
+} else {
+    message("Qt Multimedia nicht gefunden – Strichcode-Scanner nur mit Fotos (keine Webcam)")
 }

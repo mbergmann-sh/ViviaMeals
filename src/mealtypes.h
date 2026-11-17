@@ -39,6 +39,11 @@ enum Type : int {
 };
 
 // Tag-Namen
+// „hochkalorisch“: eine Portion liegt über dem Richtwert für ihre Mahlzeitart (Anteil an 2000 kcal):
+// Hauptgericht 40 % (800 kcal), leichte Mahlzeit/Frühstück/Süßspeise 30 % (600 kcal),
+// Zwischenmahlzeit/Dessert/Gebäck 15 % (300 kcal); Grundrezepte und Rezepte ohne Portionsangabe nie
+double recommendedKcal(int types);
+bool isHighCalorie(const Recipe &r, int types);
 QString tagFor(Type t);   // Breakfast → „frühstück“ …
 QStringList mealTags();   // alle Mahlzeit-Tags
 

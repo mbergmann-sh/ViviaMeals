@@ -76,13 +76,19 @@ void analyze(Recipe &r)
             const QString learned = table.learnedFor(ing.name);
             if (!learned.isEmpty()) food = table.find(learned);
         }
-        if (!food) food = table.match(ing.name);
+        // Backpapier, Holzspieße, Muffinförmchen … sind keine Lebensmittel, auch wenn ein Wortteil passt
+        const bool nonFood = !food && FoodTable::isNonFood(ing.name);
+        // „Muscheln, ausgelöst“, „Thunfisch, frisch“: die entscheidende Beschreibung steht im Zusatz
+        if (!food && !nonFood && !ing.note.isEmpty()) food = table.matchByRule(ing.name + QLatin1Char(' ') + ing.note);
+        if (!food && !nonFood) food = table.match(ing.name);
         // „1 Reife, aromatische Melone“, „After Eight, Schoko-Minz-Täfelchen“: das Lebensmittel steht im Zusatz
-        if (!food && !ing.note.isEmpty()) food = table.match(ing.note);
+        if (!food && !nonFood && !ing.note.isEmpty()) food = table.match(ing.note);
         // „1 Zitrone, Saft davon“ / „abgeriebene Schale von 1 Orange“
-        if (food && !ing.foodManual && (food->key == QLatin1String("zitrone") || food->key == QLatin1String("orange"))) {
+        static const QSet<QString> sour{ QStringLiteral("zitrone"), QStringLiteral("limette"), QStringLiteral("zitrusfrucht_sonst") };
+        static const QSet<QString> sweet{ QStringLiteral("orange"), QStringLiteral("mandarine"), QStringLiteral("grapefruit") };
+        if (food && !ing.foodManual && (sour.contains(food->key) || sweet.contains(food->key))) {
             const QString n = (ing.note + QLatin1Char(' ') + ing.name).toLower();
-            if (n.contains(QStringLiteral("saft"))) food = table.find(food->key == QLatin1String("zitrone") ? QStringLiteral("zitronensaft") : QStringLiteral("orangensaft"));
+            if (n.contains(QStringLiteral("saft"))) food = table.find(sour.contains(food->key) ? QStringLiteral("zitronensaft") : QStringLiteral("orangensaft"));
             else if (n.contains(QStringLiteral("schale")) || n.contains(QStringLiteral("abrieb"))) food = table.find(QStringLiteral("zitronenschale"));
         }
         ing.food = food ? food->key : QString();
@@ -97,6 +103,8 @@ void analyze(Recipe &r)
             else if (food->key == QLatin1String("zitronenschale")) ing.grams = ing.amount * 5;
         }
         if (!countable) continue;
+        // Backpapier, Holzspieße … zählen nicht
+        if (nonFood) continue;
         // Wasser zählt nicht mit
         if (food && food->key == QLatin1String("wasser")) continue;
         ++info.countable;
@@ -120,12 +128,20 @@ enum class AnimalKind { None, Meat, Fish };
 // Fleisch/Fisch am Zutatennamen erkennen (deutsch, englisch, gängige Landesnamen)
 AnimalKind animalByName(const QString &name)
 {
-    static const QRegularExpression veggie(QStringLiteral("vegan|vegetar|veggie|tofu|seitan|soja|fleischtomate|fleischersatz|ohne fleisch|fischlos"),
+    static const QRegularExpression veggie(QStringLiteral("vegan|vegetar|veggie|tofu|seitan|soja|fleischtomate|fleischersatz|ohne fleisch|fischlos|pilz|seitling|"
+                       "fruchtfleisch|kokos|kürbisfleisch|melonenfleisch|avocadofleisch|mangofleisch|nori|wakame|kombu|algen"),
                                            QRegularExpression::CaseInsensitiveOption);
     static const QRegularExpression fishRe(
         QStringLiteral("fisch|kabeljau|dorsch|bacalh?au|bacal[aà]o?|baccal[aà]|lachs|thunfisch|sardine|sardelle|anchovi|hering|matjes|makrele|"
                        "forelle|zander|scholle|dorade|wolfsbarsch|barsch|seehecht|heilbutt|steinbutt|seezunge|karpfen|aal\\b|garnele|crevette|scampi|"
                        "shrimp|krabbe|hummer|languste|muschel|auster|tintenfisch|calamar|oktopus|krake|surimi|kaviar|seeteufel|hecht|saibling|\\bwels\\b|sprotte|pollack|\\bhake\\b|halibut|haddock|mackerel|herring|trout|"
+                       "kalmar|sepia|kaisergranat|langostin|gamba|pulpo|vongole|krebs|rollmops|bückling|bueckling|schillerlocke|rotbarbe|"
+                       "felchen|renke|brasse|merluza|bonito|katsuobushi|dashi|garum|worcester|\\bplaice|\\bsole\\b|scallop|shellfish|seafood|"
+                       "\\bstör|\\bstoer|sterlet|skrei|köhler|koehler|schellfisch|wittling|merlan|\\bhoki\\b|tilapia|pangasius|barramundi|snapper|schnapper|"
+                       "goldmakrele|mahi|barrakuda|barracuda|knurrhahn|steinbeißer|steinbeisser|seewolf|rochen|flunder|kliesche|limande|rotzunge|"
+                       "maräne|maraene|\\bhuchen|\\bäsche|schleie|brachse|rotauge|plötze|döbel|meermandel|entenmuschel|percebe|coquille|"
+                       "gamber|cozze|polpo|seppia|almeja|mejill|vieira|boquerones|anguila|\\beel\\b|sturgeon|pollock|whiting|catfish|\\bcarp\\b|"
+                       "\\bpike\\b|\\bperch\\b|walleye|snapper|grouper|\\bbass\\b|\\bbream|mullet|monkfish|swordfish|turbot|sardine|cockle|barnacle|"
                        "\\bcod\\b|salmon|\\btuna\\b|\\bfish|prawn|anchov|mussel|clam|oyster|squid|lobster|\\bcrab"),
         QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption);
     static const QRegularExpression meatRe(
@@ -146,7 +162,7 @@ QStringList suggestTags(const Recipe &r)
 {
     if (isMenu(r)) return {};
     FoodTable &table = FoodTable::instance();
-    bool meat = false, fish = false, gelatine = false, nonVegan = false, meatStock = false;
+    bool meat = false, fish = false, gelatine = false, nonVegan = false, meatStock = false, animalName = false;
     int known = 0, all = 0;
     for (const Ingredient &ing : r.ingredients) {
         if (ing.heading) continue;
@@ -171,22 +187,42 @@ QStringList suggestTags(const Recipe &r)
                                                                    "suppenknochen|chicken (broth|stock)|beef (broth|stock)|fish stock"),
                                                     QRegularExpression::CaseInsensitiveOption);
         if (ing.name.contains(animalStock)) meatStock = true;
+        // Zutaten mit tierischem Anteil, die in der Tabelle unter einer anderen Gruppe stehen:
+        // Fischsauce, Austernsauce, Krabbenchips, Worcestershiresauce … – kein Fischgericht, aber nicht vegetarisch
+        if (f->category != QLatin1String("fleisch") && f->category != QLatin1String("fisch") && animalByName(ing.name) != AnimalKind::None)
+            animalName = true;
     }
     QStringList tags;
     if (meat) tags << QStringLiteral("fleischgerichte");
     if (fish) tags << QStringLiteral("fisch");
     // vegetarisch/vegan nur, wenn (fast) alle Zutaten bekannt sind
-    if (all > 0 && known >= all * 0.85 && !meat && !fish && !gelatine && !meatStock) {
+    if (all > 0 && known >= all * 0.85 && !meat && !fish && !gelatine && !meatStock && !animalName) {
         tags << QStringLiteral("vegetarisch");
         if (!nonVegan) tags << QStringLiteral("vegan");
     }
     return tags;
 }
 
+bool containsAnimal(const Recipe &r)
+{
+    if (isMenu(r)) return false;
+    FoodTable &table = FoodTable::instance();
+    for (const Ingredient &ing : r.ingredients) {
+        if (ing.heading) continue;
+        const Food *f = ing.food.isEmpty() ? table.match(ing.name) : table.find(ing.food);
+        if (f && (f->category == QLatin1String("fleisch") || f->category == QLatin1String("fisch") || f->category == QLatin1String("gelatine")))
+            return true;
+        if (animalByName(ing.name) != AnimalKind::None) return true;
+    }
+    return false;
+}
+
 void applyTagSuggestions(Recipe &r)
 {
     const QStringList s = suggestTags(r);
-    if (s.contains(QStringLiteral("fleischgerichte")) || s.contains(QStringLiteral("fisch"))) {
+    // Fleisch, Fisch, Meeresfrüchte oder tierische Würzmittel: vorhandenes „vegetarisch“/„vegan“ (auch aus der
+    // Quelle, z. B. einer MealMaster-Kategorie) entfernen
+    if (s.contains(QStringLiteral("fleischgerichte")) || s.contains(QStringLiteral("fisch")) || containsAnimal(r)) {
         r.tags.removeAll(QStringLiteral("vegan"));
         r.tags.removeAll(QStringLiteral("vegetarisch"));
     }
@@ -219,7 +255,7 @@ QList<MissingFood> missingFoods(const QList<Recipe> &recipes, const QSet<QString
     for (const Recipe &r : recipes) {
         if (isMenu(r)) continue;
         for (const Ingredient &i : r.ingredients) {
-            if (i.heading || !i.food.isEmpty()) continue;
+            if (i.heading || !i.food.isEmpty() || FoodTable::isNonFood(i.name)) continue;
             const QString key = FoodTable::normalize(i.name);
             if (key.size() < 3 || ignored.contains(key)) continue;
             if (!map.contains(key)) {

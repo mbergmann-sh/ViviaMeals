@@ -42,6 +42,10 @@ public:
     const Food *findBarcode(const QString &code) const;   // eigenes Lebensmittel mit diesem Barcode
     // Zutatennamen einem Lebensmittel zuordnen (nullptr = keine Zuordnung)
     const Food *match(const QString &ingredientName) const;
+    // Fingerabdruck der eingebauten Tabelle: ändert sich mit jeder neuen Fassung (Abgleich der Rezepte anbieten)
+    QString builtinStamp() const { return m_builtinStamp; }
+    // nur die Regeln für entscheidende Beschreibungen („frischer Thunfisch“, „Muscheln, ausgelöst“); nullptr = keine
+    const Food *matchByRule(const QString &text) const;
     QList<const Food *> all() const;             // nach Name sortiert
     static QString categoryName(const QString &cat);
     static QStringList categories();
@@ -61,6 +65,9 @@ public:
 
     static QString foldUmlauts(const QString &s);
     static QString normalize(const QString &name);   // Zutatennamen für den Abgleich vereinfachen
+    // Küchenhelfer und Verpackung (Backpapier, Holzspieße, Alufolie …) – kein Lebensmittel, zählt nie als fehlend
+    static bool isNonFood(const QString &ingredientName);
+    static bool editDistanceAtMostOne(const QString &a, const QString &b);
     QString userFile() const;
     void reload();
 
@@ -73,6 +80,7 @@ private:
     QHash<QString, Food> m_builtin;
     QHash<QString, Food> m_userFoods;
     QHash<QString, QString> m_learned;     // normalisierter Name → Schlüssel
+    QString m_builtinStamp;
     struct Alias {
         QString text, key;
         QString spaced, leading;   // „ text “ und „ text“ – vorberechnet für match()

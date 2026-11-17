@@ -174,6 +174,9 @@ QString run(QWidget *parent, Importers::Format format, const QStringList &givenF
         case Importers::Format::MealMaster:
             filter = QObject::tr("MealMaster-Rezepte (*.mmf *.mm *.mxp *.txt);;Alle Dateien (*)");
             break;
+        case Importers::Format::Ambrosia:
+            filter = QObject::tr("Ambrosia-Datenbanken (*.mdb *.MDB);;Alle Dateien (*)");
+            break;
         default:
             filter = QObject::tr("Alte ViviaMeals-Listen (*.vtm);;Alle Dateien (*)");
         }
@@ -202,7 +205,23 @@ QString run(QWidget *parent, Importers::Format format, const QStringList &givenF
         for (int i = 0; i < files.size(); ++i) {
             prog.setValue(i);
             if (prog.wasCanceled()) return false;
-            const Importers::Result res = Importers::importFile(files[i], format, o);
+            Importers::Options oi = o;
+            if (format == Importers::Format::Ambrosia) {
+                // eine Datenbank kann Tausende Rezepte enthalten: Fortschritt je Rezept
+                prog.setMaximum(0);
+                oi.progress = [&prog, &files, i](int done, int total) {
+                    if (prog.maximum() != total) prog.setMaximum(total);
+                    prog.setValue(done);
+                    prog.setLabelText(QObject::tr("%1: Rezept %2 von %3 …").arg(QFileInfo(files[i]).fileName()).arg(done + 1).arg(total));
+                    QCoreApplication::processEvents();
+                    return !prog.wasCanceled();
+                };
+            }
+            const Importers::Result res = Importers::importFile(files[i], format, oi);
+            if (format == Importers::Format::Ambrosia) {
+                if (prog.wasCanceled()) return false;
+                prog.setMaximum(int(files.size()));
+            }
             for (const Recipe &r : res.recipes) {
                 recipes << r;
                 origins << files[i];
@@ -422,7 +441,7 @@ int addHealthySuggestions(QWidget *parent)
     db.endBatch();
     QMessageBox::information(parent, QObject::tr("Gesunde Vorschläge"),
                              added > 0 ? QObject::tr("%1 Rezepte für Frühstück, Zwischenmahlzeiten und leichte Abendessen wurden übernommen. Sie tragen "
-                                                     "die Tags „frühstück“, „zwischenmahlzeit“ bzw. „leichte mahlzeit“ und lassen sich wie alle "
+                                                     "die Tags „frühstück“, „zwischenmahlzeit“ bzw. „leichte Mahlzeit“ und lassen sich wie alle "
                                                      "Rezepte bearbeiten.")
                                              .arg(added)
                                        : QObject::tr("Die Vorschläge sind bereits in der Datenbank."));

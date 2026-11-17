@@ -235,6 +235,25 @@ double produceGrams(const Recipe &r)
     return r.servings > 0 ? g / r.servings : g;
 }
 
+double recommendedKcal(int types)
+{
+    // Anteil am Tagesbedarf (EU-Referenzmenge 2000 kcal), den eine übliche Portion dieser Art haben sollte;
+    // gehört ein Rezept zu mehreren Arten, gilt der großzügigste Wert
+    double share = 0;
+    if (types & Main || !(types & ~Basic)) share = qMax(share, 0.40);      // Hauptgericht (oder unbestimmt): 800 kcal
+    if (types & (Light | Breakfast | Sweet)) share = qMax(share, 0.30);   // leichte Mahlzeit, Frühstück, Süßspeise: 600 kcal
+    if (types & (Snack | Dessert | Baking)) share = qMax(share, 0.15);    // Zwischenmahlzeit, Dessert, Stück Kuchen: 300 kcal
+    return share * Nutrition::referenceIntake().kcal;
+}
+
+bool isHighCalorie(const Recipe &r, int types)
+{
+    // nur mit echter Portionsangabe – sonst wäre „je Portion“ das ganze Rezept
+    if (r.servings <= 0 || (types & Basic && !(types & ~Basic))) return false;
+    if (types & Baking && r.servings <= 1) return false;   // ganzer Kuchen als „1 Portion“
+    return r.nutrition.perServing.kcal > recommendedKcal(types);
+}
+
 QStringList nutrientTags(const Recipe &r)
 {
     QStringList t;
@@ -250,7 +269,7 @@ QStringList nutrientTags(const Recipe &r)
     if (proteinShare(in) >= 0.20 && p.protein >= 15) t << QStringLiteral("eiweißreich");
     if (per100 > 0 && p.fat * per100 <= 3.0) t << QStringLiteral("fettarm");
     if (ed > 0 && ed <= 80 && p.kcal <= 400) t << QStringLiteral("kalorienarm");
-    if ((ed >= 250) || p.kcal >= 800) t << QStringLiteral("hochkalorisch");
+    if (isHighCalorie(r, types)) t << QStringLiteral("hochkalorisch");
     const double produce = produceGrams(r);
     // Kuchen und Gebäck nie; Desserts/Süßspeisen nur mit viel Obst (≥ 200 g je Portion)
     const bool sweet = types & (Dessert | Sweet);

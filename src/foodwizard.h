@@ -107,9 +107,12 @@ private:
     void create();
     void assign();
     void ignore();
+    void edit();        // Doppelklick: offene Zutat anlegen, erledigte Zuordnung bearbeiten
+    void saveText();
     int currentRow() const;
-    void setStatus(int row, const QString &text);
+    void setStatus(int row, const QString &text, const QString &key = QString());
     QTableWidget *m_table;
     QList<Nutrition::MissingFood> m_missing;
+    QStringList m_keys;  // zugeordnetes Lebensmittel je Zeile (leer = offen)
     bool m_changed = false;
 };

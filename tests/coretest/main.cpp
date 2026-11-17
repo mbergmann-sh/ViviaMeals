@@ -8,6 +8,16 @@
 #include "nutrition.h"
 #include "markup.h"
 #include "season.h"
+#include "ambrosia.h"
+#include "barcode.h"
+#include "webrecipe.h"
+#include "dbcheck.h"
+#include "license.h"
+#include "websiteexport.h"
+#include "kitchenglossary.h"
+#include <QPainter>
+#include <QTransform>
+#include "jetdb.h"
 #include "recipedb.h"
 #include "textcodec.h"
 #include "units.h"
@@ -150,6 +160,60 @@ int main(int argc, char **argv)
                 out << "  [" << Duplicates::reasonText(x.reasons) << " " << qRound(x.score * 100) << "%] " << titles.join(QStringLiteral(" | ")) << "\n";
             }
         }
+        return 0;
+    }
+    // coretest --dump <datei>: Import zeigen (Titel, Ertrag, Tags, Zutaten, Zubereitung, Hinweise)
+    // Messung Website-Export: coretest --bench-web <ordner> <anzahl> <themen>
+    if (argc >= 5 && QString::fromLocal8Bit(argv[1]) == QLatin1String("--bench-web")) {
+        const QString base = QString::fromLocal8Bit(argv[2]);
+        const int n = QString::fromLocal8Bit(argv[3]).toInt(), nt = QString::fromLocal8Bit(argv[4]).toInt();
+        QDir(base).removeRecursively();
+        RecipeDb &db = RecipeDb::instance();
+        QString err;
+        if (!db.create(base + "/db", "Bench", &err)) { fprintf(stderr, "%s\n", qPrintable(err)); return 1; }
+        QElapsedTimer t;
+        t.start();
+        db.beginBatch();
+        for (int i = 0; i < n; ++i) {
+            Recipe r;
+            r.title = QStringLiteral("Rezept %1").arg(i);
+            r.servings = 4;
+            for (const char *l : { "200 g Mehl", "2 Eier", "100 ml Milch", "1 Prise Salz" }) r.ingredients << IngredientParser::parseLine(QString::fromUtf8(l));
+            r.instructions = QStringLiteral("Alles verrühren und backen.");
+            for (int k = 0; k < 4; ++k) r.tags << QStringLiteral("thema%1").arg((i * 7 + k * 13) % nt);
+            Nutrition::analyze(r);
+            db.save(r);
+        }
+        db.endBatch();
+        fprintf(stderr, "DB angelegt: %lld ms\n", t.restart());
+        WebsiteExport::Options o;
+        o.legal.name = "A"; o.legal.street = "B"; o.legal.zipCity = "C"; o.legal.email = "a@b.de";
+        int calls = 0;
+        qint64 maxGap = 0, last = 0;
+        QElapsedTimer gap;
+        gap.start();
+        WebsiteExport::exportSite(base + "/site", o, &err, [&](int, int) {
+            ++calls;
+            maxGap = qMax(maxGap, gap.elapsed() - last);
+            last = gap.elapsed();
+            return true;
+        });
+        maxGap = qMax(maxGap, gap.elapsed() - last);
+        fprintf(stderr, "Export: %lld ms, Fortschritt %d-mal, längste Pause ohne Fortschritt %lld ms\n", t.elapsed(), calls, maxGap);
+        return 0;
+    }
+    if (argc >= 3 && QString::fromLocal8Bit(argv[1]) == QLatin1String("--dump")) {
+        const auto res = Importers::importFile(QString::fromLocal8Bit(argv[2]), Importers::Format::Unknown);
+        for (const Recipe &r : res.recipes) {
+            out << "=== " << r.title << " (" << r.servingsText() << ", " << r.prepMinutes << " min, Bild " << (r.image.size() * 3 / 4 / 1024)
+                << " KB, Sprache " << r.language << ")\n";
+            out << "Quelle: " << r.source << "\nTags: " << r.tags.join(", ") << "\nkcal/Portion: " << qRound(r.nutrition.perServing.kcal)
+                << "  Abdeckung " << qRound(r.nutrition.coverage() * 100) << " %\n";
+            for (const Ingredient &i : r.ingredients) out << (i.heading ? "  == " : "  - ") << i.displayLine() << (i.food.isEmpty() || i.heading ? QString() : "  [" + i.food + "]") << "\n";
+            out << r.instructions << "\n\n";
+        }
+        for (const QString &w : res.warnings) out << "Hinweis: " << w << "\n";
+        out.flush();
         return 0;
     }
     // coretest --odt <rezeptdatei> <ordner>: alle Rezepte als .odt (mit Testbild) schreiben
@@ -447,7 +511,7 @@ int main(int argc, char **argv)
             CHECK(ing(4).food == QLatin1String("hartkaese") && ing(4).note == QStringLiteral("fein gerieben"), "Greyerzer + Fortsetzung");
             CHECK(ing(5).name == QStringLiteral("Zitrone") && ing(5).food == QLatin1String("zitronensaft"), "Zitrone: Saft");
             CHECK(ing(6).unit == QLatin1String("Kugel") && ing(6).food == QLatin1String("speiseeis") && std::fabs(ing(6).grams - 200) < 1, "Kugel(n) Vanilleeis");
-            CHECK(ing(7).food == QLatin1String("fisch_mager") && std::fabs(ing(7).grams - 500) < 1, "Zanderfilets à 125 g");
+            CHECK(ing(7).food == QLatin1String("zander") && std::fabs(ing(7).grams - 500) < 1, "Zanderfilets à 125 g");
             CHECK(r.instructions.contains(QStringLiteral("180° C")) && r.instructions.contains(QStringLiteral("heißen Brühe"))
                       && r.instructions.contains(QStringLiteral("Schüssel")) && r.instructions.contains(QStringLiteral("ablöschen"))
                       && !r.instructions.contains(QStringLiteral("O-Titel")),
@@ -974,7 +1038,7 @@ int main(int argc, char **argv)
             { QStringLiteral("Spekulatius"), QStringLiteral("kekse") }, { QStringLiteral("Esskastanien"), QStringLiteral("maronen") },
             { QStringLiteral("Rote Currypaste"), QStringLiteral("wuerzpaste") }, { QStringLiteral("Hoisinsauce"), QStringLiteral("hoisinsauce") },
             { QStringLiteral("Johannisbeergelee"), QStringLiteral("marmelade") }, { QStringLiteral("Johannisbeer-Rispen"), QStringLiteral("beeren") },
-            { QStringLiteral("Wildente"), QStringLiteral("ente") }, { QStringLiteral("Poularde"), QStringLiteral("haehnchenschenkel") },
+            { QStringLiteral("Wildente"), QStringLiteral("ente") }, { QStringLiteral("Poularde"), QStringLiteral("huhn_ganz") },
             { QStringLiteral("Cidre"), QStringLiteral("bier") }, { QStringLiteral("Thymianblättchen"), QStringLiteral("kraeuter") },
             { QStringLiteral("Mandelsplitter"), QStringLiteral("mandeln") }, { QStringLiteral("Kuchenglasur"), QStringLiteral("schokolade_zartbitter") },
         };
@@ -1068,7 +1132,7 @@ int main(int argc, char **argv)
         db.load(k2, &o1);
         db.load(k3, &o2);
         keep.tags.clear();
-        o1.tags = { QStringLiteral("backen"), QStringLiteral("omas rezepte") };
+        o1.tags = QStringList{ QStringLiteral("backen"), QStringLiteral("omas rezepte") };
         const QStringList merged = Duplicates::mergeInto(keep, { o1, o2 });
         CHECK(keep.favorite && !keep.image.isEmpty() && keep.hasTag(QStringLiteral("omas rezepte")) && merged.size() >= 3,
               "Zusammenführen: Favorit, Bild, Tags übernommen");
@@ -1217,7 +1281,7 @@ int main(int argc, char **argv)
         f.name = QStringLiteral("Buttaris Test");
         f.category = QStringLiteral("fett");
         f.per100.kcal = 900; f.per100.fat = 99.8;
-        f.aliases = { QStringLiteral("buttaris test") };
+        f.aliases = QStringList{ QStringLiteral("buttaris test") };
         f.source = QStringLiteral("eigene Eingabe");
         const QString key = ft.saveUserFood(f);
         CHECK(key == QLatin1String("u_buttaris_test"), "saveUserFood gibt Schlüssel zurück");
@@ -1467,10 +1531,10 @@ int main(int argc, char **argv)
         CHECK(LatexExport::masterChapters(t) == QStringList({ QStringLiteral("Suppen & Eintöpfe"), QStringLiteral("Hauptgerichte") }), "Kapitel lesen");
         Recipe r;
         r.title = QStringLiteral("Kartoffelsuppe");
-        r.tags = { QStringLiteral("vegetarisch") };
+        r.tags = QStringList{ QStringLiteral("vegetarisch") };
         CHECK(LatexExport::suggestChapter(r) == QStringLiteral("Suppen"), "Kapitelvorschlag Suppe");
         r.title = QStringLiteral("Mousse au Chocolat");
-        r.tags = { QStringLiteral("desserts") };
+        r.tags = QStringList{ QStringLiteral("desserts") };
         CHECK(LatexExport::suggestChapter(r) == QStringLiteral("Nachtisch"), "Kapitelvorschlag Nachtisch");
         LatexExport::Options o;
         o.heading = LatexExport::Heading::Section;
@@ -1687,6 +1751,8 @@ int main(int argc, char **argv)
             CHECK(t.contains("sommer") && t.contains("frühling") == false, "Erdbeeren: " + t.join(","));
             t = Season::suggestTags(mk({ { "Grünkohl", 1000 }, { "Kartoffeln", 800 }, { "Pinkel", 300 }, { "Frühlingszwiebeln", 20 } }));
             CHECK(t == QStringList{ "winter" }, "Grünkohl: " + t.join(","));
+            t = Season::suggestTags(mk({ { "Frühlingszwiebeln", 200 }, { "Eier", 300 }, { "Butter", 20 } }));
+            CHECK(t == QStringList{ "ganzjährig" }, "Frühlingszwiebeln ganzjährig: " + t.join(","));
             t = Season::suggestTags(mk({ { "Hokkaido-Kürbis", 800 }, { "Zwiebel", 100 }, { "Gemüsebrühe", 500 } }));
             CHECK(t.contains("herbst"), "Kürbis: " + t.join(","));
             t = Season::suggestTags(mk({ { "Feldsalat", 200 }, { "Walnüsse", 50 } }));
@@ -2115,11 +2181,637 @@ int main(int argc, char **argv)
                 Sync::Store(root + "/web/vm-sync-daten").lock("anderes|Tablet");
                 ra = sync(dbA, appA, &ht);
                 CHECK(!ra.ok && ra.error.contains("Tablet"), "PHP: Sperre: " + ra.error);
+                // viele neue Rezepte auf einmal: Zwischenstände (alle 150 Dateien) werden eingetragen
+                QFile::remove(root + "/web/vm-sync-daten/lock.json");
+                const int revBefore = Sync::Store(root + "/web/vm-sync-daten").manifest().revision;
+                for (int k = 0; k < 400; ++k)
+                    mkRecipe(dbA, QUuid::createUuid().toString(QUuid::WithoutBraces), QStringLiteral("Massenrezept %1").arg(k), "Viele auf einmal.");
+                ra = sync(dbA, appA, &ht);
+                const int revAfter = Sync::Store(root + "/web/vm-sync-daten").manifest().revision;
+                CHECK(ra.ok && ra.uploaded >= 400 && revAfter - revBefore >= 3, QStringLiteral("PHP: 400 Rezepte mit Zwischenständen (Revision %1 → %2): ").arg(revBefore).arg(revAfter) + ra.summary());
+                rd = sync(dbD, appD, &hd);
+                CHECK(rd.ok && recipeCount(dbD) == recipeCount(dbA), QStringLiteral("PHP: 400 Rezepte geladen (%1/%2)").arg(recipeCount(dbD)).arg(recipeCount(dbA)));
             }
             web.kill();
             web.waitForFinished();
         }
         CHECK(Sync::newToken().size() == 43, "Zugangsschlüssel");
+    }
+
+
+
+    out << "\n=== Ambrosia ===\n";
+    {
+        const QString rtf = QStringLiteral(
+            "{\\rtf1\\ansi\\ansicpg1252\\deff0{\\fonttbl{\\f0\\fnil\\fcharset0 Arial;}{\\f1\\fnil\\fcharset2 Symbol;}}\n"
+            "\\viewkind4\\uc1\\pard\\lang2055\\fs20 \\b Vorbereitung\\b0\n\\par \\pard{\\pntext\\f1\\'B7\\tab}{\\*\\pn\\pnlvlblt\\pnf1\\pnindent0{\\pntxtb\\'B7}}"
+            "\\fi-255\\li255 Gl\\'e4ser vorw\\'e4rmen\n\\par {\\pntext\\f1\\'B7\\tab}Butter \\i weich\\i0  r\\'fchren, 5 * 3 \\{x\\}\n\\par \\pard \n\\par Schlu\\'df mit \\u8364? Euro\n\\par }\n");
+        const QString m = Ambrosia::rtfToMarkup(rtf);
+        CHECK(m == QStringLiteral("**Vorbereitung**\n\n- Gläser vorwärmen\n- Butter *weich* rühren, 5 * 3 {x}\n\nSchluß mit € Euro"), "RTF → Auszeichnung: " + m);
+        CHECK(Ambrosia::rtfToPlain(QStringLiteral("kein RTF")) == QStringLiteral("kein RTF"), "Text ohne RTF bleibt");
+        // Bild als Windows-1252-Zeichen in UTF-16 (so legt Ambrosia JPEGs ab)
+        const QByteArray jpeg("\xFF\xD8\xFF\xE0\x00\x10JFIF\x80\x9F\xA0\xFF\xD9", 15);
+        QByteArray wide;
+        for (char ch : jpeg) {
+            const QString u = QString::fromLatin1(&ch, 1);
+            QChar q = u.at(0);
+            const quint8 b = quint8(ch);
+            if (b == 0x80) q = QChar(0x20AC);
+            if (b == 0x9F) q = QChar(0x0178);
+            wide += char(q.unicode() & 0xFF);
+            wide += char(q.unicode() >> 8);
+        }
+        CHECK(Ambrosia::imageFromBlob(wide) == jpeg, "Foto aus aufgeweitetem Blob");
+        CHECK(Ambrosia::imageFromBlob(QByteArray("OLEhead") + jpeg) == jpeg, "Foto nach OLE-Kopf");
+        QString note;
+        CHECK(Ambrosia::unitName(31, 1, &note) == "g" && Ambrosia::unitName(17, 1, &note) == "EL" && Ambrosia::unitName(34, 0, &note).isEmpty()
+                  && note == "nach Belieben" && !Ambrosia::knownUnit(99),
+              "Einheiten");
+        Jet::Database db;
+        QString err;
+        CHECK(!db.openData(QByteArray(8192, 'x'), &err) && err.contains("Access"), "keine Access-Datei: " + err);
+        // echte Ambrosia-Datenbank (nicht im Quellbaum, persönliche Daten): VIVIA_AMBROSIA_TEST=<datei.mdb>
+        const QString sample = qEnvironmentVariable("VIVIA_AMBROSIA_TEST");
+        if (!sample.isEmpty() && QFileInfo::exists(sample)) {
+            CHECK(Ambrosia::isAmbrosia(sample), "Ambrosia erkannt");
+            const auto res = Importers::importFile(sample, Importers::Format::Unknown);
+            int photos = 0, steps = 0, headings = 0;
+            for (const Recipe &r : res.recipes) {
+                if (!r.image.isEmpty()) ++photos;
+                if (Markup::hasMarkup(r.instructions)) ++steps;
+                for (const Ingredient &i : r.ingredients) headings += i.heading;
+            }
+            CHECK(res.recipes.size() == 9 && photos == 8 && steps >= 8 && headings >= 6, QStringLiteral("Beispieldatenbank: %1 Rezepte, %2 Fotos").arg(res.recipes.size()).arg(photos));
+            for (const Recipe &r : res.recipes)
+                if (r.title == QStringLiteral("Bärlauchsuppe"))
+                    CHECK(r.servings == 4 && r.prepMinutes == 35 && r.source == QStringLiteral("Saisonküche 03/2007, S. 19") && r.hasTag("suppen")
+                              && r.ingredients.value(5).unit == "EL" && r.ingredients.value(5).name == "Butter",
+                          "Bärlauchsuppe: Portionen, Zeit, Quelle, Kategorie, Zutat");
+        }
+    }
+
+
+
+    out << "\n=== Strichcode ===\n";
+    {
+        // EAN-13 selbst zeichnen (Muster wie auf der Verpackung), dann lesen
+        const QStringList eanL{ "0001101", "0011001", "0010011", "0111101", "0100011", "0110001", "0101111", "0111011", "0110111", "0001011" };
+        const QStringList eanG{ "0100111", "0110011", "0011011", "0100001", "0011101", "0111001", "0000101", "0010001", "0001001", "0010111" };
+        const QStringList eanR{ "1110010", "1100110", "1101100", "1000010", "1011100", "1001110", "1010000", "1000100", "1001000", "1110100" };
+        const QStringList eanP{ "LLLLLL", "LLGLGG", "LLGGLG", "LLGGGL", "LGLLGG", "LGGLLG", "LGGGLL", "LGLGLG", "LGLGGL", "LGGLGL" };
+        auto bits13 = [&](const QString &c) {
+            QString b = QStringLiteral("101");
+            for (int i = 0; i < 6; ++i) {
+                const int d = c.at(i + 1).digitValue();
+                b += eanP.at(c.at(0).digitValue()).at(i) == QLatin1Char('L') ? eanL.at(d) : eanG.at(d);
+            }
+            b += QStringLiteral("01010");
+            for (int i = 7; i < 13; ++i) b += eanR.at(c.at(i).digitValue());
+            return b + QStringLiteral("101");
+        };
+        auto draw = [](const QString &bits, int mod, int angle) {
+            QImage img((int(bits.size()) + 24) * mod + 200, 400, QImage::Format_RGB32);
+            img.fill(QColor(200, 170, 140));
+            QPainter p(&img);
+            p.fillRect(QRect(100 - 12 * mod / 2, 80, (int(bits.size()) + 24) * mod, 240), Qt::white);
+            for (int i = 0; i < bits.size(); ++i)
+                if (bits[i] == '1') p.fillRect(QRect(100 + 6 * mod + i * mod, 100, mod, 200), QColor(25, 25, 25));
+            p.end();
+            return angle ? img.transformed(QTransform().rotate(angle)) : img;
+        };
+        CHECK(Barcode::checksumOk("4006381333931") && !Barcode::checksumOk("4006381333932") && Barcode::checksumOk("96385074"), "Prüfziffer");
+        const QStringList codes{ "4006381333931", "3017620422003", "0012345678905" };
+        QStringList bad;
+        for (const QString &c : codes)
+            for (int angle : { 0, 90, 180, 12 }) {
+                const Barcode::Result r = Barcode::decode(draw(bits13(c), 3, angle));
+                if (r.code != c) bad << QStringLiteral("%1/%2°→%3").arg(c).arg(angle).arg(r.code);
+            }
+        CHECK(bad.isEmpty(), "EAN-13 gelesen: " + bad.join(", "));
+        QImage noise(800, 600, QImage::Format_RGB32);
+        for (int y = 0; y < noise.height(); ++y)
+            for (int x = 0; x < noise.width(); ++x) {
+                const int v = ((x * 7 + y * 13) ^ (x * y)) & 255;
+                noise.setPixel(x, y, qRgb(v, v, v));
+            }
+        CHECK(!Barcode::decode(noise).ok(), "kein Code im Rauschen");
+        // Kameraauswahl: gleichnamige nummerieren, Vorrang laufend > gespeichert > Name > Standard > erste
+        const QStringList cams{ QStringLiteral("Integrated Camera"), QStringLiteral("USB Camera"), QStringLiteral("USB Camera") };
+        const QStringList lab = Barcode::uniqueLabels(cams);
+        CHECK(lab == QStringList({ "Integrated Camera", "USB Camera", "USB Camera (2)" }), "Kameranamen nummeriert: " + lab.join('|'));
+        const QList<QByteArray> ids{ "int0", "usbA", "usbB" };
+        CHECK(Barcode::pickCamera({}, {}, {}, {}, {}, {}) == -1, "keine Kamera");
+        CHECK(Barcode::pickCamera(ids, cams, "usbB", "usbA", {}, "int0") == 2, "laufende Kamera bleibt");
+        CHECK(Barcode::pickCamera(ids, cams, {}, "usbA", {}, "int0") == 1, "gespeicherte Kennung");
+        CHECK(Barcode::pickCamera(ids, cams, {}, "weg", {}, "usbB") == 2, "getrennt -> Systemstandard");
+        CHECK(Barcode::pickCamera(ids, cams, {}, {}, QStringLiteral("Integrated Camera"), "usbA") == 0, "alter Name eindeutig");
+        CHECK(Barcode::pickCamera(ids, cams, {}, {}, QStringLiteral("USB Camera"), "int0") == 0, "alter Name mehrdeutig -> Standard");
+        CHECK(Barcode::pickCamera(ids, cams, {}, {}, {}, {}) == 0, "sonst erste");
+    }
+
+    out << "\n=== Website: Impressum und Datenschutz 0.9.15 ===\n";
+    {
+        WebsiteExport::Options o;
+        o.legal.name = QStringLiteral("Erika Mustermann");
+        o.legal.street = QStringLiteral("Musterstraße 1");
+        o.legal.zipCity = QStringLiteral("12345 Musterstadt");
+        o.legal.email = QStringLiteral("kontakt@beispiel.de");
+        CHECK(o.legal.missing().isEmpty(), "Pflichtangaben vollständig");
+        // verschleierte Adresse muss echte Zahlen-Zeichenreferenzen enthalten und vom Browser zurückübersetzbar sein
+        CHECK(WebsiteExport::obfuscatedMail("a@b.de") == "&#97;&#64;&#98;&#46;&#100;&#101;", "E-Mail verschleiert: " + WebsiteExport::obfuscatedMail("a@b.de"));
+        CHECK(WebRecipe::decodeEntities(WebsiteExport::obfuscatedMail("mbergmann-sh@gmx.de")) == "mbergmann-sh@gmx.de", "E-Mail zurückübersetzbar");
+        WebsiteExport::Legal leer;
+        CHECK(leer.missing().size() == 4, "fehlende Pflichtangaben: " + leer.missing().join(", "));
+        const QString imp = WebsiteExport::impressumBody(o);
+        CHECK(imp.contains(QString::fromUtf8("§ 5 DDG")) && imp.contains(QString::fromUtf8("Musterstraße 1")) && imp.contains(QString::fromUtf8("§ 18 Abs. 2 MStV"))
+                  && !imp.contains("Telefon") && !imp.contains("kontakt@beispiel.de") && imp.contains(WebsiteExport::obfuscatedMail("kontakt@beispiel.de")),
+              "Impressum: Angaben, kein leeres Telefon, E-Mail verschleiert");
+        // ohne eigenen Verantwortlichen: Betreiber mit Anschrift
+        CHECK(imp.count("Erika Mustermann") == 2, "Verantwortlicher = Betreiber");
+        o.legal.phone = QStringLiteral("0123 456789");
+        o.legal.responsible = QStringLiteral("Max Muster, Redaktionsweg 3, 12345 Musterstadt");
+        const QString imp2 = WebsiteExport::impressumBody(o);
+        CHECK(imp2.contains("Telefon: 0123 456789") && imp2.contains("Max Muster, Redaktionsweg 3"), "Telefon und eigener Verantwortlicher");
+        const QString ds = WebsiteExport::datenschutzBody(o);
+        CHECK(ds.contains("keine Cookies") && ds.contains("Art. 6 Abs. 1 lit. f DSGVO") && ds.contains("Art. 77 DSGVO") && ds.contains("bei einem Webhosting-Anbieter betrieben.")
+                  && ds.contains("Erika Mustermann"), "Datenschutz: Kernaussagen, Hoster allgemein");
+        o.legal.hoster = QStringLiteral("Beispiel-Hosting GmbH & Co. KG");
+        CHECK(WebsiteExport::datenschutzBody(o).contains("bei folgendem Anbieter betrieben: Beispiel-Hosting GmbH &amp; Co. KG."), "Hoster genannt und maskiert");
+        o.legal.name = QStringLiteral("<script>x</script>");
+        CHECK(!WebsiteExport::impressumBody(o).contains("<script>"), "Eingaben werden maskiert");
+    }
+
+    out << "\n=== Küchen-Glossar 0.9.12 ===\n";
+    {
+        const auto &all = KitchenGlossary::entries();
+        CHECK(all.size() > 300 && KitchenGlossary::categories().size() >= 13, "Glossar geladen: " + QString::number(all.size()));
+        QStringList broken;
+        for (const auto &e : all) {
+            if (e.text.isEmpty() || e.category.isEmpty()) broken << e.term;
+            for (const QString &ref : e.seeAlso)
+                if (KitchenGlossary::indexOf(ref) < 0) broken << e.term + " → " + ref;
+        }
+        CHECK(broken.isEmpty(), "Glossar vollständig, Verweise gültig: " + broken.join(", "));
+        auto first = [&](const QString &q, const QString &cat = QString()) {
+            const QList<int> r = KitchenGlossary::search(q, cat);
+            return r.isEmpty() ? QString() : all.at(r.first()).term;
+        };
+        CHECK(first("bechamel") == QString::fromUtf8("Sauce béchamel"), "Suche ohne Akzente: " + first("bechamel"));
+        CHECK(first("Mehlschwitze") == "Roux", "Suche in anderen Schreibweisen: " + first("Mehlschwitze"));
+        CHECK(first("brunoise") == "Brunoise" && first("BRUN") == "Brunoise", "Begriff vor Erklärung: " + first("BRUN"));
+        CHECK(first("oeuf poche") == QString::fromUtf8("Œuf poché"), "œ und Akzente: " + first("oeuf poche"));
+        CHECK(KitchenGlossary::search("weiße butter").contains(KitchenGlossary::indexOf("Beurre blanc")), "mehrere Wörter");
+        CHECK(KitchenGlossary::search(QString(), QString::fromUtf8("Küchenbrigade & Organisation")).size() >= 10, "Kategorie-Filter");
+        CHECK(KitchenGlossary::indexOf("Nussbutter") == KitchenGlossary::indexOf("Beurre noisette"), "Schreibweise führt zum Begriff");
+        CHECK(KitchenGlossary::search("xyzquatsch").isEmpty(), "kein Treffer");
+    }
+
+    out << "\n=== Obst und Südfrüchte 0.9.12 ===\n";
+    {
+        FoodTable &ft = FoodTable::instance();
+        static const QStringList keys{ "quitte", "nashi", "mispel", "pfirsich", "nektarine", "sauerkirschen", "mirabellen", "schlehen", "himbeeren", "heidelbeeren", "brombeeren", "johannisbeeren", "johannisbeeren_schwarz", "stachelbeeren", "preiselbeeren", "holunderbeeren", "sanddorn", "aronia", "hagebutten", "physalis", "goji", "mandarine", "grapefruit", "limette", "kumquat", "zitrusfrucht_sonst", "papaya", "maracuja", "kaki", "granatapfel", "feige", "datteln", "litschi", "guave", "cherimoya", "sternfrucht", "pitahaya", "kiwano", "tamarillo", "kaktusfeige", "mangostane", "durian", "jackfruit_jung", "kochbanane", "kokosnuss_frisch", "kokoswasser", "acerola", "wassermelone", "honigmelone", "apfel", "birne", "orange", "zitrone", "beeren", "kirschen", "aprikose", "mango", "melone", "trockenobst", "erdbeere", "banane", "ananas", "kiwi", "trauben" };
+        QStringList clash;
+        for (const QString &k : keys) {
+            const Food *f = ft.find(k);
+            if (!f) {
+                clash << QStringLiteral("fehlt: ") + k;
+                continue;
+            }
+            for (const QString &a : f->aliases) {
+                const Food *m = ft.match(a);
+                if (!m || m->key != f->key) clash << QStringLiteral("%1(%2→%3)").arg(a, f->key, m ? m->key : QStringLiteral("–"));
+            }
+        }
+        CHECK(clash.isEmpty(), "Obstnamen eindeutig: " + clash.join(", "));
+        const QList<QPair<const char *, const char *>> expect{
+            { "Himbeeren", "himbeeren" }, { "TK-Himbeeren", "himbeeren" }, { "Blaubeeren", "heidelbeeren" }, { "rote Johannisbeeren", "johannisbeeren" },
+            { "Cassis", "likoer" }, { "Jostabeeren", "johannisbeeren_schwarz" }, { "Pfirsiche", "pfirsich" }, { "Nektarinen", "nektarine" }, { "Schattenmorellen", "sauerkirschen" },
+            { "Mandarinen", "mandarine" }, { "Clementinen", "mandarine" }, { "Limetten", "limette" }, { "Grapefruit", "grapefruit" },
+            { "Granatapfelkerne", "granatapfel" }, { "Feigen", "feige" }, { "getrocknete Feigen", "trockenobst" }, { "Feigen, getrocknet", "trockenobst" },
+            { "getrocknete Aprikosen", "trockenobst" }, { "Datteln", "datteln" }, { "Medjool-Datteln", "datteln" }, { "Litschis", "litschi" },
+            { "Wassermelone", "wassermelone" }, { "Honigmelone", "honigmelone" }, { "Papaya", "papaya" }, { "Maracuja", "maracuja" },
+            { "Sternfrucht", "sternfrucht" }, { "Drachenfrucht", "pitahaya" }, { "Kochbananen", "kochbanane" }, { "Kaki", "kaki" },
+            { "Physalis", "physalis" }, { "Quitten", "quitte" }, { "Holunderbeeren", "holunderbeeren" }, { "Cranberries", "preiselbeeren" },
+            { "getrocknete Cranberries", "trockenobst" }, { "junge Jackfruit", "jackfruit_jung" }, { "frische Kokosnuss", "kokosnuss_frisch" },
+            { "Kokosraspel", "kokosraspel" }, { "Äpfel", "apfel" }, { "Birnen", "birne" }, { "Orangen", "orange" }, { "Zitronen", "zitrone" },
+            { "Erdbeeren", "erdbeere" }, { "Mango", "mango" }, { "Aprikosen", "aprikose" }, { "Kirschen", "kirschen" }, { "Mirabellen", "mirabellen" },
+            { "beef", "rindfleisch" }, { "pork", "schweinefleisch" }, { "lamb", "lamm" }, { "ground beef", "hack_rind" },
+        };
+        QStringList wrong;
+        for (const auto &e : expect) {
+            const Food *f = ft.match(QString::fromUtf8(e.first));
+            if (!f || f->key != QLatin1String(e.second)) wrong << QStringLiteral("%1→%2").arg(QString::fromUtf8(e.first), f ? f->key : QStringLiteral("–"));
+        }
+        CHECK(wrong.isEmpty(), "Obstnamen: " + wrong.join(", "));
+        auto months = [](const char *name) {
+            Ingredient i;
+            i.name = QString::fromUtf8(name);
+            return Season::monthsFor(i);
+        };
+        CHECK((months("Himbeeren") & (1u << 6)) && !(months("Himbeeren") & (1u << 0)), "Himbeeren im Sommer");
+        CHECK(months("Papaya") == Season::AllYear && months("Datteln") == 0, "Südfrüchte ganzjährig, Trockenobst ohne Saison");
+    }
+
+    out << "\n=== Käse, Fleisch, Pasteten, Tapas 0.9.12 ===\n";
+    {
+        FoodTable &ft = FoodTable::instance();
+        static const QStringList keys{ "emmentaler", "edamer", "cheddar", "schnittkaese", "hartkaese", "parmesan", "camembert", "dreifachrahm", "rotschmier", "blauschimmel", "ziegenkaese", "halloumi", "paneer", "burrata", "pasta_filata", "sauermilchkaese", "kochkaese", "schmelzkaese", "brunost", "hack_rind", "hack_schwein", "mett", "hack_lamm", "hack_lamm_rind", "schweinesteak", "rindersteak", "hammel", "huhn_ganz", "haehnchenbein", "entenbrust", "entenkeule", "gans", "gaensebrust", "gaensekeule", "pastete", "pastete_teig", "leberpastete", "rillettes", "foie_gras", "tortilla_espanola", "ensaladilla_rusa", "jamon_iberico", "patatas_bravas", "croquetas", "calamares_romana", "gazpacho", "gambas_ajillo", "pimientos_padron", "pimientos_piquillo", "albondigas", "chorizo", "blutwurst", "empanada", "huevos_rellenos", "pan_tomate", "papas_arrugadas", "mojo", "patatas_alioli", "sardellen_essig", "ochsenschwanz", "churros", "flan", "crema_catalana", "leche_frita", "arroz_con_leche", "turron", "ente", "gouda", "feta", "mozzarella", "frischkaese", "hackfleisch", "lamm", "haehnchenschenkel", "gefluegel" };
+        QStringList clash;
+        for (const QString &k : keys) {
+            const Food *f = ft.find(k);
+            if (!f) {
+                clash << QStringLiteral("fehlt: ") + k;
+                continue;
+            }
+            for (const QString &a : f->aliases) {
+                const Food *m = ft.match(a);
+                if (!m || m->key != f->key) clash << QStringLiteral("%1(%2→%3)").arg(a, f->key, m ? m->key : QStringLiteral("–"));
+            }
+        }
+        CHECK(clash.isEmpty(), "neue Namen eindeutig: " + clash.join(", "));
+        const QList<QPair<const char *, const char *>> expect{
+            { "Emmentaler", "emmentaler" }, { "geriebener Emmentaler", "emmentaler" }, { "Bergkäse", "hartkaese" }, { "Gruyère", "hartkaese" },
+            { "Manchego", "hartkaese" }, { "Gorgonzola", "blauschimmel" }, { "Roquefort", "blauschimmel" }, { "Cheddar", "cheddar" },
+            { "Butterkäse", "schnittkaese" }, { "Raclettekäse", "schnittkaese" }, { "Taleggio", "rotschmier" }, { "Limburger", "rotschmier" },
+            { "Ziegenkäserolle", "ziegenkaese" }, { "Halloumi", "halloumi" }, { "Harzer Käse", "sauermilchkaese" }, { "Handkäs", "sauermilchkaese" },
+            { "Scheiblettenkäse", "schmelzkaese" }, { "Burrata", "burrata" }, { "Provolone", "pasta_filata" }, { "Paneer", "paneer" },
+            { "Gouda", "gouda" }, { "geriebener Käse", "gouda" }, { "Parmesan", "parmesan" }, { "Pecorino", "parmesan" }, { "Brie", "camembert" },
+            { "Rinderhackfleisch", "hack_rind" }, { "Schweinehack", "hack_schwein" }, { "Lammhackfleisch", "hack_lamm" },
+            { "gemischtes Hackfleisch", "hackfleisch" }, { "Hackfleisch", "hackfleisch" }, { "Hackfleisch vom Lamm und Rind", "hack_lamm_rind" },
+            { "Rumpsteak", "rindersteak" }, { "Rindersteaks", "rindersteak" }, { "Nackensteaks", "schweinesteak" }, { "Schweinesteak", "schweinesteak" },
+            { "Lammkeule", "lamm" }, { "Hammelfleisch", "hammel" }, { "Hähnchenbrustfilet", "gefluegel" }, { "ganzes Hähnchen", "huhn_ganz" },
+            { "Suppenhuhn", "huhn_ganz" }, { "Hähnchenkeulen", "haehnchenschenkel" }, { "Hähnchenbeine", "haehnchenbein" },
+            { "Ente", "ente" }, { "Entenbrust", "entenbrust" }, { "Entenkeulen", "entenkeule" }, { "Gans", "gans" }, { "Gänsebrust", "gaensebrust" },
+            { "Gänsekeulen", "gaensekeule" }, { "Pâté de campagne", "pastete" }, { "Pâté en croûte", "pastete_teig" }, { "Rillettes", "rillettes" },
+            { "Foie gras", "foie_gras" }, { "Leberpastete", "leberpastete" }, { "Tortilla de patatas", "tortilla_espanola" },
+            { "Patatas bravas", "patatas_bravas" }, { "Croquetas de jamón", "croquetas" }, { "Jamón ibérico", "jamon_iberico" },
+            { "Jamón serrano", "rohschinken" }, { "Gazpacho", "gazpacho" }, { "Pimientos de Padrón", "pimientos_padron" },
+            { "Albóndigas", "albondigas" }, { "Chorizo", "chorizo" }, { "Morcilla", "blutwurst" }, { "Boquerones en vinagre", "sardellen_essig" },
+            { "Sardellen, mariniert", "sardellen_essig" }, { "Flan", "flan" }, { "Turrón", "turron" }, { "Churros", "churros" },
+        };
+        QStringList wrong;
+        for (const auto &e : expect) {
+            const Food *f = ft.match(QString::fromUtf8(e.first));
+            if (!f || f->key != QLatin1String(e.second)) wrong << QStringLiteral("%1→%2").arg(QString::fromUtf8(e.first), f ? f->key : QStringLiteral("–"));
+        }
+        CHECK(wrong.isEmpty(), "Käse/Fleisch/Tapas-Namen: " + wrong.join(", "));
+        // tierische Gerichte machen ein Rezept nicht vegetarisch bzw. vegan
+        auto tagsOf = [](const QStringList &lines) {
+            Recipe r;
+            r.title = QStringLiteral("Test");
+            for (const QString &l : lines) r.ingredients << IngredientParser::parseLine(l);
+            Nutrition::analyze(r);
+            return Nutrition::suggestTags(r);
+        };
+        QStringList t = tagsOf({ "200 g Croquetas", "1 Zitrone" });
+        CHECK(!t.contains("vegetarisch") && !t.contains("vegan"), "Croquetas nicht vegetarisch: " + t.join(','));
+        t = tagsOf({ "2 Flan", "100 g Himbeeren" });
+        CHECK(t.contains("vegetarisch") && !t.contains("vegan"), "Flan vegetarisch, nicht vegan: " + t.join(','));
+        t = tagsOf({ "300 g Pimientos de Padrón", "2 EL Olivenöl", "1 TL grobes Salz" });
+        CHECK(t.contains("vegan"), "Pimientos vegan: " + t.join(','));
+        // Ganzes Huhn mit Knochen ist je 100 g magerer gerechnet als Hähnchenkeule (essbarer Anteil)
+        CHECK(ft.find("huhn_ganz")->per100.kcal < ft.find("haehnchenschenkel")->per100.kcal && ft.find("huhn_ganz")->piece >= 1000,
+              "ganzes Huhn mit Knochen");
+    }
+
+    out << "\n=== Rezept von einer Webseite 0.9.12 ===\n";
+    {
+        CHECK(WebRecipe::isoMinutes("PT1H30M") == 90 && WebRecipe::isoMinutes("PT45M") == 45 && WebRecipe::isoMinutes("P0DT2H") == 120
+                  && WebRecipe::isoMinutes("quatsch") == 0, "ISO-Zeiten");
+        CHECK(WebRecipe::decodeEntities("Salz &amp; Pfeffer &#8211; ca. &frac12; TL, &lt;b&gt;fett&lt;/b&gt;") == QString::fromUtf8("Salz & Pfeffer – ca. ½ TL, <b>fett</b>"),
+              "HTML-Zeichen: " + WebRecipe::decodeEntities("Salz &amp; Pfeffer &#8211; ca. &frac12; TL"));
+        CHECK(WebRecipe::addressesIn("siehe https://example.org/rezept/1, und\nhttp://b.de/x?y=1).") == QStringList({ "https://example.org/rezept/1", "http://b.de/x?y=1" }),
+              "Adressen aus Text");
+        const QString ld = QString::fromUtf8(R"HTML(<html><head><title>Linsen-Dal | Testblog</title>
+<meta property="og:site_name" content="Testblog">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","name":"Testblog"},
+{"@type":["Recipe"],"name":"Rotes Linsen-Dal &amp; Reis","recipeYield":["4","4 Portionen"],"totalTime":"PT40M",
+"image":[{"@type":"ImageObject","url":"/bilder/dal.jpg"}],"author":{"@type":"Person","name":"Anna Test"},
+"recipeCategory":"Hauptgericht","recipeCuisine":["Indisch"],"keywords":"vegan, schnell, lecker",
+"recipeIngredient":["200 g rote Linsen","1 Zwiebel, fein gewürfelt","400 ml Kokosmilch","1 TL Kurkuma"],
+"recipeInstructions":[{"@type":"HowToSection","name":"Dal","itemListElement":[{"@type":"HowToStep","text":"Zwiebel in Öl anschwitzen."},
+{"@type":"HowToStep","text":"Linsen, Kurkuma und Kokosmilch zugeben, 20 Minuten köcheln."}]},
+{"@type":"HowToStep","text":"Mit Reis servieren &#8211; fertig."}]}]}</script></head><body></body></html>)HTML");
+        const WebRecipe::Parsed p = WebRecipe::parseHtml(ld, QUrl("https://www.testblog.de/rezepte/dal/"));
+        CHECK(p.ok && p.via == "JSON-LD" && p.parts.title == QString::fromUtf8("Rotes Linsen-Dal & Reis") && p.parts.ingredientLines.size() == 4
+                  && p.parts.yield == "4 Portionen" && p.prepMinutes == 40 && p.imageUrl == "https://www.testblog.de/bilder/dal.jpg"
+                  && p.parts.categories == QStringList({ "Hauptgericht", "Indisch" }),
+              "JSON-LD: " + p.parts.title + " | " + p.parts.yield + " | " + p.imageUrl + " | " + p.parts.categories.join(','));
+        CHECK(p.parts.directionLines.join('\n') == QString::fromUtf8("**Dal:**\n\n1. Zwiebel in Öl anschwitzen.\n\n2. Linsen, Kurkuma und Kokosmilch zugeben, 20 Minuten köcheln.\n\n3. Mit Reis servieren – fertig."),
+              "JSON-LD Schritte: " + p.parts.directionLines.join(" / "));
+        CHECK(p.parts.sourceLines == QStringList({ QString::fromUtf8("Anna Test, Testblog – https://www.testblog.de/rezepte/dal/") }), "Quelle: " + p.parts.sourceLines.join(" / "));
+        const Recipe r = WebRecipe::toRecipe(p, QUrl("https://www.testblog.de/rezepte/dal/"));
+        CHECK(r.ingredients.size() == 4 && r.ingredients.at(0).unit == "g" && r.ingredients.at(0).food == "linsen" && r.prepMinutes == 40
+                  && r.source.contains("testblog.de") && r.servings == 4 && r.hasTag("vegan"),
+              "Web-Rezept fertig: " + (r.ingredients.isEmpty() ? QString() : r.ingredients.at(0).food) + " | " + r.source + " | " + r.tags.join(','));
+        // englische Seite, Microdata, Schritte als HTML-Text
+        const QString md = QString::fromUtf8(R"HTML(<div itemscope itemtype="http://schema.org/Recipe">
+<h1 itemprop="name">Pancakes</h1><span itemprop="recipeYield">8 pancakes</span><meta itemprop="totalTime" content="PT25M">
+<img itemprop="image" src="https://cdn.example.com/p.jpg">
+<li itemprop="recipeIngredient">1 cup all-purpose flour</li><li itemprop="recipeIngredient">2 tbsp sugar</li>
+<li itemprop="recipeIngredient">1 cup milk</li><li itemprop="recipeIngredient">1 egg</li>
+<div itemprop="recipeInstructions"><p>Whisk everything together.</p><p>Fry in a hot pan until golden.</p></div></div>)HTML");
+        const WebRecipe::Parsed q = WebRecipe::parseHtml(md, QUrl("https://example.com/pancakes"));
+        CHECK(q.ok && q.via == "Microdata" && q.parts.title == "Pancakes" && q.parts.ingredientLines.size() == 4 && q.prepMinutes == 25
+                  && q.parts.directionLines.size() == 3 && q.imageUrl == "https://cdn.example.com/p.jpg",
+              "Microdata: " + q.parts.title + " | " + QString::number(q.parts.ingredientLines.size()) + " | " + q.parts.directionLines.join(" / "));
+        const Recipe e = WebRecipe::toRecipe(q, QUrl("https://example.com/pancakes"));
+        CHECK(e.ingredients.size() == 4 && e.ingredients.at(1).unit == "EL" && e.originalLanguage == "en", "englisches Web-Rezept umgerechnet: "
+                  + (e.ingredients.size() > 1 ? e.ingredients.at(1).unit + " " + e.ingredients.at(1).name : QString()));
+        const WebRecipe::Parsed none = WebRecipe::parseHtml("<html><body><p>Kein Rezept</p></body></html>", QUrl("https://x.de"));
+        CHECK(!none.ok && !none.error.isEmpty(), "Seite ohne Rezept");
+        // kaputtes JSON-LD mit rohem Zeilenumbruch in einer Zeichenkette
+        const WebRecipe::Parsed raw = WebRecipe::parseHtml(QString::fromUtf8("<script type=\"application/ld+json\">{\"@type\":\"Recipe\",\"name\":\"Test\",\"recipeIngredient\":[\"1 Ei\"],\"recipeInstructions\":\"Ei\nkochen\"}</script>"), QUrl("https://x.de"));
+        CHECK(raw.ok && raw.parts.ingredientLines == QStringList({ "1 Ei" }), "JSON-LD mit Zeilenumbruch");
+    }
+
+    out << "\n=== Fisch und Meeresfrüchte 0.9.11 ===\n";
+    {
+        FoodTable &ft = FoodTable::instance();
+        // jeder Name eines Fisch-Eintrags landet bei genau diesem Eintrag (keine Überschneidungen)
+        QStringList clash;
+        for (const Food *f : ft.all()) {
+            if (f->category != QLatin1String("fisch")) continue;
+            for (const QString &a : f->aliases) {
+                const Food *m = ft.match(a);
+                if (!m || m->key != f->key) clash << QStringLiteral("%1(%2→%3)").arg(a, f->key, m ? m->key : QStringLiteral("–"));
+            }
+        }
+        CHECK(clash.isEmpty(), "Fischnamen eindeutig: " + clash.join(", "));
+        // auch nach dem Normalisieren (Füllwörter fallen weg) darf kein Fischname bei zwei Einträgen landen –
+        // sonst entscheidet die zufällige Reihenfolge der Tabelle
+        QHash<QString, QString> normOwner;
+        QStringList normClash;
+        for (const Food *f : ft.all()) {
+            for (const QString &a : f->aliases) {
+                const QString n = FoodTable::normalize(a);
+                const QString prev = normOwner.value(n);
+                if (!prev.isEmpty() && prev != f->key && (f->category == QLatin1String("fisch") || ft.find(prev)->category == QLatin1String("fisch")))
+                    normClash << QStringLiteral("%1: %2/%3").arg(a, prev, f->key);
+                normOwner.insert(n, f->key);
+            }
+        }
+        CHECK(normClash.isEmpty(), "Fischnamen nach dem Normalisieren eindeutig: " + normClash.join(", "));
+        const QList<QPair<const char *, const char *>> expect{
+            { "Störfilet", "stoer" }, { "Kabeljau-Loins", "kabeljau" }, { "Skreifilet", "kabeljau" }, { "Dorschfilets", "kabeljau" },
+            { "Meermandeln", "venusmuscheln" }, { "Miesmuscheln", "miesmuscheln" }, { "Miesmuscheln, ausgelöst", "muschelfleisch" },
+            { "ausgelöste Miesmuscheln", "muschelfleisch" }, { "Entenmuscheln (Percebes)", "entenmuscheln" }, { "Grünschalmuscheln", "gruenlippmuscheln" },
+            { "Austern", "austern" }, { "Jakobsmuscheln", "jakobsmuscheln" }, { "Vongole", "venusmuscheln" }, { "Bacalao", "stockfisch" },
+            { "Zanderfilets", "zander" }, { "Eglifilets", "zander" }, { "Felchenfilets", "felchen" }, { "Rotbarschfilet", "rotbarsch" },
+            { "Seezungenfilets", "seezunge" }, { "Matjesfilets", "hering_mariniert" }, { "Ölsardinen", "sardinen_oel" }, { "Sardellenfilets", "sardellen" },
+            { "Thunfisch in Öl", "thunfisch_oel" }, { "Thunfisch", "thunfisch" }, { "Thunfischsteak", "thunfisch_frisch" }, { "Pangasiusfilet", "pangasius" },
+            { "Calamari", "tintenfisch" }, { "Pulpo", "oktopus" }, { "Hummerschwänze", "hummer" }, { "Lachsfilet", "lachs" }, { "Wildlachsfilet", "wildlachs" },
+        };
+        QStringList wrong;
+        for (const auto &e : expect) {
+            const Food *f = ft.match(QString::fromUtf8(e.first));
+            if (!f || f->key != QLatin1String(e.second)) wrong << QStringLiteral("%1→%2").arg(QString::fromUtf8(e.first), f ? f->key : QStringLiteral("–"));
+        }
+        CHECK(wrong.isEmpty(), "Fisch- und Muschelnamen: " + wrong.join(", "));
+        // entscheidende Beschreibung im Zusatz
+        {
+            Recipe z;
+            z.title = QStringLiteral("Test");
+            for (const char *l : { "200 g Muscheln, ausgelöst", "150 g Thunfisch, frisch", "300 g Kabeljaufilet, Salz und Pfeffer", "6 Jakobsmuscheln, ausgelöst" })
+                z.ingredients << IngredientParser::parseLine(QString::fromUtf8(l));
+            Nutrition::analyze(z);
+            CHECK(z.ingredients.at(0).food == "muschelfleisch" && z.ingredients.at(1).food == "thunfisch_frisch"
+                      && z.ingredients.at(2).food == "kabeljau" && z.ingredients.at(3).food == "jakobsmuscheln",
+                  "Zusatz entscheidet: " + z.ingredients.at(0).food + "," + z.ingredients.at(1).food + "," + z.ingredients.at(2).food + "," + z.ingredients.at(3).food);
+        }
+        // Miesmuscheln mit Schale: 1 kg ≈ 260 kcal (essbarer Anteil rund 30 %)
+        CHECK(ft.find("miesmuscheln") && ft.find("miesmuscheln")->per100.kcal < 40 && ft.find("muschelfleisch")->per100.kcal > 70, "Muscheln mit/ohne Schale");
+        // Stör/Meermandeln machen ein Rezept nicht vegetarisch – auch ohne Tabelleneintrag am Namen erkannt
+        auto mkr = [](const QStringList &lines) {
+            Recipe r;
+            r.title = QStringLiteral("Test");
+            for (const QString &l : lines) r.ingredients << IngredientParser::parseLine(l);
+            Nutrition::analyze(r);
+            return r;
+        };
+        QStringList t = Nutrition::suggestTags(mkr({ "400 g Störfilet", "300 g Zucchini", "1 Zitrone" }));
+        CHECK(t.contains("fisch") && !t.contains("vegetarisch"), "Stör ist Fisch: " + t.join(','));
+        t = Nutrition::suggestTags(mkr({ "500 g Meermandeln", "200 g Spaghetti", "2 Knoblauchzehen" }));
+        CHECK(t.contains("fisch") && !t.contains("vegetarisch"), "Meermandeln sind Meeresfrüchte: " + t.join(','));
+        Recipe unk;
+        unk.title = QStringLiteral("Test");
+        unk.ingredients << IngredientParser::parseLine("300 g Hausenfilet vom Sterlet") << IngredientParser::parseLine("200 g Kartoffeln");
+        t = Nutrition::suggestTags(unk);
+        CHECK(!t.contains("vegetarisch"), "Sterlet am Namen erkannt: " + t.join(','));
+        // Saison: außerhalb der Laichzeit
+        auto months = [](const char *name) {
+            Ingredient i;
+            i.name = QString::fromUtf8(name);
+            return Season::monthsFor(i);
+        };
+        const Season::Months feb = 1u << 1, mar = 1u << 2, nov = 1u << 10, jan = 1u << 0, jul = 1u << 6;   // Bits 0 = Januar
+        CHECK((months("Kabeljaufilet") & nov) && !(months("Kabeljaufilet") & (feb | mar)), "Kabeljau: Herbst ja, Laichzeit nein");
+        CHECK((months("Seelachsfilet") & jul) && !(months("Seelachsfilet") & (jan | feb | mar)), "Seelachs: nicht Januar–April");
+        CHECK(months("Skrei") & feb, "Skrei im Winter");
+        CHECK((months("Miesmuscheln") & nov) && !(months("Miesmuscheln") & jul), "Muscheln in Monaten mit r");
+        CHECK(months("Räucherlachs") == 0 && months("Matjesfilet") == Season::Months((1u << 5) | (1u << 6) | (1u << 7)), "Räucherfisch ohne Saison, Matjes Juni–Aug.");
+        CHECK(months("Pangasiusfilet") == Season::AllYear, "Zuchtfisch ganzjährig");
+    }
+
+    out << "\n=== Lebensmittel 0.9.8: Schweizerdeutsch, Tippfehler, Küchenhelfer, Aufräumen ===\n";
+    {
+        FoodTable &ft = FoodTable::instance();
+        const QList<QPair<const char *, const char *>> expect{
+            { "Peterli", "kraeuter" }, { "Rüebli", "moehre" }, { "Bundrüebli", "moehre" }, { "Wirz", "weisskohl" }, { "Kefen", "erbsen" },
+            { "Randen", "rote_bete" }, { "Champignon", "champignons" }, { "Nelke", "gewuerze" }, { "Mandel", "mandeln" },
+            { "Pfefffer", "pfeffer" }, { "Puderzucekr", "puderzucker" }, { "Pouletbrüstchen", "gefluegel" }, { "Stubenküken", "huhn_ganz" }, { "Bambussprossen", "bambussprossen" },
+            { "Sojasprossen", "sprossen" }, { "Glutamat", "glutamat" }, { "Eiweiá", "eiweiss" }, { "Reispapier", "reispapier" },
+            { "Suppenknochen", "knochen" }, { "Lachstatar", "lachs" }, { "Kokosfleisch", "kokosnuss_frisch" }, { "Gewürze", "gewuerze" },
+        };
+        QStringList wrong;
+        for (const auto &e : expect) {
+            const Food *f = ft.match(QString::fromUtf8(e.first));
+            if (!f || f->key != QLatin1String(e.second)) wrong << QStringLiteral("%1→%2").arg(QString::fromUtf8(e.first), f ? f->key : QStringLiteral("–"));
+        }
+        CHECK(wrong.isEmpty(), "neue Namen: " + wrong.join(", "));
+        CHECK(FoodTable::isNonFood("Backpapier") && FoodTable::isNonFood("Holzspieße") && FoodTable::isNonFood("Papierbackförmchen")
+                  && FoodTable::isNonFood("Wok") && !FoodTable::isNonFood("Reispapier") && !FoodTable::isNonFood("Zitronentörtchen"),
+              "Küchenhelfer");
+        CHECK(Importers::repairMojibake("Weiáe Lebkuchen mit Nuá und Crème fraŒche") == QStringLiteral("Weiße Lebkuchen mit Nuß und Crème fraîche")
+                  && Importers::repairMojibake("Rostbraten von Csángó") == QStringLiteral("Rostbraten von Csángó"),
+              "DOS-Zeichen");
+        Recipe t;
+        t.source = QStringLiteral("Kochbuch");
+        auto add = [&t](const QString &line) { t.ingredients << IngredientParser::parseLine(line); };
+        add("2 Zwiebeln");
+        add("in dünnen Scheiben");
+        add("MITTAGESSEN");
+        add("200 g Möhren");
+        add("Erfasst von Rene Gagnaux");
+        add("Pro Portion 44 g E, 24 g F, 17 g KH = 471 kcal");
+        add("Backpapier");
+        const int n = Importers::tidyIngredients(t);
+        CHECK(n == 4 && t.ingredients.size() == 4 && t.ingredients[0].note.contains("in dünnen Scheiben") && t.ingredients[1].heading
+                  && t.source.contains("Gagnaux") && t.instructions.contains("471 kcal") && t.ingredients[3].name == "Backpapier",
+              QStringLiteral("Zutaten aufräumen (%1 Änderungen): ").arg(n) + t.ingredientsText().replace('\n', " | "));
+    }
+
+    out << "\n=== Meeresfrüchte, hochkalorisch, Tag-Namen ===\n";
+    {
+        auto dish = [](const QString &main, double servings = 2) {
+            Recipe r;
+            r.title = QStringLiteral("Test");
+            r.servings = servings;
+            for (const char *v : { "Kartoffeln", "Zwiebeln", "Olivenöl", "Petersilie", "Tomaten" }) {
+                Ingredient i;
+                i.amount = 100;
+                i.unit = QStringLiteral("g");
+                i.name = QString::fromUtf8(v);
+                r.ingredients << i;
+            }
+            Ingredient s;
+            s.amount = 200;
+            s.unit = QStringLiteral("g");
+            s.name = main;
+            r.ingredients << s;
+            Nutrition::analyze(r);
+            return r;
+        };
+        QStringList wrong;
+        for (const char *n : { "Nordseekrabben", "Miesmuscheln", "Jakobsmuscheln", "Tintenfischringe", "Kalmar", "Hummerschwänze", "Kaisergranat",
+                               "Meeresfrüchte-Mischung", "Fischsauce", "Austernsauce", "Sardellenfilets", "Rollmops", "Bückling", "Seeteufel",
+                               "Krabbenchips", "Dashi", "Scallops", "Prawns", "Mussels", "Plaice" }) {
+            const Recipe r = dish(QString::fromUtf8(n));
+            const QStringList tags = Nutrition::suggestTags(r);
+            if (tags.contains("vegetarisch") || tags.contains("vegan") || !Nutrition::containsAnimal(r)) wrong << QString::fromUtf8(n);
+        }
+        CHECK(wrong.isEmpty(), "Meeresfrüchte nicht vegetarisch: " + wrong.join(","));
+        CHECK(!Nutrition::containsAnimal(dish(QStringLiteral("Noriblätter"))), "Nori ist kein Fisch");
+        for (const char *n : { "Austernpilze", "Kapern", "Kokosmilch", "Kräuterseitlinge" }) {
+            const QStringList tags = Nutrition::suggestTags(dish(QString::fromUtf8(n)));
+            CHECK(tags.contains("vegetarisch"), QString::fromUtf8(n) + " bleibt vegetarisch: " + tags.join(","));
+        }
+        Recipe fix = dish(QStringLiteral("Miesmuscheln"));
+        fix.tags = QStringList{ QStringLiteral("vegetarisch"), QStringLiteral("vegan") };
+        Nutrition::applyTagSuggestions(fix);
+        CHECK(!fix.hasTag("vegetarisch") && !fix.hasTag("vegan") && fix.hasTag("fisch"), "falsches „vegetarisch“ korrigiert: " + fix.tags.join(","));
+
+        // hochkalorisch nach Richtwert je Portion und Mahlzeitart
+        CHECK(MealTypes::recommendedKcal(MealTypes::Main) == 800 && MealTypes::recommendedKcal(MealTypes::Dessert) == 300
+                  && MealTypes::recommendedKcal(MealTypes::Light | MealTypes::Main) == 800 && MealTypes::recommendedKcal(MealTypes::Light) == 600,
+              "Richtwerte je Mahlzeitart");
+        Recipe h;
+        h.servings = 4;
+        h.nutrition.perServing.kcal = 700;
+        CHECK(!MealTypes::isHighCalorie(h, MealTypes::Main) && MealTypes::isHighCalorie(h, MealTypes::Light)
+                  && MealTypes::isHighCalorie(h, MealTypes::Dessert),
+              "700 kcal: Hauptgericht nein, leichte Mahlzeit/Dessert ja");
+        h.nutrition.perServing.kcal = 900;
+        CHECK(MealTypes::isHighCalorie(h, MealTypes::Main) && !MealTypes::isHighCalorie(h, MealTypes::Basic), "900 kcal Hauptgericht; Grundrezept nie");
+        h.servings = 1;
+        CHECK(!MealTypes::isHighCalorie(h, MealTypes::Baking), "ganzer Kuchen als 1 Portion zählt nicht");
+        h.servings = 0;
+        CHECK(!MealTypes::isHighCalorie(h, MealTypes::Main), "ohne Portionsangabe nie");
+
+        CHECK(RecipeHtml::tagLabel("leichte mahlzeit") == QStringLiteral("leichte Mahlzeit") && RecipeHtml::tagLabel("vegan") == "Vegan", "Tag-Namen");
+    }
+
+    out << "\n=== Registrierungsschlüssel 0.9.19 ===\n";
+    {
+        const QByteArray raw = QByteArray::fromHex("00ff10a5c3");
+        CHECK(License::decodeBase32(License::encodeBase32(raw)) == raw, "Base32 hin und zurück");
+        QByteArray sk, pk;
+        CHECK(License::keyPair(QByteArray(32, 'S'), &sk, &pk) && sk.size() == 64 && pk.size() == 32, "Schlüsselpaar aus Seed");
+        QByteArray sk2, pk2;
+        License::keyPair(QByteArray(32, 'S'), &sk2, &pk2);
+        CHECK(pk == pk2, "gleicher Seed, gleicher öffentlicher Schlüssel");
+        CHECK(License::randomSeed() != License::randomSeed() && License::randomSeed().size() == 32, "Zufallsseed");
+        const QString key = License::makeKey(sk, QStringLiteral("  Erika@Beispiel.DE "), 42, QDate(2026, 11, 17));
+        CHECK(key.startsWith("VM1-") && key.size() == 4 + 111 + 22, "Schlüsselformat: " + QString::number(key.size()) + " " + key.left(30));
+        License::Info i = License::verify(QStringLiteral("erika@beispiel.de"), key, pk);
+        CHECK(i.valid && i.serial == 42 && i.issued == QDate(2026, 11, 17) && i.email == "erika@beispiel.de", "gültig: " + i.error);
+        // tolerant beim Eingeben: klein, ohne Bindestriche, mit Umbrüchen, O statt 0
+        QString sloppy = key.toLower();
+        sloppy.remove('-');
+        sloppy.insert(40, "\n  ");
+        sloppy.replace("0", "o");
+        CHECK(License::verify("ERIKA@beispiel.de", "vm1" + sloppy.mid(3), pk).valid, "tolerante Eingabe");
+        CHECK(!License::verify("max@beispiel.de", key, pk).valid, "andere E-Mail-Adresse abgelehnt");
+        QString tampered = key;
+        tampered[10] = tampered[10] == QChar('A') ? QChar('B') : QChar('A');
+        CHECK(!License::verify("erika@beispiel.de", tampered, pk).valid, "veränderter Schlüssel abgelehnt");
+        QByteArray skOther, pkOther;
+        License::keyPair(QByteArray(32, 'X'), &skOther, &pkOther);
+        CHECK(!License::verify("erika@beispiel.de", License::makeKey(skOther, "erika@beispiel.de", 42, QDate(2026, 11, 17)), pk).valid,
+              "fremdes Schlüsselpaar abgelehnt");
+        CHECK(!License::verify("erika@beispiel.de", key, pk, QSet<int>{ 42 }).valid && License::verify("erika@beispiel.de", key, pk, QSet<int>{ 7 }).valid,
+              "Sperrliste");
+        CHECK(License::makeKey(sk, "a@b.de", 0, QDate(2026, 1, 1)).isEmpty() && License::makeKey(sk, "a@b.de", License::kMaxSerial + 1, QDate(2026, 1, 1)).isEmpty(),
+              "Seriennummer nur 1–10000");
+        CHECK(!License::verify("a@b.de", "VM1-ABC", pk).valid && !License::verify("a@b.de", "XYZ-123", pk).valid && !License::verify("", key, pk).valid,
+              "unvollständige und fremde Eingaben");
+        // Registrierungsschreiben einfügen
+        QString em, k;
+        const QString letter = QStringLiteral("Hallo Erika,\n\nE-Mail: erika@beispiel.de\nSchlüssel:\n") + key.left(60) + "\n" + key.mid(60) + "\n\nViele Grüße\nMicha";
+        CHECK(License::parsePasted(letter, &em, &k) && em == "erika@beispiel.de" && License::verify(em, k, pk).valid, "Registrierungsschreiben auswerten: " + k.left(20));
+        // eingebauter Prüfschlüssel: Platzhalter akzeptiert nichts
+        if (!License::hasPublicKey())
+            CHECK(!License::check("erika@beispiel.de", key).valid && License::check("erika@beispiel.de", key).error.contains("Prüfschlüssel"),
+                  "ohne eingebauten Prüfschlüssel kein Schlüssel gültig");
+    }
+
+    out << "\n=== Datenbank prüfen 0.9.18 ===\n";
+    {
+        QTemporaryDir tmpc;
+        RecipeDb &db = RecipeDb::instance();
+        CHECK(db.create(tmpc.filePath(QStringLiteral("check")), QStringLiteral("Check")), "Prüf-Datenbank");
+        auto imgB64 = [](int w, int h, const char *fmt) {
+            QImage im(w, h, QImage::Format_RGB32);
+            for (int y = 0; y < h; ++y)
+                for (int x = 0; x < w; ++x) im.setPixel(x, y, qRgb((x * 7 + y) & 255, (x ^ y) & 255, (x * y) & 255));   // schwer komprimierbar
+            QByteArray b;
+            QBuffer buf(&b);
+            buf.open(QIODevice::WriteOnly);
+            im.save(&buf, fmt, 95);
+            return QString::fromLatin1(b.toBase64());
+        };
+        auto add = [&](const QString &title, const QString &image) {
+            Recipe r;
+            r.title = title;
+            r.ingredients << IngredientParser::parseLine(QStringLiteral("100 g Mehl"));
+            r.image = image;
+            db.save(r);
+            return r.id;
+        };
+        const QString okId = add(QStringLiteral("Klein"), imgB64(300, 200, "JPEG"));
+        const QString bigId = add(QStringLiteral("Groß"), imgB64(2400, 1600, "JPEG"));
+        const QString brokenId = add(QStringLiteral("Kaputtes Foto"), QStringLiteral("QUJDREVG"));
+        Recipe empty;
+        db.save(empty);
+        const QString dir = db.recipesFolder();
+        { QFile f(dir + "/kaputt.vmr"); f.open(QIODevice::WriteOnly); f.write("{ das ist kein Rezept"); }
+        { QFile f(dir + "/leer.vmr"); f.open(QIODevice::WriteOnly); }
+        { QFile f(dir + "/rest.vmr.tmp"); f.open(QIODevice::WriteOnly); f.write("x"); }
+        const DbCheck::Report rep = DbCheck::analyze();
+        CHECK(rep.files == 6 && rep.corrupt.size() == 2 && rep.strays == QStringList({ "rest.vmr.tmp" }) && rep.empty == QStringList({ empty.id })
+                  && rep.brokenImages == QStringList({ brokenId }) && rep.bigImages.size() == 1 && rep.bigImages.first().id == bigId
+                  && rep.bigImages.first().size == QSize(2400, 1600),
+              QStringLiteral("Befund: %1 Dateien, %2 unlesbar, %3 fremd, %4 leer, %5 Foto kaputt, %6 groß")
+                  .arg(rep.files).arg(rep.corrupt.size()).arg(rep.strays.size()).arg(rep.empty.size()).arg(rep.brokenImages.size()).arg(rep.bigImages.size()));
+        CHECK(!rep.clean(), "Befund nicht sauber");
+        DbCheck::Actions act;
+        act.moveEmpty = true;
+        const DbCheck::Result res = DbCheck::apply(rep, act);
+        CHECK(res.shrunk == 1 && res.savedBytes > 0 && res.imagesRemoved == 1 && res.moved == 4 && res.errors.isEmpty(),
+              QStringLiteral("Behoben: %1 verkleinert (%2), %3 Fotos entfernt, %4 verschoben, Fehler: %5")
+                  .arg(res.shrunk).arg(DbCheck::sizeText(res.savedBytes)).arg(res.imagesRemoved).arg(res.moved).arg(res.errors.join("; ")));
+        CHECK(QDir(res.sortedFolder).entryList(QDir::Files).size() == 4 && res.sortedFolder.contains("aussortiert"), "aussortierte Dateien erhalten");
+        Recipe big;
+        db.load(bigId, &big);
+        QImage shrunk;
+        shrunk.loadFromData(QByteArray::fromBase64(big.image.toLatin1()));
+        CHECK(shrunk.width() == 1000 && qAbs(shrunk.height() - 667) <= 1, QStringLiteral("Foto verkleinert auf %1×%2").arg(shrunk.width()).arg(shrunk.height()));
+        Recipe ok;
+        db.load(okId, &ok);
+        CHECK(db.count() == 3 && db.summary(okId) && !ok.image.isEmpty(), "Inhaltsverzeichnis neu, kleines Foto unverändert");
+        CHECK(DbCheck::analyze().clean(), "zweite Prüfung sauber");
+        CHECK(DbCheck::sizeText(1536) == "2 KB" && DbCheck::sizeText(5 * 1024 * 1024 + 300 * 1024) == "5,3 MB", "Größenangaben: " + DbCheck::sizeText(5 * 1024 * 1024 + 300 * 1024));
+        db.close();
     }
 
     out << "\n" << (g_fail ? QStringLiteral("%1 Fehler").arg(g_fail) : QStringLiteral("Alle Prüfungen bestanden")) << "\n";

@@ -99,7 +99,7 @@ PackageExportDialog::PackageExportDialog(const QStringList &visibleIds, QWidget 
     lay->addWidget(bb);
     connect(bb, &QDialogButtonBox::accepted, this, &PackageExportDialog::accept);
     connect(bb, &QDialogButtonBox::rejected, this, &QDialog::reject);
-    connect(group, &QButtonGroup::buttonToggled, this, &PackageExportDialog::update);
+    connect(group, QOverload<QAbstractButton *, bool>::of(&QButtonGroup::buttonToggled), this, &PackageExportDialog::update);
     connect(m_tag, &QComboBox::currentTextChanged, this, [this] {
         m_tagged->setChecked(true);
         update();

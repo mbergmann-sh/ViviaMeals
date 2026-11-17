@@ -37,7 +37,7 @@ const QList<QPair<QRegularExpression, Months>> &nameRules()
         { "spargel", span(4, 6) },
         { "rhabarber", span(4, 6) },
         { "bärlauch|baerlauch|wild garlic", span(3, 5) },
-        { "frühlingszwiebel|fruehlingszwiebel|lauchzwiebel|spring onion|scallion", span(4, 10) },
+        { "frühlingszwiebel|fruehlingszwiebel|lauchzwiebel|spring onion|scallion", AllYear },   // ganzjährig im Handel (Gewächshaus, Freiland)
         { "radieschen|radish", span(4, 10) },
         { "rettich", span(5, 10) },
         { "kohlrabi", span(5, 10) },
@@ -93,6 +93,12 @@ const QList<QPair<QRegularExpression, Months>> &nameRules()
         // Fleisch mit Saison
         { "\\bwild(?!reis|kräuter|kraeuter|kräutern)|\\breh|hirsch|wildschwein|fasan|venison", span(10, 1) },
         { "\\bgans\\b|gänse|gaense|goose", span(11, 12) },
+        // Fisch mit eigener Saison (Name genauer als der Tabelleneintrag)
+        { "skrei", span(1, 4) },                                   // Winterkabeljau aus Norwegen
+        { "matjes", span(6, 8) },                                  // neuer Matjes ab Juni
+        { "maischolle", span(5, 7) },
+        { "\\bhecht", span(5, 1) },                                // Laichzeit Februar–April
+        { "sprotte|sprotten", span(3, 5) },
         // ganzjährig (Lager, Zucht) – zuletzt, damit z. B. „Frühlingszwiebel“ oder „Apfelsine“ vorher greifen
         { "kartoffel|potato|zwiebel|onion|schalotte|shallot|knoblauch|garlic|möhre|moehre|karotte|mohrrübe|carrot|"
           "knollensellerie|sellerie|celeriac|lauch|porree|leek|rote bete|rote beete|rote rübe|beetroot|weißkohl|weisskohl|"
@@ -115,7 +121,7 @@ const QRegularExpression &notFresh()
 {
     static const QRegularExpression re(
         QStringLiteral("\\btk\\b|tiefgekühlt|tiefgekuehlt|tiefgefroren|gefroren|\\bdose\\b|dosen|konserve|aus dem glas|\\bglas\\b|getrocknet|"
-                       "eingelegt|eingemacht|kompott|marmelade|konfitüre|gelee|saft|nektar|sirup|likör|essig|mus\\b|püree|pueree|pulver|"
+                       "eingelegt|eingemacht|geräuchert|geraeuchert|räucher|raeucher|mariniert|gesalzen|kompott|marmelade|konfitüre|gelee|saft|nektar|sirup|likör|essig|mus\\b|püree|pueree|pulver|"
                        "mehl|stärke|grieß|gries|flocken|chips|mark\\b|ketchup|passiert|stückig|polpa|sugo|soße|sosse|sauce|pesto|"
                        "kerne\\b|kernen\\b|kernöl|samen|aroma|extrakt|gewürzgurke|essiggurke|cornichon|salzgurke|sauerkraut|rotkohl aus|apfelmus|rosinen|"
                        "frozen|canned|tinned|dried|jarred|juice|powder|paste|"
@@ -130,7 +136,7 @@ Months monthsForFood(const QString &key)
     static const QHash<QString, Months> table = {
         { QStringLiteral("spargel"), span(4, 6) },
         { QStringLiteral("rhabarber"), span(4, 6) },
-        { QStringLiteral("fruehlingszwiebel"), span(4, 10) },
+        { QStringLiteral("fruehlingszwiebel"), AllYear },
         { QStringLiteral("radieschen"), span(4, 10) },
         { QStringLiteral("kohlrabi"), span(5, 10) },
         { QStringLiteral("salat"), span(5, 10) },
@@ -161,8 +167,83 @@ Months monthsForFood(const QString &key)
         { QStringLiteral("trauben"), span(8, 10) },
         { QStringLiteral("birne"), span(8, 1) },
         { QStringLiteral("melone"), span(6, 9) },
+        // einzelne Obstsorten (regional bzw. Hauptsaison im Handel)
+        { QStringLiteral("pfirsich"), span(7, 9) },
+        { QStringLiteral("nektarine"), span(7, 9) },
+        { QStringLiteral("sauerkirschen"), span(7, 8) },
+        { QStringLiteral("mirabellen"), span(8, 9) },
+        { QStringLiteral("schlehen"), span(10, 12) },
+        { QStringLiteral("quitte"), span(9, 11) },
+        { QStringLiteral("mispel"), span(4, 6) },
+        { QStringLiteral("himbeeren"), span(6, 9) },
+        { QStringLiteral("heidelbeeren"), span(7, 9) },
+        { QStringLiteral("brombeeren"), span(7, 10) },
+        { QStringLiteral("johannisbeeren"), span(6, 8) },
+        { QStringLiteral("johannisbeeren_schwarz"), span(6, 8) },
+        { QStringLiteral("stachelbeeren"), span(6, 8) },
+        { QStringLiteral("preiselbeeren"), span(8, 10) },
+        { QStringLiteral("holunderbeeren"), span(8, 10) },
+        { QStringLiteral("sanddorn"), span(8, 11) },
+        { QStringLiteral("aronia"), span(8, 9) },
+        { QStringLiteral("hagebutten"), span(9, 11) },
+        { QStringLiteral("wassermelone"), span(7, 9) },
+        { QStringLiteral("honigmelone"), span(6, 9) },
+        { QStringLiteral("feige"), span(8, 10) },
+        { QStringLiteral("kaki"), span(10, 12) },
+        { QStringLiteral("granatapfel"), span(9, 1) },
+        { QStringLiteral("mandarine"), span(11, 2) },
+        { QStringLiteral("grapefruit"), span(11, 4) },
+        { QStringLiteral("kumquat"), span(11, 3) },
+        { QStringLiteral("zitrusfrucht_sonst"), span(11, 2) },
         { QStringLiteral("orange"), span(11, 3) },
         { QStringLiteral("wild"), span(10, 1) },
+        // Fisch und Meeresfrüchte: beste Qualität und Schonung der Bestände außerhalb der Laichzeit
+        // (Nord-/Ostsee, Nordatlantik, Mittelmeer, heimische Gewässer)
+        { QStringLiteral("kabeljau"), span(9, 1) },          // Herbst bis Januar; Laichzeit Februar–April
+        { QStringLiteral("seelachs"), span(5, 12) },         // Laichzeit Januar–April
+        { QStringLiteral("schellfisch"), span(9, 1) },       // Schellfisch, Wittling: Herbst und Winter; Laichzeit Februar–Mai
+        { QStringLiteral("scholle"), span(5, 12) },          // Plattfische: nach dem Ablaichen (Februar–April) bis in den Winter
+        { QStringLiteral("seezunge"), span(9, 1) },          // Laichzeit März–Juni
+        { QStringLiteral("steinbutt"), span(9, 2) },         // Laichzeit April–August
+        { QStringLiteral("wolfsbarsch"), span(9, 12) },      // kühle Monate, vor der Laichzeit (Januar–März)
+        { QStringLiteral("dorade"), span(9, 12) },
+        { QStringLiteral("seeteufel"), span(7, 1) },         // Laichzeit Februar–Juni
+        { QStringLiteral("hering"), span(3, 5) },            // Herings- und Sprottensaison an Nord- und Ostsee
+        { QStringLiteral("makrele"), span(6, 10) },          // fette Schwarmfische im Sommer
+        { QStringLiteral("sardinen"), span(6, 9) },
+        { QStringLiteral("karpfen"), span(9, 4) },           // „Monate mit r“; Laichzeit Mai–Juni
+        { QStringLiteral("zander"), span(6, 3) },            // Zander/Barsch: Laichzeit April–Mai
+        { QStringLiteral("felchen"), span(5, 10) },          // Laichzeit November–Dezember
+        { QStringLiteral("miesmuscheln"), span(9, 4) },      // Muscheln und Austern: „Monate mit r“
+        { QStringLiteral("muschelfleisch"), span(9, 4) },
+        { QStringLiteral("venusmuscheln"), span(9, 4) },
+        { QStringLiteral("austern"), span(9, 4) },
+        { QStringLiteral("jakobsmuscheln"), span(10, 4) },
+        { QStringLiteral("entenmuscheln"), span(10, 3) },
+        { QStringLiteral("hummer"), span(5, 9) },
+        // Fisch aus Zucht oder Fernfang ohne ausgeprägte Saison
+        { QStringLiteral("fisch_mager"), AllYear },
+        { QStringLiteral("seehecht"), AllYear },
+        { QStringLiteral("rotbarsch"), AllYear },
+        { QStringLiteral("heilbutt"), AllYear },
+        { QStringLiteral("snapper"), AllYear },
+        { QStringLiteral("meerbarbe"), AllYear },
+        { QStringLiteral("edelfisch_mager"), AllYear },
+        { QStringLiteral("rochen"), AllYear },
+        { QStringLiteral("schwertfisch"), AllYear },
+        { QStringLiteral("thunfisch_frisch"), AllYear },
+        { QStringLiteral("lachs"), AllYear },
+        { QStringLiteral("wildlachs"), AllYear },
+        { QStringLiteral("forelle"), AllYear },
+        { QStringLiteral("weissfisch"), AllYear },
+        { QStringLiteral("wels"), AllYear },
+        { QStringLiteral("pangasius"), AllYear },
+        { QStringLiteral("stoer"), AllYear },
+        { QStringLiteral("aal"), AllYear },
+        { QStringLiteral("garnelen"), AllYear },
+        { QStringLiteral("tintenfisch"), AllYear },
+        { QStringLiteral("oktopus"), AllYear },
+        { QStringLiteral("gruenlippmuscheln"), AllYear },
         // ganzjährig frisch (Lager, Zucht, Einfuhr ohne ausgeprägte Saison)
         { QStringLiteral("zwiebel"), AllYear },
         { QStringLiteral("schalotte"), AllYear },
@@ -183,6 +264,25 @@ Months monthsForFood(const QString &key)
         { QStringLiteral("ananas"), AllYear },
         { QStringLiteral("mango"), AllYear },
         { QStringLiteral("kiwi"), AllYear },
+        // Südfrüchte: Import, das ganze Jahr im Handel
+        { QStringLiteral("limette"), AllYear },
+        { QStringLiteral("nashi"), AllYear },
+        { QStringLiteral("physalis"), AllYear },
+        { QStringLiteral("papaya"), AllYear },
+        { QStringLiteral("maracuja"), AllYear },
+        { QStringLiteral("litschi"), AllYear },
+        { QStringLiteral("guave"), AllYear },
+        { QStringLiteral("cherimoya"), AllYear },
+        { QStringLiteral("sternfrucht"), AllYear },
+        { QStringLiteral("pitahaya"), AllYear },
+        { QStringLiteral("kiwano"), AllYear },
+        { QStringLiteral("tamarillo"), AllYear },
+        { QStringLiteral("kaktusfeige"), AllYear },
+        { QStringLiteral("mangostane"), AllYear },
+        { QStringLiteral("durian"), AllYear },
+        { QStringLiteral("kochbanane"), AllYear },
+        { QStringLiteral("kokosnuss_frisch"), AllYear },
+        { QStringLiteral("acerola"), AllYear },
         { QStringLiteral("ingwer"), AllYear },
     };
     return table.value(key, 0);

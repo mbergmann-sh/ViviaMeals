@@ -9,6 +9,7 @@
 
 #include "recipe.h"
 
+#include <QDateTime>
 #include <QList>
 #include <QString>
 
@@ -16,7 +17,7 @@
 
 namespace Importers {
 
-enum class Format { Unknown, RezKonv, MealMaster, Vtm };
+enum class Format { Unknown, RezKonv, MealMaster, Vtm, Ambrosia };
 
 struct Options {
     bool translate = true;    // englische Rezepte: Zutaten übersetzen, Maße umrechnen
@@ -29,6 +30,8 @@ struct Options {
     // übersetzt, sondern das fertige Rezept wird übergeben. Liefert false (mit Fehlertext), greift das Glossar.
     // Deutschsprachige Rezepte werden nie übergeben.
     std::function<bool(Recipe &, QString *)> translator;
+    // Fortschritt bei großen Datenbanken (Ambrosia): gelesene/alle Rezepte; false = abbrechen
+    std::function<bool(int, int)> progress;
 };
 
 struct Result {
@@ -59,7 +62,34 @@ struct TextParts {
     QStringList sourceLines;
 };
 Result fromParts(const TextParts &parts, const QString &format, const Options &opt = {});
+// Rezepte aus Datenbanken (z. B. Ambrosia), deren Zutaten schon in Spalten vorliegen. Durchläuft dieselbe
+// Nachbearbeitung wie die Textformate (Sprache, Umlaute, Übersetzung, Umrechnung, Nährwerte, Tags).
+struct StructuredIngredient {
+    bool heading = false;
+    QString amount, unit, name, note;
+};
+struct StructuredRecipe {
+    QString title;
+    QString yield;                    // „4 Portionen“, „8 Stück“
+    QStringList categories;
+    QList<StructuredIngredient> ingredients;
+    QString instructions;             // bereits in ViviaMeals-Auszeichnung (siehe markup.h)
+    QString source;
+    int prepMinutes = 0;
+    QString image;                    // Base64 (JPEG/PNG)
+    QDateTime created;
+};
+Recipe fromStructured(const StructuredRecipe &in, const QString &format, const Options &opt, Result *res);
 // Schreibweisen vereinheitlichen (Celsius: „200GradC“, „200 °C“ → „200° C“) in Titel, Anleitung und Zutaten
 void normalizeTexts(Recipe &r);
+// Zeichen alter DOS-Sammlungen, die als Windows-1252 gelesen wurden: „Eiweiá“ → „Eiweiß“, „fraŒche“ → „fraîche“
+QString repairMojibake(const QString &text);
+// Zutatenliste aufräumen (beim Import und beim Abgleich): Zeilen ohne Menge, die keine Zutat sind –
+//   Erfasser-/Quellenangaben („Erfasst von …“, „K.-H. Boller …“) → Quelle,
+//   Nährwert- und Zeitangaben der Vorlage („Pro Portion 44 g E …“) → Hinweis am Ende der Zubereitung,
+//   Mahlzeiten in GROSSBUCHSTABEN bzw. mit Doppelpunkt („MITTAGESSEN“, „SAUCE:“) → Zwischenüberschrift,
+//   umbrochene Reste der Vorzeile („geschnitten“, „in dünnen Scheiben“, „Schneiden)“) → Zusatz der Vorzeile.
+// Rückgabe: Anzahl der Änderungen
+int tidyIngredients(Recipe &r);
 
 } // namespace Importers

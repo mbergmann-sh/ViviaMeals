@@ -10,6 +10,12 @@
 #include "editordialog.h"
 #include "foodcsv.h"
 #include "fooddialog.h"
+#include "barcodedialog.h"
+#include <QTreeWidget>
+#include "dbcheckdialog.h"
+#include "webimportdialog.h"
+#include "kitchenglossarywindow.h"
+#include "maintenancewindow.h"
 #include "foodwizard.h"
 #include "busyprogress.h"
 #include "exportdialogs.h"
@@ -20,6 +26,8 @@
 #include "importdialogs.h"
 #include "importers.h"
 #include "mainwindow.h"
+#include "license.h"
+#include "registrationdialog.h"
 #include "scandialog.h"
 #include "duplicatesdialog.h"
 #include "settingsdialog.h"
@@ -180,8 +188,8 @@ void createDemo(const QString &folder)
     p.targetKg = 68;
     p.ratePerWeek = 0.5;
     p.diet = Profile::Diet::All;
-    p.likedTags = { QStringLiteral("suppen"), QStringLiteral("vegetarisch") };
-    p.excluded = { QStringLiteral("Walnüsse") };
+    p.likedTags = QStringList{ QStringLiteral("suppen"), QStringLiteral("vegetarisch") };
+    p.excluded = QStringList{ QStringLiteral("Walnüsse") };
     double kg = 79.4;
     p.snack = true;
     p.weighDay = QDate::currentDate().dayOfWeek();   // heute ist Wiegetag → Erinnerung im Hauptfenster
@@ -433,7 +441,7 @@ void takeScreenshots(MainWindow *w, const QString &dir)
         if (auto *cw = d.findChild<CropWidget *>()) {
             const QRect before = cw->selection();
             auto send = [cw](QEvent::Type t, QPointF p, Qt::MouseButtons b) {
-                QMouseEvent e(t, p, cw->mapToGlobal(p), t == QEvent::MouseMove ? Qt::NoButton : Qt::LeftButton, b, Qt::NoModifier);
+                QMouseEvent e(t, p, QPointF(cw->mapToGlobal(p.toPoint())), t == QEvent::MouseMove ? Qt::NoButton : Qt::LeftButton, b, Qt::NoModifier);
                 QApplication::sendEvent(cw, &e);
             };
             const QRectF v(cw->rect());
@@ -515,6 +523,21 @@ void takeScreenshots(MainWindow *w, const QString &dir)
         for (const QString &id : added) db.remove(id);
     }
     {
+        // Registrierung: Beispielschlüssel mit eigenem Test-Schlüsselpaar (der eingebaute Prüfschlüssel bleibt unberührt)
+        QByteArray sk, pk;
+        License::keyPair(QByteArray(32, 'D'), &sk, &pk);
+        License::setTestPublicKey(pk);
+        License::setDemo(false);
+        RegistrationDialog d(w);
+        d.setInput(QStringLiteral("erika.musterfrau@beispiel.de"),
+                   License::makeKey(sk, QStringLiteral("erika.musterfrau@beispiel.de"), 17, QDate(2026, 11, 17)));
+        d.show();
+        shot(&d, dir, QStringLiteral("registrierung"));
+        d.reject();
+        License::setTestPublicKey(QByteArray());
+        License::setDemo(true);
+    }
+    {
         // Rezept scannen: gerenderte Rezeptseite mit Foto
         ScanDialog d(ScanDialog::StartNothing, w);
         d.show();
@@ -577,10 +600,22 @@ void takeScreenshots(MainWindow *w, const QString &dir)
         wo.show();
         shot(&wo, dir, QStringLiteral("lebensmittel-openfoodfacts"));
         wo.reject();
+        // Strichcode-Scanner (ohne Kamera im Bildschirmfoto-Modus: zeigt Hinweis und Foto-Knopf)
+        BarcodeScanDialog sd(w);
+        sd.show();
+        sd.resize(560, 190);
+        shot(&sd, dir, QStringLiteral("strichcode-scanner"));
+        sd.reject();
+        // Rezept von einer Webseite (Adresse aus der Zwischenablage vorgeschlagen)
+        QApplication::clipboard()->setText(QStringLiteral("https://www.beispiel-kochblog.de/rezepte/rotes-linsen-dal/"));
+        WebImportDialog wid(w);
+        wid.show();
+        shot(&wid, dir, QStringLiteral("web-import"));
+        wid.reject();
         QList<Nutrition::MissingFood> miss;
         auto add = [&](const QString &name, int count, const QString &ex, const QString &recipe) {
             Nutrition::MissingFood m;
-            m.name = name; m.key = FoodTable::normalize(name); m.count = count; m.examples = { ex }; m.recipes = { recipe };
+            m.name = name; m.key = FoodTable::normalize(name); m.count = count; m.examples = QStringList{ ex }; m.recipes = QStringList{ recipe };
             miss << m;
         };
         add(QStringLiteral("Buttaris"), 14, QStringLiteral("2 EL Buttaris"), QStringLiteral("Bratkartoffeln"));
@@ -760,7 +795,101 @@ void takeScreenshots(MainWindow *w, const QString &dir)
     WebsiteExport::Options wo;
     wo.title = QObject::tr("Demo-Rezepte");
     wo.subtitle = QObject::tr("Rezepte mit Nährwerten");
+    {   // Export-Dialog mit Musterangaben (Bildschirmfotos fürs Handbuch)
+        QSettings s;
+        s.setValue(QStringLiteral("web/legal/name"), QStringLiteral("Erika Mustermann"));
+        s.setValue(QStringLiteral("web/legal/street"), QStringLiteral("Musterstraße 1"));
+        s.setValue(QStringLiteral("web/legal/zipCity"), QStringLiteral("12345 Musterstadt"));
+        s.setValue(QStringLiteral("web/legal/email"), QStringLiteral("kontakt@beispiel.de"));
+        s.setValue(QStringLiteral("web/legal/hoster"), QStringLiteral("Beispiel-Hosting GmbH, Serverweg 2, 54321 Hoststadt"));
+        WebsiteExportDialog d(QStringList(), w);
+        d.show();
+        shot(&d, dir, QStringLiteral("website-export"));
+        if (auto *tabs = d.findChild<QTabWidget *>()) tabs->setCurrentIndex(1);
+        shot(&d, dir, QStringLiteral("website-impressum"));
+        d.reject();
+    }
+    // erfundene Musterangaben für die Demo
+    wo.legal.name = QStringLiteral("Erika Mustermann");
+    wo.legal.street = QStringLiteral("Musterstraße 1");
+    wo.legal.zipCity = QStringLiteral("12345 Musterstadt");
+    wo.legal.country = QStringLiteral("Deutschland");
+    wo.legal.email = QStringLiteral("kontakt@beispiel.de");
     WebsiteExport::exportSite(dir + QStringLiteral("/website"), wo);
+    // Küchen-Glossar und Tipp des Tages
+    {
+        w->showGlossary(QStringLiteral("Beurre blanc"));
+        wait(400);
+        if (auto *g = w->findChild<GlossaryWindow *>()) {
+            g->resize(860, 560);
+            wait(200);
+            shot(g, dir, QStringLiteral("kuechen-glossar"));
+            g->close();
+        }
+        w->showTipOfTheDay(false);
+        wait(400);
+        if (auto *t = w->findChild<TipOfTheDayDialog *>()) {
+            shot(t, dir, QStringLiteral("tipp-des-tages"));
+            t->close();
+        }
+    }
+    // Wartungslisten (zum Schluss, sie fügen der Demo-Datenbank zwei unvollständige Rezepte hinzu)
+    {
+        Recipe a;
+        a.title = QStringLiteral("Omas Zauberkuchen");
+        a.servings = 12;
+        for (const char *l : { "250 g Mehl", "200 g Zucker", "1 Pck. Zauberpulver", "3 Eier", "1 Schuss Geheimzutat" })
+            a.ingredients << IngredientParser::parseLine(QString::fromUtf8(l));
+        Nutrition::analyze(a);
+        RecipeDb::instance().save(a);
+        Recipe b;
+        b.title = QStringLiteral("Bärlauchpesto (Zutaten nachtragen)");
+        b.instructions = QStringLiteral("Bärlauch waschen, trocken schleudern und mit Pinienkernen, Parmesan und Olivenöl fein pürieren.");
+        RecipeDb::instance().save(b);
+        w->showMaintenance(MaintenanceWindow::MissingNutrition);
+        wait(500);
+        if (auto *mw = w->findChild<MaintenanceWindow *>()) {
+            mw->resize(400, 560);
+            shot(mw, dir, QStringLiteral("wartung-naehrwerte"));
+            mw->close();
+        }
+        w->showMaintenance(MaintenanceWindow::MissingIngredients);
+        wait(500);
+        for (MaintenanceWindow *mw : w->findChildren<MaintenanceWindow *>()) {
+            if (mw->mode() != MaintenanceWindow::MissingIngredients) continue;
+            mw->resize(400, 400);
+            shot(mw, dir, QStringLiteral("wartung-zutaten"));
+            mw->close();
+        }
+    }
+    // Datenbank prüfen (zum Schluss: legt eine Restdatei und ein übergroßes Foto in der Demo-Datenbank an)
+    {
+        RecipeDb &db = RecipeDb::instance();
+        { QFile f(QDir(db.recipesFolder()).filePath(QStringLiteral("abgebrochen.vmr.tmp"))); f.open(QIODevice::WriteOnly); f.write("x"); }
+        if (!db.summaries().isEmpty()) {
+            Recipe r;
+            if (db.load(db.summaries().first().id, &r)) {
+                QImage big(2600, 1800, QImage::Format_RGB32);
+                for (int y = 0; y < big.height(); ++y)
+                    for (int x = 0; x < big.width(); ++x) big.setPixel(x, y, qRgb((x * 3 + y) & 255, (x ^ y) & 255, (y * 5) & 255));
+                QByteArray b;
+                QBuffer buf(&b);
+                buf.open(QIODevice::WriteOnly);
+                big.save(&buf, "JPEG", 95);
+                r.image = QString::fromLatin1(b.toBase64());
+                db.save(r);
+            }
+        }
+        DbCheckDialog d(w);
+        d.show();
+        for (QPushButton *b : d.findChildren<QPushButton *>())
+            if (b->text() == QObject::tr("&Prüfen")) b->click();
+        wait(300);
+        if (auto *t = d.findChild<QTreeWidget *>()) t->expandAll();
+        wait(200);
+        shot(&d, dir, QStringLiteral("datenbank-pruefen"));
+        d.reject();
+    }
 }
 
 } // namespace
@@ -891,12 +1020,19 @@ int main(int argc, char *argv[])
                                  QStringLiteral("[dateien…]"));
     parser.process(app);
     const bool isDemo = parser.isSet(demo);
-    if (isDemo) QApplication::setApplicationName(QStringLiteral("ViviaMeals-Demo"));   // eigene Einstellungen und Profile
+    if (isDemo) {
+        QApplication::setApplicationName(QStringLiteral("ViviaMeals-Demo"));   // eigene Einstellungen und Profile
+        License::setDemo(true);                                                // Komfortfunktionen zum Ausprobieren frei
+    }
     else migrateFromVitaMeals();
     Perf::mark("Befehlszeile, Einstellungen übernommen");
     if (Perf::enabled()) {
         // Schriftendatenbank einmal gezielt anfassen: unter Windows kann das Einlesen vieler Schriften dauern
+        #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         const int families = QFontDatabase::families().size();
+#else
+        const int families = QFontDatabase().families().size();
+#endif
         Perf::mark(QStringLiteral("Schriften eingelesen (%1 Familien), Qt %2, %3, Skalierung %4")
                        .arg(families)
                        .arg(QString::fromLatin1(qVersion()), QSysInfo::prettyProductName())
@@ -997,6 +1133,8 @@ int main(int argc, char *argv[])
             }
         });
     }
+    // Tipp des Tages: nach dem Laden, wenn der Start-Hinweis und Rückfragen erledigt sind
+    QTimer::singleShot(1500, &w, [&w] { w.showTipOfTheDay(true); });
     if (QSettings().value(QStringLiteral("ui/startNotice"), true).toBool()) {
         QTimer::singleShot(600, &w, [&w] {
             QMessageBox box(&w);

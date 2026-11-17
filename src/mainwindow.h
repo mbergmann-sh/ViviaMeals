@@ -10,6 +10,7 @@
 #include "importers.h"
 
 #include <QMainWindow>
+#include <QPointer>
 
 class QAction;
 class QComboBox;
@@ -19,6 +20,9 @@ class QLineEdit;
 class QListWidget;
 class QMenu;
 class QSplitter;
+class GlossaryWindow;
+class MaintenanceWindow;
+class TipOfTheDayDialog;
 class RecipeView;
 class QTimer;
 namespace Sync {
@@ -33,6 +37,11 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
 
     bool ensureDatabase();                     // beim Start: letzte Datenbank öffnen oder anlegen lassen
+    void checkFoodTableChanged();              // neue eingebaute Lebensmitteldatenbank: Abgleich der Rezepte anbieten
+    void importWeb();                          // Datei → Import → Rezept von einer Webseite
+    void showMaintenance(int mode);            // Wartungsliste (MaintenanceWindow::Mode) öffnen bzw. nach vorn holen
+    void showGlossary(const QString &term = QString());   // Hilfe → Küchen-Glossar (einmal offen)
+    void showTipOfTheDay(bool atStartup);      // „Tipp des Tages“; beim Start nur, wenn eingeschaltet
     bool openDatabase(const QString &path, bool quiet = false);
     void selectRecipe(const QString &id);
     void setTagFilter(const QString &data);   // Themenauswahl setzen (":fav", ":season" oder Tag)
@@ -58,6 +67,7 @@ public slots:
     void exportWebsite();
     void exportLatex();
     void exportOdt();
+    void updateComfortTips();   // Status-/Tooltips der Komfortfunktionen je nach Registrierung
     void clearDatabase();
     void mealTagsAll();
     void seasonTagsAll();
@@ -66,6 +76,7 @@ public slots:
     void importPackage(const QString &file = QString());
     void newFood();
     void missingFoods();
+    void showMissingFoods(const QList<Recipe> &recipes, bool offerMatch);
     void printRecipe();
     void showRandom();
     void openFridge();
@@ -75,7 +86,8 @@ public slots:
     void openDiary(const QString &recipeId = QString());
     void openMealPlan(const QString &profileId = QString());
     void openFoodTable();
-    void recalcAll();
+    void recalcAll();                 // still (nach Änderungen an der Nährwerttabelle)
+    void matchAll(bool report);       // alle Rezepte neu mit der Lebensmitteldatenbank abgleichen
     void fixUmlautsAll();
     void translateAll();
     void openSettings();
@@ -92,6 +104,7 @@ protected:
 
 private:
     void buildMenus();
+    void saveAllWithProgress(QList<Recipe> &recipes, const QString &title);
     void buildToolBar();
     void refreshList();
     void refreshHeader();
@@ -120,7 +133,11 @@ private:
     Sync::Server *m_server = nullptr;
     QTimer *m_hostSync = nullptr;   // Freigabe: nach Änderungen verzögert in den Sync-Speicher übernehmen
     bool m_syncing = false;
-    bool m_syncAfterShow = false;   // automatischer Abgleich wartet, bis das Fenster sichtbar ist
+    bool m_syncAfterShow = false;        // automatischer Abgleich wartet, bis das Fenster sichtbar ist
+    bool m_foodCheckAfterShow = false;
+    QPointer<MaintenanceWindow> m_maintNutrition, m_maintIngredients;
+    QPointer<GlossaryWindow> m_glossary;
+    QPointer<TipOfTheDayDialog> m_tip;   // ebenso die Prüfung auf eine geänderte Lebensmitteldatenbank
     bool m_closing = false;
     QMenu *m_recent;
     QList<QAction *> m_needRecipe;

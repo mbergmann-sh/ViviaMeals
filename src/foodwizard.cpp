@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "foodwizard.h"
+#include "barcodedialog.h"
 #include "symbols.h"
 #include "fooddialog.h"
 #include "icons.h"
@@ -12,6 +13,13 @@
 #include <QUrl>
 #include <QComboBox>
 #include <QDialogButtonBox>
+#include <QDateTime>
+#include <QDir>
+#include <QLocale>
+#include <QFile>
+#include <QFileDialog>
+#include <QStandardPaths>
+#include <QTextStream>
 #include <QDoubleSpinBox>
 #include <QFormLayout>
 #include <QHBoxLayout>
@@ -164,7 +172,7 @@ QString FoodWizard::guessCategory(const QString &name)
         { "milch", "milch|joghurt|quark|sahne|creme fraiche|crème fraîche|schmand|kefir|pudding" },
         { "kaese", "käse|gouda|emmentaler|mozzarella|feta|parmesan|camembert" },
         { "fleisch", "wurst|schinken|salami|fleisch|hack|speck|hähnchen|pute|rind|schwein|lamm" },
-        { "fisch", "fisch|lachs|thunfisch|hering|forelle|garnele|krabben" },
+        { "fisch", "fisch|lachs|thunfisch|hering|forelle|garnele|krabben|muschel|auster|kabeljau|dorsch|makrele|sardine|sardelle|tintenfisch|calamar|hummer|krebs|scholle|zander|karpfen|stör|seelachs" },
         { "getreide", "nudel|spaghetti|reis|mehl|grieß|haferflocken|müsli|couscous|bulgur" },
         { "backwaren", "brot|brötchen|toast|knäcke|zwieback|teig|kuchenboden|keks|waffel" },
         { "suess", "schokolade|riegel|bonbon|gummi|praline|nougat|marzipan|kuchenglasur|eis\\b" },
@@ -219,6 +227,11 @@ QWizardPage *FoodWizard::namePage()
     m_barcode->setToolTip(tr("Die Ziffern unter dem Strichcode eintippen – oder mit einem USB-Barcodescanner einlesen"));
     m_barcode->setClearButtonEnabled(true);
     orow->addWidget(m_barcode, 1);
+    auto *scan = new QPushButton(Icons::get(QStringLiteral("barcode")), tr("&Scannen …"));
+    scan->setToolTip(BarcodeScanDialog::cameraAvailable()
+                         ? tr("Strichcode mit der Webcam scannen oder aus einem Foto lesen – die Ziffern werden eingetragen und abgerufen")
+                         : tr("Strichcode aus einem Foto lesen (keine Kamera gefunden) – die Ziffern werden eingetragen und abgerufen"));
+    orow->addWidget(scan);
     auto *fetch = new QPushButton(Icons::get(QStringLiteral("web")), tr("&Abrufen"));
     orow->addWidget(fetch);
     auto *byName = new QPushButton(Icons::get(QStringLiteral("search")), tr("Nach &Namen suchen …"));
@@ -234,6 +247,23 @@ QWizardPage *FoodWizard::namePage()
     form->addRow(off);
     barcode->onEnter = [this] { offLookup(); };
     connect(fetch, &QPushButton::clicked, this, &FoodWizard::offLookup);
+    connect(scan, &QPushButton::clicked, this, [this] {
+        QString code;
+        if (BarcodeScanDialog::cameraAvailable()) {
+            BarcodeScanDialog d(this);
+            if (d.exec() != QDialog::Accepted) return;
+            code = d.code();
+        } else {
+            QString err;
+            code = BarcodeScanDialog::codeFromPhoto(this, &err);
+            if (code.isEmpty()) {
+                if (!err.isEmpty()) setOffStatus(err, false);
+                return;
+            }
+        }
+        m_barcode->setText(code);
+        offLookup();   // gleich bei Open Food Facts nachsehen
+    });
     connect(byName, &QPushButton::clicked, this, &FoodWizard::offSearch);
     if (!m_ingredient.isEmpty() && m_offerExisting) {
         auto *existing = new QPushButton(Icons::get(QStringLiteral("search")), tr("Doch ein vorhandenes Lebensmittel zuordnen …"));
@@ -687,41 +717,56 @@ MissingFoodsDialog::MissingFoodsDialog(const QList<Nutrition::MissingFood> &miss
     auto *info = new QLabel(intro + QStringLiteral("<br><small>")
                             + tr("<b>Anlegen</b> öffnet den Assistenten für ein eigenes Lebensmittel (z. B. ein Fertigprodukt mit den "
                                  "Werten von der Verpackung). <b>Zuordnen</b> wählt ein vorhandenes Lebensmittel, wenn die Zutat nur "
-                                 "anders heißt. <b>Kein Lebensmittel</b> blendet Dinge wie „Alufolie“ künftig aus.")
+                                 "anders heißt. <b>Kein Lebensmittel</b> blendet Dinge wie „Alufolie“ künftig aus. "
+                                 "<b>Doppelklick</b> auf eine Zeile legt an bzw. bearbeitet das zugeordnete Lebensmittel.")
                             + QStringLiteral("</small>"));
     info->setWordWrap(true);
     lay->addWidget(info);
-    m_table = new QTableWidget(int(missing.size()), 4);
-    m_table->setHorizontalHeaderLabels({ tr("Zutat"), tr("Anzahl"), tr("Beispiel"), tr("Erledigt") });
+    for (int i = 0; i < missing.size(); ++i) m_keys << QString();
+    m_table = new QTableWidget(int(missing.size()), 5);
+    m_table->setHorizontalHeaderLabels({ tr("Zutat"), tr("Anzahl"), tr("Rezepte"), tr("Beispiel"), tr("Erledigt") });
     m_table->verticalHeader()->hide();
     m_table->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_table->setSelectionMode(QAbstractItemView::SingleSelection);
     m_table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    m_table->setSortingEnabled(false);
     for (int i = 0; i < missing.size(); ++i) {
         const auto &m = missing[i];
         auto *n = new QTableWidgetItem(m.name);
-        n->setToolTip(tr("in: %1").arg(m.recipes.mid(0, 8).join(QStringLiteral(", "))));
+        n->setToolTip(tr("Doppelklick: Lebensmittel anlegen oder zuordnen"));
         m_table->setItem(i, 0, n);
         auto *c = new QTableWidgetItem(QString::number(m.count));
         c->setTextAlignment(Qt::AlignCenter);
         m_table->setItem(i, 1, c);
-        m_table->setItem(i, 2, new QTableWidgetItem(m.examples.join(QStringLiteral(" | "))));
-        m_table->setItem(i, 3, new QTableWidgetItem);
+        QString rec = m.recipes.mid(0, 3).join(QStringLiteral(", "));
+        if (m.recipes.size() > 3) rec += tr(" … (+%1)").arg(m.recipes.size() - 3);
+        auto *rc = new QTableWidgetItem(rec);
+        rc->setToolTip(m.recipes.mid(0, 30).join(QStringLiteral("\n")));
+        m_table->setItem(i, 2, rc);
+        m_table->setItem(i, 3, new QTableWidgetItem(m.examples.join(QStringLiteral(" | "))));
+        m_table->setItem(i, 4, new QTableWidgetItem);
     }
     m_table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     m_table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-    m_table->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
-    m_table->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+    m_table->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Interactive);
+    m_table->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
+    m_table->horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
+    m_table->setColumnWidth(2, 220);
     if (!missing.isEmpty()) m_table->selectRow(0);
     lay->addWidget(m_table, 1);
     auto *bl = new QHBoxLayout;
     auto *create = new QPushButton(Icons::get(QStringLiteral("add")), tr("&Anlegen …"));
     auto *assign = new QPushButton(Icons::get(QStringLiteral("nutrition")), tr("&Zuordnen …"));
+    auto *edit = new QPushButton(Icons::get(QStringLiteral("edit")), tr("&Bearbeiten …"));
+    edit->setToolTip(tr("Das zugeordnete bzw. angelegte Lebensmittel bearbeiten"));
     auto *ignore = new QPushButton(Icons::get(QStringLiteral("close")), tr("&Kein Lebensmittel"));
+    auto *save = new QPushButton(Icons::get(QStringLiteral("save")), tr("Als &Textdatei speichern …"));
     bl->addWidget(create);
     bl->addWidget(assign);
+    bl->addWidget(edit);
     bl->addWidget(ignore);
     bl->addStretch(1);
+    bl->addWidget(save);
     auto *bb = new QDialogButtonBox(QDialogButtonBox::Close);
     bl->addWidget(bb);
     lay->addLayout(bl);
@@ -732,9 +777,17 @@ MissingFoodsDialog::MissingFoodsDialog(const QList<Nutrition::MissingFood> &miss
     connect(bb, &QDialogButtonBox::rejected, this, &QDialog::accept);
     connect(create, &QPushButton::clicked, this, &MissingFoodsDialog::create);
     connect(assign, &QPushButton::clicked, this, &MissingFoodsDialog::assign);
+    connect(edit, &QPushButton::clicked, this, &MissingFoodsDialog::edit);
     connect(ignore, &QPushButton::clicked, this, &MissingFoodsDialog::ignore);
-    connect(m_table, &QTableWidget::cellDoubleClicked, this, &MissingFoodsDialog::create);
-    resize(860, 480);
+    connect(save, &QPushButton::clicked, this, &MissingFoodsDialog::saveText);
+    connect(m_table, &QTableWidget::cellDoubleClicked, this, &MissingFoodsDialog::edit);
+    const auto updateEdit = [this, edit] {
+        const int row = currentRow();
+        edit->setEnabled(row >= 0 && !m_keys.value(row).isEmpty());
+    };
+    connect(m_table, &QTableWidget::itemSelectionChanged, this, updateEdit);
+    updateEdit();
+    resize(980, 520);
 }
 
 int MissingFoodsDialog::currentRow() const
@@ -743,13 +796,14 @@ int MissingFoodsDialog::currentRow() const
     return sel.isEmpty() ? -1 : sel.first().row();
 }
 
-void MissingFoodsDialog::setStatus(int row, const QString &text)
+void MissingFoodsDialog::setStatus(int row, const QString &text, const QString &key)
 {
-    m_table->item(row, 3)->setText(Sym::fix(text));
-    for (int c = 0; c < 4; ++c) m_table->item(row, c)->setForeground(palette().color(QPalette::Disabled, QPalette::Text));
+    m_keys[row] = key;
+    m_table->item(row, 4)->setText(Sym::fix(text));
+    for (int c = 0; c < 5; ++c) m_table->item(row, c)->setForeground(palette().color(QPalette::Disabled, QPalette::Text));
     // nächste offene Zeile
     for (int r = row + 1; r < m_table->rowCount(); ++r)
-        if (m_table->item(r, 3)->text().isEmpty()) {
+        if (m_table->item(r, 4)->text().isEmpty()) {
             m_table->selectRow(r);
             return;
         }
@@ -763,7 +817,7 @@ void MissingFoodsDialog::create()
     if (w.exec() != QDialog::Accepted || w.foodKey().isEmpty()) return;
     m_changed = true;
     const Food *f = FoodTable::instance().find(w.foodKey());
-    setStatus(row, (w.createdNew() ? tr("✓ angelegt: %1") : tr("✓ zugeordnet: %1")).arg(f ? f->name : w.foodKey()));
+    setStatus(row, (w.createdNew() ? tr("✓ angelegt: %1") : tr("✓ zugeordnet: %1")).arg(f ? f->name : w.foodKey()), w.foodKey());
 }
 
 void MissingFoodsDialog::assign()
@@ -775,7 +829,7 @@ void MissingFoodsDialog::assign()
     FoodTable::instance().learn(m_missing[row].name, d.selectedKey());
     m_changed = true;
     const Food *f = FoodTable::instance().find(d.selectedKey());
-    setStatus(row, tr("✓ zugeordnet: %1").arg(f ? f->name : d.selectedKey()));
+    setStatus(row, tr("✓ zugeordnet: %1").arg(f ? f->name : d.selectedKey()), d.selectedKey());
 }
 
 void MissingFoodsDialog::ignore()
@@ -784,4 +838,54 @@ void MissingFoodsDialog::ignore()
     if (row < 0) return;
     setIgnored(m_missing[row].key, true);
     setStatus(row, tr("ausgeblendet"));
+}
+
+void MissingFoodsDialog::edit()
+{
+    const int row = currentRow();
+    if (row < 0) return;
+    const QString key = m_keys.value(row);
+    if (key.isEmpty()) {   // noch offen → Assistent (legt an oder ordnet zu)
+        create();
+        return;
+    }
+    const Food *f = FoodTable::instance().find(key);
+    if (!f) return;
+    FoodEditDialog d(*f, this);
+    if (d.exec() != QDialog::Accepted) return;
+    FoodTable::instance().saveUserFood(d.food());
+    m_changed = true;
+    // Zeile bleibt erledigt, der Name kann sich geändert haben
+    m_table->item(row, 4)->setText(Sym::fix(tr("✓ bearbeitet: %1").arg(d.food().name)));
+}
+
+void MissingFoodsDialog::saveText()
+{
+    const QString start = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
+                          + QStringLiteral("/fehlende-lebensmittel.txt");
+    const QString fn = QFileDialog::getSaveFileName(this, tr("Liste als Textdatei speichern"), start, tr("Textdateien (*.txt)"));
+    if (fn.isEmpty()) return;
+    QFile f(fn);
+    if (!f.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text)) {
+        QMessageBox::warning(this, windowTitle(), tr("Die Datei konnte nicht geschrieben werden:\n%1").arg(fn));
+        return;
+    }
+    QTextStream out(&f);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    out.setCodec("UTF-8");
+#endif
+    out << tr("ViviaMeals – Zutaten ohne Nährwerte") << "\n";
+    out << tr("Stand: %1").arg(QLocale().toString(QDateTime::currentDateTime(), QLocale::ShortFormat)) << "\n";
+    out << tr("%1 Zutaten, häufigste zuerst").arg(m_missing.size()) << "\n\n";
+    for (int i = 0; i < m_missing.size(); ++i) {
+        const auto &m = m_missing[i];
+        out << QStringLiteral("%1. %2  (%3×)").arg(i + 1).arg(m.name).arg(m.count);
+        const QString status = m_table->item(i, 4)->text();
+        if (!status.isEmpty()) out << QStringLiteral("  [%1]").arg(status);
+        out << "\n";
+        for (const QString &e : m.examples) out << QStringLiteral("     Zeile:  %1\n").arg(e);
+        out << QStringLiteral("     Rezepte: %1\n\n").arg(m.recipes.join(QStringLiteral("; ")));
+    }
+    f.close();
+    QMessageBox::information(this, windowTitle(), tr("Die Liste wurde gespeichert:\n%1").arg(QDir::toNativeSeparators(fn)));
 }

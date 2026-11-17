@@ -60,18 +60,35 @@ creme_double|Crème double (45 %)|milch|420 2 45 29 2.5 2.5 0 0.1|1.0|0|Becher=2
 saure_sahne|Saure Sahne (10 %)|milch|115 3 10 7 4 4 0 0.1|1.0|0|Becher=200|saure sahne,sauerrahm,schmand,crème fraîche,creme fraiche,creme fraîche,crème fraiche|sour cream,soured cream,creme fraiche,crème fraîche
 joghurt|Joghurt (3,5 %)|milch|65 3.5 3.5 2.3 4.5 4.5 0 0.1|1.03|0|Becher=150|joghurt,naturjoghurt,vollmilchjoghurt,griechischer joghurt,joghurt natur,kefir,dickmilch,sauermilch|yogurt,yoghurt,plain yogurt,natural yogurt,greek yogurt
 rahmjoghurt|Rahmjoghurt (10 %)|milch|125 3 10 6.5 4.5 4.5 0 0.1|1.03|0|Becher=150|rahmjoghurt,sahnejoghurt,griechischer joghurt 10 %|full fat greek yogurt
-quark|Magerquark|milch|67 12 0.3 0.2 4 4 0 0.1|1.05|0|Becher=250;Packung=250|quark,magerquark,speisequark,topfen|quark,farmer cheese,farmer's cheese
+quark|Magerquark|milch|67 12 0.3 0.2 4 4 0 0.1|1.05|0|Becher=250;Packung=250|quark,magerquark,speisequark,topfen|quark,farmer's cheese
 quark_sahne|Sahnequark (40 %)|milch|160 11 11 7 3 3 0 0.1|1.05|0|Becher=250|sahnequark,quark 40 %,quark 20 %,schichtkäse|cream quark
 frischkaese|Frischkäse (Doppelrahmstufe)|kaese|260 5.5 24 16 3.5 3.5 0 0.8|1.05|0|Packung=200;Becher=200|frischkäse,doppelrahmfrischkäse,philadelphia,rahmfrischkäse|cream cheese,neufchatel cheese
 mascarpone|Mascarpone|kaese|440 4.5 46 31 3.5 3.5 0 0.1|1.0|0|Becher=250|mascarpone|mascarpone
 ricotta|Ricotta|kaese|150 10 11 7 3 3 0 0.3|1.05|0|Becher=250|ricotta|ricotta,ricotta cheese
 huettenkaese|Hüttenkäse|kaese|100 12 4.5 3 2.5 2.5 0 0.8|1.05|0|Becher=200|hüttenkäse,körniger frischkäse|cottage cheese,small curd cottage cheese
-gouda|Gouda|kaese|360 25 29 19 0 0 0 2|0.5|25|Scheibe=25|gouda,käse,geriebener käse,reibekäse,butterkäse,edamer,tilsiter,emmentaler,emmentaler käse,gratinkäse,pizzakäse,leerdammer|cheese,cheddar,cheddar cheese,sharp cheddar,shredded cheese,grated cheese,swiss cheese,monterey jack,monterey jack cheese,colby,american cheese,jarlsberg,gouda,edam
-hartkaese|Hartkäse (Bergkäse, Greyerzer)|kaese|400 28 32 19 0 0 0 1.5|0.5|0|Scheibe=25|hartkäse,bergkäse,greyerzer,gruyère,gruyere,comté,comte,appenzeller,alpkäse,sbrinz,beaufort|gruyere,gruyere cheese,swiss gruyere,comte,comte cheese,beaufort
-parmesan|Parmesan|kaese|390 35 28 18 0 0 0 1.6|0.4|0||parmesan,parmigiano,parmigiano reggiano,grana padano,pecorino|parmesan,parmesan cheese,grated parmesan,romano cheese,pecorino,pecorino romano
+gouda|Gouda|kaese|360 25 29 19 0 0 0 2|0.5|25|Scheibe=25|gouda,käse,geriebener käse,reibekäse,gratinkäse,pizzakäse|cheese,shredded cheese,grated cheese,monterey jack cheese,gouda
 mozzarella|Mozzarella|kaese|250 18 19 12.5 1 1 0 0.5|1.0|125|Packung=125;Kugel=125|mozzarella,büffelmozzarella|mozzarella,mozzarella cheese,fresh mozzarella
 feta|Feta|kaese|260 17 21 14 0.7 0.7 0 2.8|1.0|0|Packung=200|feta,schafskäse,hirtenkäse,fetakäse|feta,feta cheese
-camembert|Camembert|kaese|300 20 24 16 0 0 0 1.5|1.0|125|Packung=125|camembert,brie,blauschimmelkäse,gorgonzola,roquefort,bavaria blu,bavaria blue,chaumes,ziegenkäsetaler,ziegenkäse,weichkäse,münsterkäse|camembert,brie,blue cheese,gorgonzola,roquefort
+# --- Käse nach Gruppen (Käseverordnung: Hart-, Schnitt-, halbfester Schnitt-, Weich-, Frisch-, Sauermilchkäse; dazu Pasta filata, Blauschimmel, Schmelzkäse) ---
+emmentaler|Emmentaler / Maasdamer / Leerdammer|kaese|380 28.7 30 18 0 0 0 0.5|0.5|25|Scheibe=25|emmentaler,emmentaler käse,allgäuer emmentaler,schweizer emmentaler,maasdamer,leerdammer,leerdamer,leerdamer im stück,jarlsberg,lochkäse,washington valley swiss,swiss cheese|emmental,emmentaler,swiss cheese,jarlsberg,maasdam,baby swiss
+edamer|Edamer / Gouda (30–40 %)|kaese|330 27 25 16 0 0 0 2|0.5|25|Scheibe=25|edamer,leichter gouda,gouda light,leidse kaas,leidener käse,leyden,kümmelkäse,mimolette,fol epi,stirling colby|edam,edam cheese,leyden,mimolette
+cheddar|Cheddar|kaese|403 25 33 21 1.3 0.5 0 1.6|0.5|25|Scheibe=25|cheddar,cheddarkäse,chester,chesterkäse,red leicester,double gloucester,cheshire,pinconning,bega brown wax,pyengana cloth cheddar,farmers union vintage,south cape vintage,jumbunna,watsonia,epicure,mainland cheese|cheddar,cheddar cheese,sharp cheddar,mild cheddar,aged cheddar,red leicester,double gloucester,cheshire
+schnittkaese|Schnittkäse, halbfest (Butterkäse, Tilsiter, Raclette)|kaese|350 23 28 18 0 0 0 1.8|0.5|25|Scheibe=25|butterkäse,tilsiter,tilsiter käse,havarti,esrom,danbo,steppenkäse,trappistenkäse,trappist,bel paese,bel päse,port salut,saint-paulin,raclette,raclettekäse,raclette-käse,monterey jack,colby,brick-käse,queso andino,nøkkelost,nökkelost,nokkelost,gewürzkäse,schnittkäse,tilsiter vollfett,wilstermarsch,weißlacker,limberger schnittkäse|monterey jack,pepper jack,colby,colby jack,havarti,muenster cheese,brick cheese,raclette,port salut,provel
+hartkaese|Hartkäse (Bergkäse, Gruyère, Comté)|kaese|400 28 32 19 0 0 0 1.5|0.5|0|Scheibe=25|hartkäse,bergkäse,greyerzer,gruyère,gruyere,comté,comte,appenzeller,alpkäse,beaufort,manchego,alter manchego,kephalotiri,formaggella,asiago,montasio,bitto,bra-käse,bra duro,canestrato,casciotta,fontina,formai de mut,monte veronese,veronese,raschera,toma piemontese,valle d'aosta fromadzo,valtellina casera,axridda,desmond,gabriel-käse,yak-käse,yakkäse,rajya metok,quillisascut,zamorano,idiazábal,idiazabal,mahón,mahon,tête de moine,vacherin fribourgeois,tilsiter hart,hobelkäse,heumilchkäse,vorarlberger bergkäse|gruyere,gruyere cheese,swiss gruyere,comte,comte cheese,beaufort,manchego,manchego cheese,asiago,fontina,montasio,appenzeller,alpine cheese,hard cheese
+parmesan|Parmesan / Grana / Pecorino|kaese|390 35 28 18 0 0 0 1.6|0.4|0||parmesan,parmigiano,parmigiano reggiano,grana padano,grana,pecorino,pecorino romano,pecorino sardo,pecorino toscano,fiore sardo,ragusano,sbrinz,reibkäse hart,parmesanspäne,parmesankäse|parmesan,parmesan cheese,grated parmesan,romano cheese,pecorino,pecorino romano,grana padano,parmigiano-reggiano
+camembert|Camembert / Brie (Weißschimmel)|kaese|300 20 24 16 0 0 0 1.5|1.0|125|Packung=125|camembert,brie,brie de meaux,brie de melun,coulommiers,neufchâtel-käse,weißschimmelkäse,weichkäse,cooleeney,sakura cheese,sakura-käse,saint-marcellin,saint-félicien,chaource,ofenkäse,back-camembert|camembert,brie,soft cheese,soft-ripened cheese
+dreifachrahm|Dreifachrahm-Weichkäse (Brillat-Savarin, Cambozola)|kaese|420 11 41 27 2 2 0 1.3|1.0|0||brillat-savarin,brillat savarin,saint-andré,saint andré,délice de bourgogne,explorateur,jindi triple cream,triple crème,dreifachrahmkäse,doppelrahm-weichkäse,cambozola,bavaria blu,bavaria blue,manouri|triple cream,triple-cream brie,cambozola,brillat-savarin
+rotschmier|Rotschmierkäse (Limburger, Münster, Taleggio)|kaese|300 21 24 15 0 0 0 2.2|1.0|0||limburger,chaumes,romadur,münsterkäse,munster,münster-käse,époisses,epoisses,livarot,pont-l'évêque,pont-l'eveque,maroilles,taleggio,reblochon,vacherin mont d'or,mont d'or,herve,weinkäse,rotschmierkäse,stinkkäse,bergader,ardrahan,durrus,gubbeen,milleens,red hawk,tarrawingee washed rind,mungabareena washed rind,top paddock washed rind,top paddock wine washed,obazda,obatzda,obatzter|limburger,taleggio,reblochon,epoisses,washed-rind cheese,munster
+blauschimmel|Blauschimmelkäse (Gorgonzola, Roquefort, Stilton)|kaese|360 21 30 19 0.5 0.5 0 3|1.0|0||blauschimmelkäse,blauschimmel,gorgonzola,gorgonzola dolce,gorgonzola piccante,dolcelatte,roquefort,stilton,blue stilton,bleu d'auvergne,fourme d'ambert,bleu de bresse,saint agur,danablu,dänischer blauschimmelkäse,cabrales,valdeón,valdeon,maytag blue,gippsland blue,chiangrai blauschimmelkäse,edelpilzkäse,bergader edelpilz|blue cheese,gorgonzola,roquefort,stilton,danish blue,crumbled blue cheese,maytag blue
+ziegenkaese|Ziegenkäse (Rolle, Taler, Crottin)|kaese|320 20 26 18 1 1 0 1.4|1.0|0|Taler=40;Rolle=150|ziegenkäse,ziegenkäserolle,ziegenkäserollen,ziegenkäsetaler,ziegenweichkäse,ziegenfrischkäse,ziegencamembert,chèvre,chevre,crottin de chavignol,crottin,sainte-maure,valençay,bûcheron,bucheron,chabichou,picodon,banon,pélardon,haystack peak,goat cheese,st. tola,queso de cabra,queso de cabra en aceite,schafsweichkäse,caprino|goat cheese,goat's cheese,chevre,fresh goat cheese,goat cheese log,crottin
+halloumi|Halloumi / Grillkäse|kaese|320 21 25 17 2 2 0 2.8|1.0|0|Packung=225|halloumi,hellim,grillkäse,bratkäse,ofenkäse zum grillen,chiangrai halloumi,juustoleipä,queso para freír,queso frito|halloumi,grilling cheese,bread cheese,juustoleipa
+paneer|Paneer / Queso fresco (ungesalzener Frischkäse)|kaese|290 18 22 14 3 2 0 0.2|1.0|0|Packung=250|paneer,panir,queso fresco,queso blanco,kesong puti,chhena,bïshtak,bishtak,irmtschuk,bjaslag,frischkäse zum braten|paneer,queso fresco,queso blanco,farmer cheese
+burrata|Burrata / Stracciatella|kaese|290 15 25 17 1.5 1.5 0 0.6|1.0|125|Kugel=125|burrata,stracciatella,stracciatella di bufala|burrata,stracciatella
+pasta_filata|Provolone / Scamorza / Caciocavallo|kaese|350 25.6 26.6 17 2 0.6 0 2.2|0.5|0||provolone,provolone dolce,provolone piccante,scamorza,scamorza affumicata,caciocavallo,kashkaval,kaschkawal,oaxaca-käse,string cheese,fadenkäse,zopfkäse,pizza-käse|provolone,smoked provolone,scamorza,caciocavallo,string cheese,oaxaca cheese,kashkaval
+sauermilchkaese|Harzer / Handkäse (Sauermilchkäse)|kaese|125 28 0.7 0.4 0 0 0 3.5|1.0|0|Rolle=200|harzer,harzer käse,harzer roller,mainzer,mainzer käse,handkäse,handkäs,handkäs mit musik,olmützer quargel,quargel,korbkäse,stangenkäse,nieheimer,nieheimer käse,sauermilchkäse,spitzkäse,bauernhandkäse,graukäse,steirerkas|sour milk cheese,harzer cheese
+kochkaese|Kochkäse / Potkäse|kaese|180 18 10 6 3 3 0 2.5|1.05|0|Becher=200|kochkäse,kochkäs,hessischer kochkäse,potkäse,pultost|kochkaese
+schmelzkaese|Schmelzkäse / Scheiblettenkäse|kaese|290 14 23 15 6 5 0 2.6|1.0|20|Scheibe=20;Ecke=17|schmelzkäse,schmelzkäsezubereitung,scheibletten,scheiblettenkäse,toastkäse,sandwichkäse,streichkäse,käsecreme,käseecken,dreieckskäse,la vache qui rit,velveeta,cheez whiz,american cheese,amerikanischer käse,cheeseburger-scheiben|processed cheese,american cheese,cheese slices,velveeta,cheez whiz,cheese spread,cheese sauce
+brunost|Brunost / Gjetost (Molkenkäse)|kaese|440 10 28 18 40 40 0 0.8|1.0|0||brunost,gjetost,geitost,mysost,braunkäse,molkenkäse,norwegischer braunkäse|brunost,gjetost,mysost,brown cheese
 ei|Ei (Größe M)|ei|137 12.5 9.5 2.7 0.7 0.7 0 0.3|1.03|58||ei,eier,hühnerei,hühnereier,ganzes ei,verquirltes ei|egg,eggs,large egg,large eggs,whole egg,beaten egg
 eigelb|Eigelb|ei|340 16 32 9 0.3 0.3 0 0.1|1.03|18||eigelb,eidotter,dotter|egg yolk,egg yolks,yolk,yolks
 eiweiss|Eiweiß|ei|50 11 0.2 0 0.7 0.7 0 0.4|1.03|35||eiweiß,eiklar,eischnee|egg white,egg whites,whites
@@ -148,25 +165,79 @@ apfel|Apfel|obst|54 0.3 0.2 0 12 10 2.3 0|0.6|150||apfel,äpfel,boskop,säuerlic
 apfelmus|Apfelmus|obst|75 0.2 0.1 0 18 16 1.4 0|1.05|0|Glas=360|apfelmus,apfelmark,aprikosenkompott,kompott,obstkompott,birnenkompott|applesauce,apple sauce
 birne|Birne|obst|55 0.4 0.3 0 12 10 3 0|0.6|170||birne,birnen|pear,pears
 banane|Banane|obst|95 1.1 0.2 0.1 21 17 2 0|0.6|120||banane,bananen,reife banane,reife bananen|banana,bananas,ripe banana,ripe bananas,mashed bananas
-orange|Orange|obst|47 1 0.2 0 9 8.5 2 0|0.6|180||orange,orangen,apfelsine,apfelsinen,blutorange,mandarine,mandarinen,clementine,clementinen,grapefruit,grapefruits,rosa grapefruit,pampelmuse,mineola,mineolas,pomelo|orange,oranges,navel orange,tangerine,tangerines,mandarin,mandarins,clementine
-zitrone|Zitrone|obst|35 0.7 0.6 0 3.2 2.5 1.3 0|0.6|100||zitrone,zitronen,limette,limetten,bio-zitrone,unbehandelte zitrone|lemon,lemons,lime,limes
+orange|Orange|obst|47 1 0.2 0 9 8.5 2 0|0.6|180||orange,orangen,apfelsine,apfelsinen,blutorange|orange,oranges,navel orange
+zitrone|Zitrone|obst|35 0.7 0.6 0 3.2 2.5 1.3 0|0.6|100||zitrone,zitronen,bio-zitrone,unbehandelte zitrone|lemon,lemons
 zitronensaft|Zitronensaft|obst|25 0.4 0.2 0 2.5 2.5 0.3 0|1.03|0||zitronensaft,limettensaft,saft einer zitrone,zitronensaft frisch gepresst|lemon juice,lime juice,fresh lemon juice
 zitronenschale|Zitronenschale|gewuerz|50 1.5 0.3 0 5 4 10 0|0.5|0||zitronenschale,abrieb,zitronenabrieb,orangenschale,limettenschale,zitronat,orangeat|lemon zest,lemon peel,grated lemon peel,orange zest,orange peel,lime zest,candied peel
 orangensaft|Orangensaft|getraenk|45 0.7 0.2 0 9 9 0.2 0|1.04|0||orangensaft,o-saft,apfelsaft,traubensaft,multivitaminsaft,fruchtsaft,saft,ananassaft,kirschsaft,apfelsaft naturtrüb|orange juice,apple juice,juice,pineapple juice,grape juice,cranberry juice,fruit juice,apple cider
 erdbeere|Erdbeeren|obst|32 0.7 0.3 0 5.5 5 2 0|0.6|15|Schale=500|erdbeere,erdbeeren|strawberry,strawberries
-beeren|Beeren (gemischt)|obst|40 1 0.4 0 6.5 5.5 4 0|0.6|0|Packung=300|beeren,himbeeren,heidelbeeren,blaubeeren,brombeeren,johannisbeeren,stachelbeeren,preiselbeeren,cranberries,beerenmischung,tk-beeren,früchte,rote früchte,johannisbeerrispen,johannisbeer,himbeer,heidelbeer,brombeer,stachelbeer,preiselbeer,johannisbeer-rispen,johannisbeer-blätter|berries,raspberries,blueberries,blackberries,cranberries,mixed berries,currants,gooseberries,frozen berries
-kirschen|Kirschen|obst|60 0.9 0.3 0 13 13 1.5 0|0.65|8|Glas=350|kirschen,sauerkirschen,süßkirschen,schattenmorellen,kirsche|cherries,cherry,sour cherries,sweet cherries,tart cherries,maraschino cherries,pie filling,cherry pie filling
-pflaume|Pflaumen|obst|47 0.6 0.2 0 10 10 1.6 0|0.65|30||pflaume,pflaumen,zwetschgen,zwetschken,mirabellen,reneklode|plum,plums,prune plums,damson plums
-aprikose|Aprikosen|obst|45 0.9 0.1 0 8.5 8 1.5 0|0.65|40|Dose=480|aprikose,aprikosen,marille,marillen,pfirsich,pfirsiche,nektarine,nektarinen|apricot,apricots,peach,peaches,nectarine,nectarines,canned peaches
+beeren|Beeren (gemischt)|obst|40 1 0.4 0 6.5 5.5 4 0|0.6|0|Packung=300|beeren,beerenmischung,tk-beeren,früchte,rote früchte,johannisbeer,himbeer,heidelbeer,brombeer,stachelbeer,preiselbeer,johannisbeer-rispen,johannisbeer-blätter|berries,mixed berries,frozen berries
+kirschen|Süßkirschen|obst|60 0.9 0.3 0 13 13 1.5 0|0.65|8|Glas=350|kirschen,süßkirschen,kirsche|cherries,cherry,sweet cherries,maraschino cherries,pie filling,cherry pie filling
+pflaume|Pflaumen|obst|47 0.6 0.2 0 10 10 1.6 0|0.65|30||pflaume,pflaumen,zwetschgen,zwetschken|plum,plums,prune plums,damson plums
+aprikose|Aprikose / Marille|obst|45 0.9 0.1 0 8.5 8 1.5 0|0.65|40|Dose=480|aprikose,aprikosen,marille,marillen|apricot,apricots
 ananas|Ananas|obst|55 0.5 0.2 0 12 12 1.4 0|0.65|1000|Dose=340|ananas,ananasstücke,ananasscheiben|pineapple,crushed pineapple,pineapple chunks,pineapple tidbits
-mango|Mango|obst|62 0.6 0.4 0.1 13 13 1.7 0|0.65|350||mango,mangos,papaya,maracuja,passionsfrucht|mango,mangoes,papaya,passion fruit
+mango|Mango|obst|62 0.6 0.4 0.1 13 13 1.7 0|0.65|350||mango,mangos|mango,mangoes
 trauben|Weintrauben|obst|70 0.7 0.3 0 16 16 1.5 0|0.65|5||trauben,weintrauben,weintraube|grapes,green grapes,red grapes
 kiwi|Kiwi|obst|60 1 0.6 0 10 9 2 0|0.65|75||kiwi,kiwis,kiwipüree|kiwi,kiwis,kiwifruit
-melone|Melone|obst|35 0.6 0.2 0 8 8 0.5 0|0.6|1500||melone,wassermelone,honigmelone,cantaloupe,kiwano,melano,karambole,karambolefrucht,sternfrucht|melon,watermelon,cantaloupe,honeydew
+melone|Melone|obst|35 0.6 0.2 0 8 8 0.5 0|0.6|1500||melone|melon
 rhabarber|Rhabarber|obst|20 0.6 0.1 0 1.4 1 3.2 0|0.6|100|Stange=100|rhabarber|rhubarb
 rosinen|Rosinen|obst|300 2.5 0.6 0.1 68 66 5 0|0.65|0||rosinen,sultaninen,korinthen,trockenfrüchte|raisins,golden raisins,dried fruit
-trockenobst|Trockenobst|obst|260 2.5 0.5 0 58 50 9 0|0.65|0||datteln,feigen,getrocknete aprikosen,softaprikosen,trockenpflaumen,backpflaumen,getrocknete feigen,dörrobst,cranberries getrocknet,backobst,dörrpflaumen,backpflaume|dates,figs,dried apricots,prunes,dried figs,dried cranberries,craisins,dried mixed fruit
-kokosraspel|Kokosraspel|nuss|660 6.5 62 55 7 7 16 0|0.35|0||kokosraspel,kokosflocken,kokosnuss|coconut,shredded coconut,flaked coconut,desiccated coconut,sweetened coconut
+trockenobst|Trockenobst|obst|260 2.5 0.5 0 58 50 9 0|0.65|0||getrocknete aprikosen,softaprikosen,trockenpflaumen,backpflaumen,getrocknete feigen,dörrobst,cranberries getrocknet,backobst,dörrpflaumen,backpflaume|dried apricots,prunes,dried figs,dried cranberries,craisins,dried mixed fruit
+# --- Obst: Kern- und Steinobst ---
+quitte|Quitte|obst|38 0.4 0.5 0 7.3 7 6 0|0.65|300||quitte,quitten,apfelquitte,birnenquitte|quince,quinces
+nashi|Nashi-Birne|obst|42 0.5 0.2 0 10.7 7 3.6 0|0.6|200||nashi,nashibirne,nashi-birne,nashibirnen,asiatische birne|asian pear,nashi pear
+mispel|Wollmispel / Mispel|obst|47 0.4 0.2 0 12 10 1.7 0|0.65|30||mispel,mispeln,wollmispel,wollmispeln,japanische wollmispel,nispero,loquat|loquat,loquats,medlar
+pfirsich|Pfirsich / Plattpfirsich|obst|41 0.8 0.1 0 9 8.5 1.9 0|0.65|150|Dose=480|pfirsich,pfirsiche,plattpfirsich,plattpfirsiche,weinbergpfirsich,weinbergpfirsiche,bergpfirsich,pfirsichhälften|peach,peaches,canned peaches,peach halves,donut peach,flat peach
+nektarine|Nektarine|obst|44 1 0.3 0 10 8 1.7 0|0.65|150||nektarine,nektarinen|nectarine,nectarines
+sauerkirschen|Sauerkirschen|obst|53 0.9 0.5 0.1 9.9 9.9 1 0|0.65|5|Glas=350|sauerkirschen,sauerkirsche,schattenmorellen,schattenmorelle,weichseln,weichselkirschen,amarenakirschen,amarena|sour cherries,tart cherries,morello cherries,amarena cherries
+mirabellen|Mirabellen / Renekloden|obst|64 0.7 0.2 0 14 14 0.9 0|0.65|10||mirabellen,mirabelle,reneklode,renekloden,reineclauden,reineclaude,ringlotten,kriecherl,kriecherln,spänling|mirabelle plums,mirabelles,greengages,greengage
+schlehen|Schlehen|obst|54 0.7 0.3 0 9 9 4 0|0.65|1||schlehen,schlehe,schlehdorn,schwarzdorn|sloes,sloe berries
+# --- Beeren ---
+himbeeren|Himbeeren|obst|36 1.3 0.3 0 4.8 4.4 6.7 0|0.55|4|Schale=125;Packung=250|himbeeren,himbeere,waldhimbeeren,tk-himbeeren|raspberries,raspberry,frozen raspberries
+heidelbeeren|Heidelbeeren / Blaubeeren|obst|42 0.6 0.6 0 7.4 7.4 4.9 0|0.6|1|Schale=125;Packung=250|heidelbeeren,heidelbeere,blaubeeren,blaubeere,kulturheidelbeeren,waldheidelbeeren,bickbeeren,schwarzbeeren|blueberries,blueberry,wild blueberries,bilberries
+brombeeren|Brombeeren|obst|43 1.2 1 0 6.2 6 3.2 0|0.6|5|Schale=125|brombeeren,brombeere,taybeeren,loganbeeren,boysenbeeren|blackberries,blackberry,boysenberries,loganberries,tayberries
+johannisbeeren|Johannisbeeren, rot / weiß|obst|43 1.1 0.2 0 7.3 4.8 3.5 0|0.6|0|Schale=125|johannisbeeren,rote johannisbeeren,weiße johannisbeeren,johannisbeere,ribisel,träubele,johannisbeerrispen|red currants,redcurrants,white currants,currants
+johannisbeeren_schwarz|Schwarze Johannisbeeren / Jostabeeren|obst|63 1.3 0.2 0 10 10 6.8 0|0.6|0|Schale=125|schwarze johannisbeeren,schwarze johannisbeere,jostabeeren,jostabeere|black currants,blackcurrants,jostaberries
+stachelbeeren|Stachelbeeren|obst|44 0.8 0.2 0 8.5 7 3 0|0.6|4||stachelbeeren,stachelbeere|gooseberries,gooseberry
+preiselbeeren|Preiselbeeren / Cranberries (frisch)|obst|44 0.4 0.4 0 9 5 4 0|0.6|0||preiselbeeren,preiselbeere,cranberries,cranberry,moosbeeren,kranbeeren,kulturpreiselbeeren|cranberries,fresh cranberries,lingonberries
+holunderbeeren|Holunderbeeren|obst|55 2.5 1.7 0 7.4 7.4 7 0|0.6|0||holunderbeeren,holunderbeere,holler,fliederbeeren,schwarzer holunder|elderberries,elderberry
+sanddorn|Sanddorn|obst|89 1.4 7.1 1 5 3 3 0|0.6|0||sanddorn,sanddornbeeren,sanddornfrüchte|sea buckthorn,sea buckthorn berries
+aronia|Aronia / Apfelbeere|obst|47 1.4 0.5 0 7 6 5.3 0|0.6|0||aronia,aroniabeeren,apfelbeere,apfelbeeren,maulbeeren,maulbeere,moltebeeren,multebeeren,felsenbirne|aronia,chokeberries,mulberries,cloudberries,saskatoon berries
+hagebutten|Hagebutten|obst|90 1.6 0.6 0 13 13 24 0|0.6|0||hagebutten,hagebutte,hiffen,hagebuttenmark|rose hips,rosehips
+physalis|Physalis / Kapstachelbeere|obst|53 1.9 0.7 0 11 11 1 0|0.6|4|Schale=100|physalis,kapstachelbeere,kapstachelbeeren,andenbeere,andenbeeren,lampionfrucht,blasenkirsche,goldbeeren,golden berries|physalis,cape gooseberries,ground cherries,golden berries
+goji|Goji-Beeren (getrocknet)|obst|350 14 0.4 0 64 46 13 0.7|0.6|0||goji,gojibeeren,goji-beeren,wolfsbeeren,bocksdornbeeren,berberitzen,getrocknete berberitzen,inkabeeren|goji berries,dried goji berries,wolfberries,barberries,dried barberries
+# --- Zitrusfrüchte ---
+mandarine|Mandarine / Clementine|obst|50 0.7 0.3 0 10 10 1.8 0|0.6|70|Dose=300|mandarine,mandarinen,clementine,clementinen,satsuma,satsumas,tangerine,tangerinen,mineola,mineolas,tangelo,mandarinenspalten|mandarin,mandarins,mandarin oranges,clementine,clementines,tangerine,tangerines,satsuma
+grapefruit|Grapefruit / Pomelo|obst|38 0.6 0.1 0 7.4 7 1.6 0|0.6|350||grapefruit,grapefruits,rosa grapefruit,pampelmuse,pampelmusen,pomelo,pomelos,ugli,sweetie,oroblanco|grapefruit,pink grapefruit,pomelo,ugli fruit
+limette|Limette|obst|30 0.7 0.2 0 7.5 1.7 2.8 0|0.6|65||limette,limetten,limone grün,kaffirlimette,kaffir-limette,kalamansi|lime,limes,key lime,kaffir lime,calamansi
+kumquat|Kumquat|obst|71 1.9 0.9 0.1 9.4 9 6.5 0|0.6|15||kumquat,kumquats,zwergorange,zwergorangen,limequat|kumquat,kumquats
+zitrusfrucht_sonst|Yuzu / Bergamotte / Zedrat|obst|35 0.7 0.3 0 6 2.5 2 0|0.6|100||yuzu,bergamotte,bergamotten,zedrat,zitronatzitrone,cedro,buddhas hand,bitterorange,bitterorangen,pomeranze,pomeranzen,sevilla-orange|yuzu,bergamot,citron,buddha's hand,bitter orange,seville orange
+# --- Südfrüchte / Tropen ---
+papaya|Papaya|obst|43 0.5 0.3 0.1 9 8 1.7 0|0.65|400||papaya,papayas,papayafrucht,grüne papaya|papaya,papayas,green papaya
+maracuja|Maracuja / Passionsfrucht / Grenadilla|obst|97 2.2 0.7 0.1 13 11 10.4 0|0.65|30||maracuja,maracujas,passionsfrucht,passionsfrüchte,grenadilla,grenadillas,granadilla,maracujamark,maracujapüree|passion fruit,passionfruit,granadilla,passion fruit pulp
+kaki|Kaki / Sharonfrucht|obst|70 0.6 0.2 0 16 16 2.5 0|0.65|200||kaki,kakis,kakifrucht,kakifrüchte,sharonfrucht,sharonfrüchte,persimone,persimonen,dattelpflaume|persimmon,persimmons,sharon fruit,kaki
+granatapfel|Granatapfel (Kerne)|obst|83 1.7 1.2 0.1 17 14 4 0|0.65|150|Stück=150|granatapfel,granatäpfel,granatapfelkerne,granatapfelkernen,granatapfelsamen|pomegranate,pomegranates,pomegranate seeds,pomegranate arils
+feige|Feige (frisch)|obst|74 0.8 0.3 0.1 16 16 2.9 0|0.65|50||feige,feigen,frische feigen,frische feige,blaue feigen,grüne feigen|fig,figs,fresh figs
+datteln|Datteln (Medjool, Deglet Nour)|obst|282 2.5 0.4 0 64 63 8 0|0.65|8|Packung=200|datteln,dattel,medjool-datteln,medjooldatteln,medjool,deglet nour,entsteinte datteln,softdatteln|dates,date,medjool dates,pitted dates
+litschi|Litschi / Rambutan / Longan|obst|66 0.8 0.4 0.1 15 15 1.3 0|0.65|20|Dose=425|litschi,litschis,lychee,lychees,litchi,litchis,rambutan,rambutans,longan,longans,drachenauge,pulasan|lychee,lychees,litchi,rambutan,longan
+guave|Guave|obst|68 2.6 1 0.3 8.9 8.9 5.4 0|0.65|100||guave,guaven,guajave,guava,guavas,feijoa,feijoas,ananasguave|guava,guavas,feijoa,pineapple guava
+cherimoya|Cherimoya / Annone|obst|75 1.6 0.7 0.2 18 13 3 0|0.65|400||cherimoya,cherimoyas,cherimoja,annone,annonen,rahmapfel,zimtapfel,süßsack,soursop,graviola,stachelannone|cherimoya,custard apple,sugar apple,soursop,guanabana
+sternfrucht|Sternfrucht / Karambole|obst|31 1 0.3 0 3.5 4 2.8 0|0.65|90||sternfrucht,sternfrüchte,karambole,karambolen,karambolefrucht,carambola,baumstachelbeere|star fruit,starfruit,carambola
+pitahaya|Pitahaya / Drachenfrucht|obst|57 1.2 0.4 0.1 11 8 3 0|0.65|350||pitahaya,pitahayas,pitaya,drachenfrucht,drachenfrüchte,drachenauge-kaktus|dragon fruit,dragonfruit,pitaya,pitahaya
+kiwano|Kiwano (Horngurke) / Pepino|obst|30 1.4 0.9 0 5 3 1.5 0|0.65|200||kiwano,kiwanos,horngurke,horngurken,hornmelone,melano,pepino,pepinos,melonenbirne,birnenmelone|kiwano,horned melon,pepino melon
+tamarillo|Tamarillo (Baumtomate)|obst|31 2 0.4 0 4 3 3.3 0|0.65|80||tamarillo,tamarillos,baumtomate,baumtomaten,lulo,naranjilla|tamarillo,tree tomato,naranjilla,lulo
+kaktusfeige|Kaktusfeige|obst|41 0.7 0.5 0 9.6 9.6 3.6 0|0.65|80||kaktusfeige,kaktusfeigen,feigenkaktusfrucht,tuna-frucht,opuntie|prickly pear,cactus pear,tuna fruit
+mangostane|Mangostane / Salak / Sapodilla|obst|73 0.4 0.6 0.1 18 16 1.8 0|0.65|80||mangostane,mangostanen,mangostin,salak,salakfrucht,schlangenhautfrucht,sapodilla,breiapfel,sapote,mamey|mangosteen,salak,snake fruit,sapodilla,sapote,mamey
+durian|Durian / Jackfrucht (reif)|obst|120 1.6 3 0.6 25 18 2.5 0|0.65|0||durian,durians,stinkfrucht,jackfrucht,jackfruit,jackfrüchte,reife jackfrucht,cempedak,brotfrucht,brotfrüchte|durian,jackfruit,ripe jackfruit,breadfruit
+jackfruit_jung|Junge Jackfruit (Fleischersatz, abgetropft)|obst|30 0.7 0.2 0 4 1 3 0.4|0.8|0|Dose=280|junge jackfruit,grüne jackfruit,jackfruit in lake,jackfruit natur,jackfruit pulled|young jackfruit,green jackfruit,jackfruit in brine
+kochbanane|Kochbanane (Plantain)|obst|122 1.3 0.4 0.1 32 15 2.3 0|0.6|250||kochbanane,kochbananen,plantain,plantains,mehlbanane,mehlbananen,plátano macho,platano|plantain,plantains,cooking banana,green plantain
+kokosnuss_frisch|Kokosnuss (frisches Fruchtfleisch)|nuss|354 3.3 33 30 6 6 9 0|0.6|0|Stück=400|kokosnuss,kokosnüsse,frische kokosnuss,kokosnussfleisch,kokosfleisch,kokosnussstücke|fresh coconut,coconut meat,coconut flesh
+kokoswasser|Kokoswasser|getraenk|19 0.7 0.2 0.2 3.7 2.6 1.1 0.25|1.02|0|Packung=330|kokoswasser,kokosnusswasser|coconut water
+acerola|Acerola|obst|32 0.4 0.3 0 7.7 0 1.1 0|0.65|5||acerola,acerolakirsche,acerolakirschen,barbados-kirsche|acerola,acerola cherry,barbados cherry
+# --- Melonen ---
+wassermelone|Wassermelone|obst|30 0.6 0.2 0 7.6 6.2 0.4 0|0.6|3000||wassermelone,wassermelonen,wassermelonenstücke|watermelon,watermelons
+honigmelone|Honigmelone / Netzmelone (Cantaloupe, Galia)|obst|35 0.7 0.2 0 8.2 7.9 0.9 0|0.6|1200||honigmelone,honigmelonen,netzmelone,netzmelonen,zuckermelone,zuckermelonen,cantaloupe,cantaloupe-melone,galiamelone,galia-melone,galia,charentais,charentais-melone,piel de sapo,gelbe melone,cavaillon|cantaloupe,honeydew,honeydew melon,galia melon,muskmelon,rock melon
+kokosraspel|Kokosraspel|nuss|660 6.5 62 55 7 7 16 0|0.35|0||kokosraspel,kokosflocken|coconut,shredded coconut,flaked coconut,desiccated coconut,sweetened coconut
 kokosmilch|Kokosmilch|nuss|180 1.8 18 16 3 2 0 0|1.0|0|Dose=400|kokosmilch,kokoscreme,kokosnussmilch|coconut milk,coconut cream,lite coconut milk
 mandeln|Mandeln|nuss|600 22 53 4 5.5 4 11 0|0.55|0|Packung=200|mandeln,gemahlene mandeln,mandelblättchen,mandelstifte,geschälte mandeln,mandelmehl,mandelsplitter,mandelblätter,mandelkerne|almonds,sliced almonds,slivered almonds,ground almonds,almond flour,almond meal,blanched almonds
 haselnuesse|Haselnüsse|nuss|650 14 61 4.5 10.5 4 8 0|0.55|0|Packung=200|haselnüsse,haselnuss,gemahlene haselnüsse,haselnusskerne,krokant|hazelnuts,filberts,ground hazelnuts
@@ -186,26 +257,134 @@ tofu|Tofu|huelsen|130 13 8 1.2 1.5 0.6 1 0|1.0|0|Packung=200|tofu,räuchertofu,s
 sojadrink|Sojadrink|huelsen|40 3.3 1.8 0.3 2.5 2 0.6 0.1|1.03|0||sojadrink,sojamilch,mandeldrink,haferdrink,hafermilch,mandelmilch,reisdrink,pflanzendrink|soy milk,soymilk,almond milk,oat milk,rice milk
 sojasahne|Sojasahne / Hafercuisine|huelsen|170 2.5 16 2 4 1 0.5 0.1|1.0|0|Packung=200|sojasahne,hafersahne,hafercuisine,pflanzensahne,sojacuisine|soy cream,non-dairy creamer,coconut whipped cream
 sojaschnetzel|Sojaschnetzel / Fleischersatz|huelsen|340 50 1.5 0.2 18 7 18 0.1|0.3|0||sojaschnetzel,sojagranulat,seitan,tempeh,veganes hack,vegane hack,fleischersatz,vegetarisches hack|textured vegetable protein,tvp,seitan,tempeh,meat substitute,veggie crumbles
-hackfleisch|Hackfleisch (gemischt)|fleisch|250 19 19.5 8 0 0 0 0.2|1.0|0|Packung=500|hackfleisch,gehacktes,hack,gemischtes hackfleisch,rinderhack,rinderhackfleisch,schweinehack,schweinehackfleisch,mett,faschiertes,lammhack|ground beef,hamburger,ground meat,ground pork,lean ground beef,minced beef,mince,ground chuck,ground round,ground lamb,ground turkey,sausage meat
-rindfleisch|Rindfleisch (mager)|fleisch|130 22 4.5 2 0 0 0 0.1|1.0|0||rindfleisch,rinderbraten,rindergulasch,gulasch,gulaschfleisch,rinderhüfte,rumpsteak,steak,rinderfilet,roastbeef,suppenfleisch,tafelspitz,beinscheibe,rinderrouladen,rouladen,schmorfleisch,rinderbrust,kalbfleisch,kalbsschnitzel,ochsenschwanz,ochsenbacke|beef,stew meat,beef stew meat,steak,sirloin,round steak,flank steak,chuck roast,pot roast,beef roast,roast,sirloin steak,ribeye,brisket,stewing beef,veal,beef chuck,top round,london broil
+hackfleisch|Hackfleisch (gemischt)|fleisch|250 19 19.5 8 0 0 0 0.2|1.0|0|Packung=500|hackfleisch,gehacktes,hack,gemischtes hackfleisch,faschiertes|hamburger,ground meat,mince,ground chuck,ground round,ground turkey,sausage meat
+rindfleisch|Rindfleisch (mager)|fleisch|130 22 4.5 2 0 0 0 0.1|1.0|0||rindfleisch,rinderbraten,rindergulasch,gulasch,gulaschfleisch,rinderhüfte,rinderfilet,roastbeef,suppenfleisch,tafelspitz,beinscheibe,rinderrouladen,rouladen,schmorfleisch,rinderbrust,kalbfleisch,kalbsschnitzel,ochsenbacke|beef,stew meat,beef stew meat,round steak,chuck roast,pot roast,beef roast,roast,brisket,stewing beef,veal,beef chuck,top round,london broil
 kalbfleisch|Kalbfleisch (mager)|fleisch|110 20 3 1 0 0 0 0.2|1.0|0|Medaillon=80;Schnitzel=150|kalbfleisch,kalbsfilet,kalbsnuss,kalbshaxe,kalbsschnitzel,kalbsbraten,kalbsrücken,kalbsnieren,kalbszunge,kalbszungen,kalbsleber,kalbsbries,kalbsgeschnetzeltes,kalb|veal,veal cutlet,veal shank,veal loin
 wild|Wild (Reh, Hirsch)|fleisch|120 23 2.4 1 0 0 0 0.1|1.0|0|Medaillon=80|wild,wildfleisch,reh,rehfleisch,rehrücken,rehkeule,rehblatt,rehblätter,rehmedaillons,rehrückenmedaillons,hirsch,hirschfleisch,hirschmedaillons,hirschkeule,wildschwein,wildgulasch|venison,deer,elk,wild boar
-schweinefleisch|Schweinefleisch (mager)|fleisch|140 21 6 2 0 0 0 0.1|1.0|0||schweinefleisch,schweineschnitzel,schnitzel,schweinefilet,schweinelende,kotelett,koteletts,schweinebraten,schweinenacken,nackensteak,schweinebauch,schweineschulter,kasseler,geschnetzeltes,spareribs,schweinegulasch|pork,pork chops,pork loin,pork tenderloin,pork roast,pork shoulder,boneless pork chops,pork butt,spareribs,ribs,pork belly
+schweinefleisch|Schweinefleisch (mager)|fleisch|140 21 6 2 0 0 0 0.1|1.0|0||schweinefleisch,schweineschnitzel,schnitzel,schweinefilet,schweinelende,kotelett,koteletts,schweinebraten,schweinenacken,schweinebauch,schweineschulter,kasseler,geschnetzeltes,spareribs,schweinegulasch|pork,pork chops,pork loin,pork tenderloin,pork roast,pork shoulder,boneless pork chops,pork butt,spareribs,ribs,pork belly
 gefluegel|Hähnchenbrustfilet|fleisch|105 23.5 1 0.3 0 0 0 0.2|1.0|150||hähnchenbrust,hähnchenbrustfilet,hähnchenbrustfilets,hühnerbrust,hühnerbrustfilet,putenbrust,putenbrustfilet,putenschnitzel,hähnchenfilet,hühnchen,geflügel,putenfleisch,hähnchengeschnetzeltes,putengeschnetzeltes,hähnchen|chicken breast,chicken breasts,boneless chicken breasts,boneless skinless chicken breasts,chicken,turkey breast,chicken tenders,turkey,cooked chicken,diced chicken,chicken meat
-haehnchenschenkel|Hähnchenschenkel|fleisch|190 18 13 3.7 0 0 0 0.2|1.0|250||hähnchenschenkel,hühnerschenkel,hähnchenkeulen,hühnerkeulen,hähnchenflügel,chicken wings,brathähnchen,suppenhuhn,ganzes hähnchen,poularde,freilandhuhn,hähnchen,huhn,maishähnchen|chicken thighs,chicken legs,drumsticks,chicken wings,whole chicken,broiler,fryer,chicken pieces
-ente|Ente / Entenbrust|fleisch|200 19 14 4 0 0 0 0.2|1.0|300||ente,entenbrust,entenbrüste,entenbrustfilet,entenkeule,entenkeulen,flugente,barbarie-ente,gans,gänsebrust,gänsekeule,wildente|duck,duck breast,duck legs,goose
+haehnchenschenkel|Hähnchenkeule / Hähnchenschenkel|fleisch|190 18 13 3.7 0 0 0 0.2|1.0|250||hähnchenkeule,hähnchenschenkel,hühnerschenkel,hähnchenkeulen,hühnerkeulen,hähnchenflügel,chicken wings,freilandhuhn|chicken thighs,chicken wings,chicken pieces
+ente|Ente, ganz (mit Knochen)|fleisch|235 8 20 6 0 0 0 0.1|1.0|2200|Stück=2200|ente,enten,ganze ente,flugente,barbarie-ente,pekingente,peking-ente,wildente,hafermastente|duck,whole duck,roast duck
 kaninchen|Kaninchen / Hase|fleisch|130 21 5 2 0 0 0 0.1|1.0|0||kaninchen,hase,hasenrücken,hasenrückenfilets,kaninchenrücken,kaninchenkeule,hasenkeule,hasenkeulen,wildhase,kaninchenfleisch,reh,rehrücken,hirsch,wild|rabbit,hare,venison
 gefluegelleber|Geflügelleber|fleisch|135 19 5 1.6 1 0 0 0.2|1.0|0||geflügelleber,hühnerleber,hähnchenleber,entenleber,leber,kalbsleber,schweineleber,rinderleber|chicken liver,chicken livers,liver,calf liver
 lamm|Lammfleisch|fleisch|200 18 14 6 0 0 0 0.2|1.0|0||lamm,lammfleisch,lammkeule,lammkoteletts,lammrücken,lammschulter,zicklein,ziegenfleisch,capretto|lamb,leg of lamb,lamb chops,lamb shoulder
 speck|Speck (durchwachsen)|fleisch|400 13 38 14 0 0 0 3|1.0|0|Scheibe=10;Packung=125|speck,schinkenspeck,frühstücksspeck,bacon,bauchspeck,speckwürfel,räucherspeck,pancetta,lardons|bacon,bacon slices,bacon strips,salt pork,pancetta,slab bacon
 schinken|Kochschinken|fleisch|110 19 3.5 1.2 1 1 0 2.3|1.0|0|Scheibe=25|schinken,kochschinken,gekochter schinken,hinterschinken,schinkenwürfel,putenschinken,lachsschinken|ham,cooked ham,diced ham,ham slices,deli ham
 rohschinken|Rohschinken|fleisch|240 25 15 5 0 0 0 5.5|1.0|0|Scheibe=15|rohschinken,parmaschinken,serranoschinken,katenschinken,schwarzwälder schinken,prosciutto,bündnerfleisch|prosciutto,cured ham,smoked ham,country ham
-wurst|Wurst (Brühwurst)|fleisch|280 12 25 9 1 0.5 0 2|1.0|100||wurst,würstchen,wiener,wiener würstchen,frankfurter,bockwurst,bratwurst,bratwürste,fleischwurst,lyoner,leberkäse,weißwurst,mettwurst,chorizo,cabanossi,salami,mortadella,leberwurst|sausage,sausages,hot dogs,frankfurters,bratwurst,kielbasa,polish sausage,italian sausage,chorizo,pepperoni,salami,smoked sausage,link sausage
-fisch_mager|Fischfilet (mager)|fisch|80 18 0.8 0.2 0 0 0 0.2|1.0|150||fisch,fischfilet,seelachs,seelachsfilet,kabeljau,kabeljaufilet,dorsch,rotbarsch,rotbarschfilet,scholle,zander,pangasius,tilapia,schellfisch,seehecht,forelle,forellenfilet,barsch,heilbutt,steinbutt,dorade,wolfsbarsch,fischstäbchen,äschen,aeschen,aschenfilets,forellen,räucherforelle,räucherforellen,räucherforellenfilets|fish,fish fillets,white fish,cod,haddock,pollock,sole,flounder,tilapia,halibut,trout,snapper,perch,catfish,sea bass,orange roughy,whitefish
-stockfisch|Stockfisch / Klippfisch / Bacalhau (getrocknet, gesalzen)|fisch|290 63 2.4 0.5 0 0 0 17.6|1.0|0||stockfisch,klippfisch,bacalhau,bacalao,baccalà,baccala,bacalà,salzfisch,salzkabeljau,salzdorsch,getrockneter kabeljau,getrockneter dorsch,trockenfisch|salt cod,salted cod,dried cod,dried salt cod,stockfish,klipfish,bacalao,bacalhau,baccala
-lachs|Lachs|fisch|200 20 13.5 3 0 0 0 0.1|1.0|125||lachs,lachsfilet,räucherlachs,graved lachs,stremellachs,makrele,hering,matjes,thunfischsteak,sardinen,sardellen,anchovis,karpfen,aal|salmon,salmon fillet,smoked salmon,lox,mackerel,herring,sardines,anchovies,anchovy fillets,anchovy,tuna steak
-thunfisch|Thunfisch (Dose, im eigenen Saft)|fisch|110 25 1 0.3 0 0 0 0.8|1.0|0|Dose=150|thunfisch,thunfisch in öl,thunfisch naturell,thunfischdose|tuna,canned tuna,tuna fish,chunk light tuna,albacore tuna,water-packed tuna
-garnelen|Garnelen|fisch|85 18.5 1 0.3 0 0 0 0.6|1.0|10|Packung=200|garnelen,shrimps,krabben,crevetten,riesengarnelen,king prawns,scampi,meeresfrüchte,muscheln,miesmuscheln,tintenfisch,calamari,krebse,flusskrebse,hummer,surimi|shrimp,prawns,jumbo shrimp,crab,crabmeat,crab meat,lobster,scallops,clams,mussels,oysters,squid,calamari,seafood,crawfish,imitation crab
+wurst|Wurst (Brühwurst)|fleisch|280 12 25 9 1 0.5 0 2|1.0|100||wurst,würstchen,wiener,wiener würstchen,frankfurter,bockwurst,bratwurst,bratwürste,fleischwurst,lyoner,leberkäse,weißwurst,mettwurst,cabanossi,salami,mortadella,leberwurst|sausage,sausages,hot dogs,frankfurters,bratwurst,kielbasa,polish sausage,italian sausage,pepperoni,salami,smoked sausage,link sausage
+# --- Hackfleisch, Steaks, Lamm, Hammel ---
+hack_rind|Rinderhackfleisch|fleisch|215 20 15 6.5 0 0 0 0.2|1.0|0|Packung=500|rinderhack,rinderhackfleisch,rindergehacktes,hackfleisch vom rind,hackfleisch rind,beefsteakhack,tatarhack,rinderfaschiertes,hamburgerfleisch,burger patties,carne picada de ternera|ground beef,beef mince,lean ground beef,hamburger meat
+hack_schwein|Schweinehackfleisch|fleisch|260 18 21 8 0 0 0 0.2|1.0|0|Packung=500|schweinehack,schweinehackfleisch,hackfleisch vom schwein,hackfleisch schwein,schweinegehacktes,schweinefaschiertes,bratwurstbrät,brät|ground pork,pork mince
+mett|Mett / Hackepeter (gewürzt)|fleisch|260 18 21 8 0.5 0.3 0 1.8|1.0|0||mett,hackepeter,zwiebelmett,thüringer mett,schweinemett,gehacktes gewürzt|seasoned pork mince
+hack_lamm|Lammhackfleisch|fleisch|280 17 23.4 10.2 0 0 0 0.2|1.0|0|Packung=400|lammhack,lammhackfleisch,hackfleisch vom lamm,lammgehacktes,lammfaschiertes,kofta-fleisch|ground lamb,lamb mince
+hack_lamm_rind|Hackfleisch Lamm/Rind (gemischt)|fleisch|245 18.5 19 8.3 0 0 0 0.2|1.0|0|Packung=500|lamm-rind-hack,lamm- und rinderhack,hackfleisch lamm und rind,hackfleisch vom lamm und rind,gemischtes hack lamm rind,rind-lamm-hack|ground lamb and beef,lamb and beef mince
+schweinesteak|Schweinesteak (Nacken, Kamm)|fleisch|180 18 12 4.5 0 0 0 0.2|1.0|180|Stück=180|schweinesteak,schweinesteaks,nackensteak,nackensteaks,schweinenackensteak,kammsteak,kammsteaks,halssteak,schweinehalssteak,grillsteak,grillsteaks,schweinerückensteak,minutensteak vom schwein|pork steak,pork steaks,pork shoulder steak,pork neck steak
+rindersteak|Rindersteak (Rumpsteak, Entrecôte)|fleisch|155 22 7 3 0 0 0 0.1|1.0|220|Stück=220|rindersteak,rindersteaks,steak,steaks,rumpsteak,rumpsteaks,entrecôte,entrecote,entrecotes,ribeye,rib-eye,rib eye steak,hüftsteak,hüftsteaks,flanksteak,flank steak,flat iron steak,t-bone-steak,t-bone steak,porterhouse,porterhouse-steak,sirloin,sirloin steak,clubsteak,rinderrückensteak,minutensteak|steak,beef steak,sirloin,rib eye,ribeye,strip steak,new york strip,t-bone,porterhouse,flank steak,skirt steak,rump steak
+hammel|Hammelfleisch|fleisch|230 17 18 8.5 0 0 0 0.2|1.0|0||hammelfleisch,hammel,hammelkeule,hammelschulter,hammelkotelett,hammelrücken,hammelragout,schaffleisch,schafsfleisch|mutton,mutton leg,mutton shoulder
+# --- Geflügelteile ---
+huhn_ganz|Huhn / Hähnchen, ganz (mit Knochen)|fleisch|160 13 12 3.4 0 0 0 0.2|1.0|1200|Stück=1200|ganzes hähnchen,ganzes huhn,huhn,brathähnchen,brathuhn,grillhähnchen,maishähnchen,stubenküken,poularde,poulet,freilandpoulet,hendl,brathendl,suppenhuhn,suppenhühner|whole chicken,roasting chicken,broiler,fryer,poussin,stewing hen
+haehnchenbein|Hähnchenbein / Unterschenkel|fleisch|160 18.5 9.5 2.6 0 0 0 0.2|1.0|80|Stück=80|hähnchenbein,hähnchenbeine,hähnchenunterschenkel,hähnchenunterkeulen,hühnerbeine,hendlhaxerl,drumsticks,hähnchen-drumsticks,chicken drumsticks|drumstick,drumsticks,chicken drumsticks,chicken legs
+entenbrust|Entenbrust (mit Haut)|fleisch|200 18.5 14 4.5 0 0 0 0.2|1.0|300|Stück=300|entenbrust,entenbrüste,entenbrustfilet,entenbrustfilets,entenbrüstchen,barbarie-entenbrust,magret,magret de canard|duck breast,duck breasts,magret
+entenkeule|Entenkeule (essbarer Anteil)|fleisch|220 17 17 5 0 0 0 0.2|1.0|200|Stück=200|entenkeule,entenkeulen,entenschenkel,confit de canard,entenconfit,ente confit|duck leg,duck legs,duck confit
+gans|Gans, ganz (mit Knochen)|fleisch|240 10 22 6.5 0 0 0 0.1|1.0|4500|Stück=4500|gans,gänse,ganze gans,martinsgans,weihnachtsgans,bauerngans,hafermastgans,mastgans|goose,whole goose
+gaensebrust|Gänsebrust (mit Haut)|fleisch|230 18 17 5 0 0 0 0.2|1.0|500|Stück=500|gänsebrust,gänsebrüste,gänsebrustfilet,geräucherte gänsebrust,pommersche gänsebrust|goose breast
+gaensekeule|Gänsekeule (essbarer Anteil)|fleisch|250 17 20 6 0 0 0 0.2|1.0|330|Stück=330|gänsekeule,gänsekeulen,gänseschenkel|goose leg,goose legs
+# --- französische Fleischpasteten ---
+pastete|Pastete / Terrine (Pâté de campagne)|fleisch|320 14 28 10 2 0.5 0 1.8|1.0|0|Dose=125;Glas=180|pastete,pâté,pate,pâté de campagne,landpastete,bauernpastete,terrine,fleischterrine,wildterrine,wildpastete,geflügelterrine,pâté de lapin,kaninchenpastete,entenpastete,pâté de canard,galantine,pâté hénaff,pâté breton,pastete vom schwein|pate,pâté,country pate,terrine,pate de campagne,game terrine
+pastete_teig|Pastete im Teig (Pâté en croûte)|fleisch|330 12 22 8 20 1 1 1.6|1.0|0||pâté en croûte,pate en croute,pastete im teig,fleischpastete im teig,pâté lorrain,pate lorrain,schinkenpastete,wildpastete im teig,pastetchen mit fleisch,pork pie|pate en croute,meat pie,pork pie,game pie
+leberpastete|Leberpastete / Leberparfait|fleisch|300 12 27 9 3 1 0 1.8|1.0|0|Dose=125|leberpastete,leberparfait,leberterrine,pâté de foie,pate de foie,mousse de foie,geflügelleberpastete,geflügelleberparfait,leberpastete im glas|liver pate,chicken liver pate,liver mousse,liver parfait
+rillettes|Rillettes|fleisch|450 15 43 16 0 0 0 1.5|1.0|0|Glas=180|rillettes,rillettes de porc,rillettes de canard,rillettes d'oie,rillettes de tours,schweineschmalzfleisch|rillettes,potted pork,potted duck
+foie_gras|Foie gras (Gänse-/Entenstopfleber)|fleisch|460 7 44 15 4 1 0 1.2|1.0|0||foie gras,foie gras de canard,foie gras d'oie,gänsestopfleber,entenstopfleber,gänseleberpastete,stopfleberpastete,bloc de foie gras|foie gras,goose liver pate,duck liver pate
+# --- Spanische Tapas (zubereitet, je 100 g) ---
+tortilla_espanola|Tortilla de patatas (Kartoffel-Omelett)|ei|145 6 9 1.6 11 1.2 1 0.6|1.0|0|Portion=150;Pincho=120|tortilla de patatas,tortilla española,tortilla espanola,spanische tortilla,kartoffeltortilla,kartoffel-omelett,kartoffelomelett,pincho de tortilla|spanish omelette,spanish tortilla,potato omelette,tortilla de patatas
+ensaladilla_rusa|Ensaladilla rusa (Kartoffelsalat mit Thunfisch)|fisch|180 4 14 2 9 1.8 1.5 0.6|1.0|0|Portion=150|ensaladilla rusa,ensalada rusa,russischer salat,spanischer kartoffelsalat|russian salad,olivier salad,ensaladilla rusa
+jamon_iberico|Jamón ibérico|fleisch|375 31 28 9 0 0 0 4.5|1.0|0|Scheibe=10|jamón ibérico,jamon iberico,jamón ibérico de bellota,jamón de bellota,pata negra,ibérico-schinken,iberico-schinken,jamón de jabugo,lomo ibérico,paleta ibérica|iberian ham,jamon iberico,iberico ham,pata negra
+patatas_bravas|Patatas bravas (mit Soße)|kartoffel|180 2.5 10 1.3 20 2 2.2 0.8|1.0|0|Portion=200|patatas bravas,papas bravas,bravas,salsa brava,bravas-soße|patatas bravas,spicy potatoes,bravas sauce
+croquetas|Croquetas (Kroketten mit Schinken)|fleisch|230 8 12 4 22 2 1 1.0|1.0|30|Stück=30|croquetas,croquetas de jamón,croquetas de jamon,croqueta,schinkenkroketten,béchamelkroketten,croquetas de pollo,croquetas de bacalao|croquettes,ham croquettes,croquetas
+calamares_romana|Calamares a la romana (frittiert)|fisch|220 12 11 2 18 0.5 0.8 0.8|1.0|0|Portion=150|calamares a la romana,calamares fritos,frittierte tintenfischringe,panierte tintenfischringe,tintenfischringe paniert,backteig-calamari,chipirones a la andaluza,puntillitas,puntillitas fritas,pescadito frito,frittierte fischchen,boquerones fritos|fried calamari,fried squid rings,calamari fritti,fritto misto
+gazpacho|Gazpacho / Salmorejo (kalte Suppe)|gemuese|60 1.3 4 0.6 4.5 3.5 1 0.5|1.0|0|Glas=250;Portion=250|gazpacho,gazpacho andaluz,salmorejo,salmorejo cordobés,ajoblanco,kalte gemüsesuppe|gazpacho,salmorejo,cold tomato soup
+gambas_ajillo|Gambas al ajillo (in Knoblauchöl)|fisch|220 15 17 2.5 1.5 0.3 0.3 0.9|1.0|0|Portion=150|gambas al ajillo,gambas pil pil,gambas pil-pil,knoblauchgarnelen,garnelen in knoblauchöl,gambas a la plancha|garlic shrimp,gambas al ajillo,garlic prawns
+pimientos_padron|Pimientos de Padrón (Bratpaprika)|gemuese|25 1 0.3 0.1 3.5 2.5 1.8 0|0.4|8|Schale=200|pimientos de padrón,pimientos de padron,padrón-paprika,padron-paprika,padrón-paprikaschoten,bratpaprika,pimientos,pimientos fritos|padron peppers,pimientos de padron,shishito peppers
+pimientos_piquillo|Pimientos del piquillo (geröstet, im Glas)|gemuese|30 1.2 0.3 0.1 6 4 1.5 0.5|1.0|0|Glas=290|pimientos del piquillo,piquillo-paprika,piquillos,piquillo,eingelegte paprika in knoblauch,pimientos asados|piquillo peppers,roasted piquillo peppers
+albondigas|Albóndigas in Tomatensoße|fleisch|170 10 11 4 7 3 1 0.9|1.0|25|Stück=25;Portion=200|albóndigas,albondigas,albóndigas en salsa,albóndigas en salsa de tomate,spanische hackbällchen,hackbällchen in tomatensoße|spanish meatballs,albondigas,meatballs in tomato sauce
+chorizo|Chorizo (Paprikawurst)|fleisch|450 24 38 14 2 1 0 3.5|1.0|0|Stück=80|chorizo,chorizos,chorizowürste,chorizo picante,chorizo dulce,chorizo a la riojana,chorizo a la sidra,chistorra,sobrasada,paprikawurst,txistorra|chorizo,spanish chorizo,chorizo sausage
+blutwurst|Blutwurst (Morcilla)|fleisch|330 13 29 11 3 0 0 2|1.0|0||blutwurst,morcilla,morcilla de burgos,morcilla frita,rotwurst,flönz,boudin noir,black pudding,blunzn,grützwurst,schwarzwurst|black pudding,blood sausage,morcilla,boudin noir
+empanada|Empanada (gefüllte Teigtasche)|fleisch|290 9 15 6 30 2 1.5 1.0|1.0|120|Stück=120|empanada,empanadas,empanadilla,empanadillas,empanada gallega,teigtasche mit fleisch|empanada,empanadas,meat pie turnover
+huevos_rellenos|Huevos rellenos (gefüllte Eier)|ei|180 9 15 3 1 0.5 0 0.6|1.0|35|Stück=35|huevos rellenos,gefüllte eier,russische eier,deviled eggs|deviled eggs,stuffed eggs
+pan_tomate|Pan con tomate (Pa amb tomàquet)|backwaren|190 5 7 1 27 2 2 1.0|0.4|60|Scheibe=60|pan con tomate,pa amb tomàquet,pa amb tomaquet,pan tumaca,brot mit tomate|pan con tomate,tomato bread
+papas_arrugadas|Papas arrugadas (Runzelkartoffeln)|kartoffel|90 2 0.1 0 19 0.5 1.5 2.5|1.0|40|Stück=40|papas arrugadas,runzelkartoffeln,kanarische kartoffeln,salzkartoffeln kanarisch|canarian wrinkled potatoes,papas arrugadas
+mojo|Mojo rojo / verde (kanarische Soße)|sosse|350 2 35 5 6 3 2 2.5|0.95|0|Glas=200|mojo,mojo rojo,mojo verde,mojo picón,mojo picon,mojosoße,mojo-soße|mojo,mojo sauce,mojo rojo,mojo verde
+patatas_alioli|Patatas alioli|kartoffel|250 2 18 2.5 20 0.5 1.8 0.6|1.0|0|Portion=150|patatas alioli,patatas allioli,patatas ali oli,kartoffeln mit knoblauchmayonnaise|potatoes with aioli
+sardellen_essig|Boquerones en vinagre (Sardellen in Essig)|fisch|150 20 7 1.5 0.5 0 0 2.5|1.0|0|Schale=150|boquerones en vinagre,boquerones al vinagre,sardellen in essig,sardinas en escabeche,atún en escabeche,escabeche|marinated anchovies,white anchovies,boquerones,escabeche
+ochsenschwanz|Ochsenschwanz (mit Knochen)|fleisch|180 19 11 4.5 0 0 0 0.2|1.0|0||ochsenschwanz,ochsenschwänze,ochsenschwanzstücke,rabo de toro,rabo de buey,coda alla vaccinara|oxtail
+churros|Churros (frittiert)|backwaren|400 5 22 5 45 3 1.5 0.5|0.4|25|Stück=25|churros,churro,porras,churros con chocolate|churros
+flan|Flan / Crème caramel|milch|130 4 4 2 20 18 0 0.15|1.0|120|Stück=120;Becher=125|flan,flan de huevo,crème caramel,creme caramel,karamellpudding,karamellflan,flan casero|flan,creme caramel,caramel custard
+crema_catalana|Crema catalana / Natillas / Crème brûlée|milch|180 4 10 6 18 17 0 0.1|1.0|125|Portion=125|crema catalana,natillas,crème brûlée,creme brulee,crema de naranja,orangencreme,katalanische creme|creme brulee,custard,natillas
+leche_frita|Leche frita / Torrijas|ei|250 6 10 3 34 15 1 0.4|1.0|60|Stück=60|leche frita,torrijas,torrija,frittierter pudding,arme ritter|french toast,torrijas,fried milk
+arroz_con_leche|Arroz con leche / Milchreis (fertig)|milch|130 3.5 3 2 22 12 0.2 0.1|1.0|0|Becher=200|arroz con leche,riz au lait|rice pudding,arroz con leche
+turron|Turrón (Mandelnougat)|ei|480 9 25 2 55 45 4 0.1|1.0|0|Tafel=200|turrón,turron,turrón de jijona,turrón de alicante,turrón blando,turrón duro,mandelnougat,weißer nougat|turron,almond nougat,spanish nougat
+fisch_mager|Fischfilet (mager)|fisch|80 18 0.8 0.2 0 0 0 0.2|1.0|150||fisch,fischfilet,fischstäbchen|fish,fish fillets,white fish,orange roughy
+stockfisch|Stockfisch / Klippfisch / Bacalhau (getrocknet, gesalzen)|fisch|290 63 2.4 0.5 0 0 0 17.6|1.0|0||stockfisch,klippfisch,bacalhau,bacalao,baccalà,baccala,bacalà,salzfisch,salzkabeljau,salzdorsch,trockenfisch|salt cod,salted cod,dried cod,dried salt cod,stockfish,klipfish,bacalao,bacalhau,baccala
+# --- Fisch: Meer, mager (Dorschartige, Plattfische, Barsche) ---
+kabeljau|Kabeljau / Dorsch / Skrei|fisch|77 17.7 0.6 0.1 0 0 0 0.2|1.0|150||kabeljau,kabeljaufilet,kabeljaufilets,kabeljaurücken,kabeljaurückenfilet,kabeljauloins,kabeljau-loins,kabeljaukotelett,dorsch,dorschfilet,dorschfilets,dorschrücken,skrei,skreifilet,winterkabeljau,ostseedorsch,leng,lengfisch,lumb,kugelfisch,fugu|cod,cod fillet,cod fillets,atlantic cod,pacific cod,cod loin,skrei,ling,cusk,pufferfish,fugu
+seelachs|Seelachs (Köhler) / Alaska-Seelachs|fisch|80 18 0.8 0.2 0 0 0 0.3|1.0|150||seelachs,seelachsfilet,seelachsfilets,köhler,koehler,köhlerfilet,alaska-seelachs,alaska seelachs,alaskaseelachs,alaska-seelachsfilet,alaska-pollack,pollack,pollackfilet,steinköhler|pollock,pollock fillet,pollock fillets,alaska pollock,saithe,coley,pollack
+schellfisch|Schellfisch / Wittling / Hoki|fisch|78 17.9 0.6 0.1 0 0 0 0.3|1.0|150||schellfisch,schellfischfilet,wittling,wittlingsfilet,merlan,merlanfilet,merlan-filets,hoki,hokifilet,tk-hokifilet,blauer wittling|haddock,haddock fillet,whiting,hoki,blue whiting
+seehecht|Seehecht (Merluza)|fisch|86 17.2 2 0.4 0 0 0 0.2|1.0|150||seehecht,seehechtfilet,seehechtfilets,merluza,merluzza,nasello,hecht vom meer|hake,hake fillet,merluza
+rotbarsch|Rotbarsch|fisch|105 18.2 3.6 0.7 0 0 0 0.2|1.0|150||rotbarsch,rotbarschfilet,rotbarschfilets,goldbarsch,drachenkopf,roter drachenkopf,rascasse|redfish,ocean perch,rockfish,rose fish,scorpionfish
+seeteufel|Seeteufel (Lotte)|fisch|76 15 1.5 0.3 0 0 0 0.1|1.0|150||seeteufel,seeteufelfilet,seeteufelfilets,seeteufelmedaillons,lotte,anglerfisch,seeteufelbäckchen|monkfish,monkfish fillet,anglerfish,lotte
+scholle|Scholle / Flunder / Kliesche|fisch|86 17 1.9 0.4 0 0 0 0.3|1.0|150||scholle,schollen,schollenfilet,schollenfilets,flunder,flundern,flundernfilets,kliesche,klieschen,limande,rotzunge,doggerscharbe,butt,ostseebutt|plaice,flounder,dab,lemon sole,witch flounder,flatfish
+seezunge|Seezunge|fisch|83 17.5 1.4 0.3 0 0 0 0.3|1.0|150||seezunge,seezungen,seezungenfilet,seezungenfilets,seezungenfillet,seezungenröllchen|sole,dover sole,sole fillet,common sole
+steinbutt|Steinbutt / Glattbutt|fisch|95 16.7 3 0.8 0 0 0 0.3|1.0|150||steinbutt,steinbuttfilet,glattbutt|turbot,brill
+heilbutt|Heilbutt (weißer)|fisch|98 20 2.3 0.4 0 0 0 0.2|1.0|150||heilbutt,heilbuttfilet,weißer heilbutt,weisser heilbutt|halibut,halibut fillet,atlantic halibut,pacific halibut
+heilbutt_schwarz|Schwarzer Heilbutt|fisch|145 14 10 2 0 0 0 0.2|1.0|150||schwarzer heilbutt,grönland-heilbutt,grönlandheilbutt,heilbutt geräuchert,räucherheilbutt|greenland halibut,greenland turbot
+dorade|Dorade / Goldbrasse / Meerbrasse|fisch|120 20 4.5 1.1 0 0 0 0.2|1.0|350||dorade,doraden,dorade royal,dorade rosé,goldbrasse,goldbrassen,meerbrasse,meerbrassen,brasse,streifenbrasse,zahnbrasse,zahnbrassen,rotbrasse,orata,sparus|sea bream,gilt-head bream,gilthead bream,bream,porgy,dorada
+wolfsbarsch|Wolfsbarsch / Loup de mer|fisch|115 19 4.3 1 0 0 0 0.2|1.0|350||wolfsbarsch,wolfsbarschfilet,loup de mer,seebarsch,seebarschfilets,branzino,lubina,robalo|sea bass,european sea bass,branzino,seabass,striped bass
+snapper|Red Snapper / Zackenbarsch|fisch|98 20 1.3 0.3 0 0 0 0.2|1.0|150||red snapper,roter schnapper,schnapper,snapper,zackenbarsch,brauner zackenbarsch,zackenbarschfilet,barramundi,riesenbarsch,adlerfisch,umberfisch|red snapper,snapper,grouper,barramundi,meagre,croaker,drum
+meerbarbe|Rotbarbe / Meerbarbe|fisch|115 19 4.2 1 0 0 0 0.2|1.0|80||rotbarbe,rotbarben,meerbarbe,meerbarben,seebarbe,seebarben,streifenbarbe,triglie,rouget|red mullet,surmullet,goatfish
+edelfisch_mager|Petersfisch / Knurrhahn / Steinbeißer|fisch|88 17.5 1.8 0.3 0 0 0 0.2|1.0|150||petersfisch,heringskönig,st. petersfisch,knurrhahn,roter knurrhahn,steinbeißer,steinbeisser,steinbeißerfilet,seewolf,katfisch,goldmakrele,mahi mahi,mahi-mahi,dorado,pomfret,hornhecht,meeräsche,meeraesche,barrakuda,barracuda,blaufisch,blaubarsch|john dory,gurnard,wolffish,mahi mahi,dolphinfish,pomfret,garfish,grey mullet,mullet,barracuda,bluefish
+rochen|Rochen|fisch|90 20 0.7 0.1 0 0 0 0.3|1.0|200||rochen,rochenflügel,rochenflossen,gehäuteter rochen,nagelrochen|skate,skate wing,ray
+schwertfisch|Schwertfisch|fisch|120 20 4 1.1 0 0 0 0.2|1.0|180||schwertfisch,schwertfischsteak,schwertfischsteaks,schwertfischfilet,gotteslachs,opah,marlin,speerfisch|swordfish,swordfish steak,opah,marlin
+thunfisch_frisch|Thunfisch (frisch)|fisch|120 24 2.5 0.7 0 0 0 0.1|1.0|180||thunfischsteak,thunfischsteaks,thunfischfilet,gelbflossenthun,gelbflossen-thunfisch,yellowfin,bonito,echter bonito,weißer thun,roter thun,blauflossenthun,albacore,thunfischtatar,tunfischtatar,sashimi-thunfisch,ahi|tuna steak,tuna steaks,ahi tuna,yellowfin tuna,bluefin tuna,sushi-grade tuna,bonito
+thunfisch_oel|Thunfisch in Öl (Dose)|fisch|200 26 10 1.7 0 0 0 0.9|1.0|0|Dose=150|thunfisch in öl,thunfisch in olivenöl,thunfisch in pflanzenöl,thunfischfilets in olivenöl|tuna in oil,oil-packed tuna,tuna in olive oil
+haifisch|Dornhai / Schillerlocken|fisch|300 21 24 5 0 0 0 1.8|1.0|0||schillerlocke,schillerlocken,dornhai,haifisch,haifischsteak,seeaal,kalbsfisch|dogfish,spiny dogfish,shark,shark steak
+# --- Fisch: Meer, fett ---
+makrele|Makrele|fisch|180 18.7 11.9 3 0 0 0 0.2|1.0|300||makrele,makrelen,makrelenfilet,makrelenfilets,frische makrele,stöcker,holzmakrele,spanische makrele,königsmakrele|mackerel,atlantic mackerel,mackerel fillet,spanish mackerel,king mackerel,horse mackerel
+makrele_geraeuchert|Makrele (geräuchert)|fisch|230 21 15.5 3.5 0 0 0 2.5|1.0|0||räuchermakrele,räuchermakrelen,pfeffermakrele|smoked mackerel,peppered mackerel
+hering|Hering (frisch)|fisch|160 18 9.3 2.2 0 0 0 0.3|1.0|200||hering,heringe,heringsfilet,heringsfilets,grüner hering,grüne heringe,brathering,bratheringe,ostseehering,strömling,strömlinge,maifisch,alse|herring,herring fillet,fresh herring,shad
+hering_mariniert|Matjes / Bismarckhering / Rollmops|fisch|230 16 17 4 2 1.5 0 3.5|1.0|0|Stück=60|matjes,matjesfilet,matjesfilets,matjeshering,bismarckhering,bismarckheringe,rollmops,rollmöpse,salzhering,salzheringe,brathering in marinade,heringshappen,heringssalat,hering in sahnesoße|pickled herring,matjes,soused herring,rollmop,rollmops,salted herring
+bueckling|Bückling / Kieler Sprotten (geräuchert)|fisch|230 20 16 3.8 0 0 0 2.5|1.0|0||bückling,bueckling,bücklinge,räucherhering,kieler sprotten,sprotten,sprotte,räuchersprotten|kipper,kippers,smoked herring,smoked sprats,sprats,brisling
+sardinen|Sardinen (frisch)|fisch|135 19.4 5.6 1.5 0 0 0 0.3|1.0|50||sardine,sardinen,sardinenfilets,pilchard,pilchards,anchoa fresca|sardine,sardines,pilchard
+sardinen_oel|Sardinen in Öl (Dose)|fisch|210 24 12 2.5 0 0 0 0.8|1.0|0|Dose=125|sardinen in öl,ölsardinen,sardinen in olivenöl,dosensardinen|sardines in oil
+sardellen|Sardellen / Anchovis (gesalzen, in Öl)|fisch|210 29 10 2.2 0 0 0 9|1.0|4|Glas=50|sardellen,sardellenfilets,sardellenfilet,anchovis,anchovisfilets,anchovy,acciughe,alici|anchovies,anchovy,anchovy fillets,anchovy fillet,salted anchovies
+aal|Aal|fisch|280 15 24 5 0 0 0 0.2|1.0|0||aal,flussaal,aalstücke,meeraal,conger,grüner aal|eel,conger eel,unagi
+aal_geraeuchert|Räucheraal|fisch|330 18 28.6 6 0 0 0 1.5|1.0|0||räucheraal|smoked eel
+# --- Lachse, Forellen, Süßwasser ---
+wildlachs|Wildlachs (Pazifik)|fisch|140 20.5 6 1.3 0 0 0 0.1|1.0|125||wildlachs,wildlachsfilet,ketalachs,keta-lachs,sockeye,sockeye-lachs,rotlachs,buckellachs,silberlachs,coho,königslachs,pazifischer lachs,pazifiklachs,alaska-wildlachs,alaska-lachs|wild salmon,sockeye salmon,sockeye,pink salmon,chum salmon,keta salmon,coho salmon,king salmon,chinook salmon,pacific salmon
+forelle|Forelle / Saibling|fisch|103 19.5 2.7 0.6 0 0 0 0.1|1.0|250||forelle,forellen,forellenfilet,forellenfilets,regenbogenforelle,bachforelle,seeforelle,lachsforelle,lachsforellenfilet,saibling,saiblinge,saiblingsfilet,saiblingfilet,seesaibling,bachsaibling,elsässer saibling,äsche,äschen,aeschen,aschenfilets,huchen,ayu|trout,rainbow trout,brook trout,trout fillet,steelhead,arctic char,char,grayling
+forelle_geraeuchert|Räucherforelle / Räucherfisch|fisch|120 22 3.5 0.8 0 0 0 2.5|1.0|0||räucherforelle,räucherforellen,räucherforellenfilet,räucherforellenfilets,räucherfisch,räucherfischfilet,räuchersaibling|smoked trout,smoked fish,smoked whitefish
+felchen|Felchen / Renke / Maräne|fisch|100 18 3 0.6 0 0 0 0.1|1.0|200||felchen,felchenfilet,felchenfilets,renke,renken,renkenfilet,maräne,maränen,maraene,große maräne,kleine maräne,coregonus,blaufelchen,balchen,reinanke,bodenseefelchen,weißfisch vom see|whitefish,lake whitefish,vendace,cisco
+zander|Zander / Hecht / Flussbarsch|fisch|84 19 0.8 0.2 0 0 0 0.1|1.0|150||zander,zanderfilet,zanderfilets,hecht,hechtfilet,hechte,hechtklößchen,flussbarsch,flussbarschfilet,barsch,barschfilet,barschfilets,egli,eglifilet,eglifilets,kretzer,kretzerfilet,schwarzbarsch,amurbarsch,sander|pike-perch,zander,walleye,pike,northern pike,perch,yellow perch,european perch,pickerel
+karpfen|Karpfen|fisch|115 18 4.8 1 0 0 0 0.1|1.0|0||karpfen,spiegelkarpfen,schuppenkarpfen,karpfenfilet,silvesterkarpfen,karpfen blau,graskarpfen,amur,amurkarpfen,silberkarpfen,marmorkarpfen|carp,common carp,grass carp,silver carp
+weissfisch|Weißfisch (Schleie, Brachse, Rotauge)|fisch|95 17.7 2.6 0.5 0 0 0 0.1|1.0|200||schleie,schleien,brachse,brachsen,brachsenfilet,blei,rotauge,rotaugen,plötze,plötzen,döbel,barbe,nase,aland,rotfeder,güster|tench,roach,chub,barbel,ide
+wels|Wels / Waller|fisch|160 15 11 2.5 0 0 0 0.1|1.0|150||wels,welse,welsfilet,welsfilets,waller,wallerfilet,flusswels|wels catfish,sheatfish,european catfish
+pangasius|Pangasius / Tilapia / Katzenwels|fisch|90 17 2.3 0.7 0 0 0 0.2|1.0|150||pangasius,pangasiusfilet,pangasiusfilets,tilapia,tilapiafilet,tilapiafilets,buntbarsch,viktoriabarsch,victoriabarsch,nilbarsch,katzenwels,afrikanischer wels,claridae|pangasius,basa,swai,tilapia,nile perch,catfish,channel catfish,catfish fillets
+stoer|Stör|fisch|105 18 3.8 0.9 0 0 0 0.15|1.0|150||stör,störe,störfilet,störfilets,störsteak,stoer,stoerfilet,sterlet,hausen,beluga-stör,sibirischer stör,räucherstör,geräucherter stör|sturgeon,sturgeon fillet,smoked sturgeon,sterlet
+# --- Tintenfische, Krebstiere ---
+tintenfisch|Tintenfisch (Kalmar, Sepia)|fisch|90 15.6 1.4 0.4 3 0 0 0.1|1.0|0||tintenfisch,tintenfische,tintenfischringe,tintenfischtube,tintenfischtuben,calamari,calamaris,kalmar,kalmare,kalmarringe,sepia,sepien,sepiatinte,sepiola,pijlinktvis,chipirones,seppia,seppie,totani|squid,calamari,squid rings,cuttlefish,baby squid
+oktopus|Oktopus / Krake|fisch|82 15 1 0.2 2.2 0 0 0.6|1.0|0||oktopus,oktopusse,krake,kraken,pulpo,polpo,polipo,octopus,pulpo a la gallega|octopus,baby octopus
+hummer|Hummer / Languste / Flusskrebs / Krabbe|fisch|90 19 1.5 0.3 0.5 0 0 0.8|1.0|0||hummer,hummerschwänze,hummerfleisch,hummerschwanz,languste,langusten,langustenschwänze,flusskrebse,flusskrebs,flusskrebsfleisch,flusskrebsschwänze,krebse,krebsfleisch,taschenkrebs,königskrabbe,königskrabbenbeine,schneekrabbe,krabbenbeine,seespinne,bärenkrebs|lobster,lobster tail,lobster tails,lobster meat,crawfish,crayfish,crab,crabmeat,crab meat,king crab,snow crab,dungeness crab,blue crab,crab legs,lump crab meat
+surimi|Surimi (Krebsfleischimitat)|fisch|100 7.5 0.5 0.1 15 5 0.5 1.8|1.0|0||surimi,surimistäbchen,krebsfleischimitat,crab sticks,kanikama|imitation crab,surimi,crab sticks,krab
+# --- Muscheln ---
+miesmuscheln|Miesmuscheln (mit Schale gewogen)|fisch|26 3.6 0.7 0.1 1.1 0 0 0.2|1.0|0||miesmuscheln,miesmuschel,pfahlmuscheln,pfahlmuschel,moules,cozze,mejillones,bouchot-muscheln,muscheln,muschel,frische muscheln,blaue muscheln,mittelmeer-miesmuscheln|mussels,blue mussels,fresh mussels,mussel
+muschelfleisch|Muschelfleisch (ausgelöst)|fisch|86 11.9 2.2 0.4 3.7 0 0 0.7|1.0|0||muschelfleisch,miesmuschelfleisch,tk-muschelfleisch|mussel meat,clam meat
+venusmuscheln|Venus-/Herzmuscheln, Meermandeln (mit Schale)|fisch|16 2.6 0.2 0 0.5 0 0 0.3|1.0|0||venusmuscheln,venusmuschel,vongole,vongole veraci,teppichmuscheln,teppichmuschel,herzmuscheln,herzmuschel,meermandeln,meermandel,samtmuscheln,samtmuschel,englisches pastetchen,sandklaffmuscheln,schwertmuscheln,scheidenmuscheln,messermuscheln,almejas,palourdes,clams|clams,littleneck clams,manila clams,cockles,razor clams,dog cockles,carpet shell clams
+austern|Austern|fisch|75 9.5 2.3 0.5 4.5 0 0 0.5|1.0|15|Dutzend=180|auster,austern,felsenaustern,pazifische austern,belon-austern,fines de claire,austernfleisch|oyster,oysters,pacific oysters,raw oysters,shucked oysters
+jakobsmuscheln|Jakobsmuscheln (ausgelöst)|fisch|69 12.1 0.5 0.1 3.2 0 0 1|1.0|25||jakobsmuschel,jakobsmuscheln,jakobsmuschelfleisch,jakobsmuschelnüsse,jakobsmuschelnüsschen,muschelnüsse,coquilles st jacques,coquille saint-jacques,kammmuscheln,pilgermuscheln,capesante|scallop,scallops,sea scallops,bay scallops
+gruenlippmuscheln|Grünlippmuscheln (halbe Schale)|fisch|34 5.2 0.9 0.2 1.2 0 0 0.3|1.0|30||grünlippmuscheln,grünlippmuschel,grünschalmuscheln,grünschalmuschel,neuseeland-muscheln,neuseeländische grünlippmuscheln,grünlipp-muscheln|green-lipped mussels,green lipped mussels,new zealand mussels,greenshell mussels
+entenmuscheln|Entenmuscheln / Percebes (ganz)|fisch|25 5.3 0.4 0.1 0.4 0 0 0.4|1.0|0||entenmuscheln,entenmuschel,percebes,percebe,felsen-entenmuscheln,pouce-pied|goose barnacles,percebes,gooseneck barnacles
+lachs|Lachs|fisch|200 20 13.5 3 0 0 0 0.1|1.0|125||lachs,lachsfilet,räucherlachs,graved lachs,stremellachs|salmon,salmon fillet,smoked salmon,lox
+thunfisch|Thunfisch (Dose, im eigenen Saft)|fisch|110 25 1 0.3 0 0 0 0.8|1.0|0|Dose=150|thunfisch,thunfisch naturell,thunfischdose|tuna,canned tuna,tuna fish,chunk light tuna,albacore tuna,water-packed tuna
+garnelen|Garnelen|fisch|85 18.5 1 0.3 0 0 0 0.6|1.0|10|Packung=200|garnelen,shrimps,krabben,crevetten,riesengarnelen,king prawns,scampi,meeresfrüchte,kaisergranat,langostinos,gambas,garnelenschwänze,nordseekrabben,krabbenfleisch|shrimp,prawns,jumbo shrimp,seafood
 bruehe|Brühe (zubereitet)|sosse|5 0.5 0.2 0.1 0.4 0.2 0 0.8|1.0|0|Würfel=10|brühe,gemüsebrühe,fleischbrühe,hühnerbrühe,rinderbrühe,instant-brühe,fond,kalbsfond,wildfond,fischfond,geflügelfond,bouillon,spargelsud,scampisud,wildglace,sud|broth,stock,chicken broth,beef broth,vegetable broth,chicken stock,beef stock,vegetable stock,bouillon,consomme,fish stock
 bruehpulver|Brühpulver / Brühwürfel|gewuerz|200 10 12 6 15 5 0 50|0.7|10|Würfel=10;TL=4;EL=12|brühwürfel,brühpulver,gemüsebrühpulver,instant gemüsebrühe,hühnerbrühwürfel,suppenwürfel,gekörnte brühe,instantbrühe|bouillon cube,bouillon cubes,bouillon granules,chicken bouillon granules,beef bouillon cube,stock cube,chicken bouillon,beef bouillon
 salz|Salz|gewuerz|0 0 0 0 0 0 0 100|1.2|0||salz,meersalz,jodsalz,kochsalz,steinsalz,fleur de sel,salzwasser,kräutersalz|salt,kosher salt,sea salt,table salt,coarse salt,seasoned salt,garlic salt,onion salt,celery salt
@@ -233,12 +412,185 @@ wein_weiss|Weißwein|alkohol|80 0.1 0 0 2.6 1 0 0|0.99|0|Flasche=750|weißwein,t
 wein_rot|Rotwein|alkohol|85 0.1 0 0 2.6 0.6 0 0|0.99|0|Flasche=750|rotwein,trockener rotwein,portwein,madeira,glühwein|red wine,dry red wine,port,port wine,burgundy,madeira
 bier|Bier|alkohol|43 0.5 0 0 3.6 0 0 0|1.01|0|Flasche=500;Dose=500|bier,helles,dunkles bier,pils,weizenbier,malzbier,starkbier,cidre,cider,apfelwein|beer,ale,lager,dark beer,stout
 spirituosen|Spirituosen|alkohol|230 0 0 0 0 0 0 0|0.95|0|Flasche=700|rum,brauner rum,weinbrand,cognac,brandy,kirschwasser,obstler,schnaps,wodka,gin,whisky,calvados,grappa,ouzo,pernod,pastis,campari,cachaca,cachaça,aprikosengeist,himbeergeist,williamsbirne|rum,brandy,cognac,vodka,gin,whiskey,whisky,bourbon,tequila,kirsch,bourbon whiskey
-likoer|Likör (Frucht-, Kaffee-, Eierlikör)|alkohol|300 0 0 0 35 35 0 0|1.08|0|Flasche=700|likör,cassis,crème de cassis,passoa,amaretto,grand marnier,cointreau,orangenlikör,eierlikör,kaffeelikör,baileys,limoncello,curaçao,blue curaçao,kirschlikör,schwarz-johannisbeer-likör|liqueur,amaretto,grand marnier,triple sec,kahlua,coffee liqueur,irish cream,limoncello,creme de cassis
+likoer|Likör (Frucht-, Kaffee-, Eierlikör)|alkohol|300 0 0 0 35 35 0 0|1.08|0|Flasche=700|likör,crème de cassis,cassis,cassislikör,passoa,amaretto,grand marnier,cointreau,orangenlikör,eierlikör,kaffeelikör,baileys,limoncello,curaçao,blue curaçao,kirschlikör,schwarz-johannisbeer-likör|liqueur,amaretto,grand marnier,triple sec,kahlua,coffee liqueur,irish cream,limoncello,creme de cassis
 ersatz_sonstiges|Kartoffelchips / Snacks|suess|540 6 34 3 50 1 4 1.5|0.1|0|Beutel=175|chips,kartoffelchips,tortillachips,salzstangen,cracker,erdnussflips,popcorn|potato chips,chips,tortilla chips,corn chips,pretzels,popcorn
+# ---- ergänzt 0.9.8 (fehlende Lebensmittel aus der Datenbank des Nutzers, Schweizer und asiatische Rezepte)
+bambussprossen|Bambussprossen (Dose)|gemuese|19 1.8 0.2 0 1.5 0.3 1.4 0.02|1.0|0||bambussprossen,bambussprosse,bambusschösslinge,bambus,dosen-bambus,bambusspitzen|bamboo shoots
+sprossen|Sprossen (Mungbohnen-, Sojasprossen)|gemuese|30 3.0 0.2 0 4.2 4.1 1.8 0.02|0.4|0||sprossen,sojasprossen,sojabohnensprossen,sojakeime,sojabohnenkeime,sojabohnenkeimlinge,soyabohnenkeimlinge,soyabohnensprösslinge,sojabonensprossen,bohnensprossen,bohnenkeime,mungobohnensprossen,mungosprossen,mungbohnensprossen,keimlinge,alfalfasprossen,alfalfa-sprossen,linsensprossen,radieschensprossen,knoblauchsprossen,lauchsprossen|bean sprouts,mung bean sprouts,alfalfa sprouts,sprouts
+glutamat|Glutamat (Mononatriumglutamat)|gewuerz|0 0 0 0 0 0 0 31|0.8|0||glutamat,natriumglutamat,mononatriumglutamat,monosodiumglutamat,monosodium glutamat,monos glutamat,glutmat,aji-nomoto,ajinomoto,aji-shio|msg,monosodium glutamate
+artischocke|Artischocke|gemuese|47 3.3 0.2 0 5.1 1 5.4 0.24|0.6|250|Stück=250|artischocke,artischocken,artischockenherzen,artischockenböden,artischockenboden,carciofini,artischoken,karden|artichoke,artichokes,artichoke hearts,artichoke bottoms
+okra|Okra|gemuese|33 1.9 0.2 0 4.3 1.5 3.2 0.02|0.5|12|Stück=12|okra,okras,okraschoten,ladie's fingers,ladies fingers|okra
+reispapier|Reispapier|getreide|335 3 0.3 0 80 0 1.5 0.5|0.5|8|Blatt=8;Scheibe=8|reispapier,reispapierblätter,reispapierblatt,reisblätter|rice paper,rice paper wrappers
+tamarinde|Tamarindenmark|obst|239 2.8 0.6 0.3 57 57 5 0.07|1.2|0|Kugel=30|tamarinde,tamarindenmus,tamarindenmark,tamarindenkonzentrat,tamarindenpaste,tamarindenblätter|tamarind,tamarind pulp
+garnelenpaste|Garnelenpaste (Trassi, Krabbenpaste)|fisch|190 30 2.5 1 10 1 0 30|1.2|0||garnelenpaste,krabbenpaste,trassi,terasi,belacan,sardellenpaste,fischpaste|shrimp paste,anchovy paste
+kaviar|Fischrogen (Kaviar, Forellen-, Lachskaviar)|fisch|250 25 17 4 3 0 0 3.5|1.0|0||kaviar,forellenkaviar,lachskaviar,keta-kaviar,deutscher kaviar,rogen,fischrogen|caviar,roe,salmon roe
+algen|Algen (Nori, Wakame, Kombu, getrocknet)|gemuese|190 35 1 0.2 10 1 33 3|0.3|3|Blatt=3;Scheibe=3;Stück=3|nori,noriblätter,noriblatt,nori-algen,wakame,wakamestücke,kombu,konbu,kombu-streifen,algen,seetang,haarseegras,ouessane-algen,streugewürz aus blauer alge|seaweed,nori,wakame,kombu,kelp
+lebensmittelfarbe|Lebensmittelfarbe|sonstiges|0 0 0 0 0 0 0 0|1.0|0||lebensmittelfarbe,lebensmittelfarben,speisefarbe,speisefarben,rote speisefarbe,gelbe lebensmittelfarbe,blaue speisefarbe,grüne speisefarbe|food coloring,food colouring
+suessstoff|Süßstoff|zucker|0 0 0 0 0 0 0 0|1.0|0||süßstoff,flüssiger süßstoff,diabetikersüße,stevia,stevia-extrakt,streusüße,sucralose,saccharin|sweetener,artificial sweetener,stevia
+zitronensaeure|Zitronensäure / Vitamin-C-Pulver|sonstiges|0 0 0 0 0 0 0 0|0.9|0||zitronensäure,vitamin-c-pulver,ascorbinsäure,zitronensalzkristalle,gereinigter weinstein,weinstein,weinsteinbackpulver|citric acid,cream of tartar
+trueffel|Trüffel|gemuese|50 6 0.5 0 1 0 17 0.01|0.6|20|Stück=20|trüffel,trüffeln,schwarze trüffel,schwarze trüffeln,ardeche-trüffeln,trüffelscheiben|truffle,truffles
+knochen|Knochen (für Brühe, werden nicht gegessen)|sonstiges|0 0 0 0 0 0 0 0|1.0|300||knochen,suppenknochen,markknochen,kalbsknochen,rindsknochen,rinderknochen,schweineknochen,svhweineknochen,gemischte knochen,gemichte knochen,fleischknochen,rinderfleischknochen,rehknochen,wildschweinknochen,hühnerknochen,hühnerknochen und hälse,kalbsfüsse,kalbsfüße,gehackte wildschweinknochen|bones,soup bones,marrow bones
+maniok|Maniok / Taro / Yams|kartoffel|160 1.4 0.3 0.1 38 1.7 1.8 0.04|0.7|0||maniok,cassava,yucca,taro,cocoyam,jicama,plantano|cassava,taro,yuca
 """
+
+EXTRA = r"""
+moehre: rüebli,rübli,bundrüebli,bund-rüebli,frühlingsrüebli,rüebliwürfel,rüebli-würfel,rüebli mittel,karottenwürfel,möhrchen,arotte
+kraeuter: peterli,peterli glatt,peterli-stiele,prezzemolo,prezzomolo,petersilienzweige,petersilienzweigen,petersilienstängel,petersilienstengel,petersilienblätter,bohnenkraut,bohnenkrautzweig,beifuß,beifuss,quendel,lavendel,lavendelstengel,lavendelblüten,verveine,zitronenverbene,geißfuß,giersch,shisoblätter,shiso,portulak,boretsch,pimpernelle,melisse,melisseblättchen,pfefferminzzweige,pfefferminzstengel,minzestängel,kaffirblätter,kaffirzitronenblätter,kaffirlimettenblätter,kaffirlimonenblätter,limettenblätter,europagrasblätter,thai-basilikumblätter,thai-basilikum,basilkum,basilikumsträußchen,korianderkraut,frisches korianderkraut,korianda,dillkraut,fenchelkraut,fenchelgrün,selleriegrün,sellersieblätter,liebstöckelblätter,liebstöckelblatter,nane,orgegano,origano,rosmarinspitze,rosmarinnnadeln,rostnarinnadeln,schnittlauchhalme,bouquet garni,kräutersträusschen,kräutersträußchen,kräuterbündel,käutersträußchen,kräutermischung provençal,brennesseln,brennesselspitzen,junge brennesseln,curryblätter,rosenblüten,essbare rosenblüten
+gewuerze: anissamen,anispulver,fenchelsaat,fenchelsamen,kreuzkümmelsaat,cummin samen,cummin körner,cummin,kumin,kimyon,koriandersaat,schwarzkümmelsaat,schwarzkümmel,fünfgewürzpulver,fünf-gewürz-pulver,fünf-gewürzpulver,5-gewürz-pulver,fünferlei-gewürz,fünferlei-gewürzpulver,chinagewürz,china-gewürz,asiagewürz,pfefferkuchengewürz,honigkuchengewürz,stäsz-pfefferkuchengewürz,pastetengewürz,raz-el-hanut,ras-el-hanout,sumak,sumach,berbere,kassie,zimtstengel,zimtstängel,zimtrinde,wacholderbeere,kardamomkapseln,kardamomkapsel,kardamomskapseln,grüne kardamomkapseln,macisblüte,musaktblüte,muskatblüte,curcuma,fenugreek,gyrosgewürz,geflügelgewürz,fischgewürz,bratkartoffelgewürz,fallaffelgewürz,gewürzsalzmischung,lorbeerblätt,lorbeerbaltt,lorbeerbatt,lorberblatt,lorberblätter,lorneerblätter,nelke,nelken,gewürznelke,nelkenköpfe,mußkatnuß,musskatnuss,safranfäden,briefchen safranfäden,kapsel safranfäden,döschen safranfäden,sternanisfrucht,gewürzsäcklein,gewürzsäckchen,ingwerpulver,anis,bockshornkleesamen,sesamsamen,mohnsaat,gewürze
+pfeffer: chillipulver,chilli-pulver,chilli pulver,chilliflocken,pul biber,kirmizi biber,fagara,sichuanpfeffer,szechuanpfeffer,chuanjiao,blütenpfeffer,schwarze pfefferkörner,schwarze pfefferkorner,grüne pfefferkörner,pfefffer,feffer,cayennepulver
+chili: chilli,chillies,chillis,chillie,chillischote,chillischoten,chilli-schote,chilli-schoten,chilichoten,rote chillies,grüne chillies,rote chilli,roten chilli,grüner chilli,trockene rote chillies,peperoncino,peperonicino,peroncino,peporoni,peproni,ancho-chillis,anaheim-chillies,ancho- oder pasilla-chillies,ajies amarillos,chipotle,pfefferschoten,grüne pefferschote
+paprika: peperone,paprikaschotte,papkrikaschoten
+weisskohl: wirz,wirzblätter,wirsingkopf,weißkohlkopf,weißkohlköpfe,weißkrautkopf,weisskabis,kabis,rotkabis,kohlkopf,kohlblätter
+salat: lattich,lattichblätter,lattich-blätter,salatherz,salatkopf,kopfsalatherz,endivienkopf,rauke,feinblättrige rauke,ruccola,ruccolablätter,lollo bianco,chicoreestaude,chicoreestange,radicchioköpfe
+erbsen: kefen,kefe,erbsenschoten,zuckerschoten
+rote_bete: randen
+zucchini: zucchetti,zuccini,zuchini,patty pans,zucchiniblüten
+champignons: champignon,champignonköpfe,eierschwämme,eierschwämmchen,eierschwämmli,steinpilz,parasolpilz,parasolpilz-hüte,trockenpilz,trockenpilze,getrocknete chin pilz,getrocknete chinesische pilze,tonggu,tongu,dhong gü,mu-err,mu err,judasohren,wolkenohren,wolkenohrpilz,baumohren,strohpilze,goldnadeln,lilienblüten
+gefluegel: pouletbrust,pouletbrüstchen,pouletbrüste,hühnerbrüstchen,hühnerbrüste,hühnebrüstchen,hähnchenbrüstchen,hähnchnbrust,hänchenbrustfilet,hühnchenbrustfilet,hühnerfilet,hühnerfleisch,gekochtes hühnerfleisch,ausgelöstes hühnerfleisch,perlhuhnbrust,perlhuhnbrüste,perlhuhnbrüstchen,maispoulardenbrust,maispoulardenbrüste,maishuhnbrüste,poulardenbrust,poulardenbrüstchen,truthahnbrust,truthahn brustfilets,hendlbrüste,geflügelklein,gänseklein,hühnerklein,geflügelmagen,hühnerpörkölt
+haehnchenschenkel: hähnchenschlegel,hähnchenoberschenkel,hühnerflügel,putenkeulen,putenoberkeulen,hendlkeulen,oberschenkel,hahn,freilandhahn,kapaun,perlhuhn,perlhühner,coquelets,backhendl,hächnchen,truthahn,pute,puter,wachteln,tauben
+ente: entenfüße
+rindfleisch: rindertatar,tatar beefsteak,beefsteak tatar,rindsfilet,rindsfilet vom spitz,rinderlende,rindsragout,rinderkeule,rindernuss,rinderschulter,rinderquerrippe,rinderbacken,entrecôtes,rinds-entrecôte,tournedos,hohrücken,hohrückenbraten,hüfte,rindshuft,rinderschmorbraten,rinderroulade,rinderfiletsteaks,filetsteaks,rostbraten,rindbraten,rind,klärfleisch,rindszunge,rinderkutteln,kutteln,siedfleisch,pferdefleisch,pferdebraten,pferdebratenfleisch,eselsfleisch,tatar
+kalbfleisch: kalbsbrust,kalbsragout,kalbshuft,kalbsplätzchen,kalbsplätzli,kalbsmedaillons,kalbschulter,kalbschulterspitz,kalbsschulterspitz,kalbsbagge,kalbsbäggli,kalbscarrébraten,kalbskopf,kalbsherz,kalbsfleisch für ragout,kalbsmagen
+schweinefleisch: schweinsnierstück,schweins-nierstück,schweinsfilet,schweinsfilet-medaillon,schweinshuft,schweinekamm,schweinehals,schweinehalsgrat,schweinsvoressen,schweinskoteletten,schweinskotelett,schweinerippchen,schweinsrippchen,schälrippchen,rippchen,schweinebratenaufschnitt,schweineschmorbraten,schweinenuss,schweinekeule,schweinshaxe,schweinshaxen,eisbein,eisbeine,gepökeltes eisbein,schweinebacke,rippli,kotellets,plätzli,jungschweinernes,schweinsfüße,schweinefüße,schweineherz,schweineschwanz,schweineschwänzchen,nierenbraten,schweinemagen,bratenreste,panierte schnitzelchen
+lamm: chops,lammchops,lammhüfte,lammhuftsteak,lammfilets,lammhuft,lammnierstück,lammnierstücke,lammvoressen,lammragout,lammrippen,lammrippenstück,lammkoteletten,milchlammschultern,lammnieren,lammsnieren,lammhirne,lammsmilken
+wild: frischlingsfleisch,frischlingsrückenfilet,wildschweinrollbraten,wildschweinfleisch,wildscheinfleisch,wildschwein,rehnuss
+kaninchen: kanninchen
+wurst: debreziner,debreziner würste,cotechino,kochwürste,schweinswürste,regensburger,regenshurger würste,schinkenmettwürste,salame cotto,casbär-kolbasz,biroldo,grobes bratwurstbrät,kalbsbrät,grobes kalbsbrät,schweinsbrät,wurstbrät,nürnberger bratwürstl,andouille
+rohschinken: bündner fleisch,bresaola,serrano,trockenfleisch,rinderrauchfleisch,dörrfleisch,pastirma,lardo
+schinken: räucherzunge,kasslerscheiben,kassler,geräuchertes fleisch,geräuchertes rohes fleisch,geräucherte schweinerippe,schinkentranchen
+speck: speckwürfeli,bratspeckscheiben,specktranchen,bauernspecktranchen,bratspecktranchen,frühstücksseck,speckschwarte,schweineschwarte,geräucherte schweinebacke,schweinenetz
+hackfleisch: durchgedrehtes fleisch
+fisch_mager: weißlinge,festfleischige meeresfische,küchenfertige meeresfische,meeresfische,fischabschnitte,poissons de roche,fischreste,karbonadenfisch
+lachs: lachsseite,lachsschnitten,lachstranchen,lachsseite ohne haut,lachstatar
+stockfisch: bonitoflocken,getrocknete bonitoflocken,kazuobushi
+garnelen: krevetten,krevettenschwänze,graue krevetten,tiefgefrorene krevetten,crevette,krabbe,langustinen,schnecken,dutzend schnecken,frutti di mare,seegurke,seegurken
+sahne: schlagobers,schlagshne,qimiq
+saure_sahne: crème légère,creme legere,crème balance,creme balance,crème frâche,créme fraœche,crème fraœche
+joghurt: naturjogurt
+mozzarella: mozarella,mozarelline,mozarella-perlen,mini-burrata
+gouda: pressato,couda,ceddar,käsereste
+hartkaese: 
+parmesan: parmäsan,junger peccorino,peccorino
+camembert: 
+quark: ankenziger,ziger
+frischkaese: frischkäsezubereitung
+quinoa: dinkel,hafer,gerste,perlgraupen,rollgerste,graupen,hartweizen,weizen,kristallweizen körner
+haferflocken: köllnflocken,kölln,kölnflocken,köln instant flocken,kölns echte kernige,blütenzarte köllnflocken,haferfleks,knuprige haferfleks,weizenkeime,vollkornschrot
+polenta: bramata,maisgries,maisgrieß
+griess: gries
+speisestaerke: stärkepuder,sago,tapiokaperlen,tapioka
+nudeln: lasagneblätter,weiße lasagneblätter,teigblätter,trenette,tortiglioni,bucatini,pappardelle,pennette,tubettini,trockene tubettini,capelli d'angelo,capelli d`angello,fideli,hörnli,hörnle,hörnchen,maccaroni,makaroni,eiergerstel,gekochte eiergerstel,teigwaren,tagliatelli,barilla fußilini,barilla ondine,bandnudelnester,gelbe bandnudelnester,soba,vermicelli,nüdeli,chinesische nüdeli,ravioli,gefüllte teigtaschen,fusilini,mehlbüdel,gekochte klöße,fritierte mehlklöße
+couscous: cous-cous
+tortilla: strudelteig,frischer strudelteig,filoteig,phyllo-teig,strudelblätter,tk-strudelblätter,strudelteigblatt,strudelteigblätter,tk-filoteigblätter,frühlingsrollenblätter,frühlingsrollen-teigblätter,frühlingsrollen-teigstücke,won tan hüllen,won-tan-hüllen,wan tan-hüllen,wan-tan,wan tun skins,wan tun skin,teighüllen,hüllen,tiefgekühlte hüllen,tostadas,taco-schalen,weicher tortillateig
+blaetterteig: tk-blätterteigplatten,blätterteigplatten,rechteckige tk-blätterteigplatten,blätterteigkissen
+muerbeteig: kuchenteig,mürbteig,pizza-teig,grundmischung pizza-teig,pizza-fix,mürbeteigtörtchen
+kekse: biskuitboden,schokobiskuitboden,pan di spagna,löffelbiskuit,zitronentörtchen,backopladen,eiswaffeln,hippenröllchen,waffeln,sand- oder zitronenkuchen,elisenkuchen,geriebene elisenkuchen,braune gewürzkuchen,kuchenreste,diabetiker-vollkornplätz-,panettone,christstollen,mandelstuten,muffins
+brot: englischbrot,toastkrümel,brotkrumen,frische brotkrumen,weißbrotkrumen,mie de pain,canapes,fertige canapes,reiskuchen
+semmelbroesel: croutons,weißbrotcroutons
+zwieback: zwiebäcke
+puderzucker: gummibärchen,weiße marshmallows,marshmallows,kandierte veilchen,bonbons,liebesperlen,zuckerperlen,grüne zuckerperlen,silberperlen,zuckerstreusel,buntstreusel,silberstreusel,goldende zuckerkügelchen,buntes zuckerwerk,zuckerlösung,dekorschnee,puderzucekr
+schokolade_zartbitter: schokoladenstreuseln,schokoladenraspel,schokospäne,schokoladespäne,schokoladetröpfchen,couvertüre,schokoladencouverture,schoko-fettglasur,haselnussglasur,haselnußglasur,kakaoglasur,schokoladenguss,halbbitter,halbbittere,schoko-bits
+kakao: kakaopuder,kako,carob
+marzipan: marzipanmasse
+zitronenschale: sukkade,sukade,citronat,zitronat,zitranat,orangat,orangenat,pomeranzenschale,limonenschale,abgeriebene limonenschale,apfelsinenschale,getrocknete tangerinenschale,tangerinenschale,getrocknete mandarinenschale,mandarinenschale,abgeriebene limone,zitornenschale,feine orangenfrucht,angelikastengel
+pflaume: zwetschge,zwetschgenmus,pflaumenmus
+aprikose: pfirsische
+apfel: gravensteiner,bratapfelpüree,apfelkraut
+trockenobst: 
+beeren: beerenobst,erdheeren
+orange: tropischen fruchtmix
+zitrone: limone,limonen,zitronenschnitze,zitronenscheibe,zitronenachteln,zitronenspalten,limonenschnitze
+banane: bananenblüte
+tomate: tomatillos,dosentomatillos,pellati,pellati gehackt
+pastinake: teltower rübchen,weiße rübchen,navetten,junge navetten,rape,petersilienwürzel
+blumenkohl: romanesco,romanescoröschen
+brokkoli: brocoli
+staudensellerie: selleriestängel,karden
+lauch: lauchstängel,poree,porreestange,poreestangen,porreblätter,porree
+schalotte: echalottes,schaloten,cipollata,gartenzwiebelchen
+zwiebel: lauchwiebel
+knoblauch: knoblaichzehe,knobauchzehe,knochlauchzehen,koblauchzehen,knobizehe,noblauchzehen
+mais: maiskölbchen,babymaiskölbchen,mini-maiskölbchen,junge maiskölbchen
+kuerbis: kürbisse
+vanilleschote: vanillestängel,vanillepaste,vanilllepulver
+ingwer: ingwerknolle,ingwerscheibe,zitronengrasstängel,lemongras
+rhabarber: rhabarberstange,rhabarberblüten
+senf: wasabi,wasabipaste,wasabipulver,wasabi-pulver,washabi-paste,angerührtes wasabi
+spinat: weinblätter,eingelegte weinblätter,krautstiel,krautstiele,krautstielblätter,mangoldstaude
+nuesse: paranuß,paranuss,cashew-kerne,gehackte cashew-kerne,pinienkern,erdüsse,nuss
+mandeln: mandel,mandelscheiben,mandelhälften,abgezogene mandelhälften,mandel bitter,abgezogene mandeln
+walnuesse: baumnuss,baumnüsse,baumnuss-kerne,walnusskernhälften,walnußkerne
+kokosraspel: kokosspäne,cocosnusspulver,cocosnuss-pulver,cocosnuss,kokosnusspulver
+oel: sojaöl,sojaoel,salatöl,keimöl,palmöl,planzenöl,pflanzeenöl,woköl,chinaöl,chinaoel,haselnussöl,baumnussöl,nussöl,mandelöl,arganöl,limonenöl,rappsöl,paprikaöl,paprikaoel,achioteöl,trüffelöl,blütenpfefferöl,raps- oder nussöl,sonnenblumen- oder maisöl
+olivenoel: olio vergine,olivelöl,ölivenöl,olivenööl
+sesamoel: sesamsamenöl,seasamöl
+sojasosse: soya sauce,soja sauce,soya-sauce,soja-sauce,helle soya sauce,helle soja sauce,dunkle soya sauce,dunkle soja sauce,helle soyasauce,soyasauce,shoyu,ketjab asin,kecap asin,saijasauce,soja sauce pikant,pikante soja-sauce,worcester sauce,suppenwürze,speisewürze,fondor,aromat,würze
+ketchup: chilli-sauce,chilli sauce,chillisauce,chinesische chillisauce,pfefferschotensauce,tabascosauce,süß-sauer-scharfe sauce,süß-saure ingwersauce,szechuan-sauce,asia-sauce,okonomiyaki-sauce,braune okonomiyaki-sauce,schaschliksauce,pfefferminz-sauce
+hoisinsauce: gelbe bohnensauce,bohnenpaste,süße bohnenpaste,süße bohnensauce,süsze bohnensauce,scharfe bohnensauce,milde bohnenpaste,sojabohnenpaste,sojabohnenmus,braune bean-sauce,osmanthuspaste
+mayonnaise: mayonaise,mayonaisesaucen,knoblauchmayonaise
+sahnesosse: bechamelsauce,béchamelsauce,braune grundsauce,spanische sauce,demi-glace,braune fleischsauce,kalbsjus,kalbjus,bratenjus,bratensaucewürfel,saucenbinder,heller saucenbinder,dunkler saucenbinder,saucenbinder hell,dunkles saucenbindemittel,käsesahnesauce,dillsahnesauce,trüffelsauce,schokoladensauce,vanillesauce
+tomatenmark: ajvar,paprikamark,paprikapaste,paprikakrem,peperonipaste,gulaschpaste,scharfe salca,tomatenpurree,tomatenpüree,gewürztes tomatenfruchtfleisch
+pesto: oliventapenade,tapenade,alexanders würzöl,pistou,olivenpaste,schwarze olivenpaste
+wuerzpaste: sambal badjak,sambal,nam prik,nam prik phau,chilli-paste,chilipaste,pfefferpaste,d'lich
+tomatensosse: sugo,letscho
+bruehe: hühnersuppe,hühnerboullon,gemüsefonds,gemüsesud,kochsud,fleischsud,kochflüssigkeit,gemüsebrülle,dashi,dashigranulat,tomatensuppe,dolmades-flüssigkeit,weinsud
+bruehpulver: hühnerbouillonwürfel,gemüsebouillonwürfel,brühwüfel,fleischwürfel,liebig's fleischextrakt,fleischextrakt
+suppengruen: suppenbund,suppengrüm
+likoer: maraschino,grand manier
+spirituosen: armagnac,kognak,aquavit,pisco,williams christ,birnengeist,williamsbirnengeist,marc,rhum,arrak,96%igen alkohol,alkohol,apfelbrand,fernet branca,angostura,angostura-bitter,angostura bitter,angostura aromatic bitters
+wein_weiss: muscadet,gewürztraminer,moscato d'asti,weißer martini,vin santo,vinsanto,trockener vinsanto,marc de provende
+wein_rot: chianti,barolo,junger barolo,roter burgunder,beaujolais,banyuls
+bier: kristallweizen
+kaffee: teebeutel,teeblätter,teebeutel grüntee citron,mokka
+natron: natriumbikarbonat,bikarbonat,ammonium
+agar: apfelpektin,gelierfix,gel-oder gelierfix,biobin,pflanzliches bindemittel,sulzpulver,gelierzauber
+backpulver: backin,dr oetkers backin,bachpulver
+vanilleextrakt: rosenessenz,orangenblütenessenz,mandelessenz,jasminextrakt,zitronenextrakt,zitronenöl,bittermandel-backöl,rosenöl,orangback,citroback
+vanillezucker: vanillin
+puddingpulver: backfeste pudding creme,backfeste puddingcreme,dr oetker backfeste pudding creme,pudding,vanillecreme,creme chiboust
+tofu: okara,toufu,tauhu,tauhu-pok,weißer tauhu,weicher tauhu,tofuwürfel,tempeh
+bohnen_trocken: weiße perlbohnenkerne,getrocknene cannellini,cannellini
+gruene_bohnen: böhnchen
+ei: wachtelei,wachteleier,dünne omelettes
+eiweiss: eiweiá,eiweiáe,eiweisse
+hefe: hefewürfel
+kartoffel: gschwellti,kartoffelteig,topinambur
+ersatz_sonstiges: kartoffelsticks
+gemuesemix: verdura mista
+speiseeis: vanilleglace,karamellglace,orangenglacé,zimtglace
+wasser: eisstücke,eis,viel eis,zerstoßenes eis,zerstoáenes eis
+schmalz: rindertalg,talg,knochenmark
+butter: butterflöckli,butterflocken
+essig: pflaumenbalsam,alter pflaumenbalsam
+margarine: schmelzmagarine,schmelzmargarine
+marmelade: hägemark,hagebuttenmus,ungezuckertes hagebuttenmark,zwetschgensauce,süße zwetschgensauce
+radieschen: radiesli
+orangensaft: apfelgarflüssigkeit,aprikosennektar
+
+sahnesteif: sahnetorten-hilfe
+samen: mohnfüllung,tulsi-samen
+kohlrabi: kohlkrabiknolle,kohlrabiknolle
+mango: mangospalten
+gefluegelleber: pouletlebern,pouletleber,gänselebermousse,gänseleber
+kirschen: sauerkirschglas
+maronen: marroni,geschälte marroni
+spargel: spargelreste
+"""
+
+def extra_aliases():
+    """Zusätzliche Namen je Schlüssel (Schweizerdeutsch, Schreibvarianten, asiatische Zutaten …)."""
+    out = {}
+    for line in EXTRA.strip().splitlines():
+        line = line.strip()
+        if not line or line.startswith('#'):
+            continue
+        key, names = line.split(':', 1)
+        out.setdefault(key.strip(), []).extend(n.strip().lower() for n in names.split(',') if n.strip())
+    return out
 
 def parse():
     foods = []
+    extra = extra_aliases()
     for line in ROWS.strip().splitlines():
         line = line.strip()
         if not line or line.startswith('#'):
@@ -255,7 +607,7 @@ def parse():
             for u in units.split(';'):
                 k, g = u.split('=')
                 unit_map[k.strip()] = float(g)
-        aliases = [a.strip().lower() for a in (de + ',' + en).split(',') if a.strip()]
+        aliases = [a.strip().lower() for a in (de + ',' + en).split(',') if a.strip()] + extra.pop(key, [])
         # Duplikate entfernen, Reihenfolge behalten
         seen = set(); al = []
         for a in aliases:
@@ -267,6 +619,8 @@ def parse():
             "carbohydrates": v[4], "sugar": v[5], "fiber": v[6], "salt": v[7],
             "density": float(dens), "piece": float(piece), "units": unit_map, "aliases": al,
         })
+    if extra:
+        sys.exit("Zusatznamen für unbekannte Schlüssel: " + ", ".join(sorted(extra)))
     return foods
 
 if __name__ == "__main__":

@@ -57,7 +57,11 @@ QString symbolFamily(const QString &s)
     if (qobject_cast<QApplication *>(QCoreApplication::instance())) {
         static const QStringList candidates = [] {
             QStringList out;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
             const QStringList fams = QFontDatabase::families();
+#else
+            const QStringList fams = QFontDatabase().families();
+#endif
             for (const QString &f : { QStringLiteral("Segoe UI Symbol"), QStringLiteral("Segoe UI Emoji"), QStringLiteral("Apple Symbols"),
                                       QStringLiteral("DejaVu Sans"), QStringLiteral("Noto Sans Symbols"), QStringLiteral("Noto Sans Symbols2") })
                 if (fams.contains(f, Qt::CaseInsensitive)) out << f;

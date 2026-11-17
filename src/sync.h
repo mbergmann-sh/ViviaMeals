@@ -149,8 +149,11 @@ private:
     // status: HTTP-Status; false bei Netzwerkfehler
     bool request(const QString &method, const QString &action, const QMap<QString, QString> &params, const QByteArray &body,
                  int *status, QByteArray *reply);
+    bool requestOnce(const QString &method, const QString &action, const QMap<QString, QString> &params, const QByteArray &body,
+                     int *status, QByteArray *reply);
     QString m_url, m_token;
     QNetworkAccessManager *m_nam;
+    int m_retries = 0;
 };
 
 // ---------------------------------------------------------------- Verbindung einer Datenbank

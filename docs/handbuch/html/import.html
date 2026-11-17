@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Rezepte importieren – ViviaMeals – Handbuch</title><link rel="stylesheet" href="handbuch.css"></head>
 <body class="web">
-<header class="top"><span class="version">Version 0.9.5</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
+<header class="top"><span class="version">Version 0.9.19</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
 <div class="wrap"><nav class="side"><input id="suche" class="such" type="search" placeholder="Im Handbuch suchen …"><ol>
 <li><a href="index.html">Start und Inhalt</a></li>
 <li><a href="willkommen.html">Willkommen bei ViviaMeals</a>
@@ -11,7 +11,7 @@
 <li><a href="rezepte.html">Rezepte anlegen und bearbeiten</a>
 </li>
 <li class="aktiv"><a href="import.html">Rezepte importieren</a>
-<ol><li><a href="#import-ablauf">Ablauf</a></li><li><a href="#import-aufbereitung">Was beim Import passiert</a></li><li><a href="#englisch">Englische Rezepte</a></li><li><a href="#deepl">Übersetzen mit DeepL</a></li><li><a href="#umlaute">Umlaut-Korrektur</a></li><li><a href="#import-weitere">Weitere Formate</a></li></ol>
+<ol><li><a href="#import-ablauf">Ablauf</a></li><li><a href="#import-aufbereitung">Was beim Import passiert</a></li><li><a href="#englisch">Englische Rezepte</a></li><li><a href="#deepl">Übersetzen mit DeepL</a></li><li><a href="#umlaute">Umlaut-Korrektur</a></li><li><a href="#ambrosia">Ambrosia-Datenbanken</a></li><li><a href="#web-import">Rezept von einer Webseite</a></li><li><a href="#import-weitere">Weitere Formate</a></li></ol>
 </li>
 <li><a href="scannen.html">Rezepte scannen</a>
 </li>
@@ -31,11 +31,11 @@
 </li>
 </ol></nav><main>
 <h1 id="import">Rezepte importieren</h1>
-<p>ViviaMeals übernimmt Rezepte aus den verbreiteten Austauschformaten <strong>RezKonv</strong> und <strong>MealMaster</strong> – einzelne Rezepte ebenso wie Sammlungen mit Tausenden Rezepten. Dabei werden die Texte gleich aufbereitet: Zeichensatz erkennen, englische Maße umrechnen, fehlende Umlaute ergänzen, Nährwerte und Tags berechnen.</p>
+<p>ViviaMeals übernimmt Rezepte aus den verbreiteten Austauschformaten <strong>RezKonv</strong> und <strong>MealMaster</strong> – einzelne Rezepte ebenso wie Sammlungen mit Tausenden Rezepten – und direkt aus Datenbanken der Rezeptverwaltung <strong>Ambrosia</strong> (<a href="#ambrosia">Ambrosia</a>) sowie <strong>von Rezept-Webseiten</strong> über ihre Adresse (<a href="#web-import">Rezept von einer Webseite</a>). Dabei werden die Texte gleich aufbereitet: Zeichensatz erkennen, englische Maße umrechnen, fehlende Umlaute ergänzen, Nährwerte und Tags berechnen.</p>
 <h2 id="import-ablauf">Ablauf</h2>
 <ol type="1">
-<li><p><em>Datei → Import → RezKonv-Rezepte importieren …</em> bzw. <em>MealMaster-Rezepte importieren …</em> wählen.</p></li>
-<li><p>Eine oder mehrere Dateien auswählen (RezKonv: <code>.rk</code>, <code>.rkv</code>, <code>.txt</code>; MealMaster: <code>.mmf</code>, <code>.mm</code>, <code>.mxp</code>, <code>.txt</code>).</p></li>
+<li><p><em>Datei → Import → RezKonv-Rezepte importieren …</em>, <em>MealMaster-Rezepte importieren …</em> bzw. <em>Ambrosia-Datenbank importieren …</em> wählen.</p></li>
+<li><p>Eine oder mehrere Dateien auswählen (RezKonv: <code>.rk</code>, <code>.rkv</code>, <code>.txt</code>; MealMaster: <code>.mmf</code>, <code>.mm</code>, <code>.mxp</code>, <code>.txt</code>; Ambrosia: <code>.mdb</code>).</p></li>
 <li><p>Die <strong>Vorschau</strong> zeigt alle gefundenen Rezepte mit Portionen, kcal je Portion, Sprache und Status.</p>
 <figure>
 <img src="bilder/import-vorschau.png" alt="Import-Vorschau mit erkannten Doubletten" />
@@ -113,6 +113,42 @@
 <li>Rezepte, die schon echte Umlaute enthalten, bleiben unangetastet.</li>
 </ul>
 <p>Die Korrektur ist in den Einstellungen abschaltbar. Für bereits vorhandene Rezepte gibt es <em>Extras → Umlaute in allen Rezepten korrigieren …</em> (mit Beispielen und Rückfrage) und im Editor die Schaltfläche <strong>Umlaute korrigieren</strong>. Ein seltener Fehlgriff, etwa bei einem Eigennamen, lässt sich im Editor von Hand zurücknehmen.</p>
+<h2 id="ambrosia">Ambrosia-Datenbanken</h2>
+<p>Die Schweizer Rezeptverwaltung <em>Ambrosia</em> speichert ihre Rezepte in einer Microsoft-Access-Datenbank (<code>.mdb</code>, z. B. eine exportierte Rezeptsammlung oder die Arbeitsdatenbank des Programms). <em>Datei → Import → Ambrosia-Datenbank importieren …</em> liest sie direkt – ohne Access, ohne Treiber und auch unter Linux und macOS. Eine <code>.mdb</code>-Datei lässt sich auch auf das Hauptfenster ziehen.</p>
+<p>Übernommen werden:</p>
+<ul>
+<li><strong>Titel</strong>, <strong>Ertrag</strong> (Portionen, Personen, Stück …) und <strong>Zubereitungszeit</strong> (Vorbereitung + Kochzeit),</li>
+<li><strong>Zutaten</strong> mit Menge, Einheit und Verarbeitung („fein gehackt“); Trennzeilen werden zu Zwischenüberschriften, Bruchteile großer Einheiten lesbar („0,2 kg“ → „200 g“),</li>
+<li>die <strong>Zubereitung</strong> mit Aufzählungen sowie fett, kursiv und unterstrichen (<a href="rezepte.html#formatieren">Zubereitung formatieren</a>); fehlt sie, werden die Arbeitsschritte an den Zutaten zu einer nummerierten Liste,</li>
+<li><strong>Notizen</strong> und <strong>Weintipp</strong> als eigene Abschnitte am Ende der Zubereitung,</li>
+<li><strong>Kategorien</strong> als Tags, die <strong>Quelle</strong> (Zeitschrift bzw. Buch mit Ausgabe und Seite),</li>
+<li>das <strong>Rezeptfoto</strong>.</li>
+</ul>
+<p>Danach läuft alles wie bei den anderen Formaten: Vorschau, Doubletten-Abfrage, Nährwerte und Tags. Große Datenbanken zeigen den Fortschritt je Rezept und lassen sich abbrechen. Gelöschte Rezepte und Vorlagen werden übersprungen.</p>
+<p>Ambrosia speichert die Einheiten nur als Nummern; die Liste dazu steckt im Programm selbst und fehlt in exportierten Datenbanken. ViviaMeals kennt die gebräuchlichen (g, kg, ml, l, TL, EL, Prise, Bund, Scheibe, Zehe, „etwas“, „nach Belieben“). Ist eine Nummer unbekannt, wird die Menge ohne Einheit übernommen und die Vorschau nennt die Nummer mit einem Beispiel – bitte im Editor ergänzen. Menüs, Einkaufslisten, Kochbücher und Adressen aus Ambrosia werden nicht übernommen.</p>
+<h2 id="web-import">Rezept von einer Webseite</h2>
+<p><em>Datei → Import → Rezept von einer Webseite …</em> (Strg+Umschalt+W, in der Werkzeugleiste „Webseite“) übernimmt ein Rezept über die Adresse seiner Seite. Kopieren Sie die Adresse aus dem Browser – steht beim Öffnen eine Adresse in der Zwischenablage, schlägt ViviaMeals sie gleich vor. Für mehrere Rezepte geben Sie eine Adresse je Zeile ein.</p>
+<figure>
+<img src="bilder/web-import.png" alt="Rezept von einer Webseite übernehmen" />
+<figcaption aria-hidden="true">Rezept von einer Webseite übernehmen</figcaption>
+</figure>
+<p>Fast alle Rezeptseiten (Blogs mit Rezept-Plugin, Kochportale, Zeitschriften) beschreiben ihr Rezept für Suchmaschinen maschinenlesbar nach <em>schema.org</em> – ViviaMeals liest genau diese Angaben:</p>
+<ul>
+<li><strong>Titel</strong>, <strong>Portionen</strong>, <strong>Zubereitungszeit</strong>,</li>
+<li><strong>Zutaten</strong> – sie werden wie beim Dateiimport zerlegt, englische Maße umgerechnet und die Nährwerte berechnet,</li>
+<li>die <strong>Zubereitung</strong> als nummerierte Schritte, Abschnitte der Seite („Für den Teig“) als Überschriften,</li>
+<li><strong>Kategorie</strong> und <strong>Küche</strong> als Tags,</li>
+<li>das <strong>Rezeptfoto</strong> (auf höchstens 1000 Pixel verkleinert),</li>
+<li>als <strong>Quelle</strong> Autor, Website und Adresse.</li>
+</ul>
+<p>Englische Seiten werden übersetzt wie andere englische Rezepte (<a href="#englisch">Englische Rezepte</a>, <a href="#deepl">DeepL</a>).</p>
+<p>Bei <strong>einer</strong> Adresse öffnet sich das Rezept danach im Editor zur Kontrolle (abschaltbar); erst <em>Übernehmen</em> im Editor speichert es. Bei <strong>mehreren</strong> Adressen werden die Rezepte nach <em>Fertig</em> direkt gespeichert, Titel, die es schon gibt, übersprungen. Die Liste im Dialog zeigt für jede Seite, ob es geklappt hat.</p>
+<p>Abgerufen werden nur die angegebenen Seiten und ihr Rezeptfoto – ViviaMeals folgt keinen weiteren Links und durchsucht keine Websites. Die Rezepte sind für Ihre eigene Sammlung gedacht; Texte und Fotos gehören den Betreibern der Seiten, die Quelle bleibt deshalb beim Rezept vermerkt.</p>
+<p><strong>Wenn es nicht klappt:</strong></p>
+<ul>
+<li><em>„kein maschinenlesbares Rezept gefunden“</em> – die Seite bietet die Angaben nicht an. Dann bleibt Abtippen oder ein Bildschirmfoto der Seite mit <em>Rezept aus Bild oder Foto erkennen</em> (<a href="scannen.html#scannen">Rezepte scannen</a>).</li>
+<li><em>„Die Website verweigert den Abruf durch Programme“</em> – manche Websites lassen nur Browser zu. Öffnen Sie die Seite im Browser, speichern Sie sie (Strg+S, „Webseite, nur HTML“) und wählen Sie im Dialog <strong>Gespeicherte Seite öffnen …</strong>. Die Adresse der Seite wird dabei aus der Datei übernommen.</li>
+</ul>
 <h2 id="import-weitere">Weitere Formate</h2>
 <ul>
 <li><em>Datei → Import → ViviaMeals-Rezept (.vmr) importieren …</em> – einzelne Rezeptdateien, z. B. per E-Mail erhalten oder aus einer Sicherungskopie.</li>
@@ -121,5 +157,5 @@
 <li><em>Datei → Import → Rezept scannen …</em> – gedruckte Rezepte (<a href="scannen.html#scannen">Rezepte scannen</a>).</li>
 </ul>
 <nav class="pager"><span><a href="rezepte.html">← Rezepte anlegen und bearbeiten</a></span><span class="weiter"><a href="scannen.html">Rezepte scannen →</a></span></nav></main></div>
-<footer>ViviaMeals 0.9.5 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
+<footer>ViviaMeals 0.9.19 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
 </body></html>

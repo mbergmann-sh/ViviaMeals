@@ -204,6 +204,18 @@ QString RecipeDb::fileFor(const QString &id) const
     return QDir(m_folder).filePath(QStringLiteral("%1/%2.vmr").arg(QLatin1String(kRecipes), id));
 }
 
+QString RecipeDb::recipesFolder() const
+{
+    return QDir(m_folder).filePath(QLatin1String(kRecipes));
+}
+
+void RecipeDb::reindex()
+{
+    if (!isOpen()) return;
+    rebuildIndex();
+    emit changed();
+}
+
 void RecipeDb::rebuildIndex()
 {
     auto report = [this](const QString &text, int done, int total) {

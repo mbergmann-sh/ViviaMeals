@@ -86,7 +86,14 @@ public:
         const int side = qMin(size.width(), size.height());
         return QSize(side, side);
     }
-    QList<QSize> availableSizes(QIcon::Mode, QIcon::State) override { return { { 16, 16 }, { 20, 20 }, { 24, 24 }, { 32, 32 }, { 48, 48 } }; }
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QList<QSize> availableSizes(QIcon::Mode, QIcon::State) override
+#else
+    QList<QSize> availableSizes(QIcon::Mode, QIcon::State) const override
+#endif
+    {
+        return { { 16, 16 }, { 20, 20 }, { 24, 24 }, { 32, 32 }, { 48, 48 } };
+    }
     QIconEngine *clone() const override { return new SvgIconEngine(*this); }
     QString key() const override { return QStringLiteral("ViviaMealsSvg"); }
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)

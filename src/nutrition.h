@@ -28,6 +28,8 @@ void analyze(Recipe &r);
 QStringList suggestTags(const Recipe &r);
 // Vorschläge übernehmen und widersprüchliche Tags entfernen (z. B. „vegan“ bei Fleisch)
 void applyTagSuggestions(Recipe &r);
+// enthält Fleisch, Fisch, Meeresfrüchte, Gelatine oder tierische Würzmittel (Fischsauce …) – nicht vegetarisch
+bool containsAnimal(const Recipe &r);
 
 // Referenzmengen für Erwachsene (EU-Lebensmittelinformationsverordnung, Anhang XIII)
 Nutrients referenceIntake();

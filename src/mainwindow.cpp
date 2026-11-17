@@ -13,6 +13,12 @@
 #include "duplicatesdialog.h"
 #include "assistantdialog.h"
 #include "editordialog.h"
+#include "dbcheckdialog.h"
+#include "license.h"
+#include "registrationdialog.h"
+#include "kitchenglossarywindow.h"
+#include "maintenancewindow.h"
+#include "webimportdialog.h"
 #include "exportdialogs.h"
 #include "fooddialog.h"
 #include "fridgedialog.h"
@@ -46,6 +52,8 @@
 #include <QRandomGenerator>
 #include <QRegularExpression>
 #include <QApplication>
+#include <QCoreApplication>
+#include <QCryptographicHash>
 #include <QCloseEvent>
 #include <QCheckBox>
 #include <QComboBox>
@@ -192,6 +200,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
     buildMenus();
     buildToolBar();
+    updateComfortTips();
 
     auto *filterTimer = new QTimer(this);
     filterTimer->setSingleShot(true);
@@ -285,6 +294,16 @@ void MainWindow::buildMenus()
                        [this] { importFormat(Importers::Format::MealMaster); });
     a->setObjectName(QStringLiteral("actImportMm"));
     m_needDb << a;
+    a = imp->addAction(Icons::get(QStringLiteral("import-ambrosia")), tr("&Ambrosia-Datenbank importieren …"), this,
+                       [this] { importFormat(Importers::Format::Ambrosia); });
+    a->setObjectName(QStringLiteral("actImportAmbrosia"));
+    a->setStatusTip(tr("Rezepte aus einer Datenbank der Rezeptverwaltung Ambrosia (.mdb) übernehmen – mit Fotos, Kategorien und Quellen"));
+    m_needDb << a;
+    a = imp->addAction(Icons::get(QStringLiteral("web-import")), tr("Rezept von einer &Webseite …"), this, &MainWindow::importWeb);
+    a->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_W));
+    a->setObjectName(QStringLiteral("actImportWeb"));
+    a->setStatusTip(tr("Ein Rezept über die Adresse seiner Webseite übernehmen – mit Zutaten, Zubereitung, Foto und Quelle"));
+    m_needDb << a;
     imp->addSeparator();
     a = imp->addAction(Icons::get(QStringLiteral("scan")), tr("Rezept &scannen …"), this, [this] { scanRecipe(false); });
     a->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_S));
@@ -293,6 +312,7 @@ void MainWindow::buildMenus()
     m_needDb << a;
     a = imp->addAction(Icons::get(QStringLiteral("ocr")), tr("Rezept aus &Bild oder Foto erkennen …"), this, [this] { scanRecipe(true); });
     a->setObjectName(QStringLiteral("actScanImage"));
+    a->setStatusTip(tr("Ein Rezept aus einer Bilddatei oder einem Foto per Texterkennung übernehmen"));
     m_needDb << a;
     imp->addSeparator();
     a = imp->addAction(Icons::get(QStringLiteral("import")), tr("Alte ViviaMeals-&Liste (.vtm) importieren …"), this,
@@ -321,6 +341,7 @@ void MainWindow::buildMenus()
     QMenu *exp = file->addMenu(Icons::get(QStringLiteral("web")), tr("&Export"));
     a = exp->addAction(Icons::get(QStringLiteral("web")), tr("Als &Website exportieren …"), this, &MainWindow::exportWebsite);
     a->setObjectName(QStringLiteral("actWeb"));
+    a->setStatusTip(tr("Die Rezeptsammlung als Website (HTML5/PHP) mit Menüs und Suche exportieren"));
     m_needDb << a;
     a = exp->addAction(Icons::get(QStringLiteral("tex")), tr("Als &LaTeX-Datei exportieren …"), this, &MainWindow::exportLatex);
     a->setObjectName(QStringLiteral("actTex"));
@@ -334,6 +355,7 @@ void MainWindow::buildMenus()
     });
     a = exp->addAction(Icons::get(QStringLiteral("odt")), tr("Als Libre&Office-Writer-Datei (.odt) exportieren …"), this, &MainWindow::exportOdt);
     a->setObjectName(QStringLiteral("actOdt"));
+    a->setStatusTip(tr("Das gewählte Rezept als LibreOffice-Writer-Datei exportieren"));
     m_needRecipe << a;
     a = exp->addAction(Icons::get(QStringLiteral("save")), tr("Als ViviaMeals-Rezept (.&vmr) speichern …"), this, &MainWindow::exportVmr);
     m_needRecipe << a;
@@ -413,14 +435,38 @@ void MainWindow::buildMenus()
     a = extras->addAction(Icons::get(QStringLiteral("nutrition")), tr("&Nährwerttabelle …"), this, &MainWindow::openFoodTable);
     a = extras->addAction(Icons::get(QStringLiteral("add")), tr("Eigenes &Lebensmittel anlegen …"), this, &MainWindow::newFood);
     a->setStatusTip(tr("Assistent für Fertigprodukte und andere Lebensmittel mit den Nährwerten von der Verpackung"));
-    a = extras->addAction(Icons::get(QStringLiteral("nutrition")), tr("Zutaten &ohne Nährwerte …"), this, &MainWindow::missingFoods);
-    a->setStatusTip(tr("Alle Zutaten der Datenbank ohne Eintrag in der Nährwerttabelle auflisten, anlegen oder zuordnen"));
+    a = extras->addAction(Icons::get(QStringLiteral("nutrition")), tr("Datenbank nach &fehlenden Lebensmitteln durchsuchen …"), this, &MainWindow::missingFoods);
+    a->setObjectName(QStringLiteral("actMissingFoods"));
+    a->setStatusTip(tr("Alle Rezepte nach Zutaten ohne Eintrag in der Nährwerttabelle durchsuchen – als Tabelle zum Anlegen, Zuordnen und "
+                       "Bearbeiten, auch als Textdatei speicherbar"));
     m_needDb << a;
+    a = extras->addAction(Icons::get(QStringLiteral("maintain-nutrition")), tr("Rezepte ohne &Nährwerte bearbeiten …"), this,
+                          [this] { showMaintenance(MaintenanceWindow::MissingNutrition); });
+    a->setObjectName(QStringLiteral("actMaintNutrition"));
+    a->setStatusTip(tr("Liste der Rezepte ohne oder mit unvollständigen Nährwerten neben dem Hauptfenster – Klick öffnet den Editor"));
+    m_needDb << a;
+    a = extras->addAction(Icons::get(QStringLiteral("maintain-ingredients")), tr("Rezepte ohne &Zutatenliste bearbeiten …"), this,
+                          [this] { showMaintenance(MaintenanceWindow::MissingIngredients); });
+    a->setObjectName(QStringLiteral("actMaintIngredients"));
+    a->setStatusTip(tr("Liste der Rezepte ohne Zutaten neben dem Hauptfenster – Klick öffnet den Editor"));
+    m_needDb << a;
+    extras->addSeparator();
     a = extras->addAction(Icons::get(QStringLiteral("duplicates")), tr("&Doubletten suchen …"), this, &MainWindow::findDuplicates);
     a->setObjectName(QStringLiteral("actDuplicates"));
     a->setStatusTip(tr("Rezepte mit gleichem oder ähnlichem Titel bzw. gleichen Zutaten finden, vergleichen, zusammenführen und löschen"));
     m_needDb << a;
-    a = extras->addAction(Icons::get(QStringLiteral("refresh")), tr("Nährwerte aller Rezepte neu &berechnen"), this, &MainWindow::recalcAll);
+    a = extras->addAction(Icons::get(QStringLiteral("db-check")), tr("Datenbank &prüfen …"), this, [this] {
+        DbCheckDialog d(this);
+        connect(&d, &DbCheckDialog::openRecipe, this, [this](const QString &id) { selectRecipe(id); });
+        d.exec();
+    });
+    a->setObjectName(QStringLiteral("actDbCheck"));
+    a->setStatusTip(tr("Unlesbare Dateien, leere Rezepte sowie kaputte und übergroße Fotos finden und auf Wunsch beheben"));
+    m_needDb << a;
+    a = extras->addAction(Icons::get(QStringLiteral("refresh")), tr("Alle Rezepte mit der Lebensmitteldatenbank &abgleichen …"), this, [this] { matchAll(true); });
+    a->setObjectName(QStringLiteral("actMatchAll"));
+    a->setStatusTip(tr("Zutaten aller Rezepte neu zuordnen, Nährwerte neu berechnen und Tags (vegetarisch/vegan, Fisch, Fleisch, "
+                       "Nährwert- und Saison-Tags) korrigieren"));
     m_needDb << a;
     a = extras->addAction(Icons::get(QStringLiteral("tag")), tr("&Mahlzeit- und Nährwert-Tags für alle Rezepte ergänzen …"), this, &MainWindow::mealTagsAll);
     a->setStatusTip(tr("Frühstück, Hauptgericht, Zwischenmahlzeit, Dessert, Süßspeise, Backen sowie eiweißreich, kalorienarm, fettarm, "
@@ -459,7 +505,21 @@ void MainWindow::buildMenus()
         a->setShortcuts(keys);
     }
     a->setStatusTip(tr("Das Handbuch zu ViviaMeals öffnen (Windows: Hilfedatei, sonst im Browser)"));
+    a = help->addAction(Icons::get(QStringLiteral("glossary")), tr("Küchen-&Glossar …"), this, [this] { showGlossary(); });
+    a->setObjectName(QStringLiteral("actGlossary"));
+    a->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_G));
+    a->setStatusTip(tr("Fachbegriffe der gehobenen Küche nachschlagen – von „Arrosieren“ bis „Ziselieren“"));
+    a = help->addAction(Icons::get(QStringLiteral("tip")), tr("&Tipp des Tages …"), this, [this] { showTipOfTheDay(false); });
+    a->setObjectName(QStringLiteral("actTip"));
+    a->setStatusTip(tr("Einen zufälligen Begriff aus dem Küchen-Glossar zeigen"));
     help->addSeparator();
+    a = help->addAction(Icons::get(QStringLiteral("key")), tr("&Registrierung eingeben …"), this, [this] {
+        RegistrationDialog d(this);
+        d.exec();
+        updateComfortTips();
+    });
+    a->setObjectName(QStringLiteral("actRegister"));
+    a->setStatusTip(tr("Registrierungsschlüssel eingeben – schaltet die Komfortfunktionen frei"));
     help->addAction(Icons::get(QStringLiteral("info")), tr("&Über ViviaMeals …"), this, &MainWindow::about);
     help->addAction(tr("Über &Qt …"), qApp, &QApplication::aboutQt);
     updateRecentMenu();
@@ -485,6 +545,7 @@ void MainWindow::buildToolBar()
     tb->addSeparator();
     add("actImportRk", tr("RezKonv"), false);
     add("actImportMm", tr("MealMaster"), false);
+    add("actImportWeb", tr("Webseite"), false);
     add("actScan", tr("Scannen"), true);
     add("actWeb", tr("Website"), false);
     add("actTex", tr("LaTeX"), false);
@@ -511,7 +572,7 @@ void MainWindow::updateActions()
     if (m_texAction) {
         const LatexExport::Installation tex = LatexExport::findInstallation();
         m_texAction->setEnabled(rec && tex.found());
-        const QString tip = tex.found() ? tr("Rezept als LaTeX-Datei exportieren (%1: %2)").arg(tex.name, tex.program)
+        const QString tip = tex.found() ? tr("Rezept als LaTeX-Datei exportieren (%1: %2)").arg(tex.name, tex.program) + Registration::statusSuffix()
                                         : tr("Keine LaTeX-Installation gefunden – bitte TeX Live (tug.org/texlive) oder MiKTeX (miktex.org) installieren.");
         m_texAction->setToolTip(tip);
         m_texAction->setStatusTip(tip);
@@ -575,9 +636,42 @@ bool MainWindow::openDatabase(const QString &path, bool quiet)
     if (RecipeDb::instance().count() == 0)
         m_view->showMessage(tr("Die Datenbank „%1“ ist leer").arg(RecipeDb::instance().name()),
                             tr("Legen Sie mit <b>Datei → Neues Rezept</b> ein Rezept an oder importieren Sie Rezepte im "
-                               "RezKonv- oder MealMaster-Format (<b>Datei → Import</b>)."));
+                               "RezKonv- oder MealMaster-Format oder aus Ambrosia (<b>Datei → Import</b>)."));
     updateActions();
+    // neue Fassung der eingebauten Lebensmitteldatenbank: Abgleich der vorhandenen Rezepte anbieten
+    if (isVisible()) QTimer::singleShot(800, this, [this] { checkFoodTableChanged(); });
+    else m_foodCheckAfterShow = true;
     return true;
+}
+
+void MainWindow::checkFoodTableChanged()
+{
+    RecipeDb &db = RecipeDb::instance();
+    if (!db.isOpen() || QCoreApplication::applicationName().endsWith(QLatin1String("-Demo"))) return;
+    if (m_syncing) {   // erst den laufenden Abgleich beenden lassen
+        QTimer::singleShot(2000, this, [this] { checkFoodTableChanged(); });
+        return;
+    }
+    const QString stamp = FoodTable::instance().builtinStamp();
+    if (stamp.isEmpty()) return;
+    // je Datenbank gemerkt (Schlüssel aus dem Ordnerpfad)
+    const QString key = QStringLiteral("foods/stamp/")
+                        + QString::fromLatin1(QCryptographicHash::hash(QFileInfo(db.folder()).absoluteFilePath().toUtf8(), QCryptographicHash::Sha1).toHex().left(16));
+    QSettings s;
+    if (s.value(key).toString() == stamp) return;
+    s.setValue(key, stamp);   // nur einmal fragen, auch bei „Später“
+    if (db.count() == 0) return;
+    const auto answer = QMessageBox::question(
+        this, tr("Lebensmitteldatenbank erweitert"),
+        tr("Mit dieser ViviaMeals-Version wurde die eingebaute Lebensmitteldatenbank erweitert "
+           "(z. B. viele weitere Fischarten und Muscheln).<br><br>"
+           "Sollen die %n Rezepte der Datenbank jetzt neu abgeglichen werden? Dabei werden die Nährwerte neu berechnet "
+           "und falsche Tags berichtigt – etwa „vegetarisch“ bei Gerichten mit Fisch oder Meeresfrüchten.<br><br>"
+           "<small>Das dauert bei großen Datenbanken einige Minuten und geht jederzeit auch über "
+           "<i>Extras → Alle Rezepte mit der Lebensmitteldatenbank abgleichen</i>.</small>",
+           nullptr, db.count()),
+        QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+    if (answer == QMessageBox::Yes) matchAll(true);
 }
 
 bool MainWindow::ensureDatabase()
@@ -808,7 +902,7 @@ void MainWindow::selectRecipe(const QString &id)
 
 void MainWindow::openFiles(const QStringList &files)
 {
-    QStringList vmr, rk, mm, vtm, other;
+    QStringList vmr, rk, mm, vtm, ambrosia, other;
     for (const QString &f : files) {
         const QFileInfo fi(f);
         const QString suf = fi.suffix().toLower();
@@ -828,9 +922,10 @@ void MainWindow::openFiles(const QStringList &files)
         else if (suf == QLatin1String("rk") || suf == QLatin1String("rkv")) rk << fi.absoluteFilePath();
         else if (suf == QLatin1String("mmf") || suf == QLatin1String("mm") || suf == QLatin1String("mxp")) mm << fi.absoluteFilePath();
         else if (suf == QLatin1String("vtm")) vtm << fi.absoluteFilePath();
+        else if (suf == QLatin1String("mdb")) ambrosia << fi.absoluteFilePath();
         else other << fi.absoluteFilePath();
     }
-    if (vmr.isEmpty() && rk.isEmpty() && mm.isEmpty() && vtm.isEmpty() && other.isEmpty()) return;
+    if (vmr.isEmpty() && rk.isEmpty() && mm.isEmpty() && vtm.isEmpty() && ambrosia.isEmpty() && other.isEmpty()) return;
     if (!RecipeDb::instance().isOpen() && !ensureDatabase()) return;
     // Textdateien unbekannter Endung: Format am Inhalt erkennen
     for (const QString &f : other) {
@@ -846,6 +941,7 @@ void MainWindow::openFiles(const QStringList &files)
     if (!rk.isEmpty()) take(ImportFlow::run(this, Importers::Format::RezKonv, rk));
     if (!mm.isEmpty()) take(ImportFlow::run(this, Importers::Format::MealMaster, mm));
     if (!vtm.isEmpty()) take(ImportFlow::run(this, Importers::Format::Vtm, vtm));
+    if (!ambrosia.isEmpty()) take(ImportFlow::run(this, Importers::Format::Ambrosia, ambrosia));
     for (const QString &f : vmr) {
         Recipe r;
         QString err;
@@ -917,9 +1013,106 @@ void MainWindow::saveNewRecipe(const Recipe &r, const QString &title)
     else selectRecipe(nr.id);
 }
 
+void MainWindow::importWeb()
+{
+    RecipeDb &db = RecipeDb::instance();
+    if (!db.isOpen()) return;
+    WebImportDialog d(this);
+    if (d.exec() != QDialog::Accepted) return;
+    QList<Recipe> list = d.recipes();
+    if (list.isEmpty()) return;
+    if (list.size() == 1) {
+        if (d.review()) {
+            EditorDialog e(list.first(), this);
+            if (e.exec() != QDialog::Accepted) return;
+            saveNewRecipe(e.recipe(), tr("Rezept von einer Webseite"));
+        } else {
+            saveNewRecipe(list.first(), tr("Rezept von einer Webseite"));
+        }
+        return;
+    }
+    // mehrere: direkt speichern, vorhandene Titel überspringen
+    int saved = 0;
+    QStringList skipped;
+    QString first;
+    db.beginBatch();
+    for (Recipe &r : list) {
+        if (!db.duplicatesOf(r).isEmpty()) {
+            skipped << r.title;
+            continue;
+        }
+        if (db.save(r)) {
+            ++saved;
+            if (first.isEmpty()) first = r.id;
+        }
+    }
+    db.endBatch();
+    if (!first.isEmpty()) selectRecipe(first);
+    QString msg = saved == 1 ? tr("1 Rezept übernommen.") : tr("%1 Rezepte übernommen.").arg(saved);
+    if (!skipped.isEmpty())
+        msg += QStringLiteral("\n\n") + tr("Schon vorhanden und übersprungen: %1").arg(skipped.join(QStringLiteral(", ")));
+    QMessageBox::information(this, tr("Rezept von einer Webseite"), msg);
+}
+
+void MainWindow::showGlossary(const QString &term)
+{
+    if (!m_glossary) {
+        m_glossary = new GlossaryWindow(this);
+        m_glossary->show();
+    } else {
+        m_glossary->showNormal();
+    }
+    m_glossary->raise();
+    m_glossary->activateWindow();
+    if (!term.isEmpty()) m_glossary->showTerm(term);
+}
+
+void MainWindow::showTipOfTheDay(bool atStartup)
+{
+    if (atStartup) {
+        if (!QSettings().value(QStringLiteral("ui/tipOfTheDay"), true).toBool()) return;
+        if (QCoreApplication::applicationName().endsWith(QLatin1String("-Demo"))) return;   // Demo- und Bildschirmfoto-Modus
+        // erst, wenn Start-Hinweise und Rückfragen beantwortet sind
+        if (QApplication::activeModalWidget() || !isVisible()) {
+            QTimer::singleShot(800, this, [this] { showTipOfTheDay(true); });
+            return;
+        }
+    }
+    if (m_tip) {
+        m_tip->raise();
+        m_tip->activateWindow();
+        return;
+    }
+    m_tip = new TipOfTheDayDialog(this);
+    connect(m_tip, &TipOfTheDayDialog::openInGlossary, this, [this](const QString &t) { showGlossary(t); });
+    m_tip->show();
+    m_tip->raise();
+    m_tip->activateWindow();
+}
+
+void MainWindow::showMaintenance(int mode)
+{
+    QPointer<MaintenanceWindow> &w = mode == MaintenanceWindow::MissingNutrition ? m_maintNutrition : m_maintIngredients;
+    if (w) {   // schon offen: nach vorn holen
+        w->showNormal();
+        w->raise();
+        w->activateWindow();
+        return;
+    }
+    w = new MaintenanceWindow(MaintenanceWindow::Mode(mode), this);
+    connect(w, &MaintenanceWindow::editRequested, this, [this](const QString &id) {
+        selectRecipe(id);
+        if (currentId() == id) editRecipe();
+    });
+    w->placeBesideMain();
+    w->show();
+    w->raise();
+}
+
 void MainWindow::scanRecipe(bool fromFile)
 {
     if (!RecipeDb::instance().isOpen()) return;
+    if (!Registration::require(this, fromFile ? tr("Rezept aus Bild oder Foto erkennen") : tr("Rezept scannen"))) return;
     ScanDialog scan(fromFile ? ScanDialog::StartOpen : ScanDialog::StartScan, this);
     if (scan.exec() != QDialog::Accepted) return;
     EditorDialog d(scan.recipe(), this);
@@ -973,6 +1166,7 @@ void MainWindow::importFormat(Importers::Format f)
 
 void MainWindow::exportWebsite()
 {
+    if (!Registration::require(this, tr("Export als Website"))) return;
     WebsiteExportDialog d(visibleIds(), this);
     d.exec();
 }
@@ -980,6 +1174,7 @@ void MainWindow::exportWebsite()
 void MainWindow::exportLatex()
 {
     if (!m_view->hasRecipe()) return;
+    if (!Registration::require(this, tr("Export als LaTeX-Datei"))) return;
     LatexExportDialog d(m_view->recipe(), this);
     d.exec();
 }
@@ -987,6 +1182,7 @@ void MainWindow::exportLatex()
 void MainWindow::exportOdt()
 {
     if (!m_view->hasRecipe()) return;
+    if (!Registration::require(this, tr("Export als LibreOffice-Writer-Datei"))) return;
     const Recipe &r = m_view->recipe();
     QSettings s;
     const QString dir = s.value(QStringLiteral("export/odtDir"), QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)).toString();
@@ -1055,18 +1251,25 @@ void MainWindow::mealTagsAll()
     RecipeDb &db = RecipeDb::instance();
     QList<Recipe> todo;
     QHash<QString, int> added, removed;
-    for (const RecipeSummary &s : db.summaries()) {
-        Recipe r;
-        if (!db.loadLight(s.id, &r) || Nutrition::isMenu(r)) continue;   // ohne Foto: schneller, wenig Speicher
-        const QStringList before = r.tags;
-        MealTypes::applyTags(r);
-        MealTypes::applyNutrientTags(r);
-        if (r.tags == before) continue;
-        for (const QString &t : r.tags)
-            if (!before.contains(t)) added[t]++;
-        for (const QString &t : before)
-            if (!r.tags.contains(t)) removed[t]++;
-        todo << r;
+    {
+        const QList<RecipeSummary> all = db.summaries();
+        BusyProgress prog(this, tr("Mahlzeit- und Nährwert-Tags ermitteln"), int(all.size()));
+        int n = 0;
+        for (const RecipeSummary &s : all) {
+            if (!prog.step(n, tr("Rezept %1 von %2: %3").arg(n + 1).arg(all.size()).arg(s.title))) return;
+            ++n;
+            Recipe r;
+            if (!db.loadLight(s.id, &r) || Nutrition::isMenu(r)) continue;   // ohne Foto: schneller, wenig Speicher
+            const QStringList before = r.tags;
+            MealTypes::applyTags(r);
+            MealTypes::applyNutrientTags(r);
+            if (r.tags == before) continue;
+            for (const QString &t : r.tags)
+                if (!before.contains(t)) added[t]++;
+            for (const QString &t : before)
+                if (!r.tags.contains(t)) removed[t]++;
+            todo << r;
+        }
     }
     if (todo.isEmpty()) {
         QMessageBox::information(this, tr("Tags ergänzen"), tr("Alle Rezepte haben bereits passende Mahlzeit- und Nährwert-Tags."));
@@ -1083,9 +1286,7 @@ void MainWindow::mealTagsAll()
                                   .arg(lines.join(QLatin1Char('\n'))))
         != QMessageBox::Yes)
         return;
-    db.beginBatch();
-    for (Recipe &r : todo) db.saveLight(r);
-    db.endBatch();
+    saveAllWithProgress(todo, tr("Tags speichern"));
     statusBar()->showMessage(tr("Tags für %1 Rezepte aktualisiert.").arg(todo.size()), 5000);
     showCurrent();
 }
@@ -1129,9 +1330,7 @@ void MainWindow::seasonTagsAll()
                                   .arg(lines.join(QLatin1Char('\n'))))
         != QMessageBox::Yes)
         return;
-    db.beginBatch();
-    for (Recipe &r : todo) db.saveLight(r);
-    db.endBatch();
+    saveAllWithProgress(todo, tr("Saison-Tags speichern"));
     statusBar()->showMessage(tr("Saison-Tags für %1 Rezepte aktualisiert.").arg(todo.size()), 5000);
     showCurrent();
 }
@@ -1175,49 +1374,116 @@ void MainWindow::findDuplicates()
     }
 }
 
-void MainWindow::recalcAll()
+void MainWindow::saveAllWithProgress(QList<Recipe> &recipes, const QString &title)
 {
     RecipeDb &db = RecipeDb::instance();
+    BusyProgress prog(this, title, int(recipes.size()), false);
+    db.beginBatch();
+    int i = 0;
+    for (Recipe &r : recipes) {
+        prog.step(i, tr("Rezept %1 von %2: %3").arg(i + 1).arg(recipes.size()).arg(r.title));
+        ++i;
+        db.saveLight(r);
+    }
+    db.endBatch();
+}
+
+void MainWindow::recalcAll()
+{
+    matchAll(false);
+}
+
+void MainWindow::matchAll(bool report)
+{
+    RecipeDb &db = RecipeDb::instance();
+    if (!db.isOpen()) return;
     QStringList ids;
     for (const RecipeSummary &s : db.summaries()) ids << s.id;
-    BusyProgress prog(this, tr("Kalorien und Nährwerte neu berechnen"), int(ids.size()));
-    db.beginBatch();
-    int n = 0;
+    QList<Recipe> incomplete;   // Rezepte mit Zutaten ohne Lebensmittel (für die Durchsicht danach)
+    int n = 0, changed = 0, nutritionChanged = 0, dietFixed = 0, seasonChanged = 0, tagsChanged = 0, tidied = 0;
     bool canceled = false;
-    int changed = 0;
-    for (const QString &id : ids) {
-        Recipe r;
-        if (!db.loadLight(id, &r)) continue;   // Foto wird zum Rechnen nicht gebraucht
-        if (!prog.step(n, tr("Rezept %1 von %2: %3").arg(n + 1).arg(ids.size()).arg(r.title))) {
-            canceled = true;
-            break;
+    {
+        BusyProgress prog(this, tr("Rezepte mit der Lebensmitteldatenbank abgleichen"), int(ids.size()));
+        db.beginBatch();
+        for (const QString &id : ids) {
+            Recipe r;
+            if (!db.loadLight(id, &r)) continue;   // Foto wird zum Rechnen nicht gebraucht
+            if (!prog.step(n, tr("Rezept %1 von %2: %3").arg(n + 1).arg(ids.size()).arg(r.title))) {
+                canceled = true;
+                break;
+            }
+            // Zeitstempel der Berechnung zählt nicht als Änderung
+            const auto values = [](const Recipe &x) {
+                QJsonObject o = x.nutrition.toJson();
+                o.remove(QStringLiteral("computed"));
+                return o;
+            };
+            const QJsonObject before = values(r);
+            const QStringList tagsBefore = r.tags;
+            const bool wasVeg = r.hasTag(QStringLiteral("vegetarisch")) || r.hasTag(QStringLiteral("vegan"));
+            // Texte und Zutatenliste aufräumen (DOS-Zeichen, Erfasserzeilen, umbrochene Reste)
+            const QString textBefore = r.title + QChar(1) + r.instructions + QChar(1) + r.source + QChar(1) + r.ingredientsText();
+            Importers::normalizeTexts(r);
+            Importers::tidyIngredients(r);
+            const bool textChanged = textBefore != r.title + QChar(1) + r.instructions + QChar(1) + r.source + QChar(1) + r.ingredientsText();
+            if (textChanged) ++tidied;
+            Nutrition::analyze(r);               // ordnet alle Zutaten neu zu (außer von Hand festgelegten)
+            MealTypes::applyNutrientTags(r);     // abgeleitete Tags passend zu den neuen Werten
+            // Fleisch, Fisch, Meeresfrüchte und tierische Würzmittel korrigieren ein falsches „vegetarisch“/„vegan“
+            const QStringList diet = Nutrition::suggestTags(r);
+            if (diet.contains(QStringLiteral("fisch")) || diet.contains(QStringLiteral("fleischgerichte")) || Nutrition::containsAnimal(r))
+                Nutrition::applyTagSuggestions(r);
+            if (wasVeg && !r.hasTag(QStringLiteral("vegetarisch")) && !r.hasTag(QStringLiteral("vegan"))) ++dietFixed;
+            // Saison-Tags nur dort nachführen, wo schon welche vergeben sind
+            bool hadSeason = false;
+            for (const QString &t : Season::tagNames()) hadSeason = hadSeason || tagsBefore.contains(t);
+            if (hadSeason && Season::applyTags(r)) ++seasonChanged;
+            const bool valuesChanged = values(r) != before;
+            if (valuesChanged || r.tags != tagsBefore || textChanged) {   // nur geänderte Rezepte schreiben
+                db.saveLight(r);
+                ++changed;
+                if (valuesChanged) ++nutritionChanged;
+                if (r.tags != tagsBefore) ++tagsChanged;
+            }
+            if (!Nutrition::isMenu(r))
+                for (const Ingredient &i : r.ingredients)
+                    if (!i.heading && i.food.isEmpty()) {
+                        incomplete << r;
+                        break;
+                    }
+            ++n;
         }
-        // Zeitstempel der Berechnung zählt nicht als Änderung
-        const auto values = [](const Recipe &x) {
-            QJsonObject o = x.nutrition.toJson();
-            o.remove(QStringLiteral("computed"));
-            return o;
-        };
-        const QJsonObject before = values(r);
-        const QStringList tagsBefore = r.tags;
-        Nutrition::analyze(r);
-        MealTypes::applyNutrientTags(r);   // abgeleitete Tags passend zu den neuen Werten
-        // Fisch/Fleisch, das erst jetzt erkannt wird (z. B. Stockfisch), korrigiert ein falsches „vegetarisch“
-        const QStringList diet = Nutrition::suggestTags(r);
-        if (diet.contains(QStringLiteral("fisch")) || diet.contains(QStringLiteral("fleischgerichte"))) Nutrition::applyTagSuggestions(r);
-        if (values(r) != before || r.tags != tagsBefore) {   // nur geänderte Rezepte schreiben
-            db.saveLight(r);
-            ++changed;
-        }
-        ++n;
+        Perf::mark(QStringLiteral("Abgleich: %1 Rezepte, %2 geändert").arg(n).arg(changed).toUtf8().constData());
+        db.endBatch();
+        prog.step(int(ids.size()));
     }
-    Perf::mark(QStringLiteral("Neuberechnung: %1 Rezepte, %2 geändert").arg(n).arg(changed).toUtf8().constData());
-    db.endBatch();
-    prog.step(int(ids.size()));
-    statusBar()->showMessage(canceled ? tr("Neuberechnung abgebrochen – %1 von %2 Rezepten berechnet.").arg(n).arg(ids.size())
-                                      : tr("Nährwerte von %1 Rezepten neu berechnet.").arg(n),
-                             5000);
     showCurrent();
+    if (!report) {
+        statusBar()->showMessage(canceled ? tr("Abgleich abgebrochen – %1 von %2 Rezepten abgeglichen.").arg(n).arg(ids.size())
+                                          : tr("Nährwerte von %1 Rezepten neu berechnet, %2 geändert.").arg(n).arg(changed),
+                                 5000);
+        return;
+    }
+    refreshTags();
+    const auto missing = Nutrition::missingFoods(incomplete, MissingFoodsDialog::ignoredNames());
+    QString text = canceled ? tr("Der Abgleich wurde abgebrochen: %1 von %2 Rezepten sind abgeglichen.").arg(n).arg(ids.size())
+                            : tr("%1 Rezepte wurden mit der Lebensmitteldatenbank abgeglichen.").arg(n);
+    text += QStringLiteral("\n\n") + tr("Geändert: %1 Rezepte").arg(changed);
+    text += QStringLiteral("\n  ") + tr("• neue Nährwerte: %1").arg(nutritionChanged);
+    text += QStringLiteral("\n  ") + tr("• geänderte Tags: %1").arg(tagsChanged);
+    if (dietFixed) text += QStringLiteral("\n  ") + tr("• davon „vegetarisch“/„vegan“ entfernt (Fleisch, Fisch, Meeresfrüchte): %1").arg(dietFixed);
+    if (seasonChanged) text += QStringLiteral("\n  ") + tr("• davon Saison-Tags angepasst: %1").arg(seasonChanged);
+    if (tidied) text += QStringLiteral("\n  ") + tr("• Zutatenliste oder Schreibweise aufgeräumt (Erfasserzeilen, umbrochene Reste, DOS-Zeichen): %1").arg(tidied);
+    if (missing.isEmpty()) {
+        QMessageBox::information(this, tr("Abgleich mit der Lebensmitteldatenbank"),
+                                 text + QStringLiteral("\n\n") + tr("Alle Zutaten haben einen Eintrag in der Nährwerttabelle."));
+        return;
+    }
+    text += QStringLiteral("\n\n") + tr("%1 verschiedene Zutaten in %2 Rezepten haben noch kein Lebensmittel. Jetzt durchsehen?")
+                                         .arg(missing.size())
+                                         .arg(incomplete.size());
+    if (QMessageBox::question(this, tr("Abgleich mit der Lebensmitteldatenbank"), text) == QMessageBox::Yes)
+        showMissingFoods(incomplete, false);
 }
 
 void MainWindow::fixUmlautsAll()
@@ -1226,7 +1492,12 @@ void MainWindow::fixUmlautsAll()
     // erst zählen und eine Vorschau zeigen
     QList<Recipe> todo;
     QStringList examples;
-    for (const RecipeSummary &s : db.summaries()) {
+    {
+    const QList<RecipeSummary> all = db.summaries();
+    BusyProgress scan(this, tr("Rezepte ohne Umlaute suchen"), int(all.size()));
+    int n = 0;
+    for (const RecipeSummary &s : all) {
+        if (!scan.step(n++, s.title)) return;
         Recipe r;
         if (!db.loadLight(s.id, &r) || r.language != QLatin1String("de")) continue;
         if (!Umlauts::looksTranscribed(Umlauts::allRecipeText(r))) continue;
@@ -1234,6 +1505,7 @@ void MainWindow::fixUmlautsAll()
         if (Umlauts::fixRecipe(fixed) == 0) continue;
         if (examples.size() < 6) examples << QStringLiteral("„%1“ → „%2“").arg(r.title, fixed.title);
         todo << fixed;
+    }
     }
     if (todo.isEmpty()) {
         QMessageBox::information(this, tr("Umlaute korrigieren"), tr("Es wurden keine Rezepte ohne Umlaute gefunden."));
@@ -1274,12 +1546,18 @@ void MainWindow::translateAll()
     RecipeDb &db = RecipeDb::instance();
     QStringList ids;
     int chars = 0;
-    for (const RecipeSummary &s : db.summaries()) {
-        if (s.language == QLatin1String("de")) continue;
-        Recipe r;
-        if (!db.loadLight(s.id, &r)) continue;
-        ids << s.id;
-        chars += DeepL::characterCount(r);
+    {
+        const QList<RecipeSummary> all = db.summaries();
+        BusyProgress scan(this, tr("Fremdsprachige Rezepte suchen"), int(all.size()));
+        int n = 0;
+        for (const RecipeSummary &s : all) {
+            if (!scan.step(n++, s.title)) return;
+            if (s.language == QLatin1String("de")) continue;
+            Recipe r;
+            if (!db.loadLight(s.id, &r)) continue;
+            ids << s.id;
+            chars += DeepL::characterCount(r);
+        }
     }
     if (ids.isEmpty()) {
         QMessageBox::information(this, tr("Mit DeepL übersetzen"), tr("In der Datenbank gibt es keine fremdsprachigen Rezepte."));
@@ -1471,28 +1749,55 @@ void MainWindow::missingFoods()
 {
     RecipeDb &db = RecipeDb::instance();
     if (!db.isOpen()) return;
+    // alle Rezepte durchsehen und gegen die aktuelle Nährwerttabelle prüfen (nur im Speicher, nichts wird geschrieben)
     QList<Recipe> list;
+    int stale = 0;
     {
-    BusyProgress prog(this, tr("Zutaten werden geprüft"), db.count());
-    int i = 0;
-    for (const RecipeSummary &s : db.summaries()) {
-        if (!prog.step(i++)) return;
-        if (s.coverage >= 0.999) continue;
-        Recipe r;
-        if (db.loadLight(s.id, &r)) list << r;
+        const QList<RecipeSummary> all = db.summaries();
+        BusyProgress prog(this, tr("Datenbank nach fehlenden Lebensmitteln durchsuchen"), int(all.size()));
+        int i = 0;
+        for (const RecipeSummary &s : all) {
+            if (!prog.step(i, tr("Rezept %1 von %2: %3").arg(i + 1).arg(all.size()).arg(s.title))) return;
+            ++i;
+            Recipe r;
+            if (!db.loadLight(s.id, &r) || Nutrition::isMenu(r)) continue;
+            QStringList before;
+            for (const Ingredient &ing : r.ingredients) before << ing.food;
+            Nutrition::analyze(r);
+            QStringList after;
+            bool open = false;
+            for (const Ingredient &ing : r.ingredients) {
+                after << ing.food;
+                open = open || (!ing.heading && ing.food.isEmpty());
+            }
+            if (before != after) ++stale;
+            if (open) list << r;
+        }
     }
-    }
-    const auto missing = Nutrition::missingFoods(list, MissingFoodsDialog::ignoredNames());
+    showMissingFoods(list, stale > 0);
+}
+
+void MainWindow::showMissingFoods(const QList<Recipe> &recipes, bool offerMatch)
+{
+    const auto missing = Nutrition::missingFoods(recipes, MissingFoodsDialog::ignoredNames());
     if (missing.isEmpty()) {
-        QMessageBox::information(this, tr("Zutaten ohne Nährwerte"), tr("Alle Zutaten mit Mengenangabe haben einen Eintrag in der Nährwerttabelle."));
-        return;
+        QMessageBox::information(this, tr("Fehlende Lebensmittel"), tr("Alle Zutaten der Rezepte haben einen Eintrag in der Nährwerttabelle."));
+    } else {
+        MissingFoodsDialog d(missing,
+                             (missing.size() == 1 ? tr("Eine Zutat der Datenbank hat noch keine Nährwerte:")
+                                                  : tr("%1 Zutaten in %2 Rezepten haben noch keine Nährwerte (häufigste zuerst):")
+                                                        .arg(missing.size())
+                                                        .arg(recipes.size())),
+                             this);
+        d.exec();
+        offerMatch = offerMatch || d.changed();
     }
-    MissingFoodsDialog d(missing, (missing.size() == 1 ? tr("Eine Zutat der Datenbank hat noch keine Nährwerte:") : tr("%1 Zutaten der Datenbank haben noch keine Nährwerte (häufigste zuerst):").arg(missing.size())), this);
-    d.exec();
-    if (d.changed()
-        && QMessageBox::question(this, tr("Nährwerttabelle"), tr("Die Nährwerttabelle wurde geändert. Nährwerte aller Rezepte jetzt neu berechnen?"))
+    if (offerMatch
+        && QMessageBox::question(this, tr("Abgleich mit der Lebensmitteldatenbank"),
+                                 tr("Die gespeicherten Zuordnungen und Nährwerte einiger Rezepte passen nicht mehr zur aktuellen "
+                                    "Lebensmitteldatenbank. Alle Rezepte jetzt abgleichen?"))
                == QMessageBox::Yes)
-        recalcAll();
+        matchAll(false);
 }
 
 void MainWindow::openFoodTable()
@@ -1534,7 +1839,7 @@ void MainWindow::about()
                     .arg(QApplication::applicationVersion()));
     box.setInformativeText(tr("<p><b>ViviaMeals ist kein Medizinprodukt.</b> Nährwerte und Energiebedarf sind Schätzwerte "
                               "und ersetzen keine ärztliche oder Ernährungsberatung.</p>"
-                              "<p>Importiert RezKonv und MealMaster, exportiert Websites (HTML5/PHP), LaTeX (book, scrbook) "
+                              "<p>Importiert RezKonv, MealMaster und Ambrosia, exportiert Websites (HTML5/PHP), LaTeX (book, scrbook) "
                               "und LibreOffice Writer (.odt). Rezepte scannen mit Texterkennung.<br/>"
                               "Optik und Bausteine aus ViviaParms und ViviaBreathe (bis 2026: „Vita“-Reihe).</p>"
                               "<p>© 2026 Michael Bergmann<br/>"
@@ -1545,12 +1850,36 @@ void MainWindow::about()
                               "<a href=\"https://polyformproject.org/licenses/noncommercial/1.0.0\">polyformproject.org/licenses/noncommercial/1.0.0</a>"
                               "<br/>Verwendet Qt (LGPL-3.0); die Texterkennung nutzt das eigenständige Programm "
                               "<a href=\"https://github.com/tesseract-ocr/tesseract\">Tesseract</a> (Apache-2.0).</p>"));
+    {
+        const License::Info reg = License::current();
+        QString line;
+        if (reg.valid && reg.email == QLatin1String("demo")) line = tr("Demo-Modus: Komfortfunktionen freigeschaltet");
+        else if (reg.valid) line = tr("Registriert für <b>%1</b> (Nr. %2)").arg(reg.email.toHtmlEscaped()).arg(reg.serial);
+        else line = tr("Nicht registriert – Komfortfunktionen über <i>Hilfe → Registrierung eingeben …</i> freischalten");
+        box.setText(box.text() + QStringLiteral("<p>%1</p>").arg(line));
+    }
     box.setTextFormat(Qt::RichText);
     box.setTextInteractionFlags(Qt::TextBrowserInteraction);
     QFile lic(QStringLiteral(":/doc/LICENSE"));
     if (lic.open(QIODevice::ReadOnly)) box.setDetailedText(QString::fromUtf8(lic.readAll()));   // „Details einblenden …“ zeigt den Lizenztext
     box.setStandardButtons(QMessageBox::Ok);
     box.exec();
+}
+
+void MainWindow::updateComfortTips()
+{
+    // Komfortfunktionen bleiben sichtbar; ohne Registrierung steht es in der Statuszeile und am Symbol
+    const bool reg = License::isRegistered();
+    for (const char *name : { "actScan", "actScanImage", "actWeb", "actOdt" }) {
+        QAction *a = findChild<QAction *>(QLatin1String(name));
+        if (!a) continue;
+        if (!a->property("vmBaseTip").isValid()) a->setProperty("vmBaseTip", a->statusTip());
+        const QString base = a->property("vmBaseTip").toString();
+        a->setStatusTip(base + Registration::statusSuffix());
+        a->setToolTip(reg ? a->text().remove(QLatin1Char('&')).remove(QStringLiteral(" …"))
+                          : tr("%1 (Komfortfunktion – Registrierung erforderlich)").arg(a->text().remove(QLatin1Char('&')).remove(QStringLiteral(" …"))));
+    }
+    updateActions();   // LaTeX-Hinweis
 }
 
 void MainWindow::appearanceChanged()
@@ -1570,6 +1899,10 @@ void MainWindow::showEvent(QShowEvent *e)
     if (m_syncAfterShow) {
         m_syncAfterShow = false;
         QTimer::singleShot(250, this, [this] { syncNow(true); });   // erst zeichnen lassen
+    }
+    if (m_foodCheckAfterShow) {
+        m_foodCheckAfterShow = false;
+        QTimer::singleShot(1200, this, [this] { checkFoodTableChanged(); });   // nach dem Abgleich-Start
     }
 }
 

@@ -43,6 +43,8 @@ icons = {
  "import": f'<path d="M14 3H6v18h12V7z" {S}/><path d="M14 3v4h4" {S}/><path d="M12 10v7M8.8 13.8L12 17l3.2-3.2" {A}/>',
  "import-rk": f'<path d="M14 3H6v18h12V7z" {S}/><path d="M14 3v4h4" {S}/><path d="M9 11v6M9 11h2a1.5 1.5 0 0 1 0 3H9M11 14l1.5 3M14 11v6M17 11l-3 3 3 3" {A}/>',
  "import-mm": f'<path d="M14 3H6v18h12V7z" {S}/><path d="M14 3v4h4" {S}/><path d="M8 17v-6l2 3 2-3v6M12.5 17v-6l2 3 2-3v6" {A}/>',
+ "import-ambrosia": f'<ellipse cx="12" cy="6" rx="7" ry="2.5" {S}/><path d="M5 6v12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6" {S}/><path d="M9.5 16.5l2.5-7 2.5 7M10.4 14.2h3.2" {A}/>',
+ "barcode": f'<path d="M3 7V4h3M18 4h3v3M21 17v3h-3M6 20H3v-3" {S}/><path d="M7 8v8M10 8v8M14 8v8M17 8v8" {S}/><path d="M12 8v8" {A}/>',
  "web": f'<circle cx="12" cy="12" r="9" {S}/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18" {S}/><path d="M5.5 7h13M5.5 17h13" {A}/>',
  "odt": f'<path d="M14 3H6v18h12V7z" {S}/><path d="M14 3v4h4" {S}/><path d="M8.5 11h5M8.5 14h7M8.5 17h7" {S}/><rect x="13.5" y="9.5" width="3" height="3" fill="#ACCENT" stroke="none"/>',
  "tex": f'<path d="M14 3H6v18h12V7z" {S}/><path d="M14 3v4h4" {S}/><path d="M8 11h4M10 11v6M12.5 13.5l3 3.5M15.5 13.5l-3 3.5" {A}/>',
@@ -55,6 +57,15 @@ icons = {
  "zoom-fit": f'<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" {S}/><rect x="8" y="8" width="8" height="8" rx="1" {A}/>',
  "duplicates": f'<path d="M9 3h8l3 3v11H9z" {S}/><path d="M17 3v3h3" {S}/><path d="M6 7H4v14h11v-2" {S}/><path d="M12 10.5h5M12 13.5h5" {A}/>',
  "check": f'<path d="M4.5 12.5l4.5 4.5L19.5 6.5" {A}/>',
+ "db-check": f'<ellipse cx="10" cy="5.5" rx="6.5" ry="2.5" {S}/><path d="M3.5 5.5v11c0 1.4 2.9 2.5 6.5 2.5M16.5 5.5V10M3.5 11c0 1.4 2.9 2.5 6.5 2.5" {S}/><path d="M13 17.2l2.4 2.4 4.6-5" {A}/>',
+ "back": f'<path d="M14.5 5.5L8 12l6.5 6.5" {A}/>',
+ "forward": f'<path d="M9.5 5.5L16 12l-6.5 6.5" {A}/>',
+ "glossary": f'<path d="M5 4.5h10.5a2 2 0 0 1 2 2V20H7a2 2 0 0 1-2-2z" {S}/><path d="M5 18a2 2 0 0 1 2-2h10.5" {S}/><path d="M9 7.5l1.5 5 1.5-5M9.6 10.8h2" {A}/><circle cx="15.5" cy="11" r="2" {S}/><path d="M17 12.5l2.5 2.5" {A}/>',
+ "tip": f'<path d="M12 3.5a5.5 5.5 0 0 0-3.3 9.9c.6.5.8 1.1.8 1.8V16h5v-.8c0-.7.2-1.3.8-1.8A5.5 5.5 0 0 0 12 3.5z" {S}/><path d="M9.8 18.5h4.4M10.6 21h2.8" {S}/><path d="M12 7v3.5M10.3 8.7l1.7 1.8 1.7-1.8" {A}/>',
+ "warning": f'<path d="M12 3.5L21.5 20h-19z" {S}/><path d="M12 9.5v5" {A}/><circle cx="12" cy="17.3" r="0.9" fill="#ACCENT" stroke="none"/>',
+ "web-import": f'<circle cx="10" cy="10" r="7" {S}/><path d="M3 10h14M10 3c2.3 2.5 2.3 11.5 0 14M10 3c-2.3 2.5-2.3 11.5 0 14" {S}/><path d="M18 13v8M15 18l3 3 3-3" {A}/>',
+ "maintain-nutrition": f'<path d="M5 3h10l4 4v14H5z" {S}/><path d="M15 3v4h4" {S}/><path d="M8 11h4M8 14h3" {S}/><path d="M13.5 19.5l5-5M17.2 13.2a1.6 1.6 0 1 1 2.3 2.3" {A}/><path d="M8 17h2" {S}/>',
+ "maintain-ingredients": f'<path d="M5 3h10l4 4v14H5z" {S}/><path d="M15 3v4h4" {S}/><path d="M8 10.5h.01M8 13.5h.01M8 16.5h.01" {S}/><path d="M10.5 10.5h5M10.5 13.5h3" {S}/><path d="M11 17h5" {A}/>',
  "close": f'<path d="M6 6l12 12M18 6L6 18" {S}/>',
  # Planung
  "fridge": f'<rect x="5" y="2.5" width="14" height="19" rx="2" {S}/><path d="M5 10h14" {S}/><path d="M8.5 5.5v2M8.5 13v3" {A}/>',
@@ -94,6 +105,8 @@ icons = {
  "format-underline": f'<path d="M7 4v7a5 5 0 0 0 10 0V4" {S}/><path d="M5 20h14" {A}/>',
  "list-bullet": f'<path d="M10 6h10M10 12h10M10 18h10" {S}/><circle cx="5" cy="6" r="1.4" fill="#ACCENT"/><circle cx="5" cy="12" r="1.4" fill="#ACCENT"/><circle cx="5" cy="18" r="1.4" fill="#ACCENT"/>',
  "list-number": f'<path d="M10 6h10M10 12h10M10 18h10" {S}/><path d="M4 4.5l1.5-1V8M3.5 10.5a1.5 1.5 0 0 1 3 .5c0 1-3 2.2-3 3.5h3M3.6 16.2h2.7l-1.4 1.6a1.3 1.3 0 1 1-1.3 1.8" {A.replace('stroke-width="2"', 'stroke-width="1.4"')}/>',
+ "key": f'<circle cx="8" cy="15" r="4.5" {S}/><path d="M11.3 11.8L20 3.5M16.5 7l2.5 2.5M14.3 9.2l2 2" {S}/><circle cx="8" cy="15" r="1.4" {A}/>',
+ "lock": f'<rect x="5" y="10.5" width="14" height="10" rx="2" {S}/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" {S}/><path d="M12 14.5v2.5" {A}/>',
  # Saison (Blatt mit Sonne)
  "season": f'<path d="M5 20c0-8 5-13 14-14 0 9-5 14-13 14" {S}/><path d="M5 20c3-4 6-7 10-10" {S}/><circle cx="18.5" cy="17.5" r="2.5" {A}/>',
 }

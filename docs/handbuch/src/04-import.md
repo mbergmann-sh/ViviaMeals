@@ -1,15 +1,18 @@
 # Rezepte importieren {#import}
 
 ViviaMeals übernimmt Rezepte aus den verbreiteten Austauschformaten **RezKonv** und **MealMaster** –
-einzelne Rezepte ebenso wie Sammlungen mit Tausenden Rezepten. Dabei werden die Texte gleich
+einzelne Rezepte ebenso wie Sammlungen mit Tausenden Rezepten – und direkt aus Datenbanken der
+Rezeptverwaltung **Ambrosia** ([Ambrosia](#ambrosia)) sowie **von Rezept-Webseiten** über ihre Adresse
+([Rezept von einer Webseite](#web-import)). Dabei werden die Texte gleich
 aufbereitet: Zeichensatz erkennen, englische Maße umrechnen, fehlende Umlaute ergänzen, Nährwerte und
 Tags berechnen.
 
 ## Ablauf {#import-ablauf}
 
-1. *Datei → Import → RezKonv-Rezepte importieren …* bzw. *MealMaster-Rezepte importieren …* wählen.
+1. *Datei → Import → RezKonv-Rezepte importieren …*, *MealMaster-Rezepte importieren …* bzw.
+   *Ambrosia-Datenbank importieren …* wählen.
 2. Eine oder mehrere Dateien auswählen (RezKonv: `.rk`, `.rkv`, `.txt`; MealMaster: `.mmf`, `.mm`,
-   `.mxp`, `.txt`).
+   `.mxp`, `.txt`; Ambrosia: `.mdb`).
 3. Die **Vorschau** zeigt alle gefundenen Rezepte mit Portionen, kcal je Portion, Sprache und Status.
 
    ![Import-Vorschau mit erkannten Doubletten](bilder/import-vorschau.png)
@@ -118,6 +121,76 @@ Die Korrektur ist in den Einstellungen abschaltbar. Für bereits vorhandene Reze
 *Extras → Umlaute in allen Rezepten korrigieren …* (mit Beispielen und Rückfrage) und im Editor die
 Schaltfläche **Umlaute korrigieren**. Ein seltener Fehlgriff, etwa bei einem Eigennamen, lässt sich im
 Editor von Hand zurücknehmen.
+
+## Ambrosia-Datenbanken {#ambrosia}
+
+Die Schweizer Rezeptverwaltung *Ambrosia* speichert ihre Rezepte in einer Microsoft-Access-Datenbank
+(`.mdb`, z. B. eine exportierte Rezeptsammlung oder die Arbeitsdatenbank des Programms).
+*Datei → Import → Ambrosia-Datenbank importieren …* liest sie direkt – ohne Access, ohne Treiber und auch
+unter Linux und macOS. Eine `.mdb`-Datei lässt sich auch auf das Hauptfenster ziehen.
+
+Übernommen werden:
+
+- **Titel**, **Ertrag** (Portionen, Personen, Stück …) und **Zubereitungszeit** (Vorbereitung + Kochzeit),
+- **Zutaten** mit Menge, Einheit und Verarbeitung („fein gehackt“); Trennzeilen werden zu
+  Zwischenüberschriften, Bruchteile großer Einheiten lesbar („0,2 kg“ → „200 g“),
+- die **Zubereitung** mit Aufzählungen sowie fett, kursiv und unterstrichen
+  ([Zubereitung formatieren](rezepte.md#formatieren)); fehlt sie, werden die Arbeitsschritte an den
+  Zutaten zu einer nummerierten Liste,
+- **Notizen** und **Weintipp** als eigene Abschnitte am Ende der Zubereitung,
+- **Kategorien** als Tags, die **Quelle** (Zeitschrift bzw. Buch mit Ausgabe und Seite),
+- das **Rezeptfoto**.
+
+Danach läuft alles wie bei den anderen Formaten: Vorschau, Doubletten-Abfrage, Nährwerte und Tags. Große
+Datenbanken zeigen den Fortschritt je Rezept und lassen sich abbrechen. Gelöschte Rezepte und Vorlagen
+werden übersprungen.
+
+Ambrosia speichert die Einheiten nur als Nummern; die Liste dazu steckt im Programm selbst und fehlt in
+exportierten Datenbanken. ViviaMeals kennt die gebräuchlichen (g, kg, ml, l, TL, EL, Prise, Bund, Scheibe,
+Zehe, „etwas“, „nach Belieben“). Ist eine Nummer unbekannt, wird die Menge ohne Einheit übernommen und die
+Vorschau nennt die Nummer mit einem Beispiel – bitte im Editor ergänzen. Menüs, Einkaufslisten,
+Kochbücher und Adressen aus Ambrosia werden nicht übernommen.
+
+## Rezept von einer Webseite {#web-import}
+
+*Datei → Import → Rezept von einer Webseite …* (Strg+Umschalt+W, in der Werkzeugleiste „Webseite“)
+übernimmt ein Rezept über die Adresse seiner Seite. Kopieren Sie die Adresse aus dem Browser – steht beim
+Öffnen eine Adresse in der Zwischenablage, schlägt ViviaMeals sie gleich vor. Für mehrere Rezepte geben Sie
+eine Adresse je Zeile ein.
+
+![Rezept von einer Webseite übernehmen](bilder/web-import.png)
+
+Fast alle Rezeptseiten (Blogs mit Rezept-Plugin, Kochportale, Zeitschriften) beschreiben ihr Rezept für
+Suchmaschinen maschinenlesbar nach *schema.org* – ViviaMeals liest genau diese Angaben:
+
+- **Titel**, **Portionen**, **Zubereitungszeit**,
+- **Zutaten** – sie werden wie beim Dateiimport zerlegt, englische Maße umgerechnet und die Nährwerte
+  berechnet,
+- die **Zubereitung** als nummerierte Schritte, Abschnitte der Seite („Für den Teig“) als Überschriften,
+- **Kategorie** und **Küche** als Tags,
+- das **Rezeptfoto** (auf höchstens 1000 Pixel verkleinert),
+- als **Quelle** Autor, Website und Adresse.
+
+Englische Seiten werden übersetzt wie andere englische Rezepte ([Englische Rezepte](#englisch),
+[DeepL](#deepl)).
+
+Bei **einer** Adresse öffnet sich das Rezept danach im Editor zur Kontrolle (abschaltbar); erst
+*Übernehmen* im Editor speichert es. Bei **mehreren** Adressen werden die Rezepte nach *Fertig* direkt
+gespeichert, Titel, die es schon gibt, übersprungen. Die Liste im Dialog zeigt für jede Seite, ob es
+geklappt hat.
+
+Abgerufen werden nur die angegebenen Seiten und ihr Rezeptfoto – ViviaMeals folgt keinen weiteren Links
+und durchsucht keine Websites. Die Rezepte sind für Ihre eigene Sammlung gedacht; Texte und Fotos gehören
+den Betreibern der Seiten, die Quelle bleibt deshalb beim Rezept vermerkt.
+
+**Wenn es nicht klappt:**
+
+- *„kein maschinenlesbares Rezept gefunden“* – die Seite bietet die Angaben nicht an. Dann bleibt
+  Abtippen oder ein Bildschirmfoto der Seite mit *Rezept aus Bild oder Foto erkennen*
+  ([Rezepte scannen](scannen.md#scannen)).
+- *„Die Website verweigert den Abruf durch Programme“* – manche Websites lassen nur Browser zu. Öffnen
+  Sie die Seite im Browser, speichern Sie sie (Strg+S, „Webseite, nur HTML“) und wählen Sie im Dialog
+  **Gespeicherte Seite öffnen …**. Die Adresse der Seite wird dabei aus der Datei übernommen.
 
 ## Weitere Formate {#import-weitere}
 

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Nährwerte – ViviaMeals – Handbuch</title><link rel="stylesheet" href="handbuch.css"></head>
 <body class="web">
-<header class="top"><span class="version">Version 0.9.5</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
+<header class="top"><span class="version">Version 0.9.19</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
 <div class="wrap"><nav class="side"><input id="suche" class="such" type="search" placeholder="Im Handbuch suchen …"><ol>
 <li><a href="index.html">Start und Inhalt</a></li>
 <li><a href="willkommen.html">Willkommen bei ViviaMeals</a>
@@ -15,7 +15,7 @@
 <li><a href="scannen.html">Rezepte scannen</a>
 </li>
 <li class="aktiv"><a href="naehrwerte.html">Nährwerte</a>
-<ol><li><a href="#naehrwerte-rechnen">Wie ViviaMeals rechnet</a></li><li><a href="#naehrwerttabelle">Die Nährwerttabelle</a></li><li><a href="#eigene-lebensmittel">Eigene Lebensmittel anlegen</a></li><li><a href="#zutaten-ohne-naehrwerte">Zutaten ohne Nährwerte</a></li><li><a href="#naehrwerte-csv">Nährwerte importieren und exportieren</a></li><li><a href="#naehrwert-tags">Mahlzeit- und Nährwert-Tags</a></li><li><a href="#saison-tags">Saison-Tags</a></li><li><a href="#neu-berechnen">Alles neu berechnen</a></li></ol>
+<ol><li><a href="#naehrwerte-rechnen">Wie ViviaMeals rechnet</a></li><li><a href="#naehrwerttabelle">Die Nährwerttabelle</a></li><li><a href="#eigene-lebensmittel">Eigene Lebensmittel anlegen</a></li><li><a href="#zutaten-ohne-naehrwerte">Fehlende Lebensmittel finden</a></li><li><a href="#naehrwerte-csv">Nährwerte importieren und exportieren</a></li><li><a href="#naehrwert-tags">Mahlzeit- und Nährwert-Tags</a></li><li><a href="#saison-tags">Saison-Tags</a></li><li><a href="#neu-berechnen">Alle Rezepte abgleichen</a></li></ol>
 </li>
 <li><a href="planen.html">Planen und Gewichtskontrolle</a>
 </li>
@@ -44,7 +44,15 @@
 <p>Die Werte sind Richtwerte aus allgemeinen Tabellen. Sorte, Reife, Marke und Zubereitung können sie deutlich verändern. Rezepte, bei denen weniger als 80 % der Zutaten Nährwerte haben, erhalten keine Nährwert-Tags.</p>
 </blockquote>
 <h2 id="naehrwerttabelle">Die Nährwerttabelle</h2>
-<p>Eingebaut sind rund 220 Lebensmittelgruppen mit Werten je 100 g, Dichte, Stückgewichten und vielen deutschen und englischen Namen. Namen werden unabhängig von Umlauten und Akzenten verglichen („Gemuesebruehe“ = „Gemüsebrühe“, „Gruyere“ = „Gruyère“); zusammengesetzte Wörter wie „Zanderfilets“ oder „Hasenrücken“ werden erkannt.</p>
+<p>Eingebaut sind rund 400 Lebensmittelgruppen mit Werten je 100 g, Dichte, Stückgewichten und vielen deutschen und englischen Namen. Namen werden unabhängig von Umlauten und Akzenten verglichen („Gemuesebruehe“ = „Gemüsebrühe“, „Gruyere“ = „Gruyère“); zusammengesetzte Wörter wie „Zanderfilets“ oder „Hasenrücken“ werden erkannt.</p>
+<p><strong>Fisch und Meeresfrüchte</strong> sind nach Arten aufgeteilt, jeweils mit eigenen Nährwerten: magere Seefische (Kabeljau/Dorsch/Skrei, Seelachs, Schellfisch, Seehecht, Rotbarsch, Seeteufel, Scholle, Seezunge, Steinbutt, Heilbutt, Dorade, Wolfsbarsch, Rotbarbe …), fette Seefische (Makrele, Hering, Matjes, Sardinen, Sardellen, Aal), Lachs und Wildlachs, Thunfisch frisch, in Öl und im eigenen Saft, Süßwasserfische (Forelle, Saibling, Felchen, Zander, Hecht, Barsch, Karpfen, Wels, Stör …), Stockfisch/Bacalhau, Räucherfisch, Tintenfisch, Oktopus, Hummer und Krebse sowie die Muscheln: Miesmuscheln, Venus- und Herzmuscheln, Meermandeln, Austern, Jakobsmuscheln, Grünlippmuscheln und Entenmuscheln (Percebes).</p>
+<blockquote>
+<p><strong>Muscheln mit Schale:</strong> Miesmuscheln, Venusmuscheln, Meermandeln und Entenmuscheln werden in Rezepten meist <strong>mit Schale</strong> abgewogen („1 kg Miesmuscheln“). Ihre Werte beziehen sich deshalb auf das Gewicht mit Schale (essbar sind nur etwa 20–35 %). Steht „ausgelöst“ oder „ohne Schale“ dabei, rechnet ViviaMeals mit dem reinen Muschelfleisch. Austern und Jakobsmuscheln zählen als ausgelöstes Fleisch je Stück.</p>
+</blockquote>
+<p>Beschreibungen wie „frisch“, „in Öl“, „geräuchert“ oder „getrocknet“ entscheiden bei Fisch über den Eintrag: „frischer Thunfisch“ ist kein Dosenthunfisch, „getrockneter Kabeljau“ ist Stockfisch, „Sardinen in Öl“ haben mehr Fett als frische Sardinen. Das gilt auch, wenn die Beschreibung im Zusatz steht („Thunfisch, frisch“).</p>
+<p><strong>Käse</strong> ist nach Gruppen aufgeteilt, jeweils mit typischen Werten: Hartkäse (Bergkäse, Gruyère, Comté, Manchego …), Parmesan/Grana/Pecorino, Emmentaler, Gouda und Edamer, Cheddar, halbfester Schnittkäse (Butterkäse, Tilsiter, Raclette …), Weißschimmel (Camembert, Brie), Dreifachrahm-Käse, Rotschmierkäse (Limburger, Münster, Taleggio, Époisses …), Blauschimmel, Ziegenkäse, Feta, Halloumi, Paneer, Mozzarella, Burrata, Provolone/Scamorza, Sauermilchkäse (Harzer, Handkäse), Kochkäse, Schmelzkäse und Brunost.</p>
+<p><strong>Fleisch und Geflügel</strong> unterscheiden Rinder-, Schweine-, Lamm-, gemischtes und Lamm-Rind-Hackfleisch, Mett, Schweine- und Rindersteak, Lamm und Hammel, Hähnchenbrust, Hähnchenkeule und -bein, ganzes Huhn, Ente, Entenbrust und -keule, Gans, Gänsebrust und -keule. <strong>Ganze Tiere</strong> (Huhn, Ente, Gans) sind <em>mit Knochen</em> gerechnet, so wie sie im Rezept abgewogen werden; Keulen und Brust je Stück nach dem essbaren Anteil. Dazu <strong>französische Pasteten</strong> (Pâté, Terrine, Pâté en croûte, Leberpastete, Rillettes, Foie gras) und <strong>spanische Tapas</strong> als fertige Gerichte (Tortilla, Patatas bravas, Croquetas, Albóndigas, Gambas al ajillo, Calamares, Gazpacho, Pimientos de Padrón, Chorizo, Morcilla, Jamón ibérico, Flan, Churros, Turrón …).</p>
+<p><strong>Obst</strong> steht nach Sorten in der Tabelle: Kern- und Steinobst, alle gängigen Beeren (Himbeeren, Heidelbeeren, Johannisbeeren, Stachelbeeren, Preiselbeeren, Holunder, Sanddorn, Aronia …), Zitrusfrüchte (Orange, Mandarine, Grapefruit, Limette, Kumquat, Yuzu …), Melonen und die <strong>Südfrüchte</strong> (Papaya, Maracuja, Kaki, Granatapfel, Feige, Datteln, Litschi, Guave, Cherimoya, Sternfrucht, Drachenfrucht, Kochbanane, frische Kokosnuss, junge Jackfruit …). „Getrocknete Feigen“ oder „Aprikosen, getrocknet“ zählen als Trockenobst, „Saft von 2 Limetten“ als Saft.</p>
 <p><em>Extras → Nährwerttabelle …</em> zeigt alle Lebensmittel. Hier können Sie eigene Lebensmittel anlegen, eingebaute Werte überschreiben und Werte importieren oder exportieren.</p>
 <h2 id="eigene-lebensmittel">Eigene Lebensmittel anlegen</h2>
 <p>Fertigprodukte und Markenartikel („Fix für Spaghetti Bolognese“, eine bestimmte Bratensoße) stehen in keiner allgemeinen Tabelle. Mit dem Lebensmittel-Assistenten übertragen Sie die Angaben von der Verpackung.</p>
@@ -57,6 +65,7 @@
 <li><strong>Bezeichnung:</strong> Name, Marke (optional), Kategorie und weitere Namen, unter denen die Zutat in Rezepten vorkommt.
 <ul>
 <li><strong>Open Food Facts:</strong> Barcode (EAN-13, EAN-8, UPC) eintippen und <strong>Abrufen</strong> – ein USB-Barcode-Scanner tippt die Ziffern selbst. Oder <strong>Nach Namen suchen …</strong>. Übernommen werden Name, Marke, Kategorie, Nährwerte und Packungsinhalt. Gesendet wird nur der Barcode bzw. Suchbegriff.</li>
+<li><strong>Scannen …</strong> liest den Strichcode mit der <strong>Webcam</strong> (eingebaut oder per USB) oder aus einem <strong>Foto</strong> – siehe <a href="#strichcode-scannen">Strichcode scannen</a>.</li>
 <li>Heißt die Zutat nur anders als ein vorhandenes Lebensmittel („Pflanzenfett“ → Margarine), besser <strong>Doch ein vorhandenes Lebensmittel zuordnen …</strong> wählen.</li>
 </ul></li>
 <li><strong>Nährwerte:</strong> Angaben je 100 g, je 100 ml oder je Portion; Energie in kcal <strong>oder</strong> kJ; Natrium statt Salz ankreuzbar. Eine Prüfung warnt bei unmöglichen Werten (Zucker größer als Kohlenhydrate) und wenn die Energie nicht zu den Nährstoffen passt – meist wurden dann kJ als kcal eingetragen.</li>
@@ -67,18 +76,38 @@
 <img src="bilder/lebensmittel-assistent-uebersicht.png" alt="Übersicht des Lebensmittel-Assistenten" />
 <figcaption aria-hidden="true">Übersicht des Lebensmittel-Assistenten</figcaption>
 </figure>
-<h2 id="zutaten-ohne-naehrwerte">Zutaten ohne Nährwerte</h2>
-<p><em>Extras → Zutaten ohne Nährwerte …</em> listet alle Zutaten der Datenbank, für die kein Lebensmittel gefunden wurde – mit Häufigkeit und einer Beispielzeile.</p>
+<h3 id="strichcode-scannen">Strichcode scannen</h3>
+<p>Der Knopf <strong>Scannen …</strong> neben dem Barcode-Feld öffnet den Strichcode-Scanner. Erkannt werden die Strichcodes auf Lebensmittelverpackungen: <strong>EAN-13</strong>, <strong>EAN-8</strong> und <strong>UPC-A</strong>. Der gelesene Code wird ins Barcode-Feld eingetragen und sofort bei Open Food Facts abgerufen.</p>
+<ul>
+<li><strong>Mit der Webcam:</strong> Ist eine Kamera angeschlossen, zeigt der Scanner ihr Bild. Halten Sie die Packung ruhig vor die Kamera, so dass der Strichcode einen großen Teil des Bildes füllt – waagerecht oder senkrecht, gut beleuchtet und ohne Spiegelung. Sobald der Code sicher erkannt ist (in zwei Bildern hintereinander), ertönt ein kurzer Ton und der Scanner schließt sich.</li>
+<li><strong>Mehrere Kameras:</strong> Oben stehen alle angeschlossenen Kameras zur Wahl, etwa die eingebaute Laptop-Kamera und eine USB-Webcam; zwei baugleiche erscheinen als „USB Camera“ und „USB Camera (2)“. ViviaMeals merkt sich die gewählte Kamera und nimmt sie beim nächsten Mal wieder, sobald sie angeschlossen ist – sonst die Standardkamera des Systems. Eine Webcam, die Sie bei geöffnetem Scanner einstecken, erscheint sofort in der Liste; wird die benutzte Kamera abgezogen, wechselt der Scanner zur nächsten.</li>
+<li><strong>Mit einem Foto:</strong> <strong>Foto öffnen …</strong> wertet ein Foto oder einen Scan aus (JPEG, PNG, BMP …), zum Beispiel ein Handyfoto der Packung. Der Code darf schräg oder auf dem Kopf stehen; er sollte aber scharf und nicht zu klein sein. Ist keine Kamera vorhanden, fragt <strong>Scannen …</strong> gleich nach dem Foto.</li>
+</ul>
+<figure>
+<img src="bilder/strichcode-scanner.png" alt="Der Strichcode-Scanner ohne Kamera" />
+<figcaption aria-hidden="true">Der Strichcode-Scanner ohne Kamera</figcaption>
+</figure>
+<p>Die Bilder werden nur im Programm ausgewertet – nichts wird gespeichert oder gesendet außer dem erkannten Barcode an Open Food Facts. Wird nichts erkannt, hilft meist mehr Licht, ein größerer Abstand (unscharfe Nahaufnahmen) oder ein Foto, auf dem nur der Strichcode zu sehen ist.</p>
+<blockquote>
+<p><strong>Hinweis:</strong> Unter macOS fragt das System beim ersten Scannen, ob ViviaMeals die Kamera benutzen darf. Unter Windows und Linux muss die Kamera frei sein – ein Videoprogramm, das sie gerade benutzt, blockiert sie.</p>
+</blockquote>
+<h2 id="zutaten-ohne-naehrwerte">Fehlende Lebensmittel finden</h2>
+<p><em>Extras → Datenbank nach fehlenden Lebensmitteln durchsuchen …</em> prüft <strong>alle</strong> Rezepte der Datenbank gegen die aktuelle Nährwerttabelle (mit Fortschrittsbalken, abbrechbar) und listet jede Zutat, für die kein Lebensmittel gefunden wurde – mit Häufigkeit, den Rezepten, in denen sie vorkommt, und einer Beispielzeile. Die gleiche Liste erscheint auf Wunsch nach einem Import und beim Speichern eines neuen Rezepts.</p>
 <figure>
 <img src="bilder/lebensmittel-fehlend.png" alt="Zutaten ohne Nährwerte" />
 <figcaption aria-hidden="true">Zutaten ohne Nährwerte</figcaption>
 </figure>
+<p>Die Tabelle ist anklickbar:</p>
 <ul>
-<li><strong>Anlegen</strong> (oder Doppelklick) öffnet den Lebensmittel-Assistenten.</li>
-<li><strong>Zuordnen</strong> verknüpft die Zutat mit einem vorhandenen Lebensmittel.</li>
+<li><strong>Doppelklick</strong> auf eine offene Zeile (oder <strong>Anlegen</strong>) öffnet den Lebensmittel-Assistenten mit dem Namen der Zutat. Dort legen Sie ein neues Lebensmittel an oder ordnen ein vorhandenes zu.</li>
+<li><strong>Doppelklick</strong> auf eine erledigte Zeile (oder <strong>Bearbeiten</strong>) öffnet das eben angelegte bzw. zugeordnete Lebensmittel zum Ändern – etwa um Nährwerte, Dichte oder Stückgewicht nachzutragen.</li>
+<li><strong>Zuordnen</strong> verknüpft die Zutat mit einem vorhandenen Lebensmittel, wenn sie nur anders heißt.</li>
 <li><strong>Kein Lebensmittel</strong> blendet Einträge wie „Backpapier“ oder „Alufolie“ dauerhaft aus.</li>
+<li><strong>Als Textdatei speichern …</strong> schreibt die ganze Liste (Zutat, Anzahl, Stand, Beispielzeilen und alle Rezepte) in eine UTF-8-Textdatei – praktisch, um sie in Ruhe abzuarbeiten oder weiterzugeben.</li>
 </ul>
-<p>Danach werden die Nährwerte der betroffenen Rezepte neu berechnet.</p>
+<p><strong>Was gar nicht erst in der Liste landet:</strong> Küchenhelfer wie Backpapier, Alufolie, Holzspieße, Zahnstocher, Papierbackförmchen oder Springform zählen nicht als Zutat und auch nicht bei den Nährwerten. Ältere Rezeptsammlungen enthalten außerdem oft Zeilen, die gar keine Zutaten sind – Erfasser („Erfasst von …“, „K.-H. Boller …“), Nährwertangaben der Vorlage („Pro Portion 44 g E …“), Mahlzeiten in Großbuchstaben („MITTAGESSEN“) oder umbrochene Reste der Vorzeile („geschnitten“, „in dünnen Scheiben“). Beim Import und beim <a href="#neu-berechnen">Abgleich</a> werden sie aufgeräumt: Erfasser kommen zur Quelle, Nährwertangaben als Hinweis ans Ende der Zubereitung, Mahlzeiten werden Zwischenüberschriften, Reste gehören zum Zusatz der Vorzeile.</p>
+<p>Die Nährwerttabelle kennt auch <strong>schweizerdeutsche</strong> Namen (Rüebli, Peterli, Wirz, Kefen, Randen, Lattich, Zucchetti, Eierschwämmli, Poulet, Baumnüsse, Rahm, Glace …), Einzahl und Mehrzahl („Champignon“, „Nelke“) und verzeiht <strong>Tippfehler</strong> in längeren Wörtern („Pfefffer“, „Puderzucekr“). Zeichenfehler aus alten DOS-Sammlungen („Eiweiá“ statt „Eiweiß“, „fraŒche“ statt „fraîche“) werden beim Import und beim Abgleich berichtigt.</p>
+<p>Wurde etwas angelegt oder zugeordnet, bietet ViviaMeals danach den <a href="#neu-berechnen">Abgleich aller Rezepte</a> an. Das gilt auch, wenn die Suche feststellt, dass die gespeicherten Zuordnungen einiger Rezepte nicht mehr zur Nährwerttabelle passen.</p>
 <h2 id="naehrwerte-csv">Nährwerte importieren und exportieren</h2>
 <p><em>Extras → Nährwerttabelle → Importieren / Exportieren</em> übernimmt viele Werte auf einmal:</p>
 <ul>
@@ -93,7 +122,7 @@
 </figure>
 <h2 id="naehrwert-tags">Mahlzeit- und Nährwert-Tags</h2>
 <p>ViviaMeals vergibt beim Import, im Editor über <strong>Ergänzen</strong> und für alle Rezepte über <em>Extras → Mahlzeit- und Nährwert-Tags für alle Rezepte ergänzen …</em> Tags, die der Wochenplan und die Suche nutzen.</p>
-<p><strong>Mahlzeit-Tags</strong> – aus Kategorien, Titel, Zutaten und Nährwerten geschätzt: frühstück, hauptgerichte, leichte mahlzeit, zwischenmahlzeit, desserts, süßspeise, backen.</p>
+<p><strong>Mahlzeit-Tags</strong> – aus Kategorien, Titel, Zutaten und Nährwerten geschätzt: frühstück, hauptgerichte, leichte Mahlzeit, zwischenmahlzeit, desserts, süßspeise, backen.</p>
 <p><strong>Nährwert-Tags</strong> – aus den berechneten Werten:</p>
 <table>
 <colgroup>
@@ -121,7 +150,7 @@
 </tr>
 <tr class="even">
 <td>hochkalorisch</td>
-<td>mind. 250 kcal je 100 g oder mind. 800 kcal je Portion</td>
+<td>eine Portion hat mehr Energie als der Richtwert für ihre Mahlzeitart (siehe unten)</td>
 </tr>
 <tr class="odd">
 <td>vitaminreich</td>
@@ -134,24 +163,61 @@
 </tbody>
 </table>
 <p>„eiweißreich“ und „fettarm“ folgen den Grenzwerten der EU-Verordnung über nährwertbezogene Angaben; „vitaminreich“ ist ein Näherungswert, denn die Tabelle enthält keine Vitamine. Tags werden nur ergänzt, nie entfernt – mit einer Ausnahme: Nährwert-Tags, die nach einer Änderung der Zutaten nicht mehr zutreffen, entfallen beim Neuberechnen.</p>
+<p><strong>Wann ist ein Gericht hochkalorisch?</strong> Maßstab ist die übliche Portion, nicht die Energiedichte: Nüsse, Käse oder ein Rührkuchen haben viel Energie je 100 g, eine normale Portion davon ist aber nicht automatisch zu viel. ViviaMeals vergleicht deshalb die kcal <strong>je Portion</strong> mit dem Anteil, den eine Mahlzeit dieser Art am Tagesbedarf haben sollte. Grundlage ist die EU-Referenzmenge von 2000 kcal am Tag:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Mahlzeitart</th>
+<th>Anteil</th>
+<th>Richtwert je Portion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Hauptgericht (oder Art unbekannt)</td>
+<td>40 %</td>
+<td>800 kcal</td>
+</tr>
+<tr class="even">
+<td>leichte Mahlzeit, Frühstück, Süßspeise</td>
+<td>30 %</td>
+<td>600 kcal</td>
+</tr>
+<tr class="odd">
+<td>Zwischenmahlzeit, Dessert, Kuchen und Gebäck</td>
+<td>15 %</td>
+<td>300 kcal</td>
+</tr>
+</tbody>
+</table>
+<p>„hochkalorisch“ wird vergeben, wenn eine Portion <strong>über</strong> dem Richtwert liegt. Gehört ein Rezept zu mehreren Arten (z. B. Hauptgericht und leichte Mahlzeit), gilt der großzügigste Wert. Nie getaggt werden Grundrezepte (Soßen, Teige, Getränke), Rezepte ohne Portionsangabe und Kuchen mit „1 Portion“ (dann wäre die Portion der ganze Kuchen). Der Richtwert ist eine Orientierung für Erwachsene, keine Ernährungsberatung.</p>
 <h2 id="saison-tags">Saison-Tags</h2>
 <p>Frische Zutaten haben in Deutschland ihre Saison – Spargel im Frühling, Erdbeeren im Sommer, Kürbis im Herbst, Grünkohl im Winter. ViviaMeals vergibt danach die Tags <strong>frühling</strong>, <strong>sommer</strong>, <strong>herbst</strong>, <strong>winter</strong> oder <strong>ganzjährig</strong>: beim Import (abschaltbar unter <em>Einstellungen → Import</em>), im Editor über <strong>Ergänzen</strong> und nachträglich für die ganze Datenbank über <em>Extras → Saison-Tags für alle Rezepte vergeben …</em> (mit Vorschau und Rückfrage).</p>
 <p>So wird gerechnet:</p>
 <ul>
 <li>Grundlage ist ein Saisonkalender für <strong>regionale Ware</strong> (Freiland bzw. Lager) nach Monaten, etwa Spargel April–Juni, Erdbeeren Mai–August, Tomaten Juli–Oktober, Kürbis August–Dezember, Feldsalat Oktober–März, Grünkohl November–Februar. Auch Wild (Oktober–Januar) und Gans (November–Dezember) haben eine Saison.</li>
-<li>Ein Monat passt zum Rezept, wenn <strong>mindestens 80 % des Gewichts</strong> der Saisonzutaten dann Saison haben – ein Bund Frühlingszwiebeln macht aus einem Grünkohlgericht also kein Sommeressen.</li>
+<li><strong>Fisch und Meeresfrüchte</strong> haben Saison <strong>außerhalb ihrer Laichzeit</strong>: Dann ist das Fleisch fest und aromatisch, und der Verzicht in der Laichzeit schont die Bestände. Beispiele: Kabeljau September–Januar (Laichzeit Februar–April), Skrei Januar–April, Seelachs Mai–Dezember (Laichzeit Januar–April), Schellfisch und Wittling September–Januar, Scholle Mai–Dezember, Seezunge und Steinbutt Herbst und Winter, Wolfsbarsch und Dorade September–Dezember, Hering und Sprotten März–Mai, Matjes Juni–August, Makrele Juni–Oktober, Sardinen Juni–September, Karpfen September–April, Zander Juni–März, Hecht Mai–Januar; Muscheln und Austern in den „Monaten mit r“ (September–April), Jakobsmuscheln Oktober–April. Zuchtfisch und Fernfang (Lachs, Forelle, Pangasius, Garnelen, Tintenfisch …) zählen als ganzjährig.</li>
+<li>Ein Monat passt zum Rezept, wenn <strong>mindestens 80 % des Gewichts</strong> der Saisonzutaten dann Saison haben – ein Bund Radieschen macht aus einem Grünkohlgericht also kein Sommeressen.</li>
 <li>Eine Jahreszeit (Frühling März–Mai, Sommer Juni–August, Herbst September–November, Winter Dezember–Februar) wird vergeben, wenn <strong>mindestens zwei</strong> ihrer Monate passen.</li>
-<li><strong>ganzjährig</strong> bekommen Rezepte, deren frische Zutaten es immer gibt (Kartoffeln, Zwiebeln, Möhren, Kohl und Äpfel vom Lager, Champignons, Bananen …) und die einen nennenswerten Anteil frischer Zutaten haben.</li>
-<li><strong>Nicht</strong> gezählt werden Tiefkühlware, Konserven, Getrocknetes, Säfte, Mus, Pulver und Ähnliches – „Erbsen (TK)“ oder „Tomaten aus der Dose“ gibt es das ganze Jahr.</li>
+<li><strong>ganzjährig</strong> bekommen Rezepte, deren frische Zutaten es immer gibt (Kartoffeln, Zwiebeln, Möhren, Kohl und Äpfel vom Lager, Frühlingszwiebeln, Champignons, Bananen …) und die einen nennenswerten Anteil frischer Zutaten haben.</li>
+<li><strong>Nicht</strong> gezählt werden Tiefkühlware, Konserven, Getrocknetes, Geräuchertes, Mariniertes, Säfte, Mus, Pulver und Ähnliches – „Erbsen (TK)“, „Tomaten aus der Dose“ oder Räucherlachs gibt es das ganze Jahr.</li>
 </ul>
 <p>Die Themenauswahl <strong>Saisonal</strong> im Hauptfenster zeigt automatisch die Rezepte der aktuellen Jahreszeit (<a href="hauptfenster.html#rezeptliste">Die Rezeptliste</a>).</p>
 <p>Anders als die übrigen Tags werden Saison-Tags dabei ersetzt: Ändern Sie die Zutaten, passt ViviaMeals die Jahreszeit an. Andere Tags bleiben unberührt.</p>
-<h2 id="neu-berechnen">Alles neu berechnen</h2>
-<p><em>Extras → Nährwerte aller Rezepte neu berechnen</em> wendet die aktuelle Nährwerttabelle auf alle Rezepte an – etwa nachdem Sie eigene Lebensmittel angelegt haben. Ein Fortschrittsbalken zeigt den Stand; beim Abbrechen bleiben die schon berechneten Rezepte gespeichert.</p>
+<h2 id="neu-berechnen">Alle Rezepte abgleichen</h2>
+<p><em>Extras → Alle Rezepte mit der Lebensmitteldatenbank abgleichen …</em> bringt die ganze Datenbank auf den Stand der aktuellen Nährwerttabelle – etwa nachdem Sie eigene Lebensmittel angelegt oder zugeordnet haben, oder nach einem Programm-Update mit erweiterter Tabelle. Nach einem solchen Update <strong>fragt ViviaMeals beim ersten Öffnen jeder Datenbank von selbst</strong>, ob abgeglichen werden soll (einmal je Datenbank und Programmfassung). Für jedes Rezept</p>
+<ul>
+<li>werden alle Zutaten <strong>neu zugeordnet</strong> (von Hand im Editor festgelegte Zuordnungen bleiben),</li>
+<li>werden Kalorien und Nährwerte neu berechnet und die Nährwert-Tags angepasst,</li>
+<li>wird ein falsches <strong>„vegetarisch“ oder „vegan“ entfernt</strong>, wenn das Rezept Fleisch, Fisch, Meeresfrüchte (Krabben, Garnelen, Muscheln, Tintenfisch, Hummer …) oder tierische Würzmittel (Fischsauce, Austernsauce, Sardellen, Dashi …) enthält; „fisch“ bzw. „fleischgerichte“ wird ergänzt,</li>
+<li>werden vorhandene Saison-Tags an die Zutaten angepasst,</li>
+<li>wird die Zutatenliste aufgeräumt (siehe oben) und werden DOS-Zeichenfehler berichtigt.</li>
+</ul>
+<p>Ein Fortschrittsbalken zeigt den Stand; beim Abbrechen bleiben die schon abgeglichenen Rezepte gespeichert. Geschrieben werden nur Rezepte, die sich wirklich ändern. Zum Schluss nennt eine Übersicht, wie viele Rezepte neue Nährwerte oder Tags bekommen haben und wie viele Zutaten noch kein Lebensmittel haben – die lassen sich gleich <a href="#zutaten-ohne-naehrwerte">durchsehen</a>.</p>
 <figure>
 <img src="bilder/fortschritt.png" alt="Fortschrittsanzeige bei der Neuberechnung" />
 <figcaption aria-hidden="true">Fortschrittsanzeige bei der Neuberechnung</figcaption>
 </figure>
 <nav class="pager"><span><a href="scannen.html">← Rezepte scannen</a></span><span class="weiter"><a href="planen.html">Planen und Gewichtskontrolle →</a></span></nav></main></div>
-<footer>ViviaMeals 0.9.5 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
+<footer>ViviaMeals 0.9.19 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
 </body></html>

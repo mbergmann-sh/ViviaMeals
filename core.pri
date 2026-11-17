@@ -14,6 +14,14 @@ SOURCES += \
     $$PWD/src/nutrition.cpp \
     $$PWD/src/markup.cpp \
     $$PWD/src/season.cpp \
+    $$PWD/src/jetdb.cpp \
+    $$PWD/src/barcode.cpp \
+    $$PWD/src/webrecipe.cpp \
+    $$PWD/src/kitchenglossary.cpp \
+    $$PWD/src/dbcheck.cpp \
+    $$PWD/src/license.cpp \
+    $$PWD/3rdparty/monocypher/monocypher.c \
+    $$PWD/src/ambrosia.cpp \
     $$PWD/src/textcodec.cpp \
     $$PWD/src/importers.cpp \
     $$PWD/src/recipehtml.cpp \
@@ -51,6 +59,16 @@ HEADERS += \
     $$PWD/src/nutrition.h \
     $$PWD/src/markup.h \
     $$PWD/src/season.h \
+    $$PWD/src/jetdb.h \
+    $$PWD/src/barcode.h \
+    $$PWD/src/webrecipe.h \
+    $$PWD/src/kitchenglossary.h \
+    $$PWD/src/dbcheck.h \
+    $$PWD/src/license.h \
+    $$PWD/src/license_pubkey.h \
+    $$PWD/src/license_revoked.h \
+    $$PWD/3rdparty/monocypher/monocypher.h \
+    $$PWD/src/ambrosia.h \
     $$PWD/src/textcodec.h \
     $$PWD/src/importers.h \
     $$PWD/src/recipehtml.h \

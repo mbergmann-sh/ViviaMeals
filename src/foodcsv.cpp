@@ -619,13 +619,13 @@ bool writeTemplate(const QString &path, QString *error)
     a.category = QStringLiteral("getreide");
     a.per100 = Nutrients{ 335, 14, 2.5, 0.4, 61, 1, 10, 0 };
     a.density = 0.55;
-    a.aliases = { QStringLiteral("dinkelvollkornmehl"), QStringLiteral("dinkel-vollkornmehl"), QStringLiteral("spelt flour") };
+    a.aliases = QStringList{ QStringLiteral("dinkelvollkornmehl"), QStringLiteral("dinkel-vollkornmehl"), QStringLiteral("spelt flour") };
     Food b;
     b.name = QStringLiteral("Hafer-Joghurt natur");
     b.category = QStringLiteral("huelsen");
     b.per100 = Nutrients{ 62, 1.2, 2.8, 0.3, 7.6, 2.4, 1.2, 0.1 };
     b.density = 1.03;
-    b.aliases = { QStringLiteral("haferjoghurt"), QStringLiteral("hafer-joghurt") };
+    b.aliases = QStringList{ QStringLiteral("haferjoghurt"), QStringLiteral("hafer-joghurt") };
     return writeCsv(path, { exportHeader().join(QLatin1Char(';')), foodLine(a), foodLine(b) }, error);
 }
 

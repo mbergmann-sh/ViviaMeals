@@ -487,7 +487,7 @@ QStringList notes(const Options &opt)
     if (lay.roles.contains(Snack) && n[int(Snack)] == 0)
         l << tr("Es gibt keine passende Zwischenmahlzeit (Tag „zwischenmahlzeit“) – die mitgelieferten Vorschläge helfen.");
     if (lay.roles.contains(Light) && n[int(Light)] < 3)
-        l << tr("Nur %1 leichte Rezepte (Tag „leichte mahlzeit“: Salat, Suppe, Brotzeit, Quark …) – als zweite Mahlzeit des Tages "
+        l << tr("Nur %1 leichte Rezepte (Tag „leichte Mahlzeit“: Salat, Suppe, Brotzeit, Quark …) – als zweite Mahlzeit des Tages "
                 "werden deshalb auch kleine Portionen von Hauptgerichten verplant. Die mitgelieferten Vorschläge enthalten "
                 "leichte Abendessen.").arg(n[int(Light)]);
     if (n[int(Warm)] < 4) l << tr("Nur %1 Hauptgerichte passen – der Plan wiederholt sich.").arg(n[int(Warm)]);

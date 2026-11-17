@@ -51,6 +51,8 @@ macx {
 
 win32: RC_ICONS = resources/icons/app/viviameals.ico
 macx:  ICON     = resources/icons/app/viviameals.icns
+# eigene Info.plist: enthält NSCameraUsageDescription (Strichcode-Scanner mit der Kamera)
+macx:  QMAKE_INFO_PLIST = resources/macos/Info.plist
 
 # Programminformationen für Windows (Eigenschaften der .exe)
 QMAKE_TARGET_COMPANY     = Michael Bergmann

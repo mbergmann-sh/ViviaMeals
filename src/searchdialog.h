@@ -19,6 +19,8 @@ public:
     explicit SearchDialog(QWidget *parent = nullptr);
     QString selectedId() const;
     static bool matches(const RecipeSummary &s, const QString &text, bool inIngredients);
+    // für die Suche vereinfacht: klein, ohne Akzente und Umlautpunkte, ß → ss („Crêpes“ → „crepes“)
+    static QString fold(const QString &text);
 
 private:
     void search();

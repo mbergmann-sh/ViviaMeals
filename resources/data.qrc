@@ -2,6 +2,7 @@
 <RCC version="1.0">
     <qresource prefix="/data">
         <file alias="lebensmittel.json">data/lebensmittel.json</file>
+        <file alias="kuechenglossar.json">data/kuechenglossar.json</file>
     </qresource>
     <qresource prefix="/doc">
         <file alias="LICENSE">../LICENSE</file>

@@ -12,6 +12,7 @@ class QButtonGroup;
 class QCheckBox;
 class QLabel;
 class QLineEdit;
+class QPushButton;
 class QListWidget;
 class QStackedWidget;
 
@@ -41,6 +42,7 @@ private:
     QButtonGroup *m_kind;
     QStackedWidget *m_pages;
     QLineEdit *m_url, *m_key, *m_lanUrl, *m_code;
+    QPushButton *m_showKey = nullptr;
     QListWidget *m_found;
     QLabel *m_lanState, *m_hostInfo;
     QString m_lanToken, m_lanDevice;

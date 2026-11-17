@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleExecutable</key>
+	<string>${EXECUTABLE_NAME}</string>
+	<key>CFBundleIconFile</key>
+	<string>${ASSETCATALOG_COMPILER_APPICON_NAME}</string>
+	<key>CFBundleIdentifier</key>
+	<string>${PRODUCT_BUNDLE_IDENTIFIER}</string>
+	<key>CFBundleName</key>
+	<string>ViviaMeals</string>
+	<key>CFBundleShortVersionString</key>
+	<string>${QMAKE_SHORT_VERSION}</string>
+	<key>CFBundleVersion</key>
+	<string>${QMAKE_FULL_VERSION}</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>${QMAKE_PKGINFO_TYPEINFO}</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>${MACOSX_DEPLOYMENT_TARGET}</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>NSSupportsAutomaticGraphicsSwitching</key>
+	<true/>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>de</string>
+	<key>CFBundleAllowMixedLocalizations</key>
+	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>ViviaMeals nutzt die Kamera nur zum Einlesen von Strichcodes (EAN) für eigene Lebensmittel. Es werden keine Bilder gespeichert oder gesendet.</string>
+</dict>
+</plist>

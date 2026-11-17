@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "importers.h"
+#include "ambrosia.h"
 #include "season.h"
 #include "glossary.h"
 #include "ingredientparser.h"
@@ -8,6 +9,8 @@
 #include "umlauts.h"
 #include "mealtypes.h"
 #include "units.h"
+#include "foodtable.h"
+#include "markup.h"
 
 #include <QFile>
 #include <QJsonArray>
@@ -33,6 +36,7 @@ struct RawRecipe {
     };
     QList<ColumnIngredient> columns;
     QStringList directionLines;
+    QString instructions;          // fertig ausgezeichnet (Datenbank-Importe) – hat Vorrang vor directionLines
     QStringList sourceLines;
     QString format;
 };
@@ -183,7 +187,7 @@ Recipe build(const RawRecipe &raw, const QString &format, const QString &lang, b
             r.ingredients << i;
         }
     }
-    QString dir = joinDirections(raw.directionLines);
+    QString dir = raw.instructions.isEmpty() ? joinDirections(raw.directionLines) : raw.instructions;
     if (!german) dir = Units::convertTextMeasures(dir);
     r.instructions = dir;
     QStringList src;
@@ -208,12 +212,159 @@ Recipe build(const RawRecipe &raw, const QString &format, const QString &lang, b
 
 void normalizeTexts(Recipe &r)
 {
-    r.title = Units::normalizeCelsius(r.title);
-    r.instructions = Units::normalizeCelsius(r.instructions);
+    r.title = Units::normalizeCelsius(repairMojibake(r.title));
+    r.instructions = Units::normalizeCelsius(repairMojibake(r.instructions));
+    r.source = repairMojibake(r.source);
+    for (QString &t : r.tags) t = repairMojibake(t);
     for (Ingredient &i : r.ingredients) {
-        i.name = Units::normalizeCelsius(i.name);
-        i.note = Units::normalizeCelsius(i.note);
+        i.name = Units::normalizeCelsius(repairMojibake(i.name));
+        i.note = Units::normalizeCelsius(repairMojibake(i.note));
     }
+}
+
+QString repairMojibake(const QString &text)
+{
+    if (!text.contains(QChar(0x00E1)) && !text.contains(QChar(0x0152))) return text;
+    QString s = text;
+    // CP850 „ß“ (0xE1) erscheint als „á“ – im Deutschen nur nach Vokal („Weiá“, „Nuá“, „süáe“); „Csángó“, „está“ bleiben
+    static const QRegularExpression sz(QStringLiteral("(?<=[aeiouäöüAEIOUÄÖÜ])\\x{00E1}(?=[a-zäöü]|[^\\p{L}]|$)"));
+    s.replace(sz, QStringLiteral("ß"));
+    // CP850 „î“ (0x8C) erscheint als „Œ“: „fraŒche“
+    static const QRegularExpression ic(QStringLiteral("(?<=[a-z])\\x{0152}(?=[a-z])"));
+    s.replace(ic, QStringLiteral("î"));
+    return s;
+}
+
+int tidyIngredients(Recipe &r)
+{
+    static const QRegularExpression credit(
+        QStringLiteral("erfasst|konvertiert|angepa|\\bisbn\\b|\\bverlag\\b|^quelle\\b|^notiert\\b|überarbeitet|essen\\s*&\\s*trinken|"
+                       "^rezept aus\\b|\\bkhb\\b|\\d+:\\d+/\\d+|@|gagnaux|heinzmann|\\bboller\\b|vollenweider|wildeisen|peschl|"
+                       "^\\s*[>:]"),
+        QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression info(QStringLiteral("^pro (portion|stück|stuck)\\b|\\bkcal\\b|^zubereitungszeit\\b|^\\d+\\s*(stunden?|minuten)\\b"),
+                                         QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression participle(
+        QStringLiteral("(geschnitten|gehackt|gewürfelt|zerdrückt|zerstoßen|zerstossen|gezupft|feingehackt|feingeschnitten|"
+                       "feingemahlen|gemahlen|gerieben|geteilt|halbiert|entkernt|geputzt|gestrichen|durchgehackt|gestiftet|"
+                       "vermischt|abgetropft|gewässert|eingeweicht|aufheben\\)?)\\.?$"),
+        QRegularExpression::CaseInsensitiveOption);
+    static const QSet<QString> leadWords{ QStringLiteral("und"), QStringLiteral("oder"), QStringLiteral("sowie"), QStringLiteral("bzw"),
+                                          QStringLiteral("ca"), QStringLiteral("etwa"), QStringLiteral("entsprechend") };
+    static const QSet<QString> prepositions{ QStringLiteral("in"), QStringLiteral("ohne"), QStringLiteral("mit"), QStringLiteral("aus"),
+                                             QStringLiteral("zu"), QStringLiteral("zum"), QStringLiteral("zur"), QStringLiteral("für"),
+                                             QStringLiteral("nur"), QStringLiteral("am"), QStringLiteral("vom"), QStringLiteral("von"),
+                                             QStringLiteral("bei"), QStringLiteral("nach"), QStringLiteral("je") };
+    int changes = 0;
+    QStringList sourceAdd, infoAdd;
+    QList<Ingredient> out;
+    for (const Ingredient &ing : r.ingredients) {
+        if (ing.heading || ing.amount > 0) {
+            out << ing;
+            continue;
+        }
+        // „Scheiben geschnitten“: der Zerleger hat „Scheiben“ für eine Einheit gehalten
+        const QString name = (ing.unit.isEmpty() ? ing.name : ing.unit + QLatin1Char(' ') + ing.name).trimmed();
+        const QString line = ing.note.trimmed().isEmpty() ? name : name + QStringLiteral(", ") + ing.note.trimmed();
+        if (name.isEmpty()) {
+            ++changes;
+            continue;
+        }
+        if (credit.match(line).hasMatch()) {
+            QString c = line;
+            while (c.startsWith(QLatin1Char('>')) || c.startsWith(QLatin1Char(':'))) c = c.mid(1).trimmed();
+            if (!r.source.contains(c) && !sourceAdd.contains(c)) sourceAdd << c;
+            ++changes;
+            continue;
+        }
+        if (info.match(name).hasMatch()) {
+            if (!infoAdd.contains(line)) infoAdd << line;
+            ++changes;
+            continue;
+        }
+        if (FoodTable::isNonFood(name) || FoodTable::instance().match(ing.name)) {
+            out << ing;
+            continue;
+        }
+        // „Teig“, „Marinade“, „Für den Teigmantel“ ohne Menge → Zwischenüberschrift
+        static const QSet<QString> sections{ QStringLiteral("teig"), QStringLiteral("sauce"), QStringLiteral("soße"), QStringLiteral("marinade"),
+                                             QStringLiteral("füllung"), QStringLiteral("glasur"), QStringLiteral("guss"), QStringLiteral("belag"),
+                                             QStringLiteral("dekoration"), QStringLiteral("garnitur"), QStringLiteral("menü"), QStringLiteral("mahlzeiten"),
+                                             QStringLiteral("streusel"), QStringLiteral("gebäck"), QStringLiteral("teigmantel"), QStringLiteral("dip"),
+                                             QStringLiteral("dressing"), QStringLiteral("zubereitung"), QStringLiteral("vorbereitung") };
+        static const QSet<QString> verbs{ QStringLiteral("abschmecken"), QStringLiteral("fritieren"), QStringLiteral("frittieren"),
+                                          QStringLiteral("bestreichen"), QStringLiteral("begießen"), QStringLiteral("einfetten"),
+                                          QStringLiteral("garnieren"), QStringLiteral("bestäuben"), QStringLiteral("servieren"),
+                                          QStringLiteral("anbraten"), QStringLiteral("dekorieren"), QStringLiteral("verzieren"),
+                                          QStringLiteral("ausbacken"), QStringLiteral("würzen") };
+        const QString lowerName = name.toLower();
+        if (sections.contains(lowerName) || (lowerName.startsWith(QLatin1String("für ")) && name.size() < 40)) {
+            Ingredient h;
+            h.heading = true;
+            h.name = name;
+            h.original = ing.original;
+            out << h;
+            ++changes;
+            continue;
+        }
+        // „MITTAGESSEN“, „2. FRÜHSTÜCK“, „SAUCE:“ → Zwischenüberschrift
+        int letters = 0, upper = 0;
+        for (const QChar c : name)
+            if (c.isLetter()) {
+                ++letters;
+                if (c.isUpper()) ++upper;
+            }
+        if ((letters >= 4 && upper == letters) || (name.endsWith(QLatin1Char(':')) && letters >= 3)) {
+            Ingredient h;
+            h.heading = true;
+            QString t = name;
+            if (t.endsWith(QLatin1Char(':'))) t.chop(1);
+            h.name = t.trimmed();
+            h.original = ing.original;
+            out << h;
+            ++changes;
+            continue;
+        }
+        // umbrochener Rest der Vorzeile
+        Ingredient *prev = nullptr;
+        for (int k = int(out.size()) - 1; k >= 0; --k)
+            if (!out[k].heading) {
+                prev = &out[k];
+                break;
+            }
+        const QStringList words = name.split(QRegularExpression(QStringLiteral("\\s+")), Qt::SkipEmptyParts);
+        const QString first = words.value(0).toLower().remove(QLatin1Char('.'));
+        bool capitalWord = false;
+        for (const QString &w : words)
+            if (!w.isEmpty() && w.at(0).isUpper()) capitalWord = true;
+        const bool fragment = name.startsWith(QLatin1Char('(')) || (name.endsWith(QLatin1Char(')')) && !name.contains(QLatin1Char('(')))
+                              || leadWords.contains(first) || participle.match(name).hasMatch() || verbs.contains(lowerName)
+                              || (name.at(0).isLower() && (!capitalWord || prepositions.contains(first)));
+        if (fragment && prev) {
+            QString add = line;
+            if (add.endsWith(QLatin1Char(')')) && !add.contains(QLatin1Char('('))) add.chop(1);
+            if (add.startsWith(QLatin1Char('(')) && !add.contains(QLatin1Char(')'))) add = add.mid(1);
+            add = add.trimmed();
+            if (!add.isEmpty()) prev->note = prev->note.isEmpty() ? add : prev->note + QStringLiteral(" ") + add;
+            ++changes;
+            continue;
+        }
+        out << ing;
+    }
+    if (changes == 0) return 0;
+    r.ingredients = out;
+    if (!sourceAdd.isEmpty()) r.source = (QStringList{ r.source } + sourceAdd).join(QStringLiteral("; ")).trimmed();
+    while (r.source.startsWith(QLatin1Char(';'))) r.source = r.source.mid(1).trimmed();
+    if (!infoAdd.isEmpty()) {
+        QList<Markup::Run> runs;
+        Markup::Run rr;
+        rr.italic = true;
+        rr.text = QObject::tr("Angaben der Vorlage: %1").arg(infoAdd.join(QStringLiteral("; ")));
+        runs << rr;
+        const QString p = Markup::serializeInline(runs);
+        if (!r.instructions.contains(infoAdd.first())) r.instructions = r.instructions.trimmed() + QStringLiteral("\n\n") + p;
+    }
+    return changes;
 }
 
 namespace {
@@ -257,6 +408,7 @@ Recipe finish(RawRecipe &raw, const Options &opt, const QString &format, Result 
         ++res->umlautsFixed;
     }
     normalizeTexts(r);   // „200GradC“ → „200° C“ (auch nach DeepL)
+    tidyIngredients(r);  // Erfasser, Nährwertangaben und umbrochene Reste aus der Zutatenliste
     Nutrition::analyze(r);
     if (opt.autoTags) Nutrition::applyTagSuggestions(r);
     if (opt.mealTags && !Nutrition::isMenu(r)) MealTypes::applyTags(r);
@@ -322,6 +474,7 @@ QString formatName(Format f)
     case Format::RezKonv: return QStringLiteral("RezKonv");
     case Format::MealMaster: return QStringLiteral("MealMaster");
     case Format::Vtm: return QStringLiteral("ViviaMeals-Liste (.vtm)");
+    case Format::Ambrosia: return QStringLiteral("Ambrosia");
     case Format::Unknown: break;
     }
     return QObject::tr("unbekannt");
@@ -608,9 +761,38 @@ Result fromParts(const TextParts &parts, const QString &format, const Options &o
     return res;
 }
 
+Recipe fromStructured(const StructuredRecipe &in, const QString &format, const Options &opt, Result *res)
+{
+    RawRecipe raw;
+    raw.title = in.title;
+    raw.yield = in.yield;
+    raw.categories = in.categories;
+    for (const StructuredIngredient &si : in.ingredients) {
+        RawRecipe::ColumnIngredient c;
+        c.heading = si.heading;
+        c.amount = si.amount;
+        c.unit = si.unit;
+        c.name = si.name;
+        if (!si.note.trimmed().isEmpty()) c.more << si.note.trimmed();
+        c.original = (QStringList{ si.amount, si.unit, si.name }.join(QLatin1Char(' ')).simplified()
+                      + (si.note.trimmed().isEmpty() ? QString() : QStringLiteral(", ") + si.note.trimmed()));
+        raw.columns << c;
+    }
+    raw.instructions = in.instructions;
+    raw.directionLines = in.instructions.split(QLatin1Char('\n'));   // nur für Sprach- und Umlauterkennung
+    if (!in.source.trimmed().isEmpty()) raw.sourceLines << in.source;
+    raw.format = format;
+    Recipe r = finish(raw, opt, format, res);
+    if (in.prepMinutes > 0) r.prepMinutes = in.prepMinutes;
+    if (!in.image.isEmpty()) r.image = in.image;
+    if (in.created.isValid()) r.created = in.created;
+    return r;
+}
+
 Result importFile(const QString &path, Format format, const Options &opt)
 {
     Result res;
+    if (format == Format::Ambrosia || path.endsWith(QLatin1String(".mdb"), Qt::CaseInsensitive)) return Ambrosia::importFile(path, opt);
     if (format == Format::Vtm || path.endsWith(QLatin1String(".vtm"), Qt::CaseInsensitive)) {
         QFile f(path);
         if (!f.open(QIODevice::ReadOnly)) {
