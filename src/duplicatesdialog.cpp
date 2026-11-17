@@ -16,6 +16,7 @@
 #include <QLocale>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QSet>
 #include <QSettings>
 #include <QSplitter>
 #include <QTextBrowser>
@@ -43,6 +44,10 @@ DuplicatesDialog::DuplicatesDialog(QWidget *parent) : QDialog(parent)
     auto *again = new QPushButton(Icons::get(QStringLiteral("search")), tr("Neu suchen"));
     top->addWidget(again);
     top->addStretch(1);
+    m_keepSuggested = new QPushButton(Icons::get(QStringLiteral("delete")), tr("&Nur Vorgeschlagene behalten …"));
+    m_keepSuggested->setToolTip(tr("Löscht alle nicht vorgeschlagenen Rezepte unwiederbringlich"));
+    m_keepSuggested->setStatusTip(m_keepSuggested->toolTip());
+    top->addWidget(m_keepSuggested);
     lay->addLayout(top);
     m_info = new QLabel;
     m_info->setWordWrap(true);
@@ -122,6 +127,7 @@ DuplicatesDialog::DuplicatesDialog(QWidget *parent) : QDialog(parent)
     connect(m_delete, &QPushButton::clicked, this, &DuplicatesDialog::deleteSelected);
     connect(m_keep, &QPushButton::clicked, this, &DuplicatesDialog::keepAndMerge);
     connect(m_ignore, &QPushButton::clicked, this, &DuplicatesDialog::notDuplicates);
+    connect(m_keepSuggested, &QPushButton::clicked, this, &DuplicatesDialog::keepSuggestedOnly);
     resize(1300, 760);
     search();
 }
@@ -186,6 +192,7 @@ void DuplicatesDialog::fill(const QString &selectId)
         gi->setExpanded(true);
     }
     m_tree->blockSignals(false);
+    m_keepSuggested->setEnabled(!m_groups.isEmpty());
     if (m_groups.isEmpty())
         m_info->setText(tr("<b>Keine Doubletten gefunden</b> unter %1 Rezepten.").arg(db.count()));
     else
@@ -345,5 +352,55 @@ void DuplicatesDialog::notDuplicates()
             for (int b = a + 1; b < ids.size(); ++b) ign.insert(Duplicates::pairKey(ids[a], ids[b]));
     }
     if (!Duplicates::saveIgnored(ign)) QMessageBox::warning(this, windowTitle(), tr("Die Ausnahmen konnten nicht gespeichert werden."));
+    search();
+}
+
+void DuplicatesDialog::keepSuggestedOnly()
+{
+    // Vorgeschlagen = erstes (vollständigstes) Rezept jeder Gruppe. Steht ein Rezept in mehreren Gruppen und ist
+    // irgendwo vorgeschlagen, bleibt es erhalten.
+    RecipeDb &db = RecipeDb::instance();
+    QSet<QString> keep;
+    for (const Duplicates::Group &grp : m_groups)
+        if (!grp.ids.isEmpty()) keep.insert(grp.ids.first());
+    QStringList remove;
+    QStringList titles;
+    for (const Duplicates::Group &grp : m_groups)
+        for (const QString &id : grp.ids) {
+            if (keep.contains(id) || remove.contains(id)) continue;
+            const RecipeSummary *s = db.summary(id);
+            if (!s) continue;
+            remove << id;
+            if (titles.size() < 15) titles << QStringLiteral("• ") + s->title;
+        }
+    if (remove.isEmpty()) return;
+    if (remove.size() > titles.size()) titles << tr("… und %1 weitere").arg(remove.size() - titles.size());
+
+    QMessageBox box(this);
+    box.setIcon(QMessageBox::Warning);
+    box.setWindowTitle(tr("Nur Vorgeschlagene behalten"));
+    box.setText(tr("<b>%1 Rezepte aus %2 Gruppen unwiederbringlich löschen?</b>").arg(remove.size()).arg(m_groups.size()));
+    box.setInformativeText(tr("Behalten wird in jeder Gruppe nur das mit dem Häkchen vorgeschlagene, vollständigste Rezept. "
+                              "Alle übrigen werden gelöscht, ohne Bild, Tags oder Favoriten-Markierung zu übernehmen.<br/><br/>"
+                              "Prüfen Sie die Vorschläge vorher – Gruppen, die keine echten Doubletten sind, markieren Sie mit "
+                              "<i>Keine Doubletten</i>.<br/><br/>Das Löschen lässt sich nicht rückgängig machen."));
+    box.setDetailedText(titles.join(QLatin1Char('\n')));
+    QPushButton *del = box.addButton(tr("%1 Rezepte &löschen").arg(remove.size()), QMessageBox::DestructiveRole);
+    del->setIcon(Icons::get(QStringLiteral("delete")));
+    QPushButton *cancel = box.addButton(QMessageBox::Cancel);
+    box.setDefaultButton(cancel);
+    box.exec();
+    if (box.clickedButton() != del) return;
+
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    int done = 0;
+    db.beginBatch();
+    for (const QString &id : remove)
+        if (db.remove(id)) ++done;
+    db.endBatch();
+    QApplication::restoreOverrideCursor();
+    m_changes += done;
+    if (done < remove.size())
+        QMessageBox::warning(this, windowTitle(), tr("%1 von %2 Rezepten konnten nicht gelöscht werden.").arg(remove.size() - done).arg(remove.size()));
     search();
 }

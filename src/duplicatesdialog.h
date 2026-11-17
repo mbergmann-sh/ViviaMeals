@@ -39,6 +39,7 @@ private:
     void deleteSelected();
     void keepAndMerge();
     void notDuplicates();
+    void keepSuggestedOnly();   // alle nicht vorgeschlagenen Rezepte aller Gruppen löschen
     void showPreview(QTextBrowser *b, const QString &id);
 
     QComboBox *m_strict;
@@ -46,7 +47,7 @@ private:
     QLabel *m_info;
     QTextBrowser *m_left, *m_right;
     QComboBox *m_compare;
-    QPushButton *m_edit, *m_delete, *m_keep, *m_ignore;
+    QPushButton *m_edit, *m_delete, *m_keep, *m_ignore, *m_keepSuggested = nullptr;
     QList<Duplicates::Group> m_groups;
     int m_changes = 0;
 };

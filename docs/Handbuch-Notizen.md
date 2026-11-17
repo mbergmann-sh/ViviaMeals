@@ -1,6 +1,6 @@
 # ViviaMeals – Notizen für das Handbuch
 
-Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.9.19.
+Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.9.20.
 
 > **Name:** Das Programm heißt seit Version 0.6 **ViviaMeals** (vorher VitaMeals; die ganze Reihe heißt jetzt
 > Vivia – ViviaParms, ViviaBreathe). Alte Einstellungen, Profile, Tagebücher, eigene Lebensmittel und
@@ -1043,3 +1043,10 @@ Gespeicherte Menüs: *Datei → Export → Gespeicherte Menüs …* – öffnen 
   Warnung, wenn im Quelltext ein anderer Prüfschlüssel steht. Daten: `schluesselpaar.json` (GEHEIM),
   `schluessel.json` (+ `.bak`) im Datenordner bzw. `--data <ordner>`.
 - Bilder `registrierung.png`, `keygen.png` (`ViviaMealsKeygen --screenshot`); Test coretest „=== Registrierungsschlüssel ===“.
+
+## Doubletten: Nur Vorgeschlagene behalten (ab 0.9.20)
+
+- Schaltfläche oben rechts im Dialog *Doubletten suchen*, Tooltip „Löscht alle nicht vorgeschlagenen Rezepte unwiederbringlich“.
+- Löscht in allen Gruppen alle Rezepte außer dem vorgeschlagenen (erstes = vollständigstes, Häkchen); kein Zusammenführen.
+- Sicherheitsabfrage (Warnung, Vorgabe Abbrechen, Schaltfläche „n Rezepte löschen“, Titel unter Details, max. 15 + „… und n weitere“).
+- In mehreren Gruppen enthaltenes Rezept bleibt, wenn es irgendwo vorgeschlagen ist. Gesperrt, wenn keine Gruppen.

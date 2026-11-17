@@ -110,6 +110,13 @@ zwei Rezepte nebeneinander verglichen.
   Zubereitungszeit, alle Tags und die Favoriten-Markierung der übrigen werden übernommen, dann werden die
   übrigen gelöscht. Eine Rückfrage zeigt vorher genau, was geschieht.
 - **Keine Doublette(n):** Gruppe bzw. Rezept wird künftig nicht mehr gemeldet.
+- **Nur Vorgeschlagene behalten …** (oben rechts): räumt alle Gruppen auf einmal auf. Behalten wird in jeder
+  Gruppe nur das Rezept mit dem Häkchen; alle übrigen werden nach einer Sicherheitsabfrage **unwiederbringlich
+  gelöscht** – ohne etwas zu übernehmen. Die Abfrage nennt die Zahl der Rezepte, unter *Details* stehen die
+  Titel. Steht ein Rezept in mehreren Gruppen und ist in einer davon vorgeschlagen, bleibt es erhalten.
+
+> **Tipp:** Vorher die Gruppen kurz durchsehen und Fehltreffer mit **Keine Doubletten** ausnehmen –
+> besonders bei der Suchstufe „großzügig“. Wer ganz sicher gehen will, kopiert vorher den Datenbankordner.
 
 ## Alle Rezepte auf einmal bearbeiten {#sammelaktionen}
 
