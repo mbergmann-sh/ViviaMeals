@@ -14,3 +14,6 @@ tests/coretest/coretest
 tests/coretest/*.o
 *.aux
 *.log
+
+# Schlüsselgenerator: nur auf dem Rechner des Herausgebers, nicht ins öffentliche Repository
+tools/keygen/

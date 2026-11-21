@@ -13,6 +13,7 @@
 #include "webrecipe.h"
 #include "dbcheck.h"
 #include "license.h"
+#include "basenfasten.h"
 #include "websiteexport.h"
 #include "kitchenglossary.h"
 #include <QPainter>
@@ -60,7 +61,9 @@
 #include <QThread>
 #include <QStandardPaths>
 #include <QJsonArray>
+#include <QJsonArray>
 #include <QJsonDocument>
+#include <QUuid>
 #include <QJsonObject>
 #include <QTextStream>
 #include <cmath>
@@ -164,6 +167,59 @@ int main(int argc, char **argv)
     }
     // coretest --dump <datei>: Import zeigen (Titel, Ertrag, Tags, Zutaten, Zubereitung, Hinweise)
     // Messung Website-Export: coretest --bench-web <ordner> <anzahl> <themen>
+    if (argc >= 4 && QString::fromLocal8Bit(argv[1]) == QLatin1String("--make-samples")) {
+        // Beispielrezepte der mobilen App: JSON (tools/samples) → Rezeptpaket mit Nährwerten und Tags
+        QFile in(QString::fromLocal8Bit(argv[2]));
+        if (!in.open(QIODevice::ReadOnly)) return 2;
+        const QJsonArray arr = QJsonDocument::fromJson(in.readAll()).array();
+        const QUuid ns(QStringLiteral("{6b1d3c2e-7a43-4f55-9c1e-5e0a8f2a1b77}"));
+        const QDateTime when(QDate(2026, 11, 20), QTime(12, 0));
+        QList<Recipe> list;
+        int problems = 0;
+        for (const QJsonValue &v : arr) {
+            const QJsonObject o = v.toObject();
+            Recipe r;
+            r.title = o.value("title").toString();
+            r.id = QUuid::createUuidV5(ns, r.title).toString(QUuid::WithoutBraces);
+            r.servings = o.value("servings").toDouble();
+            r.yieldUnit = o.value("yieldUnit").toString();
+            r.prepMinutes = o.value("prepMinutes").toInt();
+            for (const QJsonValue &t : o.value("tags").toArray()) r.addTag(t.toString());
+            r.ingredients = IngredientParser::parseText(o.value("ingredients").toString());
+            r.instructions = o.value("instructions").toString();
+            r.source = QStringLiteral("ViviaMeals-Beispielrezepte");
+            r.sourceFormat = QStringLiteral("ViviaMeals");
+            r.language = QStringLiteral("de");
+            r.created = r.modified = when;
+            Nutrition::analyze(r);
+            if (!Nutrition::isMenu(r)) Season::applyTags(r);
+            Basenfasten::applyTag(r);
+            for (const QString &t : Nutrition::suggestTags(r))
+                if (!r.hasTag(t)) r.addTag(t);
+            const NutritionInfo &n = r.nutrition;
+            QStringList unmatched = n.unmatched;
+            if (qEnvironmentVariable("VM_SAMPLE_DEBUG") == r.title || qEnvironmentVariable("VM_SAMPLE_DEBUG") == QLatin1String("*"))
+                for (const Ingredient &i : r.ingredients) {
+                    const Food *f = FoodTable::instance().find(i.food);
+                    out << QString("      %1 | %2 | %3 g | %4 kcal\n").arg(i.displayLine(), i.food).arg(qRound(i.grams))
+                               .arg(f ? qRound(f->per100.kcal * i.grams / 100) : 0);
+                }
+            out << QString("%1 kcal  %2 %  %3").arg(qRound(n.perServing.kcal), 5).arg(qRound(n.coverage() * 100), 3).arg(r.title)
+                << (unmatched.isEmpty() ? QString() : QStringLiteral("   ohne: ") + unmatched.join(QStringLiteral(" | "))) << "\n";
+            if (!unmatched.isEmpty() || n.perServing.kcal <= 0) ++problems;
+            list << r;
+        }
+        RecipePackage::Options po;
+        po.name = QStringLiteral("ViviaMeals-Beispielrezepte");
+        po.description = QStringLiteral("Beispielrezepte der ViviaMeals-App");
+        po.author = QStringLiteral("Michael Bergmann");
+        po.images = false;
+        po.foods = false;
+        QString err;
+        const bool ok = RecipePackage::write(QString::fromLocal8Bit(argv[3]), list, po, &err);
+        out << list.size() << " Rezepte, " << problems << " mit nicht zugeordneten Zutaten" << (ok ? "" : " – Schreibfehler: " + err) << "\n";
+        return ok ? 0 : 1;
+    }
     if (argc >= 5 && QString::fromLocal8Bit(argv[1]) == QLatin1String("--bench-web")) {
         const QString base = QString::fromLocal8Bit(argv[2]);
         const int n = QString::fromLocal8Bit(argv[3]).toInt(), nt = QString::fromLocal8Bit(argv[4]).toInt();
@@ -2709,6 +2765,108 @@ int main(int argc, char **argv)
         CHECK(!MealTypes::isHighCalorie(h, MealTypes::Main), "ohne Portionsangabe nie");
 
         CHECK(RecipeHtml::tagLabel("leichte mahlzeit") == QStringLiteral("leichte Mahlzeit") && RecipeHtml::tagLabel("vegan") == "Vegan", "Tag-Namen");
+    }
+
+    out << "\n=== Nährwerttabelle: jeder Name führt zu seinem Eintrag 1.0.2 ===\n";
+    {
+        FoodTable &ft = FoodTable::instance();
+        QStringList wrong;
+        for (const Food *f : ft.all()) {
+            if (!ft.isBuiltin(f->key)) continue;
+            QStringList names = f->aliases;
+            names << f->name;
+            for (const QString &a : names) {
+                const Food *m = ft.match(a);
+                if (!m || m->key != f->key) wrong << QStringLiteral("%1 (%2→%3)").arg(a, f->key, m ? m->key : QStringLiteral("–"));
+            }
+        }
+        CHECK(wrong.isEmpty(), QStringLiteral("%1 Namen führen woandershin: ").arg(wrong.size()) + wrong.join(", "));
+        const QList<QPair<const char *, const char *>> expect{
+            { "Tomaten", "tomate" }, { "reife Tomaten", "tomate" }, { "Erbsen", "erbsen" }, { "Erbsen, tiefgekühlt", "erbsen" },
+            { "getrocknete Tomaten", "getrocknete_tomaten" }, { "Pfefferkörner", "pfeffer" },
+        };
+        QStringList bad;
+        for (const auto &e : expect) {
+            const Food *f = ft.match(QString::fromUtf8(e.first));
+            if (!f || f->key != QLatin1String(e.second)) bad << QStringLiteral("%1→%2").arg(QString::fromUtf8(e.first), f ? f->key : QStringLiteral("–"));
+        }
+        CHECK(bad.isEmpty(), "häufige Zutaten: " + bad.join(", "));
+    }
+
+    out << "\n=== Säure-Basen-Fasten 0.9.22 ===\n";
+    {
+        auto make = [](const QStringList &lines) {
+            Recipe r;
+            r.title = QStringLiteral("Test");
+            r.servings = 2;
+            for (const QString &l : lines) r.ingredients << IngredientParser::parseLine(l);
+            Nutrition::analyze(r);
+            return r;
+        };
+        struct Case { QStringList lines; bool want; const char *what; };
+        const QList<Case> cases{
+            { { "500 g Kartoffeln", "300 g Brokkoli", "1 Zwiebel", "2 EL Olivenöl", "Salz", "Pfeffer", "1 Bund Petersilie" }, true, "Gemüse-Kartoffel-Pfanne" },
+            { { "1 Kopf Blumenkohl", "2 Möhren", "500 ml Gemüsebrühe", "1 Stück Ingwer", "1 TL Kurkuma", "Wasser" }, true, "Gemüsesuppe mit Gemüsebrühe" },
+            { { "2 Äpfel", "100 g Heidelbeeren", "1 Banane", "20 g Mandeln", "1 EL Leinsamen", "1 EL Zitronensaft" }, true, "Obstsalat mit Mandeln" },
+            { { "200 g Feldsalat", "1 Avocado", "1 EL Apfelessig", "2 EL Leinöl", "1 EL Kürbiskerne" }, true, "Salat mit Apfelessig und Leinöl" },
+            { { "1 Butternutkürbis", "1 Zwiebel", "1 EL Olivenöl", "1 Prise Salz" }, true, "Butternut ist kein Butter" },
+            { { "500 g Kartoffeln", "50 g Butter", "Salz" }, false, "Butter" },
+            { { "300 g Spinat", "2 Eier", "Salz" }, false, "Eier" },
+            { { "200 g Nudeln", "2 Tomaten", "Basilikum" }, false, "Nudeln" },
+            { { "1 Zucchini", "100 g Feta" }, false, "Käse" },
+            { { "2 Möhren", "500 ml Hühnerbrühe" }, false, "Hühnerbrühe" },
+            { { "200 g Champignons", "100 g Speck" }, false, "Speck" },
+            { { "2 Äpfel", "2 EL Honig" }, false, "Honig" },
+            { { "2 Äpfel", "50 g Walnüsse" }, false, "Walnüsse" },
+            { { "300 g Rote Bete", "1 EL Balsamico-Essig" }, false, "Balsamico" },
+            { { "200 g Kichererbsen", "1 Paprika" }, false, "Hülsenfrüchte" },
+            { { "1 Paprika", "100 g Tamarillo-Chutney-Spezialmischung XY" }, false, "unbekannte Zutat" },
+            { { "1 Dose Tomaten", "1 Zwiebel" }, false, "Konserve" },
+        };
+        QStringList wrong;
+        for (const Case &c : cases) {
+            Recipe r = make(c.lines);
+            QStringList why;
+            const bool got = Basenfasten::qualifies(r, &why);
+            if (got != c.want) wrong << QStringLiteral("%1 (%2: %3)").arg(QString::fromUtf8(c.what), got ? "ja" : "nein", why.join("; "));
+        }
+        CHECK(wrong.isEmpty(), "Basenfasten-Einordnung: " + wrong.join(" | "));
+        Recipe r = make({ "500 g Kartoffeln", "1 Zwiebel" });
+        CHECK(Basenfasten::applyTag(r) == 1 && r.hasTag("säure-basen-fasten") && Basenfasten::applyTag(r) == 0, "Tag gesetzt, zweites Mal unverändert");
+        r.ingredients << IngredientParser::parseLine("200 ml Sahne");
+        Nutrition::analyze(r);
+        CHECK(Basenfasten::applyTag(r) == 1 && !r.hasTag("säure-basen-fasten"), "Tag entfernt, wenn nicht mehr passend");
+        CHECK(RecipeHtml::tagLabel("säure-basen-fasten") == "Säure-Basen-Fasten", "Anzeige " + RecipeHtml::tagLabel("säure-basen-fasten"));
+    }
+
+    out << "\n=== Kalb: Innereien, Haxe, Brust 0.9.21 ===\n";
+    {
+        FoodTable &ft = FoodTable::instance();
+        QStringList clash;
+        for (const char *k : { "kalbfleisch", "kalbsleber", "kalbsniere", "kalbszunge", "kalbsbries", "kalbshaxe", "kalbsbrust", "rindfleisch", "gefluegelleber" }) {
+            const Food *f = ft.find(QLatin1String(k));
+            if (!f) { clash << QStringLiteral("fehlt: ") + k; continue; }
+            for (const QString &a : f->aliases) {
+                const Food *m = ft.match(a);
+                if (!m || m->key != f->key) clash << QStringLiteral("%1(%2→%3)").arg(a, f->key, m ? m->key : QStringLiteral("–"));
+            }
+        }
+        CHECK(clash.isEmpty(), "Kalb-Namen eindeutig: " + clash.join(", "));
+        const QList<QPair<const char *, const char *>> expect{
+            { "Kalbsschnitzel", "kalbfleisch" }, { "Kalbfleisch", "kalbfleisch" }, { "Kalbsfilet", "kalbfleisch" }, { "Kalbsherz", "kalbfleisch" },
+            { "Kalbsleber", "kalbsleber" }, { "Kalbsleberscheiben", "kalbsleber" }, { "calf liver", "kalbsleber" }, { "Kalbsnieren", "kalbsniere" },
+            { "Kalbszunge", "kalbszunge" }, { "Kalbsbries", "kalbsbries" }, { "Kalbsmilken", "kalbsbries" }, { "Kalbshaxe", "kalbshaxe" },
+            { "Kalbsbeinscheiben", "kalbshaxe" }, { "Ossobuco", "kalbshaxe" }, { "veal shank", "kalbshaxe" }, { "Kalbsbrust", "kalbsbrust" },
+            { "Hühnerleber", "gefluegelleber" }, { "Rinderbraten", "rindfleisch" }, { "Beinscheibe", "rindfleisch" },
+        };
+        QStringList wrong;
+        for (const auto &e : expect) {
+            const Food *f = ft.match(QString::fromUtf8(e.first));
+            if (!f || f->key != QLatin1String(e.second)) wrong << QStringLiteral("%1→%2").arg(QString::fromUtf8(e.first), f ? f->key : QStringLiteral("–"));
+        }
+        CHECK(wrong.isEmpty(), "Kalb-Zuordnung: " + wrong.join(", "));
+        const Food *zunge = ft.find("kalbszunge"), *mager = ft.find("kalbfleisch"), *leber = ft.find("kalbsleber");
+        CHECK(zunge && mager && leber && zunge->per100.fat > 3 * mager->per100.fat && leber->per100.carbs > 0, "Zunge fetter, Leber mit Kohlenhydraten");
     }
 
     out << "\n=== Registrierungsschlüssel 0.9.19 ===\n";

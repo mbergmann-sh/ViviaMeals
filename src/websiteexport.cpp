@@ -41,6 +41,15 @@ bool writeText(const QString &path, const QString &text, QString *error)
     return true;
 }
 
+// Produktseite von ViviaMeals – „ViviaMeals“ im Menü und in der Fußzeile verweist dorthin
+const char *kProductUrl = "https://portfolio.mbergmann-sh.de/article/viviameals-rezeptverwaltung-fuer-windows-download";
+
+QString productLink(const QString &cls = QString())
+{
+    return QStringLiteral("<a%1 href=\"%2\" target=\"_blank\" rel=\"noopener\">ViviaMeals</a>")
+        .arg(cls.isEmpty() ? QString() : QStringLiteral(" class=\"%1\"").arg(cls), QString::fromLatin1(kProductUrl));
+}
+
 const char *kCss = R"CSS(/* ViviaMeals – Website (erzeugt) */
 :root { --blau:#1474BC; --orange:#E0620D; --gruen:#2e9e6b; --text:#222; --grau:#6b6b6b; --linie:#dde3ea; --hell:#f4f7fa; }
 * { box-sizing:border-box; }
@@ -64,6 +73,7 @@ nav.themes .credit { text-align:center; margin:0 0 18px; padding-bottom:14px; bo
 nav.themes .credit img { display:block; width:100%; max-width:210px; height:auto; margin:0 auto 8px; border-radius:10px; }
 nav.themes .credit p { margin:2px 0; font-size:.88rem; color:var(--grau); }
 nav.themes .credit .made { color:var(--text); font-weight:600; }
+nav.themes .credit .made a, footer a.product { color:var(--blau); }
 nav.themes h2 { font-size:.85rem; text-transform:uppercase; letter-spacing:.05em; color:var(--grau); margin:0 0 8px; }
 nav.themes ul { list-style:none; margin:0; padding:0; }
 nav.themes li a { display:flex; justify-content:space-between; padding:5px 8px; border-radius:6px; color:var(--text); }
@@ -164,14 +174,14 @@ foreach ($recipes as $r) {
 <span class="sub"><?= h($site['subtitle']) ?></span></span></a>
 <form action="suche.php" method="get" role="search"><input type="search" name="q" value="<?= h($q) ?>" placeholder="Rezept, Zutat oder Thema …"><button>Suchen</button></form>
 <?php if (!empty($site['legal'])): ?><nav class="legal" aria-label="Rechtliches"><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></nav><?php endif; ?></header>
-<div class="layout"><nav class="themes"><div class="credit"><img src="assets/viviameals-koch.jpg" alt="ViviaMeals" width="210"><div><p class="made">Erstellt mit ViviaMeals</p><p><a href="https://portfolio.mbergmann-sh.de" target="_blank" rel="noopener">portfolio.mbergmann-sh.de</a></p></div></div><h2>Themen</h2><ul>
+<div class="layout"><nav class="themes"><div class="credit"><img src="assets/viviameals-koch.jpg" alt="ViviaMeals" width="210"><div><p class="made">Erstellt mit <a href="https://portfolio.mbergmann-sh.de/article/viviameals-rezeptverwaltung-fuer-windows-download" target="_blank" rel="noopener">ViviaMeals</a></p><p><a href="https://portfolio.mbergmann-sh.de" target="_blank" rel="noopener">portfolio.mbergmann-sh.de</a></p></div></div><h2>Themen</h2><ul>
 <?php foreach ($site['themes'] as $t): ?><li><a href="<?= h($t['url']) ?>"><span><?= h($t['label']) ?></span><span class="count"><?= (int)$t['count'] ?></span></a></li><?php endforeach; ?>
 </ul></nav><main><h1>Suche</h1>
 <p class="muted"><?= $words ? count($hits) . ' Rezept' . (count($hits) === 1 ? '' : 'e') . ' für „' . h($q) . '“' : 'Bitte einen Suchbegriff eingeben.' ?></p>
 <div class="grid"><?php foreach ($hits as $r): ?><a class="card" href="<?= h($r['url']) ?>">
 <div class="thumb"<?= $r['image'] ? ' style="background-image:url(\'' . h($r['image']) . '\')"' : '' ?>><?= $r['image'] ? '' : '🍽' ?></div>
 <div class="body"><div class="title"><?= h($r['title']) ?></div><?php if ($r['kcal'] > 0): ?><div class="kcal"><?= (int)$r['kcal'] ?> kcal je Portion</div><?php endif; ?></div></a>
-<?php endforeach; ?></div></main></div><footer><?= h($site['footer'] ?? '') ?><?php if (!empty($site['legal'])): ?> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a><?php endif; ?></footer></body></html>
+<?php endforeach; ?></div></main></div><footer>Erstellt mit <a class="product" href="https://portfolio.mbergmann-sh.de/article/viviameals-rezeptverwaltung-fuer-windows-download" target="_blank" rel="noopener">ViviaMeals</a><?php if (!empty($site['legal'])): ?> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a><?php endif; ?></footer></body></html>
 )PHP";
 
 const char *kLogo = R"SVG(<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect x="8" y="8" width="240" height="240" rx="48" fill="#fff" fill-opacity=".14"/><circle cx="128" cy="140" r="78" fill="#fff"/><circle cx="128" cy="140" r="56" fill="none" stroke="#1474BC" stroke-width="8"/><path d="M128 72c26-30 62-30 74-26-2 30-26 56-60 58" fill="#E0620D"/><path d="M60 196l136-108" stroke="#0F67AB" stroke-width="0"/></svg>)SVG";
@@ -211,8 +221,8 @@ QString shell(const Options &opt, const QString &root, const QString &title, con
     const bool legalPage = opt.legal.enabled && (title == tr("Impressum") || title == tr("Datenschutz"));
     h += QStringLiteral("<div class=\"layout\">%1<main%3>%2</main></div>\n").arg(nav, body, legalPage ? QStringLiteral(" class=\"legal-page\"") : QString());
     h += QStringLiteral("<footer>%1%3</footer><script src=\"%2assets/suche.js\"></script></body></html>\n")
-             .arg(esc(tr("Erstellt mit ViviaMeals am %1").arg(QDate::currentDate().toString(QStringLiteral("dd.MM.yyyy")))
-                      + (opt.author.isEmpty() ? QString() : QStringLiteral(" · ") + opt.author)),
+             .arg(tr("Erstellt mit %1 am %2").arg(productLink(QStringLiteral("product")), QDate::currentDate().toString(QStringLiteral("dd.MM.yyyy")))
+                      + (opt.author.isEmpty() ? QString() : QStringLiteral(" · ") + esc(opt.author)),
                   root,
                   opt.legal.enabled ? QStringLiteral(" · <a href=\"%1impressum.html\">%2</a> · <a href=\"%1datenschutz.html\">%3</a>")
                                           .arg(root, tr("Impressum"), tr("Datenschutz"))
@@ -477,7 +487,7 @@ bool exportSite(const QString &folder, const Options &opt, QString *error, const
         return QStringLiteral("<div class=\"credit\"><img src=\"%1assets/viviameals-koch.jpg\" alt=\"ViviaMeals\" width=\"210\">"
                               "<div><p class=\"made\">%2</p><p><a href=\"https://portfolio.mbergmann-sh.de\" target=\"_blank\" rel=\"noopener\">"
                               "portfolio.mbergmann-sh.de</a></p></div></div>")
-            .arg(root, tr("Erstellt mit ViviaMeals"));
+            .arg(root, tr("Erstellt mit %1").arg(productLink()));
     };
     // Listeneinträge je Thema einmal bauen (je Pfadtiefe), nicht für jede Seite neu
     auto themeLi = [&](const QString &root, const QString &key, bool active) {

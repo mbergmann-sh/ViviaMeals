@@ -22,6 +22,7 @@ QString tagLabel(const QString &tag)
     if (tag.isEmpty()) return tag;
     // Tags aus mehreren Wörtern mit Adjektiv vorn: nur das Substantiv groß
     if (tag == QLatin1String("leichte mahlzeit")) return QStringLiteral("leichte Mahlzeit");
+    if (tag == QStringLiteral("säure-basen-fasten")) return QStringLiteral("Säure-Basen-Fasten");
     QString t = tag;
     t[0] = t[0].toUpper();
     return t;
@@ -166,7 +167,7 @@ QString render(const Recipe &r, const Style &st, double servings)
         QStringList t;
         for (const QString &tag : r.tags)
             t << QStringLiteral("<span style=\"background-color:%1; color:#ffffff;\">&nbsp;%2&nbsp;</span>")
-                     .arg(col(tag == QLatin1String("vegan") || tag == QLatin1String("vegetarisch") ? QColor(0x2e, 0x9e, 0x6b) : st.primary),
+                     .arg(col(tag == QLatin1String("vegan") || tag == QLatin1String("vegetarisch") || tag == QStringLiteral("säure-basen-fasten") ? QColor(0x2e, 0x9e, 0x6b) : st.primary),
                           escape(tagLabel(tag)));
         h += QStringLiteral("<p>%1</p>").arg(t.join(QStringLiteral(" ")));
     }

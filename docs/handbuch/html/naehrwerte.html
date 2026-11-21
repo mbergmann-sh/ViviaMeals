@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Nährwerte – ViviaMeals – Handbuch</title><link rel="stylesheet" href="handbuch.css"></head>
 <body class="web">
-<header class="top"><span class="version">Version 0.9.20</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
+<header class="top"><span class="version">Version 1.0.1</span><a href="index.html"><img src="bilder/viviameals-logo.png" alt="">ViviaMeals – Handbuch</a></header>
 <div class="wrap"><nav class="side"><input id="suche" class="such" type="search" placeholder="Im Handbuch suchen …"><ol>
 <li><a href="index.html">Start und Inhalt</a></li>
 <li><a href="willkommen.html">Willkommen bei ViviaMeals</a>
@@ -15,7 +15,7 @@
 <li><a href="scannen.html">Rezepte scannen</a>
 </li>
 <li class="aktiv"><a href="naehrwerte.html">Nährwerte</a>
-<ol><li><a href="#naehrwerte-rechnen">Wie ViviaMeals rechnet</a></li><li><a href="#naehrwerttabelle">Die Nährwerttabelle</a></li><li><a href="#eigene-lebensmittel">Eigene Lebensmittel anlegen</a></li><li><a href="#zutaten-ohne-naehrwerte">Fehlende Lebensmittel finden</a></li><li><a href="#naehrwerte-csv">Nährwerte importieren und exportieren</a></li><li><a href="#naehrwert-tags">Mahlzeit- und Nährwert-Tags</a></li><li><a href="#saison-tags">Saison-Tags</a></li><li><a href="#neu-berechnen">Alle Rezepte abgleichen</a></li></ol>
+<ol><li><a href="#naehrwerte-rechnen">Wie ViviaMeals rechnet</a></li><li><a href="#naehrwerttabelle">Die Nährwerttabelle</a></li><li><a href="#eigene-lebensmittel">Eigene Lebensmittel anlegen</a></li><li><a href="#zutaten-ohne-naehrwerte">Fehlende Lebensmittel finden</a></li><li><a href="#naehrwerte-csv">Nährwerte importieren und exportieren</a></li><li><a href="#naehrwert-tags">Mahlzeit- und Nährwert-Tags</a></li><li><a href="#saison-tags">Saison-Tags</a></li><li><a href="#basenfasten">Säure-Basen-Fasten</a></li><li><a href="#neu-berechnen">Alle Rezepte abgleichen</a></li></ol>
 </li>
 <li><a href="planen.html">Planen und Gewichtskontrolle</a>
 </li>
@@ -204,13 +204,25 @@
 </ul>
 <p>Die Themenauswahl <strong>Saisonal</strong> im Hauptfenster zeigt automatisch die Rezepte der aktuellen Jahreszeit (<a href="hauptfenster.html#rezeptliste">Die Rezeptliste</a>).</p>
 <p>Anders als die übrigen Tags werden Saison-Tags dabei ersetzt: Ändern Sie die Zutaten, passt ViviaMeals die Jahreszeit an. Andere Tags bleiben unberührt.</p>
+<h2 id="basenfasten">Säure-Basen-Fasten</h2>
+<p>Der Tag <strong>Säure-Basen-Fasten</strong> markiert Rezepte, die beim Basenfasten erlaubt sind. ViviaMeals vergibt ihn beim Import (abschaltbar unter <em>Einstellungen → Import</em>), im Editor über <strong>Ergänzen</strong> und für die ganze Datenbank über <em>Extras → Tag „Säure-Basen-Fasten“ für alle Rezepte vergeben …</em> (mit Rückfrage).</p>
+<p>Grundlage ist die gängige, <strong>strenge</strong> Variante. Ein Rezept bekommt den Tag nur, wenn <strong>alle</strong> Zutaten erlaubt sind:</p>
+<ul>
+<li><strong>Erlaubt:</strong> Gemüse (frisch oder gedünstet), Kartoffeln und Süßkartoffeln, Pilze, Sprossen, Algen, frisches Obst, wenig ungeschwefeltes Trockenobst, Kräuter und Gewürze, Salz, Ingwer, Mandeln und Mandelmus, Kürbis-, Sonnenblumen-, Lein-, Sesam- und Chiasamen, kaltgepresste Öle (Oliven-, Lein-, Hanf-, Walnuss-, Kürbiskern-, Sesamöl), Gemüsebrühe, Apfelessig, Hefeflocken, ungesüßte Mandelmilch.</li>
+<li><strong>Verboten:</strong> Fleisch, Wurst, Fisch und Meeresfrüchte, Fleisch- und Fischbrühe, Eier, Milch und Milchprodukte, Käse, Butter und Margarine, Getreide, Brot, Nudeln, Reis (auch Hirse und Quinoa), Hülsenfrüchte und Soja, Walnüsse, Haselnüsse, Erdnüsse und die meisten anderen Nüsse, Zucker, Honig, Sirup, Süßes, Alkohol, Kaffee, Fertigsaucen, Senf, Ketchup, Mayonnaise, Brühwürfel, Konserven und Tiefkühlgerichte, anderer Essig.</li>
+<li>Eine <strong>unbekannte</strong> Zutat (ohne Zuordnung zur Nährwerttabelle) schließt das Rezept ebenfalls aus – lieber ein passendes Rezept zu wenig als ein unpassendes zu viel. Wasser und Backpapier &amp; Co. zählen nicht.</li>
+</ul>
+<p>Der Tag wird bei jeder Anwendung neu bestimmt: Kommt Sahne in die Gemüsesuppe, verliert sie ihn wieder. Die Listen unterscheiden sich je nach Fastenkonzept in Details; hier gilt die strenge Fassung.</p>
+<blockquote>
+<p><strong>Hinweis:</strong> ViviaMeals ist kein Medizinprodukt. Dass sich der Säure-Basen-Haushalt über die Ernährung nennenswert verändern lässt, ist wissenschaftlich nicht belegt – der Körper reguliert seinen pH-Wert selbst. Bei Vorerkrankungen, Medikamenten, Schwangerschaft oder Untergewicht vor dem Fasten ärztlichen Rat einholen.</p>
+</blockquote>
 <h2 id="neu-berechnen">Alle Rezepte abgleichen</h2>
 <p><em>Extras → Alle Rezepte mit der Lebensmitteldatenbank abgleichen …</em> bringt die ganze Datenbank auf den Stand der aktuellen Nährwerttabelle – etwa nachdem Sie eigene Lebensmittel angelegt oder zugeordnet haben, oder nach einem Programm-Update mit erweiterter Tabelle. Nach einem solchen Update <strong>fragt ViviaMeals beim ersten Öffnen jeder Datenbank von selbst</strong>, ob abgeglichen werden soll (einmal je Datenbank und Programmfassung). Für jedes Rezept</p>
 <ul>
 <li>werden alle Zutaten <strong>neu zugeordnet</strong> (von Hand im Editor festgelegte Zuordnungen bleiben),</li>
 <li>werden Kalorien und Nährwerte neu berechnet und die Nährwert-Tags angepasst,</li>
 <li>wird ein falsches <strong>„vegetarisch“ oder „vegan“ entfernt</strong>, wenn das Rezept Fleisch, Fisch, Meeresfrüchte (Krabben, Garnelen, Muscheln, Tintenfisch, Hummer …) oder tierische Würzmittel (Fischsauce, Austernsauce, Sardellen, Dashi …) enthält; „fisch“ bzw. „fleischgerichte“ wird ergänzt,</li>
-<li>werden vorhandene Saison-Tags an die Zutaten angepasst,</li>
+<li>werden vorhandene Saison-Tags an die Zutaten angepasst und der Tag „Säure-Basen-Fasten“ neu bestimmt,</li>
 <li>wird die Zutatenliste aufgeräumt (siehe oben) und werden DOS-Zeichenfehler berichtigt.</li>
 </ul>
 <p>Ein Fortschrittsbalken zeigt den Stand; beim Abbrechen bleiben die schon abgeglichenen Rezepte gespeichert. Geschrieben werden nur Rezepte, die sich wirklich ändern. Zum Schluss nennt eine Übersicht, wie viele Rezepte neue Nährwerte oder Tags bekommen haben und wie viele Zutaten noch kein Lebensmittel haben – die lassen sich gleich <a href="#zutaten-ohne-naehrwerte">durchsehen</a>.</p>
@@ -219,5 +231,5 @@
 <figcaption aria-hidden="true">Fortschrittsanzeige bei der Neuberechnung</figcaption>
 </figure>
 <nav class="pager"><span><a href="scannen.html">← Rezepte scannen</a></span><span class="weiter"><a href="planen.html">Planen und Gewichtskontrolle →</a></span></nav></main></div>
-<footer>ViviaMeals 0.9.20 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
+<footer>ViviaMeals 1.0.1 · © 2026 Michael Bergmann · PolyForm Noncommercial 1.0.0 · kein Medizinprodukt</footer><script src="suchindex.js"></script><script src="suche.js"></script>
 </body></html>

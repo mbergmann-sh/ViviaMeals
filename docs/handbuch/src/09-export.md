@@ -49,7 +49,7 @@ das Häkchen *Impressum und Datenschutzhinweise erzeugen* heraus.
 Die Website enthält eine Startseite, eine Seite je Thema (Tag) und je Rezept – mit Foto und Nährwerten –,
 ein Menü und eine Suche: sofort im Browser (JavaScript) und auf dem Server (`suche.php`, PHP 7.4 oder
 neuer). Oben in der Themenspalte stehen auf jeder Seite das ViviaMeals-Bild aus dem Über-Dialog,
-„Erstellt mit ViviaMeals“ und ein Link zu portfolio.mbergmann-sh.de. Das Layout passt sich Handys und
+„Erstellt mit ViviaMeals“ und ein Link zu portfolio.mbergmann-sh.de; „ViviaMeals“ verweist hier und in der Fußzeile auf die Produktseite von ViviaMeals. Das Layout passt sich Handys und
 Tablets an; dort steht das Bild klein neben dem Text.
 
 Bei **sehr vielen Themen** (mehr als 60) zeigen Rezept- und Themenseiten links nur eine kurze Liste: *Alle

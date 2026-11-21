@@ -92,6 +92,11 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
                                 "Tiefkühlware, Konserven und Getrocknetes zählen nicht"));
     m_seasonTags->setChecked(s.value(QStringLiteral("import/seasonTags"), true).toBool());
     il->addWidget(m_seasonTags);
+    m_basenTag = new QCheckBox(tr("Tag „säure-basen-fasten“ vergeben, wenn alle Zutaten beim Basenfasten erlaubt sind"));
+    m_basenTag->setToolTip(tr("Strenge Variante: nur Gemüse, Kartoffeln, Obst, Kräuter, Mandeln, Samen, kaltgepresste Öle und Gemüsebrühe; "
+                              "eine verbotene oder unbekannte Zutat schließt das Rezept aus"));
+    m_basenTag->setChecked(s.value(QStringLiteral("import/basenTag"), true).toBool());
+    il->addWidget(m_basenTag);
     m_offerFoods = new QCheckBox(tr("Für Zutaten ohne Nährwerte den Lebensmittel-Assistenten anbieten (nach dem Import, beim Speichern neuer Rezepte)"));
     m_offerFoods->setToolTip(tr("Eigene Lebensmittel, z. B. Fertigprodukte, mit den Angaben von der Verpackung anlegen oder vorhandenen zuordnen"));
     m_offerFoods->setChecked(QSettings().value(QStringLiteral("foods/offerWizard"), true).toBool());
@@ -369,6 +374,7 @@ void SettingsDialog::accept()
     s.setValue(QStringLiteral("import/mealTags"), m_mealTags->isChecked());
     s.setValue(QStringLiteral("import/nutrientTags"), m_nutrientTags->isChecked());
     s.setValue(QStringLiteral("import/seasonTags"), m_seasonTags->isChecked());
+    s.setValue(QStringLiteral("import/basenTag"), m_basenTag->isChecked());
     s.setValue(QStringLiteral("foods/offerWizard"), m_offerFoods->isChecked());
     DeepL::Settings ds;
     ds.enabled = m_deepl->isChecked();

@@ -779,7 +779,6 @@
     "apricot jam",
     "hägemark",
     "hagebuttenmus",
-    "ungezuckertes hagebuttenmark",
     "zwetschgensauce",
     "süße zwetschgensauce"
    ]
@@ -1120,12 +1119,10 @@
    "units": {},
    "aliases": [
     "sesamöl",
-    "walnussöl",
     "kürbiskernöl",
     "leinöl",
     "sesame oil",
     "toasted sesame oil",
-    "walnut oil",
     "sesamsamenöl",
     "seasamöl"
    ]
@@ -1210,7 +1207,6 @@
     "skimmed milk",
     "low-fat milk",
     "lowfat milk",
-    "2% milk",
     "nonfat milk"
    ]
   },
@@ -1314,7 +1310,6 @@
     "heavy cream",
     "whipping cream",
     "heavy whipping cream",
-    "double cream",
     "light cream",
     "single cream",
     "schlagobers",
@@ -1404,7 +1399,6 @@
     "joghurt",
     "naturjoghurt",
     "vollmilchjoghurt",
-    "griechischer joghurt",
     "joghurt natur",
     "kefir",
     "dickmilch",
@@ -1413,7 +1407,6 @@
     "yoghurt",
     "plain yogurt",
     "natural yogurt",
-    "greek yogurt",
     "naturjogurt"
    ]
   },
@@ -1438,7 +1431,9 @@
     "rahmjoghurt",
     "sahnejoghurt",
     "griechischer joghurt 10 %",
-    "full fat greek yogurt"
+    "griechischer joghurt",
+    "full fat greek yogurt",
+    "greek yogurt"
    ]
   },
   {
@@ -1488,8 +1483,6 @@
    },
    "aliases": [
     "sahnequark",
-    "quark 40 %",
-    "quark 20 %",
     "schichtkäse",
     "cream quark"
    ]
@@ -2643,9 +2636,7 @@
    "piece": 0.0,
    "units": {},
    "aliases": [
-    "gekochter reis",
-    "reis gekocht",
-    "cooked rice"
+    "gekochter reis"
    ]
   },
   {
@@ -3097,17 +3088,10 @@
    "units": {},
    "aliases": [
     "zwieback",
-    "butterkekse",
-    "löffelbiskuits",
     "biskuits",
-    "kekse",
-    "cantuccini",
-    "amarettini",
     "crackers",
     "graham crackers",
     "graham cracker crumbs",
-    "cookies",
-    "ladyfingers",
     "vanilla wafers",
     "saltines",
     "zwiebäcke"
@@ -3847,22 +3831,16 @@
     "Dose": 400.0
    },
    "aliases": [
-    "tomaten aus der dose",
     "dosentomaten",
-    "gehackte tomaten",
-    "geschälte tomaten",
     "stückige tomaten",
     "pizzatomaten",
     "passierte tomaten",
     "passata",
     "tomatenpüree",
     "polpa",
-    "canned tomatoes",
-    "diced tomatoes",
     "crushed tomatoes",
     "whole tomatoes",
     "stewed tomatoes",
-    "peeled tomatoes",
     "tomato puree",
     "tomato sauce",
     "can tomatoes"
@@ -3898,7 +3876,6 @@
     "gulaschpaste",
     "scharfe salca",
     "tomatenpurree",
-    "tomatenpüree",
     "gewürztes tomatenfruchtfleisch"
    ]
   },
@@ -3920,7 +3897,6 @@
     "Glas": 280.0
    },
    "aliases": [
-    "getrocknete tomaten",
     "sonnengetrocknete tomaten",
     "sun-dried tomatoes",
     "sun dried tomatoes",
@@ -5009,7 +4985,6 @@
     "tangerinenschale",
     "getrocknete mandarinenschale",
     "mandarinenschale",
-    "abgeriebene limone",
     "zitornenschale",
     "feine orangenfrucht",
     "angelikastengel"
@@ -6668,11 +6643,9 @@
    "aliases": [
     "kokosnuss",
     "kokosnüsse",
-    "frische kokosnuss",
     "kokosnussfleisch",
     "kokosfleisch",
     "kokosnussstücke",
-    "fresh coconut",
     "coconut meat",
     "coconut flesh"
    ]
@@ -7270,12 +7243,9 @@
    "piece": 0.0,
    "units": {},
    "aliases": [
-    "getrocknete bohnen",
     "weiße bohnenkerne",
-    "getrocknete erbsen",
     "schälerbsen",
     "trockenerbsen",
-    "erbsen getrocknet",
     "dried beans",
     "dry beans",
     "split peas",
@@ -7398,7 +7368,6 @@
     "sojaschnetzel",
     "sojagranulat",
     "seitan",
-    "tempeh",
     "veganes hack",
     "vegane hack",
     "fleischersatz",
@@ -7473,8 +7442,6 @@
     "rouladen",
     "schmorfleisch",
     "rinderbrust",
-    "kalbfleisch",
-    "kalbsschnitzel",
     "ochsenbacke",
     "beef",
     "stew meat",
@@ -7486,7 +7453,6 @@
     "roast",
     "brisket",
     "stewing beef",
-    "veal",
     "beef chuck",
     "top round",
     "london broil",
@@ -7502,7 +7468,6 @@
     "rinderschulter",
     "rinderquerrippe",
     "rinderbacken",
-    "entrecôtes",
     "rinds-entrecôte",
     "tournedos",
     "hohrücken",
@@ -7550,22 +7515,14 @@
     "kalbfleisch",
     "kalbsfilet",
     "kalbsnuss",
-    "kalbshaxe",
     "kalbsschnitzel",
     "kalbsbraten",
     "kalbsrücken",
-    "kalbsnieren",
-    "kalbszunge",
-    "kalbszungen",
-    "kalbsleber",
-    "kalbsbries",
     "kalbsgeschnetzeltes",
     "kalb",
     "veal",
     "veal cutlet",
-    "veal shank",
     "veal loin",
-    "kalbsbrust",
     "kalbsragout",
     "kalbshuft",
     "kalbsplätzchen",
@@ -7581,6 +7538,172 @@
     "kalbsherz",
     "kalbsfleisch für ragout",
     "kalbsmagen"
+   ]
+  },
+  {
+   "key": "kalbsleber",
+   "name": "Kalbsleber",
+   "category": "fleisch",
+   "kcal": 135.0,
+   "protein": 20.0,
+   "fat": 4.5,
+   "saturatedFat": 1.5,
+   "carbohydrates": 3.0,
+   "sugar": 0.0,
+   "fiber": 0.0,
+   "salt": 0.2,
+   "density": 1.0,
+   "piece": 0.0,
+   "units": {
+    "Scheibe": 120.0
+   },
+   "aliases": [
+    "kalbsleber",
+    "kalbslebern",
+    "kalbsleberscheiben",
+    "kalbsleberstreifen",
+    "leber vom kalb",
+    "calf liver",
+    "calf's liver",
+    "calves liver",
+    "veal liver"
+   ]
+  },
+  {
+   "key": "kalbsniere",
+   "name": "Kalbsniere",
+   "category": "fleisch",
+   "kcal": 100.0,
+   "protein": 16.0,
+   "fat": 3.0,
+   "saturatedFat": 1.0,
+   "carbohydrates": 1.0,
+   "sugar": 0.0,
+   "fiber": 0.0,
+   "salt": 0.45,
+   "density": 1.0,
+   "piece": 300.0,
+   "units": {
+    "Stück": 300.0
+   },
+   "aliases": [
+    "kalbsniere",
+    "kalbsnieren",
+    "kalbsnierchen",
+    "nieren vom kalb",
+    "kalbsnierle",
+    "veal kidney",
+    "veal kidneys",
+    "calf kidney",
+    "calf kidneys"
+   ]
+  },
+  {
+   "key": "kalbszunge",
+   "name": "Kalbszunge",
+   "category": "fleisch",
+   "kcal": 180.0,
+   "protein": 16.0,
+   "fat": 13.0,
+   "saturatedFat": 5.0,
+   "carbohydrates": 0.5,
+   "sugar": 0.0,
+   "fiber": 0.0,
+   "salt": 0.2,
+   "density": 1.0,
+   "piece": 400.0,
+   "units": {
+    "Stück": 400.0
+   },
+   "aliases": [
+    "kalbszunge",
+    "kalbszungen",
+    "zunge vom kalb",
+    "veal tongue",
+    "calf tongue",
+    "calf's tongue"
+   ]
+  },
+  {
+   "key": "kalbsbries",
+   "name": "Kalbsbries (Milken)",
+   "category": "fleisch",
+   "kcal": 100.0,
+   "protein": 17.0,
+   "fat": 3.0,
+   "saturatedFat": 1.0,
+   "carbohydrates": 0.0,
+   "sugar": 0.0,
+   "fiber": 0.0,
+   "salt": 0.2,
+   "density": 1.0,
+   "piece": 0.0,
+   "units": {},
+   "aliases": [
+    "kalbsbries",
+    "kalbsmilken",
+    "kalbsmilke",
+    "milken",
+    "bries",
+    "kalbsbröschen",
+    "sweetbreads",
+    "veal sweetbreads",
+    "calf sweetbreads"
+   ]
+  },
+  {
+   "key": "kalbshaxe",
+   "name": "Kalbshaxe / Beinscheibe (mit Knochen)",
+   "category": "fleisch",
+   "kcal": 85.0,
+   "protein": 14.0,
+   "fat": 3.0,
+   "saturatedFat": 1.1,
+   "carbohydrates": 0.0,
+   "sugar": 0.0,
+   "fiber": 0.0,
+   "salt": 0.1,
+   "density": 1.0,
+   "piece": 0.0,
+   "units": {
+    "Beinscheibe": 300.0,
+    "Haxe": 1200.0
+   },
+   "aliases": [
+    "kalbshaxe",
+    "kalbshaxen",
+    "kalbshachse",
+    "kalbshachsen",
+    "kalbsbeinscheibe",
+    "kalbsbeinscheiben",
+    "kalbshaxenscheiben",
+    "ossobuco",
+    "osso buco",
+    "veal shank",
+    "veal shanks"
+   ]
+  },
+  {
+   "key": "kalbsbrust",
+   "name": "Kalbsbrust",
+   "category": "fleisch",
+   "kcal": 160.0,
+   "protein": 18.5,
+   "fat": 9.5,
+   "saturatedFat": 4.0,
+   "carbohydrates": 0.0,
+   "sugar": 0.0,
+   "fiber": 0.0,
+   "salt": 0.2,
+   "density": 1.0,
+   "piece": 0.0,
+   "units": {},
+   "aliases": [
+    "kalbsbrust",
+    "gefüllte kalbsbrust",
+    "kalbsbrustspitz",
+    "veal breast",
+    "breast of veal"
    ]
   },
   {
@@ -7891,13 +8014,8 @@
     "hasenkeulen",
     "wildhase",
     "kaninchenfleisch",
-    "reh",
-    "rehrücken",
-    "hirsch",
-    "wild",
     "rabbit",
     "hare",
-    "venison",
     "kanninchen"
    ]
   },
@@ -7922,13 +8040,11 @@
     "hähnchenleber",
     "entenleber",
     "leber",
-    "kalbsleber",
     "schweineleber",
     "rinderleber",
     "chicken liver",
     "chicken livers",
     "liver",
-    "calf liver",
     "pouletlebern",
     "pouletleber",
     "gänselebermousse",
@@ -11621,7 +11737,6 @@
     "bunter pfeffer",
     "chilipulver",
     "chiliflocken",
-    "piment",
     "peffer",
     "pepper",
     "black pepper",
@@ -11634,7 +11749,6 @@
     "chili powder",
     "ground black pepper",
     "freshly ground pepper",
-    "allspice",
     "chillipulver",
     "chilli-pulver",
     "chilli pulver",
@@ -11713,8 +11827,6 @@
     "fünf-gewürze-pulver",
     "italienische kräuter",
     "kräuter der provence",
-    "oregano getrocknet",
-    "thymian getrocknet",
     "majoran",
     "getrockneter majoran",
     "nelkenpulver",
@@ -11774,8 +11886,6 @@
     "celery seed",
     "dry mustard",
     "mustard powder",
-    "cream of tartar",
-    "msg",
     "taco seasoning",
     "cajun seasoning",
     "old bay",
@@ -11878,7 +11988,6 @@
     "sambal olek",
     "tandoori-paste",
     "tandooripaste",
-    "tamarindenpaste",
     "harissa",
     "chilipaste",
     "misopaste",
@@ -13089,7 +13198,6 @@
     "artischockenboden",
     "carciofini",
     "artischoken",
-    "karden",
     "artichoke",
     "artichokes",
     "artichoke hearts",

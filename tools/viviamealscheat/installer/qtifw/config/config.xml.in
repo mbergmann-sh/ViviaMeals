@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Vorlage: make_installer.cmd ersetzt @VERSION@ -->
+<Installer>
+    <Name>ViviaMealsCheat</Name>
+    <Version>@VERSION@</Version>
+    <Title>ViviaMealsCheat @VERSION@</Title>
+    <Publisher>Michael Bergmann</Publisher>
+    <ProductUrl>https://github.com/mbergmann-sh</ProductUrl>
+    <StartMenuDir>ViviaMeals</StartMenuDir>
+    <!-- Nur Verwaltungsdaten (Deinstallation); den ViviaMeals-Ordner wählt die Seite „ViviaMeals-Ordner“,
+         TargetDir wird daraus zu <ViviaMeals-Ordner>/ViviaMealsCheat gesetzt -->
+    <TargetDir>C:/ViviaMeals/ViviaMealsCheat</TargetDir>
+    <AdminTargetDir>C:/ViviaMeals/ViviaMealsCheat</AdminTargetDir>
+    <AllowSpaceInPath>true</AllowSpaceInPath>
+    <AllowNonAsciiCharacters>true</AllowNonAsciiCharacters>
+    <RemoveTargetDir>true</RemoveTargetDir>
+    <MaintenanceToolName>ViviaMealsCheat-Deinstallation</MaintenanceToolName>
+    <InstallerApplicationIcon>viviamealscheat</InstallerApplicationIcon>
+    <InstallerWindowIcon>viviamealscheat.png</InstallerWindowIcon>
+    <Logo>logo.png</Logo>
+    <Banner>banner.png</Banner>
+    <Watermark>watermark.png</Watermark>
+    <WizardStyle>Modern</WizardStyle>
+    <WizardDefaultWidth>680</WizardDefaultWidth>
+    <WizardDefaultHeight>480</WizardDefaultHeight>
+    <RunProgram>@ViviaMealsDir@/ViviaMealsCheat.exe</RunProgram>
+    <RunProgramDescription>ViviaMealsCheat starten</RunProgramDescription>
+    <Translations>
+        <Translation>ifw_de</Translation>
+        <Translation>qt_de</Translation>
+    </Translations>
+    <ControlScript>controlscript.qs</ControlScript>
+</Installer>

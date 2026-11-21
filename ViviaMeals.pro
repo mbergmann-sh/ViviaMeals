@@ -20,7 +20,12 @@ TEMPLATE  = app
 TARGET    = ViviaMeals
 
 include(version.pri)
-DEFINES  += VIVIAMEALS_VERSION=\\\"$$VERSION\\\"
+# Versionsnummer als erzeugte Kopfdatei im Build-Ordner (statt -D…): Ändert sich version.pri, baut make
+# die betroffenen Dateien nach dem nächsten qmake-Lauf sicher neu – auch ohne „Neu erstellen“.
+VM_VERSION_H = "$${LITERAL_HASH}pragma once" "$${LITERAL_HASH}define VIVIAMEALS_VERSION \"$$VERSION\""
+VM_VERSION_CUR = $$cat($$OUT_PWD/viviameals_version.h, lines)
+!equals(VM_VERSION_CUR, $$VM_VERSION_H): write_file($$OUT_PWD/viviameals_version.h, VM_VERSION_H)
+INCLUDEPATH += $$OUT_PWD
 
 # Gemeinsamer Kern (Rezeptmodell, Datenbank, Importe, Exporte, Nährwerte, Planung)
 include(core.pri)

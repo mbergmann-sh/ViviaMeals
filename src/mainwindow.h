@@ -71,6 +71,7 @@ public slots:
     void clearDatabase();
     void mealTagsAll();
     void seasonTagsAll();
+    void basenTagAll();
     void exportVmr();
     void exportPackage();
     void importPackage(const QString &file = QString());

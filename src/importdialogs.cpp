@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "importdialogs.h"
+#include "basenfasten.h"
 #include "season.h"
 #include "busyprogress.h"
 #include "foodwizard.h"
@@ -192,6 +193,7 @@ QString run(QWidget *parent, Importers::Format format, const QStringList &givenF
     opt.mealTags = s.value(QStringLiteral("import/mealTags"), true).toBool();
     opt.nutrientTags = s.value(QStringLiteral("import/nutrientTags"), true).toBool();
     opt.seasonTags = s.value(QStringLiteral("import/seasonTags"), true).toBool();
+    opt.basenTag = s.value(QStringLiteral("import/basenTag"), true).toBool();
 
     QList<Recipe> recipes;
     QStringList origins, warnings;
@@ -381,7 +383,8 @@ int offerMissingFoods(QWidget *parent, const QStringList &ids)
         const int matchedBefore = r.nutrition.matched;
         Nutrition::analyze(r);
         if (nutrientTags) MealTypes::applyNutrientTags(r);
-        const int seasonChanges = (seasonTags && !Nutrition::isMenu(r)) ? Season::applyTags(r) : 0;
+        int seasonChanges = (seasonTags && !Nutrition::isMenu(r)) ? Season::applyTags(r) : 0;
+        if (QSettings().value(QStringLiteral("import/basenTag"), true).toBool()) seasonChanges += Basenfasten::applyTag(r);
         if (seasonChanges || r.nutrition.matched != matchedBefore || !qFuzzyCompare(1 + before, 1 + r.nutrition.total.kcal)) {
             if (db.save(r)) ++updated;
         }

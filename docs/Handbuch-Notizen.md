@@ -1,6 +1,6 @@
 # ViviaMeals – Notizen für das Handbuch
 
-Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 0.9.20.
+Stichpunkte und fertige Textbausteine für die spätere Anleitung. Stand: Version 1.0.1.
 
 > **Name:** Das Programm heißt seit Version 0.6 **ViviaMeals** (vorher VitaMeals; die ganze Reihe heißt jetzt
 > Vivia – ViviaParms, ViviaBreathe). Alte Einstellungen, Profile, Tagebücher, eigene Lebensmittel und
@@ -1050,3 +1050,46 @@ Gespeicherte Menüs: *Datei → Export → Gespeicherte Menüs …* – öffnen 
 - Löscht in allen Gruppen alle Rezepte außer dem vorgeschlagenen (erstes = vollständigstes, Häkchen); kein Zusammenführen.
 - Sicherheitsabfrage (Warnung, Vorgabe Abbrechen, Schaltfläche „n Rezepte löschen“, Titel unter Details, max. 15 + „… und n weitere“).
 - In mehreren Gruppen enthaltenes Rezept bleibt, wenn es irgendwo vorgeschlagen ist. Gesperrt, wenn keine Gruppen.
+
+## Kalb: eigene Einträge (ab 0.9.21)
+
+- Neu: Kalbsleber (135 kcal), Kalbsniere (100), Kalbszunge (180, 13 g Fett), Kalbsbries/Milken (100),
+  Kalbshaxe/Beinscheibe mit Knochen (85; Beinscheibe 300 g, Haxe 1200 g), Kalbsbrust (160, 9,5 g Fett) – je 100 g roh.
+- Bisher alle unter „Kalbfleisch (mager)“; Kalbsleber stand zusätzlich bei Geflügelleber. Bereinigt: „veal“ und
+  Kalbfleisch/Kalbsschnitzel nicht mehr bei Rindfleisch, Entrecôtes nur noch bei Rindersteak.
+- Kalbsschnitzel, -filet, -herz usw. bleiben „Kalbfleisch (mager)“. Abgleich der Rezepte bietet ViviaMeals nach dem Update selbst an.
+- `tools/keygen/` steht in `.gitignore`; Mehrere-Rechner-Hinweis in `tools/keygen/README.md`.
+
+## Tag „säure-basen-fasten“ (ab 0.9.22)
+
+- `basenfasten.*` (Kern): `judge()` je Zutat (erlaubt/ignoriert/verboten/unbekannt), `qualifies()`, `applyTag()` setzt oder entfernt.
+- Strenge Variante nach der Liste des Nutzers: alle Zutaten erlaubt; verbotene oder unbekannte Zutat → kein Tag. Wasser, Nicht-Lebensmittel ignoriert.
+- Erlaubt per Schlüssel (Gemüse, Kartoffel, Süßkartoffel, frisches Obst, Trockenobst, Kräuter, Gewürze, Salz, Ingwer, Mandeln, Samen, Tahin,
+  Olivenöl, Sesamöl); „Öl“ nur mit Lein/Hanf/Walnuss/Kürbiskern/Oliven/Sesam im Namen; Brühe nur Gemüsebrühe; Essig nur Apfelessig;
+  Orangensaft nur „frisch“; Hefe nur Hefeflocken; Mandelmus/ungesüßte Mandelmilch erlaubt.
+- Verboten per Gruppe (Fleisch, Fisch, Ei, Milch, Käse, Getreide, Backwaren, Hülsen, Zucker, Honig, Süßes, Gelatine, Alkohol), per Schlüssel
+  (Hasel-/Walnüsse, Erdnüsse, Margarine, Schmalz, Kaffee, Limonade, Fertigsaucen, Brühpulver, Glutamat, Dosentomaten, Tomatenmark, Pommes …)
+  und per Name (Hühnerbrühe, Fond, Dose, Glas, TK, gesüßt, Zucker, Honig, Sahne, Butter (nicht Butternut), Käse, Milch, Ei …).
+- Vergabe: Import (Einstellung `import/basenTag`, Vorgabe an), Editor „Ergänzen“, Extras-Menü (mit Rückfrage), Abgleich, Nachberechnung nach Lebensmittel-Assistent.
+- Anzeige „Säure-Basen-Fasten“ (grün wie vegan/vegetarisch). Test coretest „=== Säure-Basen-Fasten ===“ (17 Fälle).
+
+## Prüfschlüssel nicht mehr im Quelltextpaket (ab 0.9.23)
+
+- Problem: Das Quelltextpaket enthielt den Platzhalter `src/license_pubkey.h` (Nullen). Über den eigenen Stand kopiert,
+  ersetzte er den echten Prüfschlüssel → nach dem Bauen „nicht registriert“ (die gespeicherte Registrierung war noch da).
+- Lösung: `license_pubkey.h` und `license_revoked.h` gehören nur dem Herausgeber und sind nicht mehr im Paket.
+  `license.cpp` bindet sie mit `__has_include` ein; fehlen sie, baut ViviaMeals ohne Prüfschlüssel, qmake meldet das.
+- Die Registrierung (QSettings `license/email`, `license/key`) bleibt bei Updates erhalten und wird mit dem passenden
+  Prüfschlüssel automatisch wieder gültig – kein erneutes Eingeben.
+
+## Version 1.0.0 (18.11.2026)
+
+- Erste stabile Version; `docs/Versionshinweise.md` fasst den Funktionsumfang zusammen, README nennt die Version.
+- Versionsnummer kommt jetzt aus der von qmake erzeugten `viviameals_version.h` im Build-Ordner (statt `-DVIVIAMEALS_VERSION`):
+  nach einer Änderung in `version.pri` genügt qmake + Erstellen, main.cpp wird neu übersetzt (vorher blieb sonst die alte Nummer stehen).
+- README: Zeilen Registrierung, Datenbank prüfen, Wartungslisten, Doubletten aus der Bildertabelle in die Funktionstabelle verschoben; Säure-Basen-Fasten ergänzt.
+
+## Website: Produktlink (1.0.1)
+
+- `kProductUrl`/`productLink()` in websiteexport.cpp: „Erstellt mit <a>ViviaMeals</a>“ im Menü (credit) und in der Fußzeile
+  (class="product", blau), ebenso in der PHP-Vorlage suche.php. Ziel: https://portfolio.mbergmann-sh.de/article/viviameals-rezeptverwaltung-fuer-windows-download

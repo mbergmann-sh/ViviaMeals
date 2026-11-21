@@ -1,5 +1,7 @@
 # ViviaMeals
 
+**Version 1.0.1** (18. November 2026). Was drin ist: [Versionshinweise](docs/Versionshinweise.md).
+
 Rezeptverwaltung mit **Nährwertanalyse**, **Kühlschrank-Vorschlägen**, **Wochenmenü-Plänen** und
 **Assistenten für Gewichtsverlust und Gewichtszunahme** – Deutsch, Qt 6 (bzw. Qt 5.15) / C++17 / qmake – PolyForm Noncommercial 1.0.0 (frei für nicht-kommerzielle Nutzung).
 Technisch und optisch an [ViviaParms](https://github.com/mbergmann-sh/ViviaParms) und
@@ -19,10 +21,6 @@ Technisch und optisch an [ViviaParms](https://github.com/mbergmann-sh/ViviaParms
 | ![Kühlschrank](docs/images/kuehlschrank.png) | ![Assistent](docs/images/assistent.png) | ![Wochenplan](docs/images/wochenplan.png) |
 | **Ernährungstagebuch** | **Tagebuch: Mahlzeit eintragen** | **Gewichtskontrolle** |
 | ![Tagebuch](docs/images/tagebuch.png) | ![Tagebuch-Eintrag](docs/images/tagebuch-eintrag.png) | ![Gewichtskontrolle](docs/images/gewichtskontrolle.png) |
-| **Registrierung** | *Hilfe → Registrierung eingeben …*: Komfortfunktionen (Rezepte scannen, Texterkennung aus Bildern/Fotos, Export als Website, LaTeX und LibreOffice Writer) werden mit einem Registrierungsschlüssel freigeschaltet; alles andere bleibt frei. Schlüssel `VM1-…` = Ed25519-Signatur (Monocypher, EdDSA mit BLAKE2b) über E-Mail-Adresse, Seriennummer (1–10 000) und Ausstellungsdatum, geprüft offline gegen den eingebauten öffentlichen Schlüssel `src/license_pubkey.h`; Sperrliste `src/license_revoked.h`. Eingabe tolerant (Kleinschreibung, Leerzeichen, O/0, I/1), ganzes Registrierungsschreiben einfügbar; Über-Dialog zeigt den Inhaber; Demo schaltet alles frei (`license.*`, `registrationdialog.*`). Schlüssel erzeugt der Herausgeber mit `tools/keygen` |
-| **Datenbank prüfen** | *Extras → Datenbank prüfen …*: findet unlesbare Rezeptdateien, fremde Dateien im Rezeptordner, leere Rezepte, unlesbare und übergroße Fotos (über 1200 px bzw. 350 KB); zeigt die Befunde mit Häkchen, behebt die gewählten (Fotos auf 1000 px verkleinern bzw. entfernen, Dateien in `aussortiert/<Datum>` verschieben – nichts wird gelöscht) und baut das Inhaltsverzeichnis neu auf (`dbcheck.*`, `dbcheckdialog.*`) |
-| **Wartungslisten** | *Extras → Rezepte ohne Nährwerte bearbeiten …* und *… ohne Zutatenliste bearbeiten …*: nicht-modale Liste **rechts neben dem Hauptfenster** (je Art nur einmal offen), sortierbar nach erfasstem Anteil, mit Filter und den fehlenden Zutaten des gewählten Rezepts; **Klick öffnet den Editor**, nach dem Speichern aktualisiert sich die Liste und rückt zum nächsten Rezept (`maintenancewindow.*`) – zum stückweisen Vervollständigen großer Sammlungen |
-| **Doubletten** | *Extras → Doubletten suchen …*: findet Rezepte mit **gleichem Titel** (unabhängig von Groß-/Kleinschreibung, Satzzeichen und Umlaut-Schreibweise – „Käsekuchen“ = „KAESEKUCHEN!“), mit **ähnlichem Titel** (Tippfehler, Zusätze wie „Omas …“) und weitgehend gleichen Zutaten sowie mit **praktisch gleichen Zutaten** unter anderem Namen (z. B. Pfannkuchen/Eierkuchen). Drei Suchstufen (nur gleiche Titel / empfohlen / großzügig); auch bei mehreren tausend Rezepten in Sekundenbruchteilen. Gruppen mit Portionen, kcal, Zutatenzahl, Bild, Favorit und Änderungsdatum; das vollständigste Rezept ist als Vorschlag zum Behalten markiert; **zwei Rezepte nebeneinander vergleichen**, **bearbeiten**, **löschen** (auch mehrere), **„Dieses behalten, übrige zusammenführen“** (Bild, Quelle, Zubereitungszeit, Tags und Favorit werden übernommen) oder als **„Keine Doublette“** markieren (gespeichert in der Datenbank, `doubletten-ignoriert.json`) |
 | **Suche** | **Import-Vorschau mit Doubletten** | **Kleiner Bildschirm (1024 × 640)** |
 | ![Suche](docs/images/suche.png) | ![Import](docs/images/import-vorschau.png) | ![Klein](docs/images/hauptfenster-klein.png) |
 | **Nährwerte aus CSV importieren** | **Import mit Umlaut-Korrektur** | **Einstellungen** |
@@ -41,6 +39,11 @@ Technisch und optisch an [ViviaParms](https://github.com/mbergmann-sh/ViviaParms
 
 | Bereich | Umsetzung |
 |---|---|
+| **Registrierung** | *Hilfe → Registrierung eingeben …*: Komfortfunktionen (Rezepte scannen, Texterkennung aus Bildern/Fotos, Export als Website, LaTeX und LibreOffice Writer) werden mit einem Registrierungsschlüssel freigeschaltet; alles andere bleibt frei. Schlüssel `VM1-…` = Ed25519-Signatur (Monocypher, EdDSA mit BLAKE2b) über E-Mail-Adresse, Seriennummer (1–10 000) und Ausstellungsdatum, geprüft offline gegen den eingebauten öffentlichen Schlüssel `src/license_pubkey.h`; Sperrliste `src/license_revoked.h`. Eingabe tolerant (Kleinschreibung, Leerzeichen, O/0, I/1), ganzes Registrierungsschreiben einfügbar; Über-Dialog zeigt den Inhaber; Demo schaltet alles frei (`license.*`, `registrationdialog.*`). Schlüssel erzeugt der Herausgeber mit `tools/keygen` |
+| **Datenbank prüfen** | *Extras → Datenbank prüfen …*: findet unlesbare Rezeptdateien, fremde Dateien im Rezeptordner, leere Rezepte, unlesbare und übergroße Fotos (über 1200 px bzw. 350 KB); zeigt die Befunde mit Häkchen, behebt die gewählten (Fotos auf 1000 px verkleinern bzw. entfernen, Dateien in `aussortiert/<Datum>` verschieben – nichts wird gelöscht) und baut das Inhaltsverzeichnis neu auf (`dbcheck.*`, `dbcheckdialog.*`) |
+| **Wartungslisten** | *Extras → Rezepte ohne Nährwerte bearbeiten …* und *… ohne Zutatenliste bearbeiten …*: nicht-modale Liste **rechts neben dem Hauptfenster** (je Art nur einmal offen), sortierbar nach erfasstem Anteil, mit Filter und den fehlenden Zutaten des gewählten Rezepts; **Klick öffnet den Editor**, nach dem Speichern aktualisiert sich die Liste und rückt zum nächsten Rezept (`maintenancewindow.*`) – zum stückweisen Vervollständigen großer Sammlungen |
+| **Doubletten** | *Extras → Doubletten suchen …*: findet Rezepte mit **gleichem Titel** (unabhängig von Groß-/Kleinschreibung, Satzzeichen und Umlaut-Schreibweise – „Käsekuchen“ = „KAESEKUCHEN!“), mit **ähnlichem Titel** (Tippfehler, Zusätze wie „Omas …“) und weitgehend gleichen Zutaten sowie mit **praktisch gleichen Zutaten** unter anderem Namen (z. B. Pfannkuchen/Eierkuchen). Drei Suchstufen (nur gleiche Titel / empfohlen / großzügig); auch bei mehreren tausend Rezepten in Sekundenbruchteilen. Gruppen mit Portionen, kcal, Zutatenzahl, Bild, Favorit und Änderungsdatum; das vollständigste Rezept ist als Vorschlag zum Behalten markiert; **zwei Rezepte nebeneinander vergleichen**, **bearbeiten**, **löschen** (auch mehrere), **„Dieses behalten, übrige zusammenführen“** (Bild, Quelle, Zubereitungszeit, Tags und Favorit werden übernommen) oder als **„Keine Doublette“** markieren (gespeichert in der Datenbank, `doubletten-ignoriert.json`) |
+| **Säure-Basen-Fasten** | Tag „säure-basen-fasten“ (strenge Variante): nur wenn **alle** Zutaten erlaubt sind (Gemüse, Kartoffeln, Obst, Kräuter, Mandeln, Samen, kaltgepresste Öle, Gemüsebrühe, Apfelessig …); eine verbotene oder unbekannte Zutat schließt aus. Beim Import (abschaltbar), im Editor („Ergänzen“), per *Extras*-Befehl und beim Abgleich; wird jeweils neu bestimmt (`basenfasten.*`) |
 | **Küchen-Glossar** | *Hilfe → Küchen-Glossar …* (Strg+Umschalt+G): rund 350 Fachbegriffe der gehobenen Küche in 13 Kategorien (Garverfahren, Schneiden & Formen, Techniken, Fonds & Saucen, Suppen, Gerichte, Garnituren, Fleisch & Fisch, Pâtisserie, Zutaten, Geräte, Küchenbrigade, Menü & Service) mit eigenen Erklärungen, anderen Schreibweisen und Verweisen. Suche ohne Rücksicht auf Akzente und Groß-/Kleinschreibung, Begriff vor Schreibweise vor Erklärung; Kategorie-Filter; Verweise anklickbar mit Zurück/Vor. Daten: `tools/make_glossar.py` → `resources/data/kuechenglossar.json`; Kern `kitchenglossary.*`, Fenster `kitchenglossarywindow.*` |
 | **Tipp des Tages** | Nach dem Start (wenn Datenbank geladen und Start-Hinweise beantwortet sind) ein zufälliger Glossar-Begriff; Zurück/Weiter blättern durch eine zufällige Reihenfolge, „Im Glossar öffnen“; abschaltbar im Dialog und unter *Einstellungen → Programmstart* (`ui/tipOfTheDay`); *Hilfe → Tipp des Tages …* |
 | **Handbuch** | *Hilfe → Handbuch* (**F1**): unter **Windows** die Hilfedatei `ViviaMeals-Handbuch.chm` (Inhalt, Stichwörter, Volltextsuche), unter **Linux und macOS** die HTML-Fassung im Standard-Browser (Seitenleiste, Suche, Querverweise); dazu ein **PDF** zum Drucken. Quelle: `docs/handbuch/src/*.md` (12 Kapitel mit Bildschirmfotos), erzeugt mit `python3 tools/make_handbuch.py` (pandoc; PDF mit XeLaTeX, CHM mit `chmcmd` aus Free Pascal bzw. `hhc.exe` aus dem HTML Help Workshop). Gesucht wird im Ordner `handbuch` neben dem Programm, unter `<PREFIX>/share/viviameals/handbuch` (`make install`), im macOS-Bundle und im Quellbaum; der Windows-Installer legt CHM, PDF und HTML nach `C:\ViviaMeals\handbuch` und eine Startmenü-Verknüpfung an |
@@ -84,6 +87,12 @@ Technisch und optisch an [ViviaParms](https://github.com/mbergmann-sh/ViviaParms
 | **Demo** | `ViviaMeals --demo`: temporäre Datenbank mit Beispielrezepten, Bildern, Profil und Vorrat – eigene Daten bleiben unberührt |
 | **Windows-Installer** | Qt Installer Framework, Zielordner-Vorgabe `C:\ViviaMeals`, Startmenü und Desktop, Dateizuordnung `.vmr`/`.vmdb`, Update über neueren Installer – wird beim Release-Build automatisch erzeugt (siehe [installer/README.md](installer/README.md)) |
 | **Kommandozeile / Doppelklick** | `ViviaMeals rezept.vmr`, `ViviaMeals sammlung.mmf`, `ViviaMeals <ordner>/viviameals.vmdb` – Rezepte übernehmen, Sammlungen importieren, Datenbank öffnen |
+
+## ViviaMeals Mobil (Android)
+
+Im Ordner `mobile/` liegt die kostenlose Android-App mit demselben Kern: Rezepte ansehen und umrechnen,
+Einkaufsliste, Kühlschrank, Wochenplan vom PC, Tagebuch und Gewicht, Abgleich mit dem PC.
+Siehe `mobile/README.md` und `docs/ViviaMeals-Android-Anleitung.pdf`.
 
 ## Bauen
 
@@ -149,7 +158,7 @@ src/
   dbcheck.*           Datenbank prüfen: Befund (nur lesen) und Beheben
   dbcheckdialog.*     Extras → Datenbank prüfen
   license.*           Registrierungsschlüssel: Format, Base32, Signatur prüfen, Speichern (Kern, ohne Oberfläche)
-  license_pubkey.h, license_revoked.h   öffentlicher Prüfschlüssel und Sperrliste (vom Schlüsselgenerator erzeugt)
+  license_pubkey.h, license_revoked.h   Prüfschlüssel und Sperrliste – erzeugt der Schlüsselgenerator; nicht in Quelltext-Paketen enthalten
   registrationdialog.*  Hilfe → Registrierung eingeben; Sperre der Komfortfunktionen
   kitchenglossary.*   Küchen-Glossar: Daten laden, Suche (ohne Akzente), Verweise
   kitchenglossarywindow.* Hilfe → Küchen-Glossar und „Tipp des Tages“
@@ -183,7 +192,7 @@ src/
   themes.*, icons.*, screenfit.*, windowstate.*, qtcompat.h   aus ViviaBreathe/ViviaParms übernommen
 tools/          make_icons.py (Symbole, ICO/ICNS), make_foods.py (Nährwerttabelle), make_installer_images.py,
                 viviamealscheat/ (Hilfsprogramm: Quelle aller Rezepte ersetzen, eigener Installer),
-                keygen/ (Schlüsselgenerator für Registrierungsschlüssel – nur für den Herausgeber, siehe tools/keygen/README.md)
+                keygen/ (Schlüsselgenerator – nur beim Herausgeber, per .gitignore nicht im öffentlichen Repository)
 3rdparty/       monocypher/ (Signaturen, BSD-2-Clause oder CC0)
 installer/      Qt-Installer-Framework-Installer (windows_deploy.pri, qtifw/config, qtifw/meta)
 tests/coretest/ Test des Kerns

@@ -26,6 +26,7 @@
 #include "importdialogs.h"
 #include "importers.h"
 #include "mainwindow.h"
+#include "viviameals_version.h"   // erzeugt qmake im Build-Ordner aus version.pri
 #include "license.h"
 #include "registrationdialog.h"
 #include "scandialog.h"

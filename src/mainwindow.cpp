@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "mainwindow.h"
+#include "basenfasten.h"
 #include "season.h"
 #include "symbols.h"
 #include "latexexport.h"
@@ -474,6 +475,9 @@ void MainWindow::buildMenus()
     m_needDb << a;
     a = extras->addAction(Icons::get(QStringLiteral("season")), tr("&Saison-Tags für alle Rezepte vergeben …"), this, &MainWindow::seasonTagsAll);
     a->setStatusTip(tr("Frühling, Sommer, Herbst, Winter oder ganzjährig nach der Saison der frischen Zutaten (regionaler Anbau)"));
+    m_needDb << a;
+    a = extras->addAction(Icons::get(QStringLiteral("tag")), tr("Tag „Säure-&Basen-Fasten“ für alle Rezepte vergeben …"), this, &MainWindow::basenTagAll);
+    a->setStatusTip(tr("Rezepte, deren Zutaten alle beim Basenfasten erlaubt sind, mit „säure-basen-fasten“ markieren (nicht mehr passende verlieren den Tag)"));
     m_needDb << a;
     a = extras->addAction(Icons::get(QStringLiteral("umlaut")), tr("&Umlaute in allen Rezepten korrigieren …"), this, &MainWindow::fixUmlautsAll);
     a->setStatusTip(tr("Rezepte ohne ä, ö, ü und ß (z. B. „Kaese“, „heiss“) in der ganzen Datenbank korrigieren"));
@@ -1291,6 +1295,46 @@ void MainWindow::mealTagsAll()
     showCurrent();
 }
 
+void MainWindow::basenTagAll()
+{
+    RecipeDb &db = RecipeDb::instance();
+    const QList<RecipeSummary> all = db.summaries();
+    QList<Recipe> todo;
+    int added = 0, removed = 0, total = 0;
+    {
+        BusyProgress prog(this, tr("Säure-Basen-Fasten prüfen"), int(all.size()), false);
+        int n = 0;
+        for (const RecipeSummary &s : all) {
+            prog.step(n, tr("Rezept %1 von %2: %3").arg(n + 1).arg(all.size()).arg(s.title));
+            ++n;
+            Recipe r;
+            if (!db.loadLight(s.id, &r)) continue;
+            const bool had = r.hasTag(Basenfasten::tagName());
+            if (Basenfasten::applyTag(r)) {
+                (had ? removed : added)++;
+                todo << r;
+            }
+            if (r.hasTag(Basenfasten::tagName())) ++total;
+        }
+    }
+    if (todo.isEmpty()) {
+        QMessageBox::information(this, tr("Säure-Basen-Fasten"), tr("Nichts zu ändern – %1 Rezepte tragen den Tag „Säure-Basen-Fasten“.").arg(total));
+        return;
+    }
+    if (QMessageBox::question(this, tr("Säure-Basen-Fasten"),
+                              tr("Den Tag „Säure-Basen-Fasten“ erhalten %1 Rezepte, %2 verlieren ihn; danach tragen ihn %3 Rezepte.\n\n"
+                                 "Vergeben wird er nur, wenn alle Zutaten auf der Liste der erlaubten Lebensmittel stehen (strenge Variante). "
+                                 "Eine verbotene oder unbekannte Zutat schließt ein Rezept aus. Andere Tags bleiben erhalten. Fortfahren?")
+                                  .arg(added)
+                                  .arg(removed)
+                                  .arg(total))
+        != QMessageBox::Yes)
+        return;
+    saveAllWithProgress(todo, tr("Tags speichern"));
+    statusBar()->showMessage(tr("„Säure-Basen-Fasten“ für %1 Rezepte aktualisiert.").arg(todo.size()), 5000);
+    showCurrent();
+}
+
 void MainWindow::seasonTagsAll()
 {
     RecipeDb &db = RecipeDb::instance();
@@ -1404,6 +1448,7 @@ void MainWindow::matchAll(bool report)
     bool canceled = false;
     {
         BusyProgress prog(this, tr("Rezepte mit der Lebensmitteldatenbank abgleichen"), int(ids.size()));
+        const bool basenTag = QSettings().value(QStringLiteral("import/basenTag"), true).toBool();
         db.beginBatch();
         for (const QString &id : ids) {
             Recipe r;
@@ -1438,6 +1483,7 @@ void MainWindow::matchAll(bool report)
             bool hadSeason = false;
             for (const QString &t : Season::tagNames()) hadSeason = hadSeason || tagsBefore.contains(t);
             if (hadSeason && Season::applyTags(r)) ++seasonChanged;
+            if (basenTag) Basenfasten::applyTag(r);
             const bool valuesChanged = values(r) != before;
             if (valuesChanged || r.tags != tagsBefore || textChanged) {   // nur geänderte Rezepte schreiben
                 db.saveLight(r);

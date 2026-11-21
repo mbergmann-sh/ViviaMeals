@@ -1,0 +1,17 @@
+ViviaMealsCheat – Lizenz und Hinweis
+====================================
+
+ViviaMealsCheat ist ein Hilfsprogramm zu ViviaMeals. Es ändert die Angabe „Quelle“ in den
+Rezeptdateien (.vmr) einer ViviaMeals-Rezeptdatenbank. Alle anderen Angaben der Rezepte bleiben
+unverändert. Vor dem Ändern werden die betroffenen Rezepte auf Wunsch gesichert
+(<Datenbank>\sicherung-quelle-<Datum>).
+
+Bitte beachten: Die Quelle eines Rezepts nennt oft Urheber oder Erfasser. Wer Rezepte weitergibt
+oder veröffentlicht, ist selbst dafür verantwortlich, dabei fremde Rechte zu wahren.
+
+© 2026 Michael Bergmann. Lizenz: PolyForm Noncommercial License 1.0.0
+(https://polyformproject.org/licenses/noncommercial/1.0.0) – kostenlos für jede nicht-kommerzielle
+Nutzung; Verkauf und Einsatz in kostenpflichtigen Produkten nur mit Erlaubnis des Autors.
+Required Notice: Copyright Michael Bergmann (https://github.com/mbergmann-sh)
+
+Die Software wird ohne Gewähr bereitgestellt.

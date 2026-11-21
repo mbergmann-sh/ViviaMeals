@@ -14,6 +14,7 @@ SOURCES += \
     $$PWD/src/nutrition.cpp \
     $$PWD/src/markup.cpp \
     $$PWD/src/season.cpp \
+    $$PWD/src/basenfasten.cpp \
     $$PWD/src/jetdb.cpp \
     $$PWD/src/barcode.cpp \
     $$PWD/src/webrecipe.cpp \
@@ -65,8 +66,6 @@ HEADERS += \
     $$PWD/src/kitchenglossary.h \
     $$PWD/src/dbcheck.h \
     $$PWD/src/license.h \
-    $$PWD/src/license_pubkey.h \
-    $$PWD/src/license_revoked.h \
     $$PWD/3rdparty/monocypher/monocypher.h \
     $$PWD/src/ambrosia.h \
     $$PWD/src/textcodec.h \
@@ -94,3 +93,6 @@ HEADERS += \
     $$PWD/src/recipescan.h \
     $$PWD/src/escl.h \
     $$PWD/src/duplicates.h
+
+# Registrierung: Prüfschlüssel vom Schlüsselgenerator (tools/keygen → „Prüfschlüssel … exportieren“)
+!vm_mobile:!exists($$PWD/src/license_pubkey.h): message("src/license_pubkey.h fehlt – ViviaMeals wird ohne Prüfschlüssel gebaut und nimmt keine Registrierungsschlüssel an")

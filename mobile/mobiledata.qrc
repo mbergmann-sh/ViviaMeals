@@ -1,0 +1,11 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/data">
+        <file alias="lebensmittel.json">../resources/data/lebensmittel.json</file>
+        <file alias="kuechenglossar.json">../resources/data/kuechenglossar.json</file>
+        <file alias="beispielrezepte.vmpack">data/beispielrezepte.vmpack</file>
+    </qresource>
+    <qresource prefix="/doc">
+        <file alias="LICENSE">../LICENSE</file>
+    </qresource>
+</RCC>

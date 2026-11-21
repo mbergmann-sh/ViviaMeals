@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "importers.h"
+#include "basenfasten.h"
 #include "ambrosia.h"
 #include "season.h"
 #include "glossary.h"
@@ -414,6 +415,7 @@ Recipe finish(RawRecipe &raw, const Options &opt, const QString &format, Result 
     if (opt.mealTags && !Nutrition::isMenu(r)) MealTypes::applyTags(r);
     if (opt.nutrientTags) MealTypes::applyNutrientTags(r);
     if (opt.seasonTags && !Nutrition::isMenu(r)) Season::applyTags(r);
+    if (opt.basenTag) Basenfasten::applyTag(r);
     return r;
 }
 
@@ -741,6 +743,7 @@ Result parseVtm(const QByteArray &json, const Options &opt)
         Nutrition::analyze(r);
         if (opt.autoTags) Nutrition::applyTagSuggestions(r);
         if (opt.seasonTags && !Nutrition::isMenu(r)) Season::applyTags(r);
+        if (opt.basenTag) Basenfasten::applyTag(r);
         res.recipes << r;
     }
     return res;

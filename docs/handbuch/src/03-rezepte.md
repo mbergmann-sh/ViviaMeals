@@ -99,6 +99,7 @@ auf der exportierten Website und im Menüassistenten.
   (die Regeln stehen unter [Nährwert-Tags](naehrwerte.md#naehrwert-tags))
 - **Saison:** frühling, sommer, herbst, winter, ganzjährig
   (siehe [Saison-Tags](naehrwerte.md#saison-tags))
+- **Fasten:** säure-basen-fasten (siehe [Säure-Basen-Fasten](naehrwerte.md#basenfasten))
 
 Vorhandene Tags werden nur ergänzt, nie entfernt. Ein unpassender Vorschlag lässt sich im Feld einfach
 löschen. Für den Wochenplan und den Menüassistenten sind besonders hilfreich: **frühstück**,

@@ -884,6 +884,7 @@ void ScanDialog::accept()
     opt.mealTags = s.value(QStringLiteral("import/mealTags"), true).toBool();
     opt.nutrientTags = s.value(QStringLiteral("import/nutrientTags"), true).toBool();
     opt.seasonTags = s.value(QStringLiteral("import/seasonTags"), true).toBool();
+    opt.basenTag = s.value(QStringLiteral("import/basenTag"), true).toBool();
     opt.translator = ImportFlow::deeplTranslator();
     QApplication::setOverrideCursor(Qt::WaitCursor);
     m_recipe = RecipeScan::toRecipe(parts, opt);

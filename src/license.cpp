@@ -1,8 +1,19 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "license.h"
 
+// Prüfschlüssel und Sperrliste schreibt der Schlüsselgenerator (tools/keygen) nach src/. Sie gehören dem
+// Herausgeber und werden NICHT mit Quelltext-Paketen ausgeliefert – so überschreibt ein neuer Quelltextstand
+// den eigenen Prüfschlüssel nicht. Fehlen sie, baut ViviaMeals ohne Prüfschlüssel (kein Schlüssel gültig).
+#if __has_include("license_pubkey.h")
 #include "license_pubkey.h"
+#else
+static const unsigned char kViviaMealsPublicKey[32] = { 0 };
+#endif
+#if __has_include("license_revoked.h")
 #include "license_revoked.h"
+#else
+static const int kViviaMealsRevokedSerials[] = { 0 };
+#endif
 
 extern "C" {
 #include "../3rdparty/monocypher/monocypher.h"

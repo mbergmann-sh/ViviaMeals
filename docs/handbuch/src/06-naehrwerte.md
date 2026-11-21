@@ -259,6 +259,34 @@ Die Themenauswahl **Saisonal** im Hauptfenster zeigt automatisch die Rezepte der
 Anders als die übrigen Tags werden Saison-Tags dabei ersetzt: Ändern Sie die Zutaten, passt ViviaMeals
 die Jahreszeit an. Andere Tags bleiben unberührt.
 
+## Säure-Basen-Fasten {#basenfasten}
+
+Der Tag **Säure-Basen-Fasten** markiert Rezepte, die beim Basenfasten erlaubt sind. ViviaMeals vergibt ihn
+beim Import (abschaltbar unter *Einstellungen → Import*), im Editor über **Ergänzen** und für die ganze
+Datenbank über *Extras → Tag „Säure-Basen-Fasten“ für alle Rezepte vergeben …* (mit Rückfrage).
+
+Grundlage ist die gängige, **strenge** Variante. Ein Rezept bekommt den Tag nur, wenn **alle** Zutaten
+erlaubt sind:
+
+- **Erlaubt:** Gemüse (frisch oder gedünstet), Kartoffeln und Süßkartoffeln, Pilze, Sprossen, Algen,
+  frisches Obst, wenig ungeschwefeltes Trockenobst, Kräuter und Gewürze, Salz, Ingwer, Mandeln und
+  Mandelmus, Kürbis-, Sonnenblumen-, Lein-, Sesam- und Chiasamen, kaltgepresste Öle (Oliven-, Lein-, Hanf-,
+  Walnuss-, Kürbiskern-, Sesamöl), Gemüsebrühe, Apfelessig, Hefeflocken, ungesüßte Mandelmilch.
+- **Verboten:** Fleisch, Wurst, Fisch und Meeresfrüchte, Fleisch- und Fischbrühe, Eier, Milch und
+  Milchprodukte, Käse, Butter und Margarine, Getreide, Brot, Nudeln, Reis (auch Hirse und Quinoa),
+  Hülsenfrüchte und Soja, Walnüsse, Haselnüsse, Erdnüsse und die meisten anderen Nüsse, Zucker, Honig, Sirup,
+  Süßes, Alkohol, Kaffee, Fertigsaucen, Senf, Ketchup, Mayonnaise, Brühwürfel, Konserven und
+  Tiefkühlgerichte, anderer Essig.
+- Eine **unbekannte** Zutat (ohne Zuordnung zur Nährwerttabelle) schließt das Rezept ebenfalls aus –
+  lieber ein passendes Rezept zu wenig als ein unpassendes zu viel. Wasser und Backpapier & Co. zählen nicht.
+
+Der Tag wird bei jeder Anwendung neu bestimmt: Kommt Sahne in die Gemüsesuppe, verliert sie ihn wieder.
+Die Listen unterscheiden sich je nach Fastenkonzept in Details; hier gilt die strenge Fassung.
+
+> **Hinweis:** ViviaMeals ist kein Medizinprodukt. Dass sich der Säure-Basen-Haushalt über die Ernährung
+> nennenswert verändern lässt, ist wissenschaftlich nicht belegt – der Körper reguliert seinen pH-Wert selbst.
+> Bei Vorerkrankungen, Medikamenten, Schwangerschaft oder Untergewicht vor dem Fasten ärztlichen Rat einholen.
+
 ## Alle Rezepte abgleichen {#neu-berechnen}
 
 *Extras → Alle Rezepte mit der Lebensmitteldatenbank abgleichen …* bringt die ganze Datenbank auf den Stand
@@ -272,7 +300,7 @@ Für jedes Rezept
 - wird ein falsches **„vegetarisch“ oder „vegan“ entfernt**, wenn das Rezept Fleisch, Fisch,
   Meeresfrüchte (Krabben, Garnelen, Muscheln, Tintenfisch, Hummer …) oder tierische Würzmittel
   (Fischsauce, Austernsauce, Sardellen, Dashi …) enthält; „fisch“ bzw. „fleischgerichte“ wird ergänzt,
-- werden vorhandene Saison-Tags an die Zutaten angepasst,
+- werden vorhandene Saison-Tags an die Zutaten angepasst und der Tag „Säure-Basen-Fasten“ neu bestimmt,
 - wird die Zutatenliste aufgeräumt (siehe oben) und werden DOS-Zeichenfehler berichtigt.
 
 Ein Fortschrittsbalken zeigt den Stand; beim Abbrechen bleiben die schon abgeglichenen Rezepte gespeichert.

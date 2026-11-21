@@ -455,6 +455,20 @@ const Food *FoodTable::matchByRule(const QString &text) const
         { "forelle|saibling|trout|char\\b", "geräuchert|räucher|smoked", "forelle_geraeuchert" },
         { "\\baal\\b|\\beel\\b", "geräuchert|räucher|smoked", "aal_geraeuchert" },
         { "hering|herring", "geräuchert|räucher|smoked", "bueckling" },
+        // Füllwörter („getrocknet“, „gekocht“, „gehackt“ …) entfallen beim Vereinfachen – hier entscheiden sie
+        { "tomate|tomato", "getrocknet|sun-dried|sundried|dried", "getrocknete_tomaten" },
+        { "tomate|tomato", "\\bdose|dosen|gehackt|geschält|stückig|passiert|canned|tinned|diced|peeled|crushed|stewed|\\bcan\\b", "tomaten_dose" },
+        { "erbse|\\bpeas?\\b", "getrocknet|trocken|dried|\\bsplit\\b", "bohnen_trocken" },
+        { "bohne|\\bbeans?\\b", "getrocknet|trocken|dried|\\bdry\\b", "bohnen_trocken" },
+        { "thymian|oregano|rosmarin|bohnenkraut|estragon|thyme|rosemary", "getrocknet|gerebelt|dried", "gewuerze" },
+        { "^(?!.*(kokosmilch|kokosöl|kokosfett|kokoswasser|coconut milk|coconut oil|coconut water)).*(kokos|coconut)", "frisch|fresh", "kokosnuss_frisch" },
+        { "reis\\b|rice", "gekocht|gegart|\\bcooked|\\bboiled|\\bsteamed", "reis_gekocht" },
+        { "quark", "40|20|sahne|rahm", "quark_sahne" },
+        { "milch|\\bmilk", "1,5|1\\.5|fettarm|teilentrahmt|low-?fat|reduced-?fat|semi-?skimmed|\\b2 ?%", "milch_fettarm" },
+        { "joghurt|jogurt|yogh?urt", "10 ?%|rahm|sahne|full[ -]fat", "rahmjoghurt" },
+        { "zitrone|limone|\\blemon", "abgerieben|abrieb|schale|\\bzest|\\bpeel", "zitronenschale" },
+        { "\\bmsg\\b|glutamat", "\\bmsg\\b|glutamat", "glutamat" },
+        { "cream of tartar|weinstein", "cream of tartar|weinstein", "zitronensaeure" },
     };
     static const QList<QPair<QRegularExpression, QPair<QRegularExpression, QString>>> compiled = [] {
         QList<QPair<QRegularExpression, QPair<QRegularExpression, QString>>> out;

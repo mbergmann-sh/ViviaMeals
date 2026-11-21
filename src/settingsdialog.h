@@ -36,6 +36,7 @@ private:
     QCheckBox *m_mealTags;
     QCheckBox *m_nutrientTags;
     QCheckBox *m_seasonTags;
+    QCheckBox *m_basenTag = nullptr;
     QCheckBox *m_offerFoods;
     QLineEdit *m_defaultSource;
     QCheckBox *m_deepl;

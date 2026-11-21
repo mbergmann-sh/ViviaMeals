@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 (siehe LICENSE)
 #include "editordialog.h"
+#include "basenfasten.h"
 #include "instructionsedit.h"
 #include "season.h"
 #include "symbols.h"
@@ -232,6 +233,7 @@ EditorDialog::EditorDialog(const Recipe &r, QWidget *parent) : QDialog(parent), 
         if (!Nutrition::isMenu(m_recipe)) MealTypes::applyTags(m_recipe);
         MealTypes::applyNutrientTags(m_recipe);
         if (!Nutrition::isMenu(m_recipe)) Season::applyTags(m_recipe);
+        Basenfasten::applyTag(m_recipe);
         m_tags->setText(m_recipe.tags.join(QStringLiteral(", ")));
     });
     updateImage();
